@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 class RegisterController extends Controller
 {
 
-    // Hiển thị form đăng kí
+    // 
     public function showProvinces()
     {
         try {
