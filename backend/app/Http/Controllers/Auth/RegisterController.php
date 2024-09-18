@@ -16,8 +16,8 @@ use Illuminate\Support\Str;
 class RegisterController extends Controller
 {
 
-    // 
-    public function showProvinces()
+    // Hiển thị form đăng kí
+    public function showFormRegister()
     {
         try {
             $provinces = Province::all();
