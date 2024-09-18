@@ -26,6 +26,6 @@ Route::post('login', [LoginController::class, 'login'])->name('login')->middlewa
 
 Route::get('/get-districts/{provinceId}', [RegisterController::class, 'getDistricts']);
 Route::get('/get-wards/{districtId}', [RegisterController::class, 'getWards']);
-Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('form.register');
+Route::get('/get-provinces', [RegisterController::class, 'showProvinces']);
 Route::post('register', [RegisterController::class, 'register'])->name('register');
 Route::get('email/verify/{token}', [VerificationController::class, 'verify'])->name('verification.verify');

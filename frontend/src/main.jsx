@@ -1,10 +1,15 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
-import './index.css'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.jsx'; // Import component chính của bạn
+import './index.css'; // Import CSS
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+// Khởi tạo root chỉ một lần
+const container = document.getElementById('root');
+const root = createRoot(container);
+
+// Render ứng dụng của bạn
+root.render(
+  <React.StrictMode>
     <App />
-  </StrictMode>,
-)
+  </React.StrictMode>
+);
