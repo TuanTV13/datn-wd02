@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerificationController;
@@ -29,3 +30,9 @@ Route::get('/get-wards/{districtId}', [RegisterController::class, 'getWards']);
 Route::get('/get-provinces', [RegisterController::class, 'showProvinces']);
 Route::post('register', [RegisterController::class, 'register'])->name('register');
 Route::get('email/verify/{token}', [VerificationController::class, 'verify'])->name('verification.verify');
+
+
+
+Route::get('index', [UserController::class, 'getAll'])->middleware('check.jwt');
+
+Route::post('refresh', [LoginController::class, 'refresh']);
