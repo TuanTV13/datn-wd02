@@ -26,6 +26,7 @@ class RegisterRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'address' => ['nullable', 'string'],
+            'phone' => ['required', 'string'],
             'province_id' => ['required', 'exists:provinces,id'],   // Kiểm tra tỉnh có tồn tại
             'district_id' => ['required', 'exists:districts,id'],   // Kiểm tra huyện có tồn tại
             'ward_id' => ['required', 'exists:wards,id'],
@@ -38,6 +39,7 @@ class RegisterRequest extends FormRequest
             'name' => 'Tên người dùng',
             'email' => 'Địa chỉ email',
             'password' => 'Mật khẩu',
+            'phone' => 'Số điện thoại',
             'province_id' => 'Tỉnh',
             'district_id' => 'Huyện',
             'ward_id' => 'Xã/Phường',

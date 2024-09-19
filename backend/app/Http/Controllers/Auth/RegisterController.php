@@ -70,7 +70,7 @@ class RegisterController extends Controller
 
             return response()->json([
                 'message' => 'Tài khoản cần được xác thực',
-                'data' => $user
+                // 'data' => $user
             ]);
         } catch (ValidationException $e) {
             Log::error($e->getMessage(), $e->errors());
