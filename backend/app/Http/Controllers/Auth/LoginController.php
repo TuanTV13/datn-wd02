@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\RefreshToken;
 use App\Models\User;
 use App\Services\Auth\LoginService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -29,11 +32,29 @@ class LoginController extends Controller
                 'message' => $result['message']
             ]);
         }
-
         return response()->json([
-            'message' => $result['message'],
             'token' => $result['token'],
-            'user' => $result['user']
+            'refresh_token' => $result['refresh_token']
         ]);
     }
+
+    public function refresh(Request $request)
+    {
+        // $refreshToken = $request->input('refresh_token');
+
+        $result = $this->loginService->refresh($request);
+
+        if(!$result['status']){
+            return response()->json([
+                'message' => $result['message']
+            ]);
+        }
+
+        return response()->json([
+            'token' => $result['access_token'],
+            'refresh_token' => $result['refresh_token']
+        ]);
+
+    }
+    
 }

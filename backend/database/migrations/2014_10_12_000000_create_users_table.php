@@ -16,10 +16,12 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('phone')->unique();
             $table->string('address')->nullable();
-            $table->foreignId('province_id')->nullable()->constrained('provinces')->onDelete('set null');
-            $table->foreignId('district_id')->nullable()->constrained('districts')->onDelete('set null');
-            $table->foreignId('ward_id')->nullable()->constrained('wards')->onDelete('set null');
+            $table->foreignId('province_id')->constrained('provinces')->onDelete('cascade');
+            $table->foreignId('district_id')->constrained('districts')->onDelete('cascade');
+            $table->foreignId('ward_id')->constrained('wards')->onDelete('cascade');
+            $table->timestamp('deleted_at')->nullable();
             $table->string('email_verification_token')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

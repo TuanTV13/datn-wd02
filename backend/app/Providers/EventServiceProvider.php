@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\UserForgotPassword;
 use App\Events\UserRegisterdSuccess;
+use App\Listeners\UserForgotPasswordSendCode;
 use App\Listeners\UserRegisterdSuccessVerification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -24,6 +26,12 @@ class EventServiceProvider extends ServiceProvider
         UserRegisterdSuccess::class => [
             UserRegisterdSuccessVerification::class,
         ],
+
+        UserForgotPassword::class => [
+            UserForgotPasswordSendCode::class,
+        ],
+
+        
     ];
 
     /**

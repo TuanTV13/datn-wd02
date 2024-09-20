@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -11,19 +10,19 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UserRegisterdSuccess
+class UserForgotPassword
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $user;
-    public $minutes;
+    public $user, $minutes;
     /**
      * Create a new event instance.
      */
-    public function __construct(User $user, $minutes)
+    public function __construct($user, $minutes)
     {
         $this->user = $user;
         $this->minutes = $minutes;
+
     }
 
     /**
