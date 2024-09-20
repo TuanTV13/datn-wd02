@@ -7,11 +7,18 @@ const AddressForm = () => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
 
+<<<<<<< HEAD
   // Gọi API để lấy danh sách các tỉnh khi component được render
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/get-province");
+=======
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/get-provinces");
+>>>>>>> 0693cc158bfa58c071c8eb8df5b9cf21c9c319de
         setProvinces(response.data);
       } catch (error) {
         console.error("Error fetching provinces:", error);
@@ -21,7 +28,10 @@ const AddressForm = () => {
     fetchProvinces();
   }, []);
 
+<<<<<<< HEAD
   // Gọi API để lấy danh sách huyện khi tỉnh được chọn
+=======
+>>>>>>> 0693cc158bfa58c071c8eb8df5b9cf21c9c319de
   const handleProvinceChange = async (e) => {
     const provinceId = e.target.value;
     setSelectedProvince(provinceId);
@@ -51,13 +61,14 @@ const AddressForm = () => {
         <select id="province" value={selectedProvince} onChange={handleProvinceChange}>
           <option value="">-- Chọn tỉnh --</option>
           {provinces.map((province) => (
-            <option key={province.code} value={province.code}>
+            <option key={province.id} value={province.id}>
               {province.name}
             </option>
           ))}
         </select>
       </div>
 
+<<<<<<< HEAD
       <div>
         <label htmlFor="district">Chọn huyện:</label>
         <select
@@ -74,6 +85,26 @@ const AddressForm = () => {
           ))}
         </select>
       </div>
+=======
+      {selectedProvince && (
+        <div>
+          <label htmlFor="district">Chọn huyện:</label>
+          <select
+            id="district"
+            value={selectedDistrict}
+            onChange={handleDistrictChange}
+            disabled={!selectedProvince}
+          >
+            <option value="">-- Chọn huyện --</option>
+            {districts.map((district) => (
+              <option key={district.id} value={district.id}>
+                {district.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+>>>>>>> 0693cc158bfa58c071c8eb8df5b9cf21c9c319de
 
       <button type="submit" disabled={!selectedProvince || !selectedDistrict}>
         Submit

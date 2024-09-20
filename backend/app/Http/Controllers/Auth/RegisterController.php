@@ -16,13 +16,16 @@ use Illuminate\Support\Str;
 class RegisterController extends Controller
 {
 
-    // Hiển thị form đăng kí
-    public function showFormRegister()
+    // 
+    public function showProvinces()
     {
-        $provinces = Province::all();
-        return response()->json([
-            'provinces' => $provinces
-        ]);
+        try {
+            $provinces = Province::all();
+            return response()->json($provinces);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi nạp dữ liệu tỉnh thành: ' . $e->getMessage());
+            return response()->json(['error' => 'Không thể nạp dữ liệu tỉnh thành'], 500);
+        }
     }
 
     // List các huyện
