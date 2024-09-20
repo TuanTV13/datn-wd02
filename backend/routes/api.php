@@ -29,15 +29,16 @@ Route::get('email/verify/{token}', [VerificationController::class, 'verify'])->n
 Route::post('send-code', [ForgotPasswordController::class, 'sendCode'])->name('sendCode');
 Route::post('reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('resetPassword');
 
+Route::get('/get-districts/{provinceId}', [RegisterController::class, 'getDistricts'])->name('getDistricts');
+Route::get('/get-wards/{districtId}', [RegisterController::class, 'getWards'])->name('getWards');
+Route::get('/get-provinces', [RegisterController::class, 'showProvinces'])->name('showProvinces');
+
 Route::prefix('v1')->middleware('verify.email')->group(function () {
 
-    Route::get('/get-districts/{provinceId}', [RegisterController::class, 'getDistricts'])->name('getDistricts');
-    Route::get('/get-wards/{districtId}', [RegisterController::class, 'getWards'])->name('getWards');
-    Route::get('/get-provinces', [RegisterController::class, 'showProvinces'])->name('showProvinces');
+
 
     Route::post('login', [LoginController::class, 'login'])->name('login');
     Route::post('refresh', [LoginController::class, 'refresh'])->name('refresh.token');
-
 });
 
 Route::post('query', [UserController::class, 'query']);
