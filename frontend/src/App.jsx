@@ -1,6 +1,5 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import AddressForm from "./components/addressform";
+import React from 'react';
+import AddressForm from './components/addressform'; // Import component AddressForm
 
 const App = () => {
   return (
@@ -11,5 +10,4 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />, document.getElementById("root"));
 export default App;

@@ -1,54 +1,54 @@
-
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+
 const AddressForm = () => {
-    const [provinces, setProvinces] = useState([]);
-    const [districts, setDistricts] = useState([]);
-    const [selected_province, setSelectedProvince] = useState("");
-    const [selected_district, setSelectedDistrict] = useState("");
-  // Dữ liệu các tỉnh và huyện (nên lấy từ server hoặc API thực tế)
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+
+  // Gọi API để lấy danh sách các tỉnh khi component được render
   useEffect(() => {
-    const fetch_provinces = async () => {
+    const fetchProvinces = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/register");
-        const data = await response.json();
-        setProvinces(data);
+        const response = await axios.get("http://127.0.0.1:8000/api/get-province");
+        setProvinces(response.data);
       } catch (error) {
         console.error("Error fetching provinces:", error);
       }
     };
 
-    fetch_provinces();
+    fetchProvinces();
   }, []);
 
   // Gọi API để lấy danh sách huyện khi tỉnh được chọn
-  const handle_province_change = async (e) => {
-    const province = e.target.value;
-    setSelectedProvince(province);
-    setSelectedDistrict(""); // Reset huyện khi chọn tỉnh mới
+  const handleProvinceChange = async (e) => {
+    const provinceId = e.target.value;
+    setSelectedProvince(provinceId);
+    setSelectedDistrict(""); // Reset danh sách huyện khi chọn tỉnh mới
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/get-districts/${provinceId}`);
-      const data = await response.json();
-      setDistricts(data);
+      const response = await axios.get(`http://127.0.0.1:8000/api/get-districts/${provinceId}`);
+      setDistricts(response.data);
     } catch (error) {
       console.error("Error fetching districts:", error);
     }
   };
 
-  const handle_district_change = (e) => {
+  const handleDistrictChange = (e) => {
     setSelectedDistrict(e.target.value);
   };
 
-  const handle_submit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Tỉnh: ${selected_province}, Huyện: ${selected_district}`);
+    alert(`Tỉnh: ${selectedProvince}, Huyện: ${selectedDistrict}`);
   };
 
   return (
-    <form onSubmit={handle_submit}>
+    <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor="province">Chọn tỉnh:</label>
-        <select id="province" value={selected_province} onChange={handle_province_change}>
+        <select id="province" value={selectedProvince} onChange={handleProvinceChange}>
           <option value="">-- Chọn tỉnh --</option>
           {provinces.map((province) => (
             <option key={province.code} value={province.code}>
@@ -58,26 +58,24 @@ const AddressForm = () => {
         </select>
       </div>
 
-      {selected_province && (
-        <div>
-          <label htmlFor="district">Chọn huyện:</label>
-          <select
-            id="district"
-            value={selected_district}
-            onChange={handle_district_change}
-            disabled={!selected_province}
-          >
-            <option value="">-- Chọn huyện --</option>
-            {districts.map((district) => (
-              <option key={district.code} value={district.code}>
-                {district.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div>
+        <label htmlFor="district">Chọn huyện:</label>
+        <select
+          id="district"
+          value={selectedDistrict}
+          onChange={handleDistrictChange}
+          disabled={!selectedProvince} // Không cho chọn huyện nếu chưa chọn tỉnh
+        >
+          <option value="">-- Chọn huyện --</option>
+          {districts.map((district) => (
+            <option key={district.code} value={district.code}>
+              {district.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <button type="submit" disabled={!selected_province || !selected_district}>
+      <button type="submit" disabled={!selectedProvince || !selectedDistrict}>
         Submit
       </button>
     </form>
