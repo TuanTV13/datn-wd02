@@ -66,11 +66,12 @@ class RegisterController extends Controller
 
             $user = User::create($data);
 
-            event(new UserRegisterdSuccess($user));
+            $minutes = config('auth.passwords.users.expire');
+            // event(new UserRegisterdSuccess($user, $minutes));
+            UserRegisterdSuccess::dispatch($user, $minutes);
 
             return response()->json([
                 'message' => 'Tài khoản cần được xác thực',
-                // 'data' => $user
             ]);
         } catch (ValidationException $e) {
             Log::error($e->getMessage(), $e->errors());

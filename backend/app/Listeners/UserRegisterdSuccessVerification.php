@@ -3,11 +3,12 @@
 namespace App\Listeners;
 
 use App\Events\UserRegisterdSuccess;
+use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
 
-class UserRegisterdSuccessVerification
+class UserRegisterdSuccessVerification implements ShouldQueue
 {
     /**
      * Create the event listener.
@@ -23,9 +24,10 @@ class UserRegisterdSuccessVerification
     public function handle(UserRegisterdSuccess $event)
     {
         $user = $event->user;
-
+        
         $data = [
             'user' => $user,
+            'minutes' => $event->minutes
         ];
 
         Mail::send('emails.verify-email', $data, function ($message) use ($user){

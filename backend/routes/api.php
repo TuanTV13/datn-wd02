@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerificationController;
@@ -22,17 +23,21 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('login', [LoginController::class, 'login'])->name('login')->middleware('verify.email');
 
-
-Route::get('/get-districts/{provinceId}', [RegisterController::class, 'getDistricts']);
-Route::get('/get-wards/{districtId}', [RegisterController::class, 'getWards']);
-Route::get('/get-provinces', [RegisterController::class, 'showProvinces']);
 Route::post('register', [RegisterController::class, 'register'])->name('register');
 Route::get('email/verify/{token}', [VerificationController::class, 'verify'])->name('verification.verify');
+Route::post('send-code', [ForgotPasswordController::class, 'sendCode'])->name('sendCode');
+Route::post('reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('resetPassword');
 
+Route::prefix('v1')->middleware('verify.email')->group(function () {
 
+    Route::get('/get-districts/{provinceId}', [RegisterController::class, 'getDistricts'])->name('getDistricts');
+    Route::get('/get-wards/{districtId}', [RegisterController::class, 'getWards'])->name('getWards');
+    Route::get('/get-provinces', [RegisterController::class, 'showProvinces'])->name('showProvinces');
 
-Route::get('index', [UserController::class, 'getAll'])->middleware('check.jwt');
+    Route::post('login', [LoginController::class, 'login'])->name('login');
+    Route::post('refresh', [LoginController::class, 'refresh'])->name('refresh.token');
 
-Route::post('refresh', [LoginController::class, 'refresh']);
+});
+
+Route::post('query', [UserController::class, 'query']);
