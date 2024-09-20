@@ -1,78 +1,82 @@
+{{-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Xác nhận tài khoản</title>
+</head>
+<body style="width: 100%; min-height: 600px; background-color: #dbdde4; font-size: 18px; font-family: Arial, sans-serif;">
+    <h1 style="text-align: center; margin-top: 1.5rem; margin-bottom: 1.5rem;">{{ config('app.name') }}</h1>
+    <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 20px; border: 1px solid #e1e1e1; border-radius: 8px; min-height: 300px; color: #718096;">
+        <h2 style="color: #3d4852;">Xác nhận tài khoản</h2>
+        <p>Chào bạn, {{ $user->name }}</p>
+        <p>Bạn nhận được email này vì chúng tôi đã nhận được yêu cầu Xác nhận tài khoản cho tài khoản của bạn. Vui lòng nhấn vào liên kết dưới đây để Xác nhận tài khoản của bạn:</p>
+        <div style="text-align: center;">
+            <a href="{{ route('verification.verify', ['token' => $user->email_verification_token]) }}" style="font-weight: bold; background-color: #500050; border-color: #500050; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; display: inline-block;">Xác nhận tài khoản</a>
+        </div>
+        <p>Liên kết này sẽ hết hạn sau {{ $minutes }} phút.</p>
+        <p>Nếu bạn không yêu cầu xác nhận tài khoản, vui lòng bỏ qua email này.</p>
+        <p>Cảm ơn,<br>{{ config('app.name') }}</p>
+    </div>
+    <footer style="margin-top: 1.5rem; width: 100%; text-align: center; color: #718096;">© 2024 EVENTIFY. All rights reserved.</footer>
+</body>
+</html> --}}
+
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xác Thực Email</title>
+    <title>Xác nhận tài khoản</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
             color: #333;
+            line-height: 1.6;
         }
         .container {
-            width: 100%;
             max-width: 600px;
-            margin: 20px auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            background: #ffffff;
             padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            color: #007bff;
-            margin: 0;
-        }
-        .content {
-            font-size: 16px;
-            line-height: 1.5;
-        }
-        .content p {
-            margin: 0 0 10px;
-        }
-        .button {
+        .btn {
             display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
+            background-color: #28a745;
             color: #fff;
-            background-color: #007bff;
+            padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
-            text-align: center;
+        }
+        .btn:hover {
+            background-color: #218838;
         }
         .footer {
             margin-top: 20px;
             text-align: center;
             font-size: 14px;
-            color: #666;
-        }
-        .footer p {
-            margin: 0;
+            color: #888;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Xác Thực Email</h1>
-        </div>
-        <div class="content">
-            <p>Chào bạn, {{ $user->name }}</p>
-            <p>Vui lòng nhấp vào liên kết dưới đây để xác thực địa chỉ email của bạn:</p>
-            <p>
-                <a href="{{ route('verification.verify', ['token' => $user->email_verification_token]) }}" class="button">Xác Thực Email</a>
-            </p>
-            <p>Nếu bạn không tạo tài khoản, không cần thực hiện hành động nào.</p>
-        </div>
+        <h2>Xác nhận tài khoản của bạn</h2>
+        <p>Chào {{ $user->name }},</p>
+        <p>Cảm ơn bạn đã đăng ký tài khoản tại {{ config('app.name') }}. Vui lòng nhấp vào nút dưới đây để xác nhận địa chỉ email của bạn:</p>
+        
+        <p style="text-align: center;">
+            <a href="{{ route('verification.verify', ['token' => $user->email_verification_token]) }}" class="btn">Xác nhận tài khoản</a>
+        </p>
+
+        <p>Liên kết này sẽ hết hạn sau {{ $minutes }} phút.</p>
+        <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
+        
+        <p>Trân trọng,<br>{{ config('app.name') }}</p>
+        
         <div class="footer">
-            <p>Trân trọng,</p>
-            <p>Đội ngũ hỗ trợ</p>
+            &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
         </div>
     </div>
 </body>
