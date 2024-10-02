@@ -8,15 +8,4 @@ use Illuminate\Database\Eloquent\Model;
 class RefreshToken extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'token',
-        'expires_at'
-    ];
-
-    public function user()
-    {
-        $this->belongsTo(User::class);
-    }
 }
