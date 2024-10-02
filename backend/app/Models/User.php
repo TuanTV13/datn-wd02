@@ -22,14 +22,16 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
+        'status_id',
+        'province_id',
+        'district_id',
+        'ward_id',
         'name',
         'email',
         'password',
         'phone',
         'address',
-        'province_id',
-        'district_id',
-        'ward_id',
+        'image',
         'deleted_at',
         'email_verification_token',
         'email_verified_at',
@@ -80,11 +82,21 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->belongsTo(Ward::class);
     }
 
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
+
+    public function vouchers()
+    {
+        return $this->belongsToMany(Voucher::class, 'user_vouchers')
+            ->withPivot('used_at');
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
-
 
     public function getJWTCustomClaims()
     {
