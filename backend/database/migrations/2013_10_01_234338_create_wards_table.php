@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\District;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,11 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('provinces', function (Blueprint $table) {
+        Schema::create('wards', function (Blueprint $table) {
             $table->id();
-            $table->string('province_code')->unique()->nullable();
-            $table->string('name')->unique();
-            $table->string('name_en')->nullable();
+            $table->foreignIdFor(District::class)->constrained()->onDelete('cascade');
+            $table->string('ward_code', 30)->unique()->nullable();
+            $table->string('name', 100);
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('provinces');
+        Schema::dropIfExists('wards');
     }
 };

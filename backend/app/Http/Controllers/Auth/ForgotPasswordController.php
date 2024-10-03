@@ -31,7 +31,7 @@ class ForgotPasswordController extends Controller
 
         $cacheKey = $email;
         $cacheTTL = 60;
-        $maxAttempts = 3;
+        $maxAttempts = 5;
 
         $attempts = Cache::get($cacheKey, 0);
 

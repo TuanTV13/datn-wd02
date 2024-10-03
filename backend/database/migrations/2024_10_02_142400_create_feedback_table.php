@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Event;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,11 +13,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wards', function (Blueprint $table) {
+        Schema::create('feedback', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('district_id')->constrained('districts')->onDelete('cascade');
-            $table->string('name');
-            $table->string('ward_code')->unique()->nullable();
+            $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Event::class)->constrained()->onDelete('cascade');
+            $table->bigInteger('rating');
+            $table->string('comment', 255);
             $table->timestamps();
         });
     }
@@ -25,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wards');
+        Schema::dropIfExists('feedback');
     }
 };

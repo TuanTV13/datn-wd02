@@ -16,7 +16,7 @@ return [
     'accepted' => ':attribute phải được chấp nhận.',
     'accepted_if' => ':attribute phải được chấp nhận khi :other là :value.',
     'active_url' => ':attribute không phải là URL hợp lệ.',
-    'after' => ':attribute phải là ngày sau :date.',
+    'after' => ':attribute phải sau :date.',
     'after_or_equal' => ':attribute phải là ngày sau hoặc bằng :date.',
     'alpha' => ':attribute chỉ được chứa chữ cái.',
     'alpha_dash' => ':attribute chỉ được chứa chữ cái, số, dấu gạch ngang và gạch dưới.',
@@ -129,7 +129,7 @@ return [
     'prohibits' => ':attribute cấm :other có mặt.',
     'regex' => ':attribute có định dạng không hợp lệ.',
     'required' => ':attribute là bắt buộc.',
-    'required_if' => ':attribute là bắt buộc khi :other là :value.',
+    'required_if' => ':attribute là bắt buộc khi :other là rỗng',
     'required_unless' => ':attribute là bắt buộc trừ khi :other có trong :values.',
     'required_with' => ':attribute là bắt buộc khi :values có mặt.',
     'required_with_all' => ':attribute là bắt buộc khi :values có mặt.',
@@ -182,5 +182,4 @@ return [
     */
 
     'attributes' => [],
-
 ];
