@@ -32,6 +32,7 @@ class LoginController extends Controller
                 'message' => $result['message']
             ]);
         }
+        
         return response()->json([
             'token' => $result['token'],
             'refresh_token' => $result['refresh_token']

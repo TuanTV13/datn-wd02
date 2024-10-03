@@ -9,6 +9,7 @@ use App\Models\District;
 use App\Models\Province;
 use App\Models\User;
 use App\Models\Ward;
+use App\Services\Auth\RegisterService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +19,14 @@ use Illuminate\Support\Str;
 class RegisterController extends Controller
 {
 
-    // 
+    protected $registerService;
+
+    public function __construct(RegisterService $registerService)
+    {
+        $this->registerService = $registerService;
+    }
+
+    // Tỉnh
     public function showProvinces()
     {
         try {
@@ -54,40 +62,12 @@ class RegisterController extends Controller
         }
     }
 
-    // Xử lý đăng kí
     public function register(RegisterRequest $registerRequest)
     {
-        try {
+        $user = $this->registerService->create($registerRequest);
 
-            DB::transaction(function () use ($registerRequest) {
-
-                $data = $registerRequest->validated();
-
-                if ($registerRequest->hasFile('image')) {
-                    $data['image'] = Storage::put('users', $registerRequest->file('image'));
-                }
-
-                $data['password'] = bcrypt($data['password']);
-
-                $data['email_verification_token'] = Str::random(60);
-
-                $user = User::create($data);
-
-                $minutes = config('auth.passwords.users.expire');
-
-                UserRegisterdSuccess::dispatch($user, $minutes);
-            }, 3);
-
-            return response()->json([
-                'message' => 'Tài khoản cần được xác thực',
-            ]);
-        } catch (ValidationException $e) {
-            Log::error($e->getMessage(), $e->errors());
-
-            return response()->json([
-                'message' => 'Đã xảy ra lỗi trong quá trình xác thực.',
-                'errors' => $e->errors(),
-            ], 422);
-        }
+        return response()->json([
+            'message' => $user['message']
+        ]);
     }
 }

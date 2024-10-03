@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\web\SetLangController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,3 +20,4 @@ Route::get('/', function () {
 });
 
 Route::get('/abc/{id}', [EventController::class, 'update']);
+Route::get('/language/{lang}', [SetLangController::class, 'setLanguage'])->name('set.language');
