@@ -28,28 +28,15 @@ class LoginController extends Controller
         $result = $this->loginService->login($credentials['email'], $credentials['password']);
 
         if (!$result['status']) {
-            // Xử lý các loại lỗi và trả về mã trạng thái tương ứng
-            if ($result['message'] === 'Không tìm thấy tài khoản') {
-                return response()->json([
-                    'message' => $result['message']
-                ], 404); // Mã lỗi 404 (Not Found)
-            } elseif ($result['message'] === 'Mật khẩu không đúng') {
-                return response()->json([
-                    'message' => $result['message']
-                ], 401); // Mã lỗi 401 (Unauthorized)
-            }
-    
-            // Trả về lỗi chung nếu có lỗi khác
             return response()->json([
                 'message' => $result['message']
-            ], 400); // Mã lỗi 400 (Bad Request)
+            ], 401);
         }
-    
-        // Đăng nhập thành công, trả về token và refresh token
+
         return response()->json([
             'token' => $result['token'],
             'refresh_token' => $result['refresh_token']
-        ], 200); // Mã 200 (OK)
+        ], 200);
     }
 
     public function refresh(Request $request)
@@ -58,7 +45,7 @@ class LoginController extends Controller
 
         $result = $this->loginService->refresh($request);
 
-        if(!$result['status']){
+        if (!$result['status']) {
             return response()->json([
                 'message' => $result['message']
             ]);
@@ -68,7 +55,5 @@ class LoginController extends Controller
             'token' => $result['access_token'],
             'refresh_token' => $result['refresh_token']
         ]);
-
     }
-    
 }

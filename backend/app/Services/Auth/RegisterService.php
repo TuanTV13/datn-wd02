@@ -23,39 +23,49 @@ class RegisterService
     {
         $this->registerRepository = $registerRepository;
         $this->client = new Client();
-        $this->api_key = env('KICKBOX_API_KEY');
+        $this->api_key = env('KICKBOX_API_KEY'); // Lấy API key từ file .env
     }
 
     public function create(RegisterRequest $registerRequest)
     {
         $data = $registerRequest->validated();
 
+        // Kiểm tra email với API Kickbox
         if (!$this->verifyEmail($data['email'])) {
             Log::info("Email không hợp lệ: " . $data['email']);
             throw ValidationException::withMessages([
                 'email' => 'Email không hợp lệ hoặc không tồn tại. Vui lòng thử lại với một địa chỉ email khác.',
             ]);
         }
-        try {
 
+        try {
+            // Xử lý ảnh người dùng nếu có
             if ($registerRequest->hasFile('image')) {
                 $data['image'] = Storage::put('users', $registerRequest->file('image'));
             }
 
+            // Mã hóa mật khẩu
             $data['password'] = bcrypt($data['password']);
 
+            // Tạo token xác minh email
             $data['email_verification_token'] = Str::random(60);
 
+            // Tạo người dùng
             $user = User::create($data);
 
+            // Gửi sự kiện đăng ký thành công và thiết lập thời gian hết hạn cho token
             $minutes = config('auth.passwords.users.expire');
-
             UserRegisterdSuccess::dispatch($user, $minutes);
+
+            return ['message' => 'Đăng ký thành công'];
         } catch (\Throwable $th) {
+            Log::error("Lỗi hệ thống khi tạo người dùng: " . $th->getMessage());
             return ['message' => 'Lỗi hệ thống'];
         }
     }
 
+    // nerverbounce: 'https://api.neverbounce.com/v4/single/check'
+    // Phương thức kiểm tra email qua API Kickbox
     public function verifyEmail($email)
     {
         try {
@@ -71,13 +81,15 @@ class RegisterService
                 return false;
             }
 
-            $result = json_decode($response->getBody(), true); // Chuyển đổi thành mảng
+            $result = json_decode($response->getBody(), true);
 
-            // Ghi log kết quả từ API
-            Log::info("Kết quả kiểm tra email: ", $result);
+            // Kiểm tra kết quả từ API
+            if (isset($result['result']) && $result['result'] === 'deliverable') {
+                return true;
+            }
 
-            // Trả về true nếu email tồn tại
-            return $result['result'] === 'deliverable'; // Sử dụng cú pháp mảng
+            Log::warning("Kickbox không xác nhận được email: " . $email);
+            return false;
         } catch (Exception $e) {
             Log::error("Lỗi khi gọi API Kickbox: " . $e->getMessage());
             return false;
