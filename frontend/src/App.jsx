@@ -1,12 +1,18 @@
 import React from 'react';
-import AddressForm from './components/addressform'; // Import component AddressForm
-
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Auth from './components/Auth';
+import './App.css'
+import AuthContainer from './components/auth/AuthContainer';
 const App = () => {
   return (
-    <div>
-      <h1>Form chọn địa chỉ</h1>
-      <AddressForm />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/auth" element={<AuthContainer />} />
+        {/* Add more routes here as needed */}
+        <Route path="/auth2" element={<Auth />} />
+
+      </Routes>
+    </Router>
   );
 };
 

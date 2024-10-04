@@ -2,6 +2,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx'; // Import component chính của bạn
 import './index.css'; // Import CSS
+import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+// import 'bootstrap'; // Nếu bạn cần các thành phần JS của Bootstrap (tuỳ chọn)
 
 // Khởi tạo root chỉ một lần
 const container = document.getElementById('root');
