@@ -2,12 +2,10 @@
 
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\TicketController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerificationController;
-use App\Http\Controllers\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -61,6 +59,3 @@ Route::prefix('tickets')->middleware('check.jwt')->group(function () {
     Route::get('/', [TicketController::class, 'index'])->name('tickets.index');
     Route::post('/store', [TicketController::class, 'store'])->name('tickets.store');
 });
-
-
-Route::post('category/store', [CategoryController::class, 'store']);
