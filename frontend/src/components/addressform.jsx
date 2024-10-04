@@ -7,18 +7,10 @@ const AddressForm = () => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
 
-<<<<<<< HEAD
-  // Gọi API để lấy danh sách các tỉnh khi component được render
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/get-province");
-=======
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/get-provinces");
->>>>>>> 0693cc158bfa58c071c8eb8df5b9cf21c9c319de
         setProvinces(response.data);
       } catch (error) {
         console.error("Error fetching provinces:", error);
@@ -28,10 +20,6 @@ const AddressForm = () => {
     fetchProvinces();
   }, []);
 
-<<<<<<< HEAD
-  // Gọi API để lấy danh sách huyện khi tỉnh được chọn
-=======
->>>>>>> 0693cc158bfa58c071c8eb8df5b9cf21c9c319de
   const handleProvinceChange = async (e) => {
     const provinceId = e.target.value;
     setSelectedProvince(provinceId);
