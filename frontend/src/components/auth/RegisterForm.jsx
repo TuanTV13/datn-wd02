@@ -1,44 +1,47 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
-import AddressForm from './AddressForm'; // Import AddressForm
-import './LoginForm.css'; // Import CSS
+import { Modal, Button } from 'react-bootstrap';
+import './LoginForm.css';
 
 const RegisterForm = ({ toggleForm }) => {
   const { register, handleSubmit, formState: { errors }, watch } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errorMessages, setErrorMessages] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [currentErrorIndex, setCurrentErrorIndex] = useState(0);
+  const [showNameError, setShowNameError] = useState(false);
+  const [showEmailError, setShowEmailError] = useState(false);
+  const [showPasswordError, setShowPasswordError] = useState(false);
+  const [showConfirmPasswordError, setShowConfirmPasswordError] = useState(false);
 
-  // State để lưu thông tin địa chỉ
-  const [selectedProvince, setSelectedProvince] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [selectedWard, setSelectedWard] = useState("");
-
-  // Theo dõi mật khẩu để so sánh với confirm password
   const password = watch('password');
 
   const onSubmit = async (data) => {
-    // Gộp thông tin địa chỉ vào dữ liệu đăng ký
-    const registrationData = {
-      ...data,
-      province_id: selectedProvince,
-      district_id: selectedDistrict,
-      ward_id: selectedWard,
-    };
-
     try {
-      // Gọi API để gửi dữ liệu đăng ký
-      const response = await axios.post('http://127.0.0.1:8000/api/register', registrationData);
+      const response = await axios.post('http://127.0.0.1:8000/api/register', data);
       if (response.status === 200) {
-        alert('Đăng ký thành công!'); // Thông báo đăng ký thành công
+        alert('Đăng ký thành công!');
       }
     } catch (error) {
-      console.error("Error during registration:", error);
       if (error.response && error.response.data.errors) {
-        alert('Đăng ký thất bại: ' + JSON.stringify(error.response.data.errors)); // Thông báo lỗi chi tiết
+        const backendErrors = Object.values(error.response.data.errors).flat();
+        setErrorMessages(backendErrors);
       } else {
-        alert('Đăng ký thất bại. Vui lòng kiểm tra lại thông tin!'); // Thông báo đăng ký thất bại
+        setErrorMessages(['Đăng ký thất bại. Vui lòng kiểm tra lại thông tin!']);
       }
+      setCurrentErrorIndex(0);
+      setShowModal(true);
+    }
+  };
+
+  const closeModal = () => {
+    if (currentErrorIndex < errorMessages.length - 1) {
+      setCurrentErrorIndex(currentErrorIndex + 1);
+    } else {
+      setShowModal(false);
+      setErrorMessages([]);
     }
   };
 
@@ -48,67 +51,93 @@ const RegisterForm = ({ toggleForm }) => {
         <div className="auth-form-outer">
           <h2 className="auth-form-title">Đăng Ký</h2>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-3">
+
+            {/* Input Tên */}
+            <div className="mb-3 input-container">
               <input
+                id="name"
                 type="text"
-                className={`auth-form-input ${errors.name ? 'is-invalid' : ''}`}
                 placeholder="Nhập tên"
+                className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                 {...register('name', { required: 'Tên là bắt buộc' })}
+                onMouseEnter={() => errors.name && setShowNameError(true)}
+                onMouseLeave={() => errors.name && setShowNameError(false)}
               />
-              {errors.name && <p className="text-danger">{errors.name.message}</p>}
+              {errors.name && showNameError && (
+                <div className="input-error">{errors.name.message}</div>
+              )}
             </div>
 
-            <div className="mb-3">
+            {/* Input Email */}
+            <div className="mb-3 input-container">
               <input
-                type="email"
-                className={`auth-form-input ${errors.email ? 'is-invalid' : ''}`}
+                id="email"
+                type="text"
                 placeholder="Nhập email"
+                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                 {...register('email', { required: 'Email là bắt buộc', pattern: { value: /^\S+@\S+$/i, message: 'Email không hợp lệ' } })}
+                onMouseEnter={() => errors.email && setShowEmailError(true)}
+                onMouseLeave={() => errors.email && setShowEmailError(false)}
               />
-              {errors.email && <p className="text-danger">{errors.email.message}</p>}
+              {errors.email && showEmailError && (
+                <div className="input-error">{errors.email.message}</div>
+              )}
             </div>
 
-            <div className="mb-3 position-relative">
+            {/* Input Mật Khẩu */}
+            <div className="mb-3 position-relative input-container">
               <input
+                id="password"
                 type={showPassword ? 'text' : 'password'}
-                className={`auth-form-input ${errors.password ? 'is-invalid' : ''}`}
                 placeholder="Nhập mật khẩu"
-                {...register('password', { required: 'Mật khẩu là bắt buộc', minLength: { value: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' } })}
+                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                {...register('password', { required: 'Mật khẩu là bắt buộc' })}
+                onMouseEnter={() => errors.password && setShowPasswordError(true)}
+                onMouseLeave={() => errors.password && setShowPasswordError(false)}
               />
-              <i 
-                className={`uil ${showPassword ? 'uil-eye' : 'uil-eye-slash'} position-absolute`}
-                style={{ right: '10px', top: '10px', cursor: 'pointer' }}
-                onClick={() => setShowPassword(!showPassword)}
-              ></i>
-              {errors.password && <p className="text-danger">{errors.password.message}</p>}
+              {/* Chỉ hiển thị icon khi không có lỗi validate */}
+              {!errors.password && (
+                <i
+                  className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', top: '50%', right: '10px', cursor: 'pointer', transform: 'translateY(-50%)' }}
+                />
+              )}
+              {errors.password && showPasswordError && (
+                <div className="input-error">{errors.password.message}</div>
+              )}
             </div>
 
-            <div className="mb-3 position-relative">
+            {/* Input Xác Nhận Mật Khẩu */}
+            <div className="mb-3 position-relative input-container">
               <input
+                id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
-                className={`auth-form-input ${errors.confirmPassword ? 'is-invalid' : ''}`}
-                placeholder="Nhập lại mật khẩu"
+                placeholder="Xác nhận mật khẩu"
+                className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
                 {...register('confirmPassword', {
-                  required: 'Bạn cần nhập lại mật khẩu',
-                  validate: value => value === password || 'Mật khẩu không khớp',
+                  required: 'Cần nhập lại mật khẩu',
+                  validate: value => {
+                    return value === password || 'Mật khẩu không khớp';
+                  },
                 })}
+                onMouseEnter={() => errors.confirmPassword && setShowConfirmPasswordError(true)}
+                onMouseLeave={() => errors.confirmPassword && setShowConfirmPasswordError(false)}
               />
-              <i 
-                className={`uil ${showConfirmPassword ? 'uil-eye' : 'uil-eye-slash'} position-absolute`}
-                style={{ right: '10px', top: '10px', cursor: 'pointer' }}
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              ></i>
-              {errors.confirmPassword && <p className="text-danger">{errors.confirmPassword.message}</p>}
+              {/* Chỉ hiển thị icon khi không có lỗi validate */}
+              {!errors.confirmPassword && (
+                <i
+                  className={`fas ${showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ position: 'absolute', top: '50%', right: '10px', cursor: 'pointer', transform: 'translateY(-50%)' }}
+                />
+              )}
+              {errors.confirmPassword && showConfirmPasswordError && (
+                <div className="input-error">{errors.confirmPassword.message}</div>
+              )}
             </div>
 
-            {/* Thêm AddressForm vào đây và xử lý thông tin tỉnh, huyện */}
-            <AddressForm 
-              onProvinceChange={setSelectedProvince} 
-              onDistrictChange={setSelectedDistrict} 
-              onWardChange={setSelectedWard} // Thêm onWardChange
-            />
-
-            <button type="submit" className="auth-submit">Đăng ký</button>
+            <button type="submit" className="btn btn-primary w-100">Đăng ký</button>
           </form>
 
           <p className="mt-3">
@@ -116,9 +145,23 @@ const RegisterForm = ({ toggleForm }) => {
           </p>
         </div>
       </div>
+
       <div className="auth-action-right">
         <img src='https://i.pinimg.com/564x/b7/e1/8a/b7e18a28198f0b2cae87db8ba2218018.jpg' alt="Hình ảnh mô tả" style={{ height: '100%', width: 'auto' }} />
       </div>
+
+      {/* Modal thông báo lỗi */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Thông báo</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{errorMessages[currentErrorIndex]}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeModal}>
+            Đóng
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

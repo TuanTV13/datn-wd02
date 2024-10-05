@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { login } from '../../service/auth-service';
-import { Modal, Button } from 'react-bootstrap'; // Giữ lại Modal từ Bootstrap để hiển thị thông báo lỗi
-import './LoginForm.css'; // Nhớ import CSS tùy chỉnh
+import { Modal, Button } from 'react-bootstrap';
+import './LoginForm.css';
 
 const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -11,6 +11,8 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showEmailError, setShowEmailError] = useState(false);
+  const [showPasswordError, setShowPasswordError] = useState(false);
 
   const handleClose = () => setShowErrorModal(false);
 
@@ -20,7 +22,6 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
 
     try {
       const response = await login(data.email, data.password);
-
       if (response.token) {
         setErrorMessage('Đăng nhập thành công!');
         setShowErrorModal(true);
@@ -47,42 +48,60 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
         <div className="auth-form-outer">
           <h2 className="auth-form-title">Đăng Nhập</h2>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-3">
+            <div className="mb-3 input-container">
               <input
-                type="email"
+                id="email"
+                type="text"
+                placeholder='Email'
                 className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                placeholder="Nhập email"
                 {...register('email', { required: 'Email là bắt buộc', pattern: { value: /^\S+@\S+$/i, message: 'Email không hợp lệ' } })}
                 defaultValue={localStorage.getItem('email') || ''}
+                onMouseEnter={() => errors.email && setShowEmailError(true)}
+                onMouseLeave={() => errors.email && setShowEmailError(false)}
               />
-              {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
+              {errors.email && showEmailError && (
+                <div className="input-error">{errors.email.message}</div>
+              )}
             </div>
 
-            <div className="mb-3 position-relative">
+            <div className="mb-3 position-relative input-container">
               <input
+                id="password"
                 type={showPassword ? 'text' : 'password'}
+                placeholder='Mật khẩu'
                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                placeholder="Nhập mật khẩu"
                 {...register('password', { required: 'Mật khẩu là bắt buộc' })}
+                onMouseEnter={() => errors.password && setShowPasswordError(true)}
+                onMouseLeave={() => errors.password && setShowPasswordError(false)}
               />
-              <button 
-                type="button" 
-                className="position-absolute" 
-                style={{ right: '10px', top: '10px', background: 'none', border: 'none', cursor: 'pointer' }}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                <i className={`uil ${showPassword ? 'uil-eye' : 'uil-eye-slash'}`}></i>
-              </button>
-              {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
+
+              {/* Chỉ hiển thị icon khi không có lỗi validate */}
+              {!errors.password && (
+                <i
+                  className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', top: '50%', right: '10px', cursor: 'pointer', transform: 'translateY(-50%)' }}
+                />
+              )}
+
+              {errors.password && showPasswordError && (
+                <div className="input-error">{errors.password.message}</div>
+              )}
             </div>
 
-            <div className="form-check mb-3">
+            <div className="form-check mb-3 d-flex align-items-center">
               <input
                 type="checkbox"
                 className="form-check-input"
                 id="rememberMe"
                 checked={rememberMe}
                 onChange={() => setRememberMe(!rememberMe)}
+                style={{ display: 'none' }} // Ẩn checkbox mặc định
+              />
+              <i
+                className={`far ${rememberMe ? 'fa-check-square' : 'fa-square'}`}
+                onClick={() => setRememberMe(!rememberMe)}
+                style={{ cursor: 'pointer', fontSize: '1.2rem', marginRight: '10px' }}
               />
               <label className="form-check-label" htmlFor="rememberMe">Lưu thông tin đăng nhập</label>
             </div>

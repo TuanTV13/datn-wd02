@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 
 body {
   margin: 0;
@@ -13,7 +14,7 @@ body {
   max-height: 600px;
   margin: 0 auto;
   background: #fff;
-  border-radius: 15px;
+  border-radius: 25px;
   box-shadow: 1px 2px 8px 8px #ccc3;
   display: flex;
   margin-top: 4rem;
@@ -38,8 +39,9 @@ body {
 }
 
 .auth-form-outer {
-  padding: 2rem 4rem;
+  padding: 6rem 4rem;
   display: block;
+
 }
 
 h2.auth-form-title {
@@ -183,4 +185,67 @@ a.auth-btn-direct:focus {
   .auth-action-right {
     display: none;
   }
+}
+
+/* Đặt màu cho placeholder */
+.auth-form-outer input::placeholder {
+  color: #2196f3b5; /* Màu placeholder mới */
+}
+/* Đặt màu cho checkbox khi được chọn */
+input[type="checkbox"]:checked + i {
+  color: #2196f3b5; /* Màu cho biểu tượng checkbox khi chọn */
+}
+
+/* Đặt màu cho checkbox khi không được chọn */
+label input[type="checkbox"] ~ i.fa.fa-square-o {
+  color: #2196f3b5; /* Màu cho biểu tượng checkbox khi không chọn */
+}
+.forgot-pass {
+  color: blue; /* Màu chữ ban đầu */
+  cursor: pointer; /* Hiển thị con trỏ tay khi hover */
+  transition: color 0.3s, text-decoration 0.3s; /* Hiệu ứng chuyển màu và gạch chân */
+}
+
+/* Hiệu ứng hover */
+.forgot-pass:hover {
+  color: darkblue; /* Màu chữ khi hover */
+  text-decoration: underline; /* Gạch chân chữ khi hover */
+}
+
+
+
+/* bao loi valid*/
+.auth-form-outer {
+  position: relative; /* Đảm bảo vị trí cho thông báo lỗi */
+}
+
+.input-container {
+  position: relative; /* Để dễ dàng định vị các thành phần bên trong */
+}
+
+.input-error {
+  position: absolute;
+  left: 150px; /* Căn trái với ô input */
+  top: 72%; /* Đẩy lên giữa ô input */
+  transform: translateY(-100%); /* Căn giữa */
+  color: red; /* Màu sắc của thông báo lỗi */
+  font-size: 0.775rem; /* Kích thước chữ */
+  pointer-events: none; /* Không cho phép người dùng tương tác với thông báo lỗi */
+  opacity: 0; /* Ẩn thông báo theo mặc định */
+  transition: opacity 0.2s ease; /* Hiệu ứng chuyển động cho thông báo */
+}
+
+.is-invalid + .input-error {
+  opacity: 1; /* Hiện thông báo khi có lỗi */
+}
+.input-container {
+  width: 100%;
+}
+
+.input-container input {
+  width: 100%; /* Cố định chiều rộng cho input */
+  height: 40px; /* Cố định chiều cao cho input */
+  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+  min-width: 300px; /* Thêm chiều rộng tối thiểu nếu cần */
+  max-width: 400px; /* Thêm chiều rộng tối đa nếu cần */
 }
