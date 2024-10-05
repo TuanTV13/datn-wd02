@@ -21,7 +21,6 @@ const AuthContainer = () => {
         <LoginForm 
           toggleForm={toggleForm} 
           showForgotPasswordForm={showForgotPasswordForm} 
-          showForgotPassword={showForgotPassword} // Truyền trạng thái quên mật khẩu
         />
       ) : (
         <RegisterForm toggleForm={toggleForm} />
