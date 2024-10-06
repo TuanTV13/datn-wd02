@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Events\UserRegisterdSuccess;
+use App\Helpers\EmailHelper;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use App\Repositories\Auth\RegisterRepository;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 class RegisterService
 {
@@ -30,9 +32,11 @@ class RegisterService
     {
         $data = $registerRequest->validated();
 
+        $email = EmailHelper::trimEmail($data['email']);
+
         // Kiểm tra email với API Kickbox
-        if (!$this->verifyEmail($data['email'])) {
-            Log::info("Email không hợp lệ: " . $data['email']);
+        if (!$this->verifyEmail($email)) {
+            Log::info("Email không hợp lệ: " . $email);
             throw ValidationException::withMessages([
                 'email' => 'Email không hợp lệ hoặc không tồn tại. Vui lòng thử lại với một địa chỉ email khác.',
             ]);
@@ -53,11 +57,14 @@ class RegisterService
             // Tạo người dùng
             $user = User::create($data);
 
+            $userRole = Role::findByName('user');
+            $user->assignRole($userRole);
+
             // Gửi sự kiện đăng ký thành công và thiết lập thời gian hết hạn cho token
             $minutes = config('auth.passwords.users.expire');
             UserRegisterdSuccess::dispatch($user, $minutes);
 
-            return ['message' => 'Đăng ký thành công'];
+            return ['message' => 'Vui lòng xác thực tài khoản'];
         } catch (\Throwable $th) {
             Log::error("Lỗi hệ thống khi tạo người dùng: " . $th->getMessage());
             return ['message' => 'Lỗi hệ thống'];
@@ -82,6 +89,7 @@ class RegisterService
             }
 
             $result = json_decode($response->getBody(), true);
+            Log::info("Kết quả kiểm tra email: ", $result); // Ghi lại kết quả
 
             // Kiểm tra kết quả từ API
             if (isset($result['result']) && $result['result'] === 'deliverable') {
