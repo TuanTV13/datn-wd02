@@ -20,4 +20,3 @@ Route::get('/', function () {
 });
 
 Route::get('/abc/{id}', [EventController::class, 'update']);
-Route::get('/language/{lang}', [SetLangController::class, 'setLanguage'])->name('set.language');

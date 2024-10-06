@@ -27,10 +27,10 @@ class RegisterRequest extends FormRequest
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'address' => ['nullable', 'string'],
             'phone' => ['required', 'string', 'unique:users'],
-            'image' => ['nullable', 'file', 'mimes:jpg,jpeg,png'],
-            'province_id' => ['required', 'exists:provinces,id'],
-            'district_id' => ['required', 'exists:districts,id'],
-            'ward_id' => ['required', 'exists:wards,id'],
+            'image' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'province_id' => ['nullable', 'exists:provinces,id'],
+            'district_id' => ['nullable', 'exists:districts,id'],
+            'ward_id' => ['nullable', 'exists:wards,id'],
         ];
     }
 
@@ -66,14 +66,14 @@ class RegisterRequest extends FormRequest
             'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
             'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
 
-            'province_id.required' => 'Vui lòng chọn tỉnh.',
             'province_id.exists' => 'Tỉnh không hợp lệ.',
 
-            'district_id.required' => 'Vui lòng chọn huyện.',
             'district_id.exists' => 'Huyện không hợp lệ.',
 
-            'ward_id.required' => 'Vui lòng chọn xã/phường.',
             'ward_id.exists' => 'Xã/Phường không hợp lệ.',
+
+            'image.mimes' => 'Hình ảnh phải có định dạng jpg, jpeg hoặc png.',
+            'image.max' => 'Hình ảnh không được vượt quá 2MB.',
         ];
     }
 }
