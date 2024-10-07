@@ -21,9 +21,13 @@ class VerificationController extends Controller
         $user = User::where('email_verification_token', $token)->first();
 
         if (!$user) {
-            return response()->json([
-                'message' => 'Token xác thực không hợp lệ.'
-            ], 400);
+            // Chuyển hướng đến trang React với thông báo thất bại
+            return redirect('/your-react-url?status=failed');
+        }
+
+        // Kiểm tra xem email đã được xác thực chưa
+        if ($user->email_verified_at) {
+            return redirect('/your-react-url?status=already_verified');
         }
 
         // Kiểm tra xem email đã được xác thực chưa
@@ -38,9 +42,8 @@ class VerificationController extends Controller
         $user->email_verification_token = null; // Xóa token xác thực sau khi đã xác thực
         $user->save();
 
-        return response()->json([
-            'message' => 'Tài khoản của bạn đã được xác thực thành công.'
-        ]);
+        // Trang thành công
+        return redirect('/your-react-url?status=success');
     }
 }
 

@@ -7,50 +7,50 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 
 class ForgotPasswordController extends Controller
 {
+
     public function sendCode(Request $request)
     {
+        // Xác thực địa chỉ email
         $email = $request->validate([
             'email' => 'required|email'
-        ]);
+        ])['email'];
 
-        $email = $email['email']; 
-
+        // Tìm người dùng
         $user = User::where('email', $email)->first();
 
         if (!$user) {
             return response()->json([
-                'message' => 'Không tìm thấy tài khoản của bạn '
+                'message' => 'Không tìm thấy tài khoản của bạn.'
             ]);
         }
 
-        $cacheKey = $email;
-        $cacheTTL = 60;
-        $maxAttempts = 5;
-
-        $attempts = Cache::get($cacheKey, 0);
-
-        if($attempts >= $maxAttempts){
+        // Kiểm tra số lần gửi mã xác thực
+        $key = $request->ip(); // Hoặc bạn có thể dùng $user->id để kiểm tra theo người dùng
+        if (RateLimiter::tooManyAttempts('sendCode:' . $key, 5)) {
+            $retryAfter = RateLimiter::availableIn('sendCode:' . $key);
             return response()->json([
-                'message' => 'Bạn đã gửi quá nhiều yêu cầu, vui lòng thử lại sau ' . $cacheTTL . ' phút'
+                'message' => 'Bạn đã gửi quá nhiều yêu cầu, vui lòng thử lại sau ' . $retryAfter . ' giây.'
             ], 429);
         }
 
+        // Gửi mã xác thực
         $minutes = config('auth.passwords.users.expire');
-        // event(new UserForgotPassword($user, $minutes));
         UserForgotPassword::dispatch($user, $minutes);
 
-        Cache::put($cacheKey, $attempts + 1, now()->addMinute($cacheTTL));
+        // Tăng số lần gửi mã xác thực
+        RateLimiter::hit('sendCode:' . $key);
 
         return response()->json([
-            'message' => 'Mã xác thực đã được gửi vào email của bạn, vui lòng kiểm tra'
+            'message' => 'Mã xác thực đã được gửi vào email của bạn, vui lòng kiểm tra.'
         ]);
     }
+
 
 
     public function resetPassword(Request $request)

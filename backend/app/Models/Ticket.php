@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Ticket extends Model
 {
@@ -35,5 +36,10 @@ class Ticket extends Model
     public function status()
     {
         return $this->belongsTo(Status::class);
+    }
+
+    public function statuses(): MorphToMany
+    {
+        return $this->morphToMany(Status::class, 'model');
     }
 }
