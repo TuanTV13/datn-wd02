@@ -15,9 +15,62 @@ use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
+    protected $eventService;
+
+    public function __construct(EventService $eventService) 
+    {
+        $this->eventService = $eventService;
+    }
+
+    public function index ()
+    {
+        $events = $this->eventService->getAll();
+        
+        if ($events->isEmpty()) {
+            return response()->json([
+                'message' => 'Chưa có sự kiện nào được tạo'
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Lấy danh sách sự kiện thành công',
+            'events' => $events,
+        ], 200);
+    }
+
+    public function create()
+    {
+        try {
+            $provinces = $this->eventService->getAllProvinces();
+            $districts = $this->eventService->getAllDistricts();
+            $wards = $this->eventService->getAllWards();
+            $categories = $this->eventService->getAllCategories();
+            $statuses = $this->eventService->getAllStatus();
+            $ticket_types = $this->eventService->getAllTicketTypes();
     
-    // Danh sách sự kiện
-    public function index()
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'provinces' => $provinces,
+                    'districts' => $districts,
+                    'wards' => $wards,
+                    'categories' => $categories,
+                    'statuses' => $statuses,
+                    'ticket_types' => $ticket_types,
+                ]
+            ], 200); 
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể truy xuất dữ liệu.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    
+
+    public function getDistricts($province_id)
     {
         $events = Event::with([
             'category',
