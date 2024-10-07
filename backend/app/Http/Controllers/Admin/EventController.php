@@ -58,6 +58,7 @@ class EventController extends Controller
                     'ticket_types' => $ticket_types,
                 ]
             ], 200); 
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
