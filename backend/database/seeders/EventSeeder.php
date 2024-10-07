@@ -3,13 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Event;
-use App\Models\Organizer;
 use App\Models\Speaker;
 use App\Models\Ticket;
-use App\Models\SeatLocation;
 use App\Models\Voucher;
 
 class EventSeeder extends Seeder
@@ -49,6 +45,7 @@ class EventSeeder extends Seeder
         $ticket = Ticket::create([
             'event_id' => $event->id,
             'ticket_type_id' => 1,
+            'status_id' => 1,
             'price' => 100.00,
             'quantity' => 50,
             'available_quantity' => 50,
@@ -59,16 +56,17 @@ class EventSeeder extends Seeder
         ]);
 
         // Tạo vị trí ngồi
-        SeatLocation::create([
-            'ticket_id' => $ticket->id,
-            'section' => 'A',
-            'seat_number' => '1',
-            'status' => true,
-        ]);
+        // SeatLocation::create([
+        //     'ticket_id' => $ticket->id,
+        //     'section' => 'A',
+        //     'seat_number' => '1',
+        //     'status' => true,
+        // ]);
 
         // Tạo voucher
         Voucher::create([
             'ticket_id' => $ticket->id,
+            'status_id' => 1,
             'code' => 'DISCOUNT10',
             'discount_amount' => 10.00,
             'expiration_date' => now()->addDays(30),
