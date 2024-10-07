@@ -23,7 +23,7 @@ class Event extends Model
         'event_type',
         'link_online',
         'max_attendees',
-        'registed_attendees'
+        'registered_attendees'
     ];
 
     public function category()
@@ -58,6 +58,11 @@ class Event extends Model
 
     public function speakers()
     {
-        return $this->belongsToMany(Speaker::class, 'event_speakers');
+        return $this->hasMany(Speaker::class);
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
     }
 }
