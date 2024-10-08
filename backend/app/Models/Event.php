@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Event extends Model
 {
@@ -23,7 +24,7 @@ class Event extends Model
         'event_type',
         'link_online',
         'max_attendees',
-        'registed_attendees'
+        'registered_attendees'
     ];
 
     public function category()
@@ -31,9 +32,9 @@ class Event extends Model
         return $this->belongsTo(Category::class);
     }
     
-    public function status()
+    public function statuses(): MorphToMany
     {
-        return $this->belongsTo(Status::class);
+        return $this->morphToMany(Status::class, 'model');
     }
 
     public function province()
@@ -58,6 +59,11 @@ class Event extends Model
 
     public function speakers()
     {
-        return $this->belongsToMany(Speaker::class, 'event_speakers');
+        return $this->hasMany(Speaker::class);
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
     }
 }

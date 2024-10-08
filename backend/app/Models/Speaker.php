@@ -10,6 +10,7 @@ class Speaker extends Model
     use HasFactory;
 
     protected $fillable = [
+        'event_id',
         'name',
         'profile',
         'email',
