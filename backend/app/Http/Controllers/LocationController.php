@@ -1,32 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers;
 
-use App\Events\UserRegisterdSuccess;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\District;
 use App\Models\Province;
-use App\Models\User;
 use App\Models\Ward;
-use App\Services\Auth\RegisterService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Str;
 
-class RegisterController extends Controller
+class LocationController extends Controller
 {
-
-    protected $registerService;
-
-    public function __construct(RegisterService $registerService)
-    {
-        $this->registerService = $registerService;
-    }
-
-    // Tỉnh
     public function showProvinces()
     {
         try {
@@ -38,7 +21,6 @@ class RegisterController extends Controller
         }
     }
 
-    // List các huyện
     public function getDistricts($provinceId)
     {
         try {
@@ -50,7 +32,6 @@ class RegisterController extends Controller
         }
     }
 
-    // List các xã
     public function getWards($districtId)
     {
         try {
@@ -60,14 +41,5 @@ class RegisterController extends Controller
             Log::error('Lỗi khi nạp dữ liệu phường xã: ' . $e->getMessage());
             return response()->json(['error' => 'Không thể nạp dữ liệu phường xã'], 500);
         }
-    }
-
-    public function register(RegisterRequest $registerRequest)
-    {
-        $user = $this->registerService->create($registerRequest);
-
-        return response()->json([
-            'message' => $user['message']
-        ]);
     }
 }
