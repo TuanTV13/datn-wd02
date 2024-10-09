@@ -35,8 +35,8 @@ const Header = () => {
               </svg>
             </div>
             <img
-              className="lg:w-[167px] w-[119px] lg:h-[40px] h-[28px]"
-              src="../../image/logo.png"
+              className=" w-12 h-12 rounded-full"
+              src="../../public/images/logo.webp"
               alt="Logo"
             />
 

@@ -86,7 +86,7 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
               children: [
                 {
                   key: "4.1",
-                  label: <Link to="/admin/ticket-list">Danh sách vé</Link>,
+                  label: <Link to="ticket-list">Danh sách vé</Link>,
                 },
                 {
                   key: "4.2",
