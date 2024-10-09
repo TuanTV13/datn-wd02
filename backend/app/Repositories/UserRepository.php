@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Admin;
+namespace App\Repositories;
 
 use App\Models\User;
 
@@ -21,6 +21,11 @@ class UserRepository
     public function find($id)
     {
         return $this->user->find($id);
+    }
+
+    public function findByEmail($email)
+    {
+        return $this->user->where('email', $email)->first();
     }
 
     public function update($id, array $data)
