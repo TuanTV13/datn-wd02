@@ -3,6 +3,7 @@
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
+use App\Http\Controllers\V1\EventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -41,4 +42,13 @@ Route::prefix('v1')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('password/sendOTP', [AuthController::class, 'sendResetOTPEmail']);
     Route::post('password/reset', [AuthController::class, 'resetPasswordWithOTP']);
+
+    Route::get('events', [EventController::class, 'index']);
+
+    Route::prefix('events')->middleware(['check.jwt','check.permission:manage-events'])->group( function () {
+        Route::post('create', [EventController::class, 'create']);
+        Route::put('{event}/update', [EventController::class, 'update']);
+        Route::delete('{event}/delete', [EventController::class, 'delete']);
+        Route::post('{event}/restore', [EventController::class, 'restore']);
+    });
 });

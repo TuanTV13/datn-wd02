@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'category_id',
@@ -18,13 +19,13 @@ class Event extends Model
         'ward_id',
         'name',
         'description',
+        'thumbnail',
         'start_time',
         'end_time',
         'location',
         'event_type',
         'link_online',
         'max_attendees',
-        'registered_attendees'
     ];
 
     public function category()
@@ -52,14 +53,9 @@ class Event extends Model
         return $this->belongsTo(Ward::class);
     }
 
-    public function images()
-    {
-        return $this->hasMany(EventImage::class);
-    }
-
     public function speakers()
     {
-        return $this->hasMany(Speaker::class);
+        return $this->belongsToMany(Speaker::class, 'event_speakers');
     }
 
     public function tickets()
