@@ -1,20 +1,23 @@
 <?php
 
+
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
+
+use App\Http\Controllers\V1\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
-|-------------------------------------------------------------------------- 
+|--------------------------------------------------------------------------
 | API Routes
-|-------------------------------------------------------------------------- 
-| 
-| Here is where you can register API routes for your application. These 
-| routes are loaded by the RouteServiceProvider and all of them will 
-| be assigned to the "api" middleware group. Make something great! 
-| 
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
 */
 
 // Middleware để lấy thông tin người dùng đã xác thực
@@ -41,4 +44,12 @@ Route::prefix('v1')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('password/sendOTP', [AuthController::class, 'sendResetOTPEmail']);
     Route::post('password/reset', [AuthController::class, 'resetPasswordWithOTP']);
+});
+
+Route::prefix('v1/categories')->group(function () {
+    Route::get('/', [CategoryController::class, 'index']);
+    Route::post('/create', [CategoryController::class, 'create']);
+    Route::get('/{id}/show', [CategoryController::class, 'show']);
+    Route::put('/{id}/update', [CategoryController::class, 'update']);
+    Route::delete('/{id}/delete', [CategoryController::class, 'destroy']);
 });
