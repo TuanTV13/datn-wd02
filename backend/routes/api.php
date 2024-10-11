@@ -4,8 +4,8 @@
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
-
 use App\Http\Controllers\V1\CategoryController;
+use App\Http\Controllers\V1\EventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -44,12 +44,21 @@ Route::prefix('v1')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('password/sendOTP', [AuthController::class, 'sendResetOTPEmail']);
     Route::post('password/reset', [AuthController::class, 'resetPasswordWithOTP']);
-});
 
-Route::prefix('v1/categories')->group(function () {
-    Route::get('/', [CategoryController::class, 'index']);
-    Route::post('/create', [CategoryController::class, 'create']);
-    Route::get('/{id}/show', [CategoryController::class, 'show']);
-    Route::put('/{id}/update', [CategoryController::class, 'update']);
-    Route::delete('/{id}/delete', [CategoryController::class, 'destroy']);
+    Route::get('events', [EventController::class, 'index']);
+
+    Route::prefix('events')->middleware(['check.jwt', 'check.permission:manage-events'])->group(function () {
+        Route::post('create', [EventController::class, 'create']);
+        Route::put('{event}/update', [EventController::class, 'update']);
+        Route::delete('{event}/delete', [EventController::class, 'delete']);
+        Route::post('{event}/restore', [EventController::class, 'restore']);
+    });
+
+    Route::get('categories', [CategoryController::class, 'index']);
+
+    Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-categories'])->group(function () {
+        Route::post('create', [CategoryController::class, 'create']);
+        Route::put('{id}/update', [CategoryController::class, 'update']);
+        Route::delete('{id}/delete', [CategoryController::class, 'delete']);
+    });
 });

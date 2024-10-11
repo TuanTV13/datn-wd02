@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -40,9 +39,11 @@ class AuthController extends Controller
         $this->userRepository = $userRepository;
         $this->client = new Client();
         $this->api_key = env('KICKBOX_API_KEY');
+        // $this->api_key = env('NEVERBOUNCE_API_KEY');
         $this->refreshRepository = $refreshRepository;
     }
 
+    // https://api.neverbounce.com/v4/single/check
     public function verifyEmail($email)
     {
         try {
