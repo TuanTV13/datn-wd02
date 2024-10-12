@@ -8,4 +8,9 @@ class EmailHelper
     {
         return trim($email);
     }
+
+    public static function toLowerCase($email)
+    {
+        return strtolower($email);
+    }
 }
