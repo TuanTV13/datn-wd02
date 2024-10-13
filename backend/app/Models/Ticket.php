@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ticket extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'event_id',
@@ -38,8 +38,4 @@ class Ticket extends Model
         return $this->belongsTo(Status::class);
     }
 
-    public function statuses(): MorphToMany
-    {
-        return $this->morphToMany(Status::class, 'model');
-    }
 }

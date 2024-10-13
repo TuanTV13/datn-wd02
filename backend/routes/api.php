@@ -6,6 +6,7 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\CategoryController;
 use App\Http\Controllers\V1\EventController;
+use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -70,5 +71,14 @@ Route::prefix('v1')->group(function () {
         Route::post('create', [CategoryController::class, 'create']);
         Route::put('{id}/update', [CategoryController::class, 'update']);
         Route::delete('{id}/delete', [CategoryController::class, 'delete']);
+    });
+
+    Route::get('tickets', [TicketController::class, 'index']);
+    Route::prefix('tickets')->middleware(['check.jwt','check.permission:manage-tickets'])->group( function () {
+        Route::post('create', [TicketController::class, 'create']);
+        Route::put('{id}/update', [TicketController::class, 'update']);
+        Route::delete('{id}/delete', [TicketController::class, 'delete']);
+        Route::post('{id}/restore', [TicketController::class, 'restoreTicket']);
+        Route::put('{id}/verified', [TicketController::class, 'verifiedTicket']);
     });
 });

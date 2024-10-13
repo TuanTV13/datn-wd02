@@ -18,7 +18,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Event::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(TicketType::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(Status::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Status::class)->constrained()->onDelete('cascade')->default(10);
             $table->double('price', 10,2);
             $table->bigInteger('quantity');
             $table->bigInteger('available_quantity')->nullable();
