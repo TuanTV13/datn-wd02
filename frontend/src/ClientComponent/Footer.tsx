@@ -9,7 +9,7 @@ const Footer = () => {
 
                 <div className="flex-grow p-4 text-xs max-w-96">
                     <div className="flex items-center">
-                    <img src="./../public/logo.png" alt="Logo" className="w-12 h-12 rounded-full mr-2" />
+                    <img src="../../public/images/logo.webp" alt="Logo" className="w-12 h-12 rounded-full mr-2" />
                     </div>
                     <div>
                         <h3 className="text-lg mt-1">Thông tin hỗ trợ</h3>

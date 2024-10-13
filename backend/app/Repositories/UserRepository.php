@@ -13,6 +13,11 @@ class UserRepository
         $this->user = $user;
     }
 
+    public function all()
+    {
+        return $this->user->all();
+    }
+
     public function create(array $data)
     {
         return $this->user->create($data);
@@ -39,5 +44,22 @@ class UserRepository
     {
         $user = $this->find($id);
         return $user->delete();
+    }
+
+    public function trashed()
+    {
+        $usersTrashed = $this->user->onlyTrashed()->orderBy('deleted_at', 'desc')->get();
+        return $usersTrashed;
+    }
+
+    public function findTrashed($id)
+    {
+        return $this->user->onlyTrashed()->find($id);
+    }
+
+    public function restore($id)
+    {
+        $userTrashed = $this->user->withTrashed()->find($id);
+        return $userTrashed->restore();
     }
 }

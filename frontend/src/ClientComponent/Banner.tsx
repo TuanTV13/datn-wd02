@@ -9,7 +9,7 @@ const Banner = () => {
         {
             type: 'text',
             content: (
-                <div className="flex flex-col justify-center h-[500px] bg-gradient-to-r from-[#007BFF] to-[#F5F5F5]">
+                <div className="flex flex-col justify-center h-[600px] bg-gradient-to-r from-[#007BFF] to-[#F5F5F5]">
                     <div className="flex flex-col md:pl-16 md:py-[120px] mb:py-[57px]">
                         <span className="text-[#030303] text-base tracking-[4px]">Dịch vụ</span>
                         <strong className="text-[64px] w-[664px] font-medium leading-[70.4px] tracking-[-3.4px] my-4 text-white">
@@ -27,7 +27,7 @@ const Banner = () => {
         },
         {
             type: 'image',
-            src: '../../public/banner.png',
+            src: 'https://p-vn.ipricegroup.com/trends-article/cong-nghe-det-adidas-climacool-va-adidas-climachill-medium.jpg',
             alt: 'Slide 1',
         },
         {
@@ -43,23 +43,23 @@ const Banner = () => {
     ]
 
     return (
-        <div className="relative w-full h-screen">
+        <div className="relative w-full">
             <Swiper
                 modules={[Pagination, Autoplay]}
                 spaceBetween={30}
                 slidesPerView={1}
                 pagination={{ clickable: true }}
-                autoplay={{ delay: 3000 }}
+                autoplay={{ delay: 3000, pauseOnMouseEnter: false}}
                 loop={true}
                 allowTouchMove={true} 
-                className="w-full h-[90%]"
+                className="w-full h-[600px]"
             >
                 {slides.map((slide, index) => (
                     <SwiperSlide key={index}>
                         {slide.type === 'text' ? (
                             slide.content
                         ) : (
-                            <img src={slide.src} alt={slide.alt} className="w-full h-full object-cover" />
+                            <img src={slide.src} alt={slide.alt} className="w-full h-auto max-h-full object-cover" />
                         )}
                     </SwiperSlide>
                 ))}
