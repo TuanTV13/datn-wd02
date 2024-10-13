@@ -6,6 +6,7 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\CategoryController;
 use App\Http\Controllers\V1\EventController;
+use App\Http\Controllers\V1\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +53,15 @@ Route::prefix('v1')->group(function () {
         Route::put('{event}/update', [EventController::class, 'update']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
+    });
+
+    Route::get('users', [UserController::class, 'index']);
+
+    Route::prefix('users')->middleware(['check.jwt', 'check.permission:manage-users'])->group(function () {
+        Route::post('create', [UserController::class, 'create']);
+        Route::delete('{id}/delete', [UserController::class, 'delete']);
+        Route::get('trashed', [UserController::class, 'trashed']);
+        Route::post('{id}/restore', [UserController::class, 'restore']);
     });
 
     Route::get('categories', [CategoryController::class, 'index']);
