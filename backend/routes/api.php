@@ -4,6 +4,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\EventController;
+use App\Http\Controllers\V1\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -44,11 +45,22 @@ Route::prefix('v1')->group(function () {
     Route::post('password/reset', [AuthController::class, 'resetPasswordWithOTP']);
 
     Route::get('events', [EventController::class, 'index']);
+    Route::get('events/{event}', [EventController::class, 'show']);
 
     Route::prefix('events')->middleware(['check.jwt','check.permission:manage-events'])->group( function () {
         Route::post('create', [EventController::class, 'create']);
         Route::put('{event}/update', [EventController::class, 'update']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
+        Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
+    });
+
+    Route::get('tickets', [TicketController::class, 'index']);
+    Route::prefix('tickets')->middleware(['check.jwt','check.permission:manage-tickets'])->group( function () {
+        Route::post('create', [TicketController::class, 'create']);
+        Route::put('{id}/update', [TicketController::class, 'update']);
+        Route::delete('{id}/delete', [TicketController::class, 'delete']);
+        Route::post('{id}/restore', [TicketController::class, 'restoreTicket']);
+        Route::put('{id}/verified', [TicketController::class, 'verifiedTicket']);
     });
 });

@@ -21,7 +21,7 @@ class EventRepository
 
     public function find($id)
     {
-        return $this->event->find($id);
+        return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->find($id);
     }
 
     public function findTrashed($id)

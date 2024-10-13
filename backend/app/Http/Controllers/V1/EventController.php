@@ -31,6 +31,46 @@ class EventController extends Controller
         ]);
     }
 
+    public function show($event)
+    {
+        $event = $this->eventRepository->find($event);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Không tìm thấy sự kiện'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $event
+        ], 200);
+    }
+
+    public function verifiedEvent($id)
+    {
+        $event = $this->eventRepository->find($id);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Sự kiện không tồn tại.'
+            ], 404);
+        }
+
+        if ($event->status_id == 5) {
+            $event->status_id = 2;
+            $event->save();
+
+            return response()->json([
+                'message' => 'Xác nhận thành công',
+                'data' => $event
+            ], 200);
+        }
+        
+        return response()->json([
+            'message' => 'Sự kiện đã được xác nhận trước đó.'
+        ], 400);
+    }
+
     private function handleSpeakers($request, $data, $event)
     {
         $existingSpeakers = $request->input('existing_speakers', []);
@@ -234,4 +274,5 @@ class EventController extends Controller
             'message' => 'Khôi phục sự kiện thành công'
         ], 200);
     }
+    
 }

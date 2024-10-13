@@ -19,7 +19,7 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Category::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(Status::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Status::class)->constrained()->onDelete('cascade')->default(5);
             $table->foreignIdFor(Province::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(District::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(Ward::class)->constrained()->onDelete('cascade');
