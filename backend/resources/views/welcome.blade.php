@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{{-- <!DOCTYPE html>
 <html lang="{{ session('applocale') }}">
 <head>
     <meta charset="UTF-8">
@@ -15,4 +15,4 @@
         </select>
     </form>
 </body>
-</html>
+</html> --}}

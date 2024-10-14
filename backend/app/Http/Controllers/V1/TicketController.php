@@ -5,123 +5,216 @@ namespace App\Http\Controllers\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreTicketRequest;
 use App\Http\Requests\Admin\UpdateTicketRequest;
+use App\Repositories\EventRepository;
 use App\Repositories\TicketRepository;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class TicketController extends Controller
 {
-    protected $ticketRepository;
+    protected $ticketRepository, $eventRepository;
 
-    public function __construct(TicketRepository $ticketRepository)
+    public function __construct(TicketRepository $ticketRepository, EventRepository $eventRepository)
     {
         $this->ticketRepository = $ticketRepository;
+        $this->eventRepository = $eventRepository;
+    }
+
+    protected function checkSaleEndTime($saleEnd, $eventStart)
+    {
+        $eventStart = \Carbon\Carbon::parse($eventStart);
+        $saleEnd = \Carbon\Carbon::parse($saleEnd);
+
+        if ($saleEnd->greaterThanOrEqualTo($eventStart)) {
+            return response()->json([
+                'message' => 'Thời gian kết thúc bán vé phải trước khi sự kiện diễn ra ít nhất 2 ngày.'
+                    . " (Thời gian bắt đầu sự kiện: {$eventStart->toDateTimeString()})"
+                    . " (Thời gian kết thúc bán vé: {$saleEnd->toDateTimeString()})"
+            ], 400);
+        }
+
+        return null;
     }
 
     public function index()
     {
-        $ticket = $this->ticketRepository->getAll();
+        return $this->ticketRepository->getAll();
+    }
+
+    public function verifiedTicket($id)
+    {
+        $ticket = $this->ticketRepository->find($id);
+
+        if (!$ticket) {
+            return response()->json([
+                'message' => 'Vé không tồn tại.'
+            ], 404);
+        }
+
+        if ($ticket->status_id == 10) {
+            $ticket->status_id = 8;
+            $ticket->save();
+
+            return response()->json([
+                'message' => 'Xác nhận vé thành công',
+                'data' => $ticket
+            ], 200);
+        }
 
         return response()->json([
-            'message' => 'Danh sách vé',
-            'data' => $ticket
-        ]);
+            'message' => 'Vé đã được xác nhận trước đó hoặc không đủ điều kiện để xác nhận.'
+        ], 400);
     }
+
 
     public function create(StoreTicketRequest $request)
     {
+        DB::beginTransaction();
         $data = $request->validated();
+        $data['available_quantity'] = $data['quantity'];
 
-        try {
-            $ticket = $this->ticketRepository->create($data);
+        $eventId = $data['event_id'];
+        $ticketTypeId = $data['ticket_type_id'];
+        $event = $this->eventRepository->find($eventId);
 
+        if (!$event) {
             return response()->json([
-                'message' => 'Thêm mới vé thành công',
-                'data' => $ticket,
-            ], 201);
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi thêm mới vé:" . $e->getMessage());
-
-            return response()->json([
-                'message' => 'Lỗi hệ thống khi thêm mới vé',
-            ], 500);
+                'message' => 'Sự kiện không tồn tại'
+            ], 404);
         }
-    }
 
-    public function show($id)
-    {
+        if ($response = $this->checkSaleEndTime($data['sale_end'], $event->start_time)) {
+            return $response;
+        }
+
         try {
-            $ticket = $this->ticketRepository->find($id);
+            $existingTicket = $this->ticketRepository->findByEventAndType($eventId, $ticketTypeId);
 
-            if (!$ticket) {
-                return response()->json([
-                    'message' => 'Vé không tồn tại',
-                ], 404);
+            if ($existingTicket) {
+                $existingTicket->quantity += $data['quantity'];
+                $existingTicket->available_quantity += $data['quantity'];
+                $existingTicket->save();
+
+                $ticket = $existingTicket;
+            } else {
+                $ticket = $this->ticketRepository->create($data);
             }
 
-            return response()->json([
-                'message' => 'Thông tin vé',
-                'data' => $ticket,
-            ]);
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi lấy thông tin vé: " . $e->getMessage());
+            DB::commit();
 
             return response()->json([
-                'message' => 'Lỗi hệ thống khi lấy thông tin vé',
+                'message' => 'Vé đã được tạo thành công, vui lòng kiểm tra và xác thực trước khi bán',
+                'data' => $ticket
+            ], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Log::error("errors" . $e->getMessage());
+
+            return response()->json([
+                'errors' => $e->getMessage()
             ], 500);
         }
     }
 
     public function update($id, UpdateTicketRequest $request)
     {
+        DB::beginTransaction();
+
         $data = $request->validated();
+        $ticket = $this->ticketRepository->find($id);
+
+        if (!$ticket) {
+            return response()->json([
+                'message' => 'Vé không tồn tại'
+            ], 404);
+        }
+
+        if ($ticket->status_id != 10) {
+            return response()->json([
+                'message' => 'Không thể cập nhật vé trong trạng thái này'
+            ], 403);
+        }
+
+        $event = $this->eventRepository->find($ticket->event_id);
+        if (!$event) {
+            return response()->json([
+                'message' => 'Sự kiện không tồn tại'
+            ], 404);
+        }
+
+        if ($response = $this->checkSaleEndTime($data['sale_end'], $event->start_time)) {
+            return $response;
+        }
 
         try {
-            $ticket = $this->ticketRepository->find($id);
-
-            if (!$ticket) {
-                return response()->json([
-                    'message' => 'Vé không tồn tại',
-                ], 404);
-            }
 
             $ticket = $this->ticketRepository->update($id, $data);
 
-            return response()->json([
-                'message' => 'Cập nhật vé thành công',
-                'data' => $ticket,
-            ]);
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi cập nhật vé: " . $e->getMessage());
+            DB::commit();
 
             return response()->json([
-                'message' => 'Lỗi hệ thống khi cập nhật vé',
+                'message' => 'Cập nhật vé thành công',
+                'data' => $ticket
+            ], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Log::error("errors" . $e->getMessage());
+
+            return response()->json([
+                'errors' => $e->getMessage()
             ], 500);
         }
     }
 
-    public function destroy($id)
+    public function delete($id)
     {
+        $ticket = $this->ticketRepository->find($id);
+
+        if (!$ticket) {
+            return response()->json([
+                'message' => 'Vé không tồn tại'
+            ], 404);
+        }
+
+        if ($ticket->status_id != 10) {
+            return response()->json([
+                'message' => 'Không thể xóa vé trong trạng thái này'
+            ], 403);
+        }
+
         try {
-            $ticket = $this->ticketRepository->find($id);
-
-            if (!$ticket) {
-                return response()->json([
-                    'message' => 'Vé không tồn tại',
-                ], 404);
-            }
-
-            $this->ticketRepository->delete($id);
+            $ticket->delete();
 
             return response()->json([
-                'message' => 'Xóa vé thành công',
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi xóa vé: " . $e->getMessage());
+                'message' => 'Vé đã được xóa'
+            ], 201);
+        } catch (Exception $e) {
+            Log::error("errors" . $e->getMessage());
 
             return response()->json([
-                'message' => 'Lỗi hệ thống khi xóa vé',
+                'errors' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function restoreTicket($id)
+    {
+        $ticket = $this->ticketRepository->findTrashed($id);
+
+        if (!$ticket) {
+            return response()->json([
+                'message' => 'Không tìm thấy vé hoặc vé không bị hủy'
+            ], 404);
+        }
+
+        $ticket->restore();
+
+        return response()->json([
+            'message' => 'Khôi phục vé thành công'
+        ], 200);
     }
 }

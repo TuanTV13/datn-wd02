@@ -15,6 +15,6 @@ class Status extends Model
 
     public function events()
     {
-        return $this->belongsToMany(Event::class, 'model_has_statuses');
+        return $this->hasMany(Event::class);
     }
 }
