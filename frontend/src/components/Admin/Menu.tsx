@@ -9,6 +9,8 @@ import {
 } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { Badge, Tooltip } from "antd"; // Thêm Badge và Tooltip
+import React from 'react';
+
 
 type Props = {
   collapsed?: boolean;

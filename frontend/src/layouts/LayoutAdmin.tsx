@@ -14,6 +14,8 @@ import { Outlet } from "react-router-dom";
 import MenuSidebar from "../components/admin/Menu";
 import Notification from "../components/admin/Notification";
 import useWindowSize from "../hooks/hook";
+import React from 'react';
+
 
 const { Header, Sider, Content } = Layout;
 const { Search } = Input;
@@ -133,6 +135,7 @@ const LayoutAdmin = () => {
             minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
+            overflow: 'auto'
           }}
         >
           <Outlet />
