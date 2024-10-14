@@ -1,0 +1,39 @@
+.voucher-expiring {
+  padding: 20px;
+}
+
+.header {
+  margin-bottom: 20px; /* Giảm khoảng cách giữa header và phần dưới */
+}
+
+.filters {
+  margin-bottom: 20px; /* Khoảng cách giữa phần lọc và bảng */
+}
+
+.filters .ant-input {
+  width: 300px;
+  margin-right: 10px;
+}
+
+.filters .ant-btn {
+  margin-left: 10px;
+}
+
+.table-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ant-table {
+  margin-top: 10px; /* Khoảng cách giữa phần lọc và bảng */
+}
+.header h2 {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 20px 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
