@@ -16,7 +16,6 @@ return new class extends Migration
     {
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(TicketType::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(Event::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(Status::class)->constrained()->onDelete('cascade');
             $table->string('code', 100)->unique();

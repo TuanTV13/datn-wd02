@@ -23,7 +23,7 @@ class StoreTicketRequest extends FormRequest
     {
         return [
             'event_id' => 'required|exists:events,id',
-            'ticket_type_id' => 'required|exists:ticket_types,id',
+            'ticket_type' => 'required',
             'price' => 'required|numeric|min:1',
             'quantity' => 'required|integer|min:1',
             'evailable_quantity' => 'nullable|integer',

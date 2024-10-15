@@ -1,8 +1,8 @@
 <?php
 
+use App\Enums\TicketType as EnumsTicketType;
 use App\Models\Event;
 use App\Models\Status;
-use App\Models\TicketType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,9 +17,9 @@ return new class extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Event::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(TicketType::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(Status::class)->constrained()->onDelete('cascade')->default(10);
-            $table->double('price', 10,2);
+            $table->enum('ticket_type', EnumsTicketType::getValues());
+            $table->double('price', 10, 2);
             $table->bigInteger('quantity');
             $table->bigInteger('available_quantity')->nullable();
             $table->string('seat_location', 100);

@@ -31,7 +31,7 @@ class TicketRepository
     public function findByEventAndType($eventId, $ticketTypeId)
     {
         return $this->ticket->where('event_id', $eventId)
-            ->where('ticket_type_id', $ticketTypeId)
+            ->where('ticket_type', $ticketTypeId)
             ->first();
     }
 

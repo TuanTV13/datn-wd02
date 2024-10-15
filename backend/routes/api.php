@@ -76,7 +76,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('tickets', [TicketController::class, 'index']);
-    Route::prefix('tickets')->middleware(['check.jwt','check.permission:manage-tickets'])->group( function () {
+    Route::prefix('tickets')->middleware(['check.jwt', 'check.permission:manage-tickets'])->group(function () {
         Route::post('create', [TicketController::class, 'create']);
         Route::put('{id}/update', [TicketController::class, 'update']);
         Route::delete('{id}/delete', [TicketController::class, 'delete']);
@@ -85,13 +85,16 @@ Route::prefix('v1')->group(function () {
     });
 
 
-    Route::prefix('vouchers')->middleware(['check.jwt','check.permission:manage-vouchers'])->group( function () {
+    Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
     });
 
     Route::prefix('clients')->group(function () {
-        Route::get('events', [ClientEventController::class, 'index']);
-        Route::get('events/{id}', [ClientEventController::class, 'show']);
-        Route::get('events/filter/{categoryId}', [ClientEventController::class, 'filter']);
+
+        Route::prefix('events')->group(function () {
+            Route::get('/', [ClientEventController::class, 'index']);
+            Route::get('{id}', [ClientEventController::class, 'show']);
+            Route::get('filter/{categoryId}', [ClientEventController::class, 'filter']);
+        });
     });
 });

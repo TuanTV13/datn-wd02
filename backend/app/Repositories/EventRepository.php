@@ -56,7 +56,6 @@ class EventRepository
     {
         $query = Event::where('ward_id', $wardId)
             ->where(function ($q) use ($startTime, $endTime) {
-                // Kiểm tra thời gian bắt đầu và kết thúc
                 $q->whereBetween('start_time', [$startTime, $endTime])
                     ->orWhereBetween('end_time', [$startTime, $endTime])
                     ->orWhere(function ($q2) use ($startTime, $endTime) {
