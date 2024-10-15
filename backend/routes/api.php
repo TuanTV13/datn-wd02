@@ -5,9 +5,11 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\CategoryController;
+use App\Http\Controllers\V1\Client\EventController as ClientEventController;
 use App\Http\Controllers\V1\EventController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\UserController;
+use App\Http\Controllers\V1\VoucherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -80,5 +82,16 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [TicketController::class, 'delete']);
         Route::post('{id}/restore', [TicketController::class, 'restoreTicket']);
         Route::put('{id}/verified', [TicketController::class, 'verifiedTicket']);
+    });
+
+
+    Route::prefix('vouchers')->middleware(['check.jwt','check.permission:manage-vouchers'])->group( function () {
+        Route::post('create', [VoucherController::class, 'create']);
+    });
+
+    Route::prefix('clients')->group(function () {
+        Route::get('events', [ClientEventController::class, 'index']);
+        Route::get('events/{id}', [ClientEventController::class, 'show']);
+        Route::get('events/filter/{categoryId}', [ClientEventController::class, 'filter']);
     });
 });

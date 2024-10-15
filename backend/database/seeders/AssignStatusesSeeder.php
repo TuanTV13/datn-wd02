@@ -9,21 +9,7 @@ class AssignStatusesSeeder extends Seeder
 {
     public function run(): void
     {
-        // Lấy tất cả trạng thái từ bảng statuses
         $statuses = DB::table('statuses')->get();
-
-        // Gán trạng thái cho User
-        // foreach ($statuses as $status) {
-        //     if ($status->type === 'user') {
-        //         DB::table('model_has_statuses')->insert([
-        //             'model_id' => 5, // Thay đổi ID của user nếu cần
-        //             'status_id' => $status->id,
-        //             'model_type' => 'App\Models\User', // Thay đổi theo tên model User
-        //             'created_at' => now(),
-        //             'updated_at' => now(),
-        //         ]);
-        //     }
-        // }
 
         // Gán trạng thái cho Event
         foreach ($statuses as $status) {

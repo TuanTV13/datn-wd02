@@ -4,14 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Voucher extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'ticket_id',
+        'ticket_type_id',
+        'event_id',
         'status_id',
         'code',
         'discount_amount',
@@ -24,9 +25,14 @@ class Voucher extends Model
         return $this->belongsTo(Ticket::class);
     }
 
-    public function statuses(): MorphToMany
+    public function event()
     {
-        return $this->morphToMany(Status::class, 'model');
+        return $this->belongsTo(Event::class);
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
     }
 
     public function users()

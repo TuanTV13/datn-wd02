@@ -29,6 +29,7 @@ class StatusesTableSeeder extends Seeder
             ['name' => 'Hết hạn', 'type' => 'voucher'],
             ['name' => 'Đã sử dụng', 'type' => 'voucher'],
             ['name' => 'Đã hủy', 'type' => 'voucher'],
+            ['name' => 'Hết lượt sử dụng', 'type' => 'voucher'],
             
             // Trạng thái thanh toán
             ['name' => 'Đang xử lý', 'type' => 'payment'],
@@ -36,6 +37,7 @@ class StatusesTableSeeder extends Seeder
             ['name' => 'Thất bại', 'type' => 'payment'],
             ['name' => 'Đã hoàn tiền', 'type' => 'payment'],
             ['name' => 'Đang chờ xác nhận', 'type' => 'payment'],
+            ['name' => 'Chưa thanh toán', 'type' => 'payment'],
         ];
 
         DB::table('statuses')->insert($statuses);
