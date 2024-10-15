@@ -25,6 +25,7 @@ return new class extends Migration
             $table->foreignIdFor(Ward::class)->constrained()->onDelete('cascade');
             $table->string('name', 255);
             $table->text('description');
+            $table->string('thumbnail', 255);
             $table->dateTime('start_time');
             $table->dateTime('end_time');
             $table->string('location', 255);
@@ -32,6 +33,7 @@ return new class extends Migration
             $table->string('link_online', 255)->nullable();
             $table->bigInteger('max_attendees')->nullable();
             $table->bigInteger('registed_attendees')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
