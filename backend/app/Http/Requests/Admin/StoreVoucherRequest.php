@@ -22,7 +22,6 @@ class StoreVoucherRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ticket_type_id' => 'required|exists:ticket_types,id',
             'event_id' => 'required|exists:events,id',
             'code' => 'required|string|max:100|unique:vouchers,code',
             'discount_amount' => 'required|numeric',

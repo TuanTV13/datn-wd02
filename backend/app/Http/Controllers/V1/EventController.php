@@ -65,7 +65,7 @@ class EventController extends Controller
                 'data' => $event
             ], 200);
         }
-        
+
         return response()->json([
             'message' => 'Sự kiện đã được xác nhận trước đó.'
         ], 400);
@@ -77,6 +77,13 @@ class EventController extends Controller
 
         foreach ($existingSpeakers as $existingSpeakerId) {
             $existingSpeaker = $this->speakerRepository->findById($existingSpeakerId);
+
+            if (!$existingSpeaker) {
+                return response()->json([
+                    'message' => 'Diễn giả không tồn tại.',
+                    'speaker_id' => $existingSpeakerId,
+                ], 404);
+            }
 
             if ($existingSpeaker->hasConflict($data['start_time'], $data['end_time'])) {
                 return response()->json([
@@ -107,9 +114,14 @@ class EventController extends Controller
             ], 400);
         }
 
-        $newSpeaker = $this->speakerRepository->create($speakerData);
-        $event->speakers()->attach($newSpeaker->id);
+        if (!$existingSpeaker) {
+            $newSpeaker = $this->speakerRepository->create($speakerData);
+            $event->speakers()->attach($newSpeaker->id);
+        } else {
+            $event->speakers()->attach($existingSpeaker->id);
+        }
     }
+
 
     public function create(StoreEventRequest $request)
     {
@@ -274,5 +286,4 @@ class EventController extends Controller
             'message' => 'Khôi phục sự kiện thành công'
         ], 200);
     }
-    
 }
