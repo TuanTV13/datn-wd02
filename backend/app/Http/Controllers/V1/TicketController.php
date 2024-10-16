@@ -76,7 +76,7 @@ class TicketController extends Controller
         $data['available_quantity'] = $data['quantity'];
 
         $eventId = $data['event_id'];
-        $ticketTypeId = $data['ticket_type_id'];
+        $ticketTypeId = $data['ticket_type'];
         $event = $this->eventRepository->find($eventId);
 
         if (!$event) {

@@ -16,12 +16,17 @@ class EventRepository
 
     public function getAll()
     {
-        return $this->event->all();
+        return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->get();
     }
 
     public function find($id)
     {
         return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->find($id);
+    }
+
+    public function findByCategory($categoryId)
+    {
+        return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->where('category_id', $categoryId)->get();
     }
 
     public function findTrashed($id)
@@ -51,7 +56,6 @@ class EventRepository
     {
         $query = Event::where('ward_id', $wardId)
             ->where(function ($q) use ($startTime, $endTime) {
-                // Kiểm tra thời gian bắt đầu và kết thúc
                 $q->whereBetween('start_time', [$startTime, $endTime])
                     ->orWhereBetween('end_time', [$startTime, $endTime])
                     ->orWhere(function ($q2) use ($startTime, $endTime) {

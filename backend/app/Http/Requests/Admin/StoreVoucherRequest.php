@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreTicketRequest extends FormRequest
+class StoreVoucherRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,14 +23,17 @@ class StoreTicketRequest extends FormRequest
     {
         return [
             'event_id' => 'required|exists:events,id',
-            'ticket_type' => 'required',
-            'price' => 'required|numeric|min:1',
-            'quantity' => 'required|integer|min:1',
-            'evailable_quantity' => 'nullable|integer',
-            'seat_location' => 'required|string|max:100',
-            'sale_start' => 'required|date|after_or_equal:today',
-            'sale_end' => 'required|date|after:sale_start',
-            'description' => 'nullable|string'
+            'code' => 'required|string|max:100|unique:vouchers,code',
+            'discount_amount' => 'required|numeric',
+            'expiration_date' => 'required|date|after:' . now()->addDays(10),
+            'used_limit' => 'required|integer'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            ''
         ];
     }
 }

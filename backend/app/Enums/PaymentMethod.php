@@ -6,7 +6,6 @@ class PaymentMethod
 {
     const VNPAY = 'VNPAY';
     const MOMO = 'MOMO';
-    const BANKING = 'Banking';
     const CASH = 'Cash';
 
     public static function getValues()
@@ -14,7 +13,6 @@ class PaymentMethod
         return [
             self::VNPAY,
             self::MOMO,
-            self::BANKING,
             self::CASH,
         ];
     }

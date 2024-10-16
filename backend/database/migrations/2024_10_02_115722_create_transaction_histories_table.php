@@ -1,7 +1,6 @@
 <?php
 
-use App\Models\OrderItem;
-use App\Models\PaymentMethod;
+use App\Enums\PaymentMethod;
 use App\Models\Status;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -19,9 +18,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Status::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(PaymentMethod::class)->constrained()->onDelete('cascade');
+            $table->enum('payment_type', PaymentMethod::getValues());
             $table->string('discount_code', 100)->nullable();
-            $table->double('amount', 10,2);
+            $table->double('amount', 10, 2);
             $table->dateTime('transaction_date');
             $table->timestamps();
         });
