@@ -12,10 +12,10 @@ class Event extends Model
 
     protected $fillable = [
         'category_id',
-        'status_id',
         'province_id',
         'district_id',
         'ward_id',
+        'status',
         'name',
         'description',
         'thumbnail',
@@ -30,12 +30,7 @@ class Event extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
-    }
-    
-    public function status()
-    {
-        return $this->belongsTo(Status::class);
-    }    
+    }   
 
     public function province()
     {
