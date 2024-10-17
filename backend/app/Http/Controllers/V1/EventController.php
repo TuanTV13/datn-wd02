@@ -56,8 +56,8 @@ class EventController extends Controller
             ], 404);
         }
 
-        if ($event->status_id == 5) {
-            $event->status_id = 2;
+        if ($event->status == 'pending') {
+            $event->status = 'confirmed';
             $event->save();
 
             return response()->json([
@@ -202,7 +202,7 @@ class EventController extends Controller
             ], 404);
         }
 
-        if ($event->status_id != 5) {
+        if ($event->status != "PENDING") {
             return response()->json([
                 'message' => 'Sự kiện đã được xác nhận không thể cập nhật'
             ], 403);
@@ -257,7 +257,7 @@ class EventController extends Controller
             ], 404);
         }
 
-        if ($event->status_id != 5) {
+        if ($event->status_id != "PENDING") {
             return response()->json([
                 'message' => 'Sự kiện đã được xác nhận không thể hủy'
             ], 403);
