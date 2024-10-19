@@ -23,6 +23,11 @@ class VoucherRepository
         return $this->voucher->find($id);
     }
 
+    public function findByCode($code)
+    {
+        return $this->voucher->where('code', $code)->first();
+    }
+
     public function create(array $data)
     {
         return $this->voucher->create($data);
@@ -39,5 +44,21 @@ class VoucherRepository
     {
         $voucher = $this->findById($id);
         return $voucher->delete();
+    }
+
+    public function trashed()
+    {
+        return $this->voucher->onlyTrashed()->get();
+    }
+
+    public function findTrashed($id)
+    {
+        return $this->voucher->onlyTrashed()->find($id);
+    }
+
+    public function restore($id)
+    {
+        $voucher = $this->findById($id);
+        return $voucher->restore();
     }
 }
