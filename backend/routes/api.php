@@ -5,9 +5,12 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\CategoryController;
+use App\Http\Controllers\V1\Client\CartController;
 use App\Http\Controllers\V1\Client\EventController as ClientEventController;
+use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
 use App\Http\Controllers\V1\TicketController;
+use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
 use App\Http\Controllers\V1\VoucherController;
 use Illuminate\Http\Request;
@@ -56,6 +59,7 @@ Route::prefix('v1')->group(function () {
         Route::put('{event}/update', [EventController::class, 'update']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
+        Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
     });
 
     Route::get('users', [UserController::class, 'index']);
@@ -84,7 +88,16 @@ Route::prefix('v1')->group(function () {
         Route::put('{id}/verified', [TicketController::class, 'verifiedTicket']);
     });
 
+<<<<<<< HEAD
     Route::get('vouchers', [VoucherController::class, 'index']);
+=======
+    Route::prefix('transactions')->middleware(['check.jwt'])->group(function () {
+        Route::get('/', [TransactionController::class, 'index']);
+        Route::get('{id}/detail', [TransactionController::class, 'show']);
+    });
+
+
+>>>>>>> 68733f11688d42aa2676e84883e51f4f178d50e1
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
         Route::put('{id}/update', [VoucherController::class, 'update']);
@@ -101,5 +114,15 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}', [ClientEventController::class, 'show']);
             Route::get('filter/{categoryId}', [ClientEventController::class, 'filter']);
         });
+
+        Route::prefix('carts')->middleware('check.jwt')->group(function () {
+            Route::get('/', [CartController::class, 'getCart']);
+            Route::post('add', [CartController::class, 'addToCart']);
+            Route::put('increase', [CartController::class, 'increaseQuantity']);
+            Route::put('{cartItem}/decrease', [CartController::class, 'updateCartItem']);
+        });
+
+        Route::post('checkout/cart', [PaymentController::class, 'checkoutCart']);
+        Route::post('checkout/event', [PaymentController::class, 'checkoutEvent']);
     });
 });

@@ -4,15 +4,17 @@ namespace App\Http\Controllers\V1\Client;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\EventRepository;
+use App\Repositories\TicketRepository;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
-    protected $eventRepository;
+    protected $eventRepository, $ticketRepository;
 
-    public function __construct(EventRepository $eventRepository)
+    public function __construct(EventRepository $eventRepository, TicketRepository $ticketRepository)
     {
         $this->eventRepository = $eventRepository;
+        $this->ticketRepository = $ticketRepository;
     }
 
     public function index()
@@ -33,6 +35,7 @@ class EventController extends Controller
     public function show($id)
     {
         $event = $this->eventRepository->find($id);
+        $tickets = $this->ticketRepository->findByEvent($id);
 
         if (!$event) {
             return response()->json([
@@ -41,7 +44,8 @@ class EventController extends Controller
         }
 
         return response()->json([
-            'data' => $event
+            'data' => $event,
+            'tickets' => $tickets
         ]);
     }
 

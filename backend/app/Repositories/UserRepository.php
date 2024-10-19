@@ -33,6 +33,11 @@ class UserRepository
         return $this->user->where('email', $email)->first();
     }
 
+    public function findByPhone($phone)
+    {
+        return $this->user->where('phone', $phone)->first();
+    }
+
     public function update($id, array $data)
     {
         $user = $this->find($id);

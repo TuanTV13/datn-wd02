@@ -3,91 +3,28 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role as SpatieRole;
+use Spatie\Permission\Models\Permission as SpatiePermission;
+use App\RolesAndPermissions\Role;
+use App\RolesAndPermissions\Permission;
 
 class RoleAndPermissionSeeder extends Seeder
 {
     public function run()
     {
-        $permissions = [
-            // Quyền của admin
-            'manage-users',
-            'manage-events',
-            'manage-tickets',
-            'manage-vouchers',
-            'manage-event-promotions',
-            'manage-event-categories',
-            'manage-reviews',
-            'view-statistics',
-
-            // Quyền của user
-            'register-account',
-            'purchase-ticket',
-            'join-event',
-            'checkin-event',
-            'use-vouchers',
-            'view-events',
-            'search-events',
-            'view-participation-history',
-            'view-transaction-history',
-
-            // Quyền của guest
-            'register-account',
-            'purchase-ticket',
-            'join-event',
-            'checkin-event',
-            'view-events',
-            'search-events',
-        ];
-
-        // Tạo các quyền trong cơ sở dữ liệu
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+        foreach (Permission::all() as $permissions) {
+            foreach ($permissions as $permission) {
+                SpatiePermission::firstOrCreate(['name' => $permission]);
+            }
         }
 
-        // Tạo và gán quyền cho role admin
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $adminRole->givePermissionTo([
-            'manage-users',
-            'manage-events',
-            'manage-tickets',
-            'manage-vouchers',
-            'manage-event-promotions',
-            'manage-event-categories',
-            'manage-reviews',
-            'view-statistics',
-            'purchase-ticket',
-            'join-event',
-            'checkin-event',
-            'use-vouchers',
-            'view-events',
-            'search-events',
-        ]);
+        $adminRole = SpatieRole::firstOrCreate(['name' => Role::ADMIN]);
+        $adminRole->givePermissionTo(Permission::ADMIN);
 
-        // Tạo và gán quyền cho role user
-        $userRole = Role::firstOrCreate(['name' => 'user']);
-        $userRole->givePermissionTo([
-            'register-account',
-            'purchase-ticket',
-            'join-event',
-            'checkin-event',
-            'use-vouchers',
-            'view-events',
-            'search-events',
-            'view-participation-history',
-            'view-transaction-history',
-        ]);
+        $userRole = SpatieRole::firstOrCreate(['name' => Role::USER]);
+        $userRole->givePermissionTo(Permission::USER);
 
-        // Tạo và gán quyền cho role guest
-        $guestRole = Role::firstOrCreate(['name' => 'guest']);
-        $guestRole->givePermissionTo([
-            'register-account',
-            'purchase-ticket',
-            'join-event',
-            'checkin-event',
-            'view-events',
-            'search-events',
-        ]);
+        $guestRole = SpatieRole::firstOrCreate(['name' => Role::GUEST]);
+        $guestRole->givePermissionTo(Permission::GUEST);
     }
 }
