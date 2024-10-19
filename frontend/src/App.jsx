@@ -8,13 +8,17 @@ import ListTicket from "./pages/Admin/Tickets/ListTicket";
 import ListUserBuyTicket from "./pages/Admin/Tickets/ListUserBuyTicket";
 import AddTicket from "./pages/Admin/Tickets/AddTicket";
 import EditTicket from "./pages/Admin/Tickets/EditTicket";
+import EventListing from "./pages/Client/EventList";
 
 function App() {
   const route = useRoutes([
     {
       path: "",
       element: <Client />,
-      children: [{ path: "", element: <Home /> }],
+      children: [
+        { path: "", element: <Home /> },
+        { path: "event-list", element: <EventListing /> }
+      ],
     },
     {path:'admin',element: <LayoutAdmin />,children:[
       {path: 'ticket-list', element: <ListTicket/>},

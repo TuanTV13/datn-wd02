@@ -1,10 +1,11 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const ItemEven = () => {
-  const [showAll, setShowAll] = useState(false)
+  const [showAll, setShowAll] = useState(false);
   const toggleShowAll = () => {
-    setShowAll(!showAll)
-  }
+    setShowAll(!showAll);
+  };
   //   Dữ liệu tạm thời
   const events = [
     {
@@ -63,7 +64,7 @@ const ItemEven = () => {
       date: "09:00 - 23/10/2024",
       visitors: "16.6k",
     },
-  ]
+  ];
   return (
     <div>
       {/* 1 */}
@@ -72,40 +73,43 @@ const ItemEven = () => {
           SỰ KIỆN SẮP DIỄN RA
         </strong>
 
-        <div className="relative flex mb:flex-col md:flex-row md:items-center mb:gap-y-6 md:gap-y-0 lg:gap-x-[40px] lg:mt-8 mb:my-6">
-          <ul className="*:md:h-[48px] *:border flex whitespace-nowrap *:grid *:place-items-center lg:text-base mb:text-sm *:px-5 *:py-2 *:rounded-[30px] lg:gap-x-[24px] mb:gap-x-4 *:cursor-pointer *:duration-200">
-            <li className="hover:text-[#6C757D] hover:bg-[#F2F6F4] bg-[#F2F6F4] text-[#6C757D] hover:border-black border-black">
-              Mới nhất
-            </li>
-            <li className="hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black">
-              Đại nhạc hội
-            </li>
-            <li className="hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black">
-              Hà Nội
-            </li>
-            <li className="hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black">
-              Hồ Chí Minh
-            </li>
-            <li className="hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black">
-              Lễ hội
-            </li>
-          </ul>
+        <div className="flex bg-white lg:mt-6">
+          <div className="overflow-x-auto w-full">
+            <ul className="flex space-x-4 w-max px-4 mb-4 mt-4">
+              <li className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full border border-black whitespace-nowrap">
+                <Link to={""}>Mới nhất</Link>
+              </li>
+              <li className="px-4 py-2 hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black rounded-full border-gray-300 border whitespace-nowrap">
+                <Link to={""}>Đại nhạc hội</Link>
+              </li>
+              <li className="px-4 py-2 hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black rounded-full border-gray-300 border whitespace-nowrap">
+                <Link to={""}>Hà Nội</Link>
+              </li>
+              <li className="px-4 py-2 hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black rounded-full border-gray-300 border whitespace-nowrap">
+                <Link to={""}>Hồ Chí Minh</Link>
+              </li>
+              <li className="px-4 py-2 hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black rounded-full border-gray-300 border whitespace-nowrap">
+                <Link to={""}>Lễ hội</Link>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div className="grid lg:pt-16 lg:pb-[50px] lg:mt-[7px] mb:pb-[61px] lg:grid-cols-[276px_276px_276px_276px]  border-y justify-between lg:gap-y-8 mb:gap-y-[29px] mb:pt-8">
+
+        <div className="grid lg:pt-8 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-6">
           {events.slice(0, showAll ? events.length : 4).map((event) => (
             <div
               key={event.id}
-              className="w-[214px] h-[230px] border border-gray-400 rounded-lg p-2"
+              className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3"
             >
-              <div className="w-full h-[99px] bg-gray-200 mb-2">
+              <div className="w-full h-[120px] bg-gray-200 mb-2">
                 <img src="" alt="" />
               </div>
               <div className="text-xs text-gray-700 mb-2">
                 <p>{event.location}</p>
                 <p>{event.title}</p>
-                <p className="text-gray-500 pt-3">Vào cổng tự do</p>
+                <p className="text-gray-500 pt-4">Vào cổng tự do</p>
               </div>
-              <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
+              <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
                 <div className="flex items-center space-x-1">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -154,13 +158,13 @@ const ItemEven = () => {
         </div>
       </div>
       {/* 2 */}
-      <div className="lg:w-[1200px] mx-auto sm:w-[95vw] mb:w-[342px] flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px]">
-        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px]">
+      <div className="lg:w-[1200px] mx-auto sm:w-full mb:w-full flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px] mt-4 mb-4">
+        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px] xm:mt-5">
           SỰ KIỆN ĐẶC BIỆT
         </strong>
 
-        <div className="grid lg:pt-16 lg:pb-[50px] lg:mt-[7px] mb:pb-[61px] lg:grid-cols-[220px_220px_220px_220px_220px]  border-y justify-between lg:gap-y-8 mb:gap-y-[29px] mb:pt-8">
-          <div className="w-[200px] h-[270px] border border-gray-400 rounded-lg p-2">
+        <div className="grid lg:pt-16 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-[250px_250px_250px_250px_250px]  gap-y-8 mb:gap-y-4 mx-6 md:grid-cols-2">
+          <div className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3">
             <div className="w-full h-[99px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
@@ -169,7 +173,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn </p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-5">
+            <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -207,7 +211,7 @@ const ItemEven = () => {
             </div>
           </div>
 
-          <div className="w-[200px] h-[270px] border border-gray-400 rounded-lg p-2">
+          <div className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3">
             <div className="w-full h-[99px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
@@ -216,7 +220,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn </p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-5">
+            <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -254,7 +258,7 @@ const ItemEven = () => {
             </div>
           </div>
 
-          <div className="w-[200px] h-[270px] border border-gray-400 rounded-lg p-2">
+          <div className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3">
             <div className="w-full h-[99px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
@@ -263,7 +267,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn </p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-5">
+            <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -301,7 +305,7 @@ const ItemEven = () => {
             </div>
           </div>
 
-          <div className="w-[200px] h-[270px] border border-gray-400 rounded-lg p-2">
+          <div className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3">
             <div className="w-full h-[99px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
@@ -310,7 +314,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn </p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-5">
+            <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -348,7 +352,7 @@ const ItemEven = () => {
             </div>
           </div>
 
-          <div className="w-[200px] h-[270px] border border-gray-400 rounded-lg p-2">
+          <div className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3">
             <div className="w-full h-[99px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
@@ -357,7 +361,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn </p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-5">
+            <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -397,15 +401,15 @@ const ItemEven = () => {
         </div>
       </div>
       {/* 3 */}
-      <div className="lg:w-[1200px] mx-auto sm:w-[95vw] mb:w-[342px] flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px]">
-        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px]">
+      <div className="lg:w-[1200px] mx-auto sm:w-full mb:w-full flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px] mt-4 mb-4">
+        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px] xm:mt-5">
           ÂM NHẠC VÀ NHẠC HỘI
         </strong>
 
-        <div className="grid lg:pt-16 lg:pb-[50px] lg:mt-[7px] mb:pb-[61px] lg:grid-cols-[276px_276px_276px_276px]  border-y justify-between lg:gap-y-8 mb:gap-y-[29px] mb:pt-8">
-          {/* item1 */}
-          <div className="w-[214px] h-[230px] border border-gray-400 rounded-lg p-2">
-            <div className="w-full h-[99px] bg-gray-200 mb-2">
+        <div className="grid lg:pt-16 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-6">
+          {/* <!-- item1 --> */}
+          <div className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3">
+            <div className="w-full h-[120px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
             <div className="text-xs text-gray-700 mb-2">
@@ -413,7 +417,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn</p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
+            <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -450,10 +454,9 @@ const ItemEven = () => {
               </div>
             </div>
           </div>
-
-          {/* item1 */}
-          <div className="w-[214px] h-[230px] border border-gray-400 rounded-lg p-2">
-            <div className="w-full h-[99px] bg-gray-200 mb-2">
+          {/* <!-- item1 --> */}
+          <div className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2">
+            <div className="w-full h-[120px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
             <div className="text-xs text-gray-700 mb-2">
@@ -461,7 +464,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn</p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
+            <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -498,10 +501,9 @@ const ItemEven = () => {
               </div>
             </div>
           </div>
-
-          {/* item1 */}
-          <div className="w-[214px] h-[230px] border border-gray-400 rounded-lg p-2">
-            <div className="w-full h-[99px] bg-gray-200 mb-2">
+          {/* <!-- item1 --> */}
+          <div className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2">
+            <div className="w-full h-[120px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
             <div className="text-xs text-gray-700 mb-2">
@@ -509,7 +511,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn</p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
+            <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -546,10 +548,9 @@ const ItemEven = () => {
               </div>
             </div>
           </div>
-
-          {/* item1 */}
-          <div className="w-[214px] h-[230px] border border-gray-400 rounded-lg p-2">
-            <div className="w-full h-[99px] bg-gray-200 mb-2">
+          {/* <!-- item1 --> */}
+          <div className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2">
+            <div className="w-full h-[120px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
             <div className="text-xs text-gray-700 mb-2">
@@ -557,8 +558,8 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn</p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
-              <div className="flex items-center space-x-1">
+            <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
+              <div className="flex  space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -575,7 +576,7 @@ const ItemEven = () => {
                 </svg>
                 <span>09:00 - 23/10/2024</span>
               </div>
-              <div className="flex items-center space-x-1">
+              <div className="flex  space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -597,15 +598,15 @@ const ItemEven = () => {
         </div>
       </div>
       {/* 4 */}
-      <div className="lg:w-[1200px] mx-auto sm:w-[95vw] mb:w-[342px] flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px]">
-        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px]">
+      <div className="lg:w-[1200px] mx-auto sm:w-full mb:w-full flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px] mt-4 mb-4">
+        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px] xm:mt-5">
           SÂN KHẤU ĐIỆN ẢNH
         </strong>
 
-        <div className="grid lg:pt-16 lg:pb-[50px] lg:mt-[7px] mb:pb-[61px] lg:grid-cols-[276px_276px_276px_276px]  border-y justify-between lg:gap-y-8 mb:gap-y-[29px] mb:pt-8">
-          {/* item1 */}
-          <div className="w-[214px] h-[230px] border border-gray-400 rounded-lg p-2">
-            <div className="w-full h-[99px] bg-gray-200 mb-2">
+        <div className="grid lg:pt-16 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-6">
+          {/* <!-- item1 --> */}
+          <div className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3">
+            <div className="w-full h-[120px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
             <div className="text-xs text-gray-700 mb-2">
@@ -613,7 +614,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn</p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
+            <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -650,10 +651,9 @@ const ItemEven = () => {
               </div>
             </div>
           </div>
-
-          {/* item1 */}
-          <div className="w-[214px] h-[230px] border border-gray-400 rounded-lg p-2">
-            <div className="w-full h-[99px] bg-gray-200 mb-2">
+          {/* <!-- item1 --> */}
+          <div className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2">
+            <div className="w-full h-[120px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
             <div className="text-xs text-gray-700 mb-2">
@@ -661,7 +661,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn</p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
+            <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -698,10 +698,9 @@ const ItemEven = () => {
               </div>
             </div>
           </div>
-
-          {/* item1 */}
-          <div className="w-[214px] h-[230px] border border-gray-400 rounded-lg p-2">
-            <div className="w-full h-[99px] bg-gray-200 mb-2">
+          {/* <!-- item1 --> */}
+          <div className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2">
+            <div className="w-full h-[120px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
             <div className="text-xs text-gray-700 mb-2">
@@ -709,7 +708,7 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn</p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
+            <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
               <div className="flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -746,10 +745,9 @@ const ItemEven = () => {
               </div>
             </div>
           </div>
-
-          {/* item1 */}
-          <div className="w-[214px] h-[230px] border border-gray-400 rounded-lg p-2">
-            <div className="w-full h-[99px] bg-gray-200 mb-2">
+          {/* <!-- item1 --> */}
+          <div className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2">
+            <div className="w-full h-[120px] bg-gray-200 mb-2">
               <img src="" alt="" />
             </div>
             <div className="text-xs text-gray-700 mb-2">
@@ -757,8 +755,8 @@ const ItemEven = () => {
               <p>Vietnam Motor show 2024 - triển lãm ô tô vn</p>
               <p className="text-gray-500 pt-3">Vào cổng tự do</p>
             </div>
-            <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
-              <div className="flex items-center space-x-1">
+            <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
+              <div className="flex  space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -775,7 +773,7 @@ const ItemEven = () => {
                 </svg>
                 <span>09:00 - 23/10/2024</span>
               </div>
-              <div className="flex items-center space-x-1">
+              <div className="flex  space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -797,7 +795,7 @@ const ItemEven = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ItemEven
+export default ItemEven;
