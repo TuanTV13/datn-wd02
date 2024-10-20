@@ -1,6 +1,8 @@
 import { Popover } from "antd";
 import { useState } from "react";
 import { IoNotificationsOutline } from "react-icons/io5";
+import React from 'react';
+
 
 const NotificationContent = () => {
   return (
