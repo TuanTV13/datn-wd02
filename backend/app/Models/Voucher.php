@@ -29,11 +29,6 @@ class Voucher extends Model
         return $this->belongsTo(Event::class);
     }
 
-    public function status()
-    {
-        return $this->belongsTo(Status::class);
-    }
-
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_vouchers')

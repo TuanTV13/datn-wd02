@@ -83,11 +83,6 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->belongsTo(Ward::class);
     }
 
-    public function status()
-    {
-        return $this->belongsTo(Status::class);
-    }
-
     public function vouchers()
     {
         return $this->belongsToMany(Voucher::class, 'user_vouchers')

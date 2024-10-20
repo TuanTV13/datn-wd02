@@ -88,16 +88,12 @@ Route::prefix('v1')->group(function () {
         Route::put('{id}/verified', [TicketController::class, 'verifiedTicket']);
     });
 
-<<<<<<< HEAD
-    Route::get('vouchers', [VoucherController::class, 'index']);
-=======
     Route::prefix('transactions')->middleware(['check.jwt'])->group(function () {
         Route::get('/', [TransactionController::class, 'index']);
         Route::get('{id}/detail', [TransactionController::class, 'show']);
     });
 
-
->>>>>>> 68733f11688d42aa2676e84883e51f4f178d50e1
+    Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
         Route::put('{id}/update', [VoucherController::class, 'update']);
