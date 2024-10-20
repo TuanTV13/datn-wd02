@@ -14,7 +14,6 @@ return new class extends Migration
     {
         Schema::create('speakers', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Event::class)->constrained()->onDelete('cascade');
             $table->string('name', 50);
             $table->string('profile', 255)->nullable();
             $table->string('email', 50)->unique();

@@ -16,17 +16,17 @@ class EventRepository
 
     public function getAll()
     {
-        return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->get();
+        return $this->event->with(['speakers', 'category', 'province', 'district', 'ward'])->get();
     }
 
     public function find($id)
     {
-        return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->find($id);
+        return $this->event->with(['speakers', 'category', 'province', 'district', 'ward'])->find($id);
     }
 
     public function findByCategory($categoryId)
     {
-        return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->where('category_id', $categoryId)->get();
+        return $this->event->with(['speakers', 'category', 'province', 'district', 'ward'])->where('category_id', $categoryId)->get();
     }
 
     public function findTrashed($id)

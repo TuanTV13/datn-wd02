@@ -53,8 +53,8 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status_id == 10) {
-            $ticket->status_id = 8;
+        if ($ticket->status == "pending") {
+            $ticket->status = 'confirmed';
             $ticket->save();
 
             return response()->json([
@@ -132,7 +132,7 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status_id != 10) {
+        if ($ticket->status_id != 'pending') {
             return response()->json([
                 'message' => 'Không thể cập nhật vé trong trạng thái này'
             ], 403);
@@ -180,7 +180,7 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status_id != 10) {
+        if ($ticket->status_id != 'pending') {
             return response()->json([
                 'message' => 'Không thể xóa vé trong trạng thái này'
             ], 403);
