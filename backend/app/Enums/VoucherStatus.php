@@ -5,25 +5,26 @@ namespace App\Enums;
 class VoucherStatus
 {
     const DRAFT = 'draft';
-    const RELEASE = 'release';
-    const COMMING_SOON = 'coming_soon';
-    const AVAILABLE = 'available';
-    const SOLD_OUT = 'sold_out';
-    const SOLD = 'sold';
-    const CANCELED = 'canceled';
     const PENDING = 'pending';
+    const PUBLISHED = 'published';
+    
+    const VALID = 'valid';
+    const EXPIRED = 'expired';
+    const USED = 'used';
+    const CANCELLED = 'cancelled';
+    const OUT_OF_STOCK = 'out_of_stock';
 
     public static function getValues() 
     {
         return [
             self::DRAFT,
-            self::RELEASE,
-            self::COMMING_SOON,
-            self::AVAILABLE,
-            self::SOLD_OUT,
-            self::SOLD,
-            self::CANCELED,
             self::PENDING,
+            self::PUBLISHED,
+            self::VALID,
+            self::EXPIRED,
+            self::USED,
+            self::CANCELLED,
+            self::OUT_OF_STOCK,
         ];
     }
 }
