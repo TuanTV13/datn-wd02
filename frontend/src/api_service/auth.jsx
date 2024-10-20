@@ -22,11 +22,3 @@ export const register = async (name, email, password) => {
     throw error.response.data; // Handle errors appropriately
   }
 };
-export const getEvents = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/events`);
-    return response.data; // Xử lý dữ liệu trả về nếu cần
-  } catch (error) {
-    throw error.response.data; // Xử lý lỗi phù hợp
-  }
-};

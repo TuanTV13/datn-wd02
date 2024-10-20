@@ -13,7 +13,8 @@ import ListEvent from "./pages/Admin/Events/ListEvents";
 import AddEvent from "./pages/Admin/Events/AddEvent";
 import UpdateEvent from "./pages/Admin/Events/UpdateEvent";
 import DetailEvents from "./pages/Admin/Events/DetailEvent";
-
+import ListUser from "./pages/Admin/User/ListUser";
+import AddUser from "./pages/Admin/User/AddUser";
 function App() {
   const route = useRoutes([
     {
@@ -28,8 +29,10 @@ function App() {
       {path: 'edit-ticket/:id', element: <EditTicket/>},
       {path:'event-list', element:<ListEvent/>},
       {path:'add-event', element:<AddEvent/>},
-      {path:'update-event/:id', element:<UpdateEvent/>},
-      {path:'detail-event/', element:<DetailEvents/>}
+      {path:'update-event/', element:<UpdateEvent/>},
+      {path:'detail-event/', element:<DetailEvents/>},
+      {path:'user-list', element:<ListUser/>},
+      {path:'add-user', element:<AddUser/>}
     ]},
     {
       path:'auth', element: <Auth/>
