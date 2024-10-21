@@ -6,9 +6,9 @@ use App\Models\Event;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreVoucherRequest extends FormRequest
+class UpdateVoucherRequest extends FormRequest
 {
-/**
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -26,8 +26,8 @@ class StoreVoucherRequest extends FormRequest
         return [
             'creator_id'        => ['required', 'integer', 'exists:users,id'],       
             'event_id'          => ['required', 'integer', 'exists:events,id'],       
-            'status'            => ['required', 'in:draft,pending,published'],     
-            'code'              => ['required', 'string', 'max:100', 'unique:vouchers,code'],  
+            'status'            => ['required', 'in:draft,pending,published,cancelled,out_of_uses'],     
+            'code'              => ['required', 'string', 'max:100', 'unique:vouchers,code,' . $this->route('id')],  
             'discount_type'     => ['required', 'in:percent,fixed'],                 
             'discount_value'    => ['required', 'numeric', 'gt:0'],                        
             'min_order_value'   => ['nullable', 'numeric', 'gt:0'],                        
@@ -35,7 +35,7 @@ class StoreVoucherRequest extends FormRequest
             'issue_quantity'    => ['required', 'integer'],                    
             'start_time'        => ['required', 'date', 'after_or_equal:today'], 
             'end_time'          => ['required', 'date', 'after:start_time'],   
-            'used_limit'        => ['required', 'min:0', 'integer'],                       
+            'used_limit'        => ['required', 'min:0', 'integer'],                
         ];    
     }
     
@@ -49,21 +49,20 @@ class StoreVoucherRequest extends FormRequest
                 }
             }
 
-            if ($this->discount_type === 'percent' && $this->discount_value > 100 && is_numeric($this->discount_value) ) {
+            if ($this->discount_type === 'percent' && $this->discount_value > 100) {
                 $validator->errors()->add('discount_value', 'Giá trị giảm giá loại phần trăm không được lớn hơn 100.');
             }
-        });     
-        
+        });        
+
         $validator->sometimes('issue_quantity', 'gt:0', function ($input) {
             return is_numeric($input->issue_quantity);
         }); 
 
         $validator->after(function ($validator) {
-            if ($this->used_limit == '-0') {
+            if ($this->used_linit == '-0') {
                 $validator->errors()->add('used_limit', 'Giới hạn sử dụng mã giảm giá phải lớn hơn hoặc bằng 0.');
             }
         });
-       
     }
 
     public function messages()
@@ -107,8 +106,8 @@ class StoreVoucherRequest extends FormRequest
             'start_time.date'            => 'Thời gian bắt đầu phát hành mã giảm giá không hợp lệ.',
 
             'end_time.required'          => 'Thời gian kết thúc phát hành mã giảm giá là bắt buộc.',
-            'end_time.after'             => 'Thời gian kết thúc phát hành mã giảm giá phải sau thời gian bắt đầu.',
             'end_time.date'              => 'Thời gian kết thúc phát hành mã giảm giá không hợp lệ.',
+            'end_time.after'             => 'Thời gian kết thúc phát hành mã giảm giá phải sau thời gian bắt đầu.',
 
             'used_limit.required'        => 'Giới hạn sử dụng mã giảm giá là bắt buộc.',
             'used_limit.integer'         => 'Giới hạn sử dụng mã giảm giá phải là số nguyên.',
