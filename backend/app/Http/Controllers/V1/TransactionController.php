@@ -31,4 +31,42 @@ class TransactionController extends Controller
 
         return response()->json($transaction, 200);
     }
+
+    public function verified($id)
+    {
+        $transaction = $this->transactionRepository->findTransactionById($id);
+
+        if (!$transaction) {
+            return response()->json(['message' => 'Không tìm thấy giao dịch'], 404);
+        }
+
+        if($transaction->status == 'completed'){
+            return response()->json(['message' => 'Giao dịch đã được xác nhận'], 400);
+        }
+
+        $transaction->status = 'completed';
+
+        $transaction->save();
+
+        return response()->json(['message' => 'Xác nhận giao dịch thành công'], 200);
+    }
+
+    public function failed($id)
+    {
+        $transaction = $this->transactionRepository->findTransactionById($id);
+
+        if (!$transaction) {
+            return response()->json(['message' => 'Không tìm thấy giao dịch'], 404);
+        }
+
+        if($transaction->status == 'completed'){
+            return response()->json(['message' => 'Giao dịch đã được xác nhận'], 400);
+        }
+
+        $transaction->status = 'failed';
+
+        $transaction->save();
+
+        return response()->json(['message' => 'Hủy giao dịch thành công'], 200);
+    }
 }
