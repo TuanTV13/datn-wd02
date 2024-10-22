@@ -46,7 +46,7 @@ const RegisterForm = ({ toggleForm }) => {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container mt-36">
       <div className="auth-action-left">
         <div className="auth-form-outer">
           <h2 className="auth-form-title">Đăng Ký</h2>
