@@ -58,7 +58,7 @@ class VoucherRepository
 
     public function restore($id)
     {
-        $voucher = $this->findById($id);
+        $voucher = $this->findTrashed($id);
         return $voucher->restore();
     }
 }

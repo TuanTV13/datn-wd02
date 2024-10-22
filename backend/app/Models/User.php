@@ -85,7 +85,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 
     public function vouchers()
     {
-        return $this->belongsToMany(Voucher::class, 'user_vouchers')
+        return $this->belongsToMany(Voucher::class, 'user_voucher')
             ->withPivot('used_at');
     }
 

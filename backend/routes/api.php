@@ -94,6 +94,8 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('vouchers', [VoucherController::class, 'index']);
+
+    Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
         Route::put('{id}/update', [VoucherController::class, 'update']);

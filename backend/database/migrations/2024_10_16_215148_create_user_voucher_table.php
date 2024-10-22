@@ -18,10 +18,8 @@ return new class extends Migration
             $table->foreignIdFor(Voucher::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
             $table->integer('used_count')->default(0)->comment('Số lần người dùng đã sử dụng voucher');
-            $table->double('ticket_value', 10, 2)->comment('Giá trị của vé tại thời điểm sử dụng voucher');
             $table->double('discount_value', 10, 2)->comment('Giá trị giảm giá của voucher');
             $table->enum('discount_type', ['percent', 'fixed'])->comment('Loại giảm giá của voucher tại thời điểm sử dụng');
-            $table->double('total_ticket_value', 10, 2)->comment('Tổng giá trị của vé sau khi áp dụng voucher');
             $table->dateTime('used_at')->comment('Thời gian người dùng sử dụng voucher');
             $table->timestamps();
         });

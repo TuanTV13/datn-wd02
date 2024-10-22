@@ -11,11 +11,18 @@ class Voucher extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'creator_id',
         'event_id',
-        'status_id',
+        'status',
         'code',
-        'discount_amount',
-        'expiration_date',
+        'description',
+        'discount_type',
+        'discount_value',
+        'min_order_value',
+        'max_order_value',
+        'issue_quantity',
+        'start_time',
+        'end_time',
         'used_limit'
     ];
 
@@ -29,9 +36,20 @@ class Voucher extends Model
         return $this->belongsTo(Event::class);
     }
 
+    public function events()
+    {
+        return $this->belongsToMany(Event::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
     public function users()
     {
-        return $this->belongsToMany(User::class, 'user_vouchers')
-            ->withPivot('used_at');
+        return $this->belongsToMany(User::class)
+            ->withPivot(['voucher_id', 'used_count', 'used_at'])
+            ->withTimestamps();
     }
 }
