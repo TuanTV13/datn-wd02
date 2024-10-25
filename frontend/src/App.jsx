@@ -18,6 +18,7 @@ import AddUser from "./pages/Admin/User/AddUser";
 import EventListing from "./pages/Client/EventList";
 import CategoryEven from "./pages/Client/CategoryEven";
 import Cart from "./pages/Client/Cart";
+import CheckOut from "./pages/Client/CheckOut";
 function App() {
   const route = useRoutes([
     {
@@ -28,6 +29,7 @@ function App() {
         { path: "event-list", element: <EventListing /> },
         { path: "event-category", element: <CategoryEven /> },
         { path: "cart", element: <Cart/>},
+        { path: "checkout", element: <CheckOut/>},
       ],
     },
     {path:'admin',element: <LayoutAdmin />,children:[

@@ -116,19 +116,24 @@ const Cart = () => {
             </div>
 
             {/* Voucher */}
-            <div className="flex items-center justify-between gap-x-3 py-4">
-              <input
-                type="text"
-                placeholder="Coupon code"
-                className="px-3 py-2 rounded-lg border"
-              />
-              <button className="text-[#007BFF] font-medium bg-[#e0d8d8] text-sm rounded-[100px] px-5 py-2">
-                Apply Coupon
-              </button>
+            <div className="border-b flex flex-col gap-y-3">
+              <label className="text-sm text-[#9D9EA2]">
+                Email Money Transfer
+              </label>
+              <div className="lg:flex items-center grid grid-cols-[50%_45%] justify-between gap-x-3 *:h-12">
+                <input
+                  type="text "
+                  placeholder="Coupon code"
+                  className="pl-[22px] py-2 rounded-lg border"
+                />
+                <button className="text-[#007BFF] font-medium bg-[#F3FBF4] border text-sm rounded-[100px] px-3 py-2">
+                  Apply Coupon
+                </button>
+              </div>
             </div>
 
             <Link
-              to={``}
+              to={`/`}
               className="font-semibold text-sm underline cursor-pointer tracking-[-0.1px]"
             >
               Home
