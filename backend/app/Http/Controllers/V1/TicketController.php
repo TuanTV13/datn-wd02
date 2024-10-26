@@ -40,7 +40,11 @@ class TicketController extends Controller
 
     public function index()
     {
-        return $this->ticketRepository->getAll();
+        $tickets = $this->ticketRepository->getAll();
+
+        return response()->json([
+            'data' => $tickets
+        ]);
     }
 
     public function verifiedTicket($id)
@@ -67,7 +71,6 @@ class TicketController extends Controller
             'message' => 'Vé đã được xác nhận trước đó hoặc không đủ điều kiện để xác nhận.'
         ], 400);
     }
-
 
     public function create(StoreTicketRequest $request)
     {
