@@ -12,6 +12,7 @@ use App\Models\Ticket;
 use App\Models\Voucher;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class EventSeeder extends Seeder
 {
@@ -76,6 +77,21 @@ class EventSeeder extends Seeder
                 'issue_quantity' => 50,
                 'used_limit' => 1,
             ]);
+
+            $userIds = DB::table('users')->pluck('id');
+            $randomUserIds = $userIds->random(rand(1, 5));
+
+            foreach ($randomUserIds as $userId) {
+                DB::table('user_event')->insert([
+                    'user_id' => $userId,
+                    'event_id' => $event->id,
+                    'status' => 'attended', 
+                    'registered_at' => now(),
+                    'attended_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
     }
 }

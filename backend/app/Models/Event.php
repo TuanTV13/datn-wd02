@@ -56,4 +56,14 @@ class Event extends Model
     {
         return $this->hasMany(Ticket::class);
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_event')->withPivot('status');
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
+    }
 }
