@@ -125,5 +125,7 @@ Route::prefix('v1')->group(function () {
 
         Route::post('checkout', [PaymentController::class, 'checkout']);
         Route::post('payment/process', [PaymentController::class, 'processPayment']);
+        Route::get('payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+        Route::get('payment/cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
     });
 });
