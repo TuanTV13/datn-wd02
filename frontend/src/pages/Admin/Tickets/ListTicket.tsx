@@ -39,24 +39,6 @@ const ListTicket = () => {
                     <tbody className="divide-y divide-gray-200 text-center">
                         
                         <tr>
-                            <td className="p-4 border border-gray-300">1</td>
-                            <td className="p-4 border border-gray-300">DAJLE202</td>
-                            <td className="p-4 border border-gray-300">Sự kiện ABC</td>
-                            <td className="p-4 border border-gray-300">Vé VIP</td>
-                            <td className="p-4 border border-gray-300">Sự kiện ABC</td>
-                            <td className="p-4 border border-gray-300">200.000 VND</td>
-                            <td className="p-4 border border-gray-300">21/08/2024</td>
-                            <td className="p-4 border border-gray-300">30/08/2024</td>
-                            <td className="p-4 border border-gray-300">
-                                <div className="flex flex-col items-center space-y-1">
-                                    <button className="bg-blue-500 text-white w-full h-8 rounded-[10px]">Cập nhật</button>
-                                    <button className="bg-red-500 text-white w-full h-8 rounded-[10px]">Xóa</button>
-                                    <button className="bg-yellow-500 text-white w-full h-8 rounded-[10px]">Chi tiết</button>
-                                </div>
-                            </td>
-                        </tr>
-                        
-                        <tr>
                             <td className="p-4 border border-gray-300">2</td>
                             <td className="p-4 border border-gray-300">AJE202</td>
                             <td className="p-4 border border-gray-300">Ngày đọc sách</td>
@@ -67,9 +49,9 @@ const ListTicket = () => {
                             <td className="p-4 border border-gray-300">31/08/2024</td>
                             <td className="p-4 border border-gray-300">
                                 <div className="flex flex-col items-center space-y-1">
-                                    <button className="bg-blue-500 text-white w-full h-8 rounded-[10px]">Cập nhật</button>
-                                    <button className="bg-red-500 text-white w-full h-8 rounded-[10px]">Xóa</button>
-                                    <button className="bg-yellow-500 text-white w-full h-8 rounded-[10px]">Chi tiết</button>
+                                    <button className="bg-blue-500 text-white w-[80px] h-8 rounded-[10px]">Cập nhật</button>
+                                    <button className="bg-red-500 text-white w-[80px] h-8 rounded-[10px]">Xóa</button>
+                                    <button className="bg-yellow-500 text-white w-[80px] h-8 rounded-[10px]">Chi tiết</button>
                                 </div>
                             </td>
                         </tr>

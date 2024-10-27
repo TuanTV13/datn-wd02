@@ -9530,12 +9530,16 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.1"
     },
+<<<<<<< HEAD
+    "platform-dev": {},
+=======
     "platform-dev": [],
+>>>>>>> 2d4bac7b0b40db9614b37f7dbc3d44707eacbeb8
     "plugin-api-version": "2.6.0"
 }

@@ -16,6 +16,9 @@ import DetailEvents from "./pages/Admin/Events/DetailEvent";
 import ListUser from "./pages/Admin/User/ListUser";
 import AddUser from "./pages/Admin/User/AddUser";
 import EventListing from "./pages/Client/EventList";
+import CategoryEven from "./pages/Client/CategoryEven";
+import Cart from "./pages/Client/Cart";
+import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
 function App() {
   const route = useRoutes([
@@ -25,7 +28,10 @@ function App() {
       children: [
         { path: "", element: <Home /> },
         { path: "event-list", element: <EventListing /> },
-        { path: "event-detail", element:<EventDetail/>}
+        { path: "event-detail", element:<EventDetail/>},
+        { path: "event-category", element: <CategoryEven /> },
+        { path: "cart", element: <Cart/>},
+        { path: "checkout", element: <CheckOut/>},
       ],
     },
     {path:'admin',element: <LayoutAdmin />,children:[
