@@ -9,10 +9,14 @@ use App\Http\Controllers\V1\Client\CartController;
 use App\Http\Controllers\V1\Client\EventController as ClientEventController;
 use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
+use App\Http\Controllers\V1\FeedbackController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
+use App\Http\Controllers\v1\VNPayController;
 use App\Http\Controllers\V1\VoucherController;
+use App\Http\Services\Payments\VNPayService;
+use App\Http\Services\Payments\ZaloPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -56,24 +60,27 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('events')->middleware(['check.jwt', 'check.permission:manage-events'])->group(function () {
         Route::post('create', [EventController::class, 'create']);
+        Route::get('{event}/show', [EventController::class, 'show']);
         Route::put('{event}/update', [EventController::class, 'update']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
+
+        Route::post('{event}/feedback-mail', [EventController::class, 'sendFeedbackEmail']);     
     });
 
     Route::get('users', [UserController::class, 'index']);
 
     Route::prefix('users')->middleware(['check.jwt', 'check.permission:manage-users'])->group(function () {
         Route::post('create', [UserController::class, 'create']);
-        Route::delete('{id}/delete', [UserController::class, 'delete']);
+        Route::delete('{id}/delete', [UserController::class, 'destroy']);
         Route::get('trashed', [UserController::class, 'trashed']);
         Route::post('{id}/restore', [UserController::class, 'restore']);
     });
 
     Route::get('categories', [CategoryController::class, 'index']);
 
-    Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-categories'])->group(function () {
+    Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-event-categories'])->group(function () {
         Route::post('create', [CategoryController::class, 'create']);
         Route::put('{id}/update', [CategoryController::class, 'update']);
         Route::delete('{id}/delete', [CategoryController::class, 'delete']);
@@ -91,12 +98,27 @@ Route::prefix('v1')->group(function () {
     Route::prefix('transactions')->middleware(['check.jwt'])->group(function () {
         Route::get('/', [TransactionController::class, 'index']);
         Route::get('{id}/detail', [TransactionController::class, 'show']);
+        Route::put('{id}/verified', [TransactionController::class, 'verified']);
+        Route::put('{id}/failed', [TransactionController::class, 'failed']);
     });
 
-
+    Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
+        Route::put('{id}/update', [VoucherController::class, 'update']);
+        Route::delete('{id}/delete', [VoucherController::class, 'delete']);
+        Route::get('trashed', [VoucherController::class, 'trashed']);
+        Route::post('{id}/restore', [VoucherController::class, 'restore']);
+        Route::post('apply', [VoucherController::class, 'apply']);
     });
+
+    Route::get('feedbacks', [FeedbackController::class, 'index']);  
+    Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {  
+        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá  
+        Route::get('{id}/show', [FeedbackController::class, 'show']);   
+        Route::post('submit', [FeedbackController::class, 'submit']);  
+        Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
+    });  
 
     Route::prefix('clients')->group(function () {
 
@@ -109,11 +131,13 @@ Route::prefix('v1')->group(function () {
         Route::prefix('carts')->middleware('check.jwt')->group(function () {
             Route::get('/', [CartController::class, 'getCart']);
             Route::post('add', [CartController::class, 'addToCart']);
-            Route::put('increase', [CartController::class, 'increaseQuantity']);
-            Route::put('{cartItem}/decrease', [CartController::class, 'updateCartItem']);
+            Route::put('{cartItem}/increase', [CartController::class, 'increaseQuantity']);
+            Route::put('{cartItem}/decrease', [CartController::class, 'decreaseQuantity']);
         });
 
-        Route::post('checkout/cart', [PaymentController::class, 'checkoutCart']);
-        Route::post('checkout/event', [PaymentController::class, 'checkoutEvent']);
+        Route::post('checkout', [PaymentController::class, 'checkout']);
+        Route::post('payment/process', [PaymentController::class, 'processPayment']);
+        Route::get('payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+        Route::get('payment/cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
     });
 });

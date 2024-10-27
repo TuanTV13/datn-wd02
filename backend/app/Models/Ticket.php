@@ -29,5 +29,8 @@ class Ticket extends Model
         return $this->belongsTo(Event::class);
     }
 
-
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

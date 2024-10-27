@@ -1,9 +1,10 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const AddTicket = () => {
   return (
-    <div>
-          <form className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className=''>
+          <form className=" mx-auto p-6 bg-white shadow-md rounded-lg">
           <h2 className="text-2xl font-bold text-center mb-5">Thêm mới vé</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
@@ -51,9 +52,9 @@ const AddTicket = () => {
               <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 Lưu
               </button>
-              <button type="button" className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+              <Link to={"/admin/ticket-list"} className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
                 Quay lại
-              </button>
+              </Link>
             </div>
       </form>
     </div>

@@ -2,175 +2,184 @@
 
 namespace App\Http\Controllers\V1\Client;
 
-use App\Enums\PaymentMethod;
-use App\Enums\TransactionStatus;
+use App\Events\TransactionVerified;
 use App\Http\Controllers\Controller;
-use App\Repositories\CartRepository;
-use App\Repositories\TicketRepository;
-use App\Repositories\TransactionRepository;
-use App\Repositories\UserRepository;
-use Exception;
+use App\Http\Services\PayPalService;
+use App\Repositories\{TicketRepository, TransactionRepository, UserRepository};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\{Auth, DB, Log};
+use Exception;
 
 class PaymentController extends Controller
 {
-    protected $cartRepository;
-    protected $ticketRepository;
-    protected $transactionRepository;
-    protected $userRepository;
+    protected $ticketRepository, $transactionRepository, $userRepository;
 
-    public function __construct(CartRepository $cartRepository, TicketRepository $ticketRepository, TransactionRepository $transactionRepository, UserRepository $userRepository)
+    public function __construct(TicketRepository $ticketRepo, TransactionRepository $transRepo, UserRepository $userRepo)
     {
-        $this->cartRepository = $cartRepository;
-        $this->ticketRepository = $ticketRepository;
-        $this->transactionRepository = $transactionRepository;
-        $this->userRepository = $userRepository;
+        $this->ticketRepository = $ticketRepo;
+        $this->transactionRepository = $transRepo;
+        $this->userRepository = $userRepo;
     }
 
-    protected function processTickets($selectedItems)
-    {
-        foreach ($selectedItems as $item) {
-            $ticket = $this->ticketRepository->find($item->ticket_id);
-            if ($ticket->available_quantity < $item->quantity) {
-                throw new \Exception('Số lượng vé không đủ cho vé ID: ' . $item->ticket_id);
-            }
-
-            $ticket->available_quantity -= $item->quantity;
-            if ($ticket->available_quantity == 0) {
-                $ticket->status = "sold_out";
-            }
-            $ticket->save();
-        }
-    }
-
-
-    public function checkoutCart(Request $request)
-    {
-        $request->validate([
-            'cart_item_ids' => 'required|array',
-            'cart_item_ids.*' => 'exists:cart_items,id'
-        ]);
-
-        $userId = Auth()->user()->id;
-        $cart = $this->cartRepository->getCart($userId);
-
-        if (!$cart || $cart->cartItems->isEmpty()) {
-            return response()->json(['message' => 'Giỏ hàng trống'], 400);
-        }
-
-        $selectedItems = $cart->cartItems->whereIn('id', $request->cart_item_ids);
-
-        if ($selectedItems->isEmpty()) {
-            return response()->json(['message' => 'Không có mục nào được chọn trong giỏ hàng'], 400);
-        }
-
-        $totalAmount = $selectedItems->sum(function ($item) {
-            return $item->price * $item->quantity;
-        });
-
-        $transactionData = [
-            'user_id' => $userId,
-            'total_amount' => $totalAmount,
-            'payment_method' => PaymentMethod::CASH,
-            'status' => TransactionStatus::PENDING,
-        ];
-        DB::beginTransaction();
-
-        try {
-            $transaction = $this->transactionRepository->createTransaction($transactionData);
-            $this->processTickets($selectedItems);
-
-            foreach ($selectedItems as $item) {
-                $this->cartRepository->removeCartItem($item->id);
-            }
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Mua vé thành công',
-                'total_amount' => $transaction
-            ], 200);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], 400);
-        }
-    }
-
-    public function checkoutEvent(Request $request)
+    public function checkout(Request $request)
     {
         $request->validate([
             'ticket_id' => 'required|exists:tickets,id',
-            'quantity' => 'required|integer|min:1',
-            'guest' => 'boolean',
-            'guest_name' => 'required_if:guest,true|string|max:255',
-            'guest_email' => 'required_if:guest,true|email|max:255',
-            'guest_phone' => 'required_if:guest,true|string|max:15',
         ]);
 
         $ticket = $this->ticketRepository->find($request->ticket_id);
-
-        if (!$ticket) {
-            return response()->json(['message' => 'Vé không tồn tại'], 404);
+        if ($ticket->available_quantity < 1) {
+            return response()->json(['message' => 'Số lượng vé không đủ'], 400);
         }
 
-        if ($ticket->available_quantity < $request->quantity) {
-            return response()->json(['message' => 'Số lượng vé không đủ'], 400);
+        // Mặc định chỉ cho mua 1 vé
+        $totalAmount = $ticket->price;
+        session(['checkout_data' => ['ticket_id' => $ticket->id, 'quantity' => 1, 'total_amount' => $totalAmount]]);
+
+        return response()->json(['message' => 'Đã chọn vé', 'total_amount' => $totalAmount]);
+    }
+
+    public function processPayment(Request $request)
+    {
+        $checkoutData = session('checkout_data');
+        $ticket_id = $checkoutData['ticket_id'];
+        if (!$checkoutData) {
+            return response()->json(['message' => 'Không có thông tin thanh toán'], 400);
         }
 
         DB::beginTransaction();
         try {
-            $userId = Auth()->user() ? Auth()->user()->id : null;
-
-        if ($request->guest) {
-
-            $existingPhone = $this->userRepository->findByPhone($request->guest_phone);
-            $existingEmail = $this->userRepository->findByEmail($request->guest_email);
-
-            if ($existingPhone) {
-                return response()->json(['message' => 'Số điện thoại đã được đăng ký'], 400);
+            $ticket = $this->ticketRepository->find($checkoutData['ticket_id']);
+            if (!$ticket) {
+                return response()->json(['message' => 'Vé không tồn tại'], 404);
             }
 
-            if ($existingEmail) {
-                return response()->json(['message' => 'Email đã được đăng ký'], 400);
-            }
-            $guestData = [
-                'name' => $request->guest_name,
-                'email' => $request->guest_email,
-                'phone' => $request->guest_phone,
+            // Xác nhận người dùng
+            $userId = Auth::check() ? Auth::id() : $this->userRepository->create($request->validate([
+                'name' => 'required',
+                'email' => 'required|email',
+                'phone' => 'required'
+            ]))->id;
+
+            // Xác nhận phương thức thanh toán
+            $request->validate(['payment_method' => 'required|string|in:cash,paypal']);
+            $ticketCode = strtoupper(uniqid('TICKET-'));
+
+            // Dữ liệu giao dịch
+            $transactionData = [
+                'user_id' => $userId,
+                'ticket_id' => $ticket->id,
+                'event_id' => $ticket->event_id,
+                'quantity' => 1,
+                'ticket_code' => $ticketCode,
+                'total_amount' => $checkoutData['total_amount'],
+                'payment_method' => $request->payment_method,
+                'status' => 'PENDING',
+                'order_desc' => 'Thanh toán vé cho sự kiện #' . $ticket->id,
             ];
 
-            $user = $this->userRepository->create($guestData);
-            $userId = $user->id;
-        }
+            Log::info('Thông tin vé', ['ticket' => $ticket]);
+            Log::info('Thông tin giao dịch', ['transaction_data' => $transactionData]);
 
-        $totalAmount = $ticket->price * $request->quantity;
+            if ($request->payment_method === 'paypal') {
+                if (empty($ticket->ticket_type) || empty($checkoutData['total_amount']) || !is_numeric($checkoutData['total_amount'])) {
+                    return response()->json(['message' => 'Thông tin vé không đầy đủ'], 400);
+                }
 
-        $transactionData = [
-            'user_id' => $userId,
-            'total_amount' => $totalAmount,
-            'payment_method' => PaymentMethod::CASH,
-            'status' => TransactionStatus::PENDING,
-        ];
+                $exchangeRate = 23000; // Giả sử 1 USD = 23,000 VND
+                $totalAmountInUSD = $checkoutData['total_amount'] / $exchangeRate;
 
-        $transaction = $this->transactionRepository->createTransaction($transactionData);
+                $paypalService = new PayPalService();
+                $paypalService->setItem([[
+                    'name' => 'Vé ' . $ticket->ticket_type,
+                    'sku' => $ticket->id,
+                    'quantity' => 1,
+                    'price' => number_format($totalAmountInUSD, 2, '.', ''),
+                ]]);
+                $transaction = $this->transactionRepository->createTransaction($transactionData);
+                $transaction_id = $transaction->id;
+                $paypalService->setReturnUrl(route('payment.success', compact(['transaction_id', 'ticket_id'])))
+                    ->setCancelUrl(route('payment.cancel', compact(['transaction_id', 'ticket_id'])));
 
-        $ticket->available_quantity -= $request->quantity;
-        if ($ticket->available_quantity == 0) {
-            $ticket->status = "sold_out";
-        }
-        $ticket->save();
+                $paymentUrl = $paypalService->createPayment('Thanh toán vé cho sự kiện #' . $ticket->id);
 
-        DB::commit();
-
-        return response()->json([
-            'message' => 'Mua vé thành công từ sự kiện',
-            'total_amount' => $transaction
-        ], 200);
+                
+                $transaction->update(['payment_url' => $paymentUrl, 'transaction_id' => $transaction->id]);
+                DB::commit();
+                session()->flush();
+                return response()->json(['message' => 'Chuyển hướng đến PayPal', 'payment_url' => $paymentUrl]);
+            } else {
+                $transaction = $this->transactionRepository->createTransaction($transactionData);
+                $ticket->decrement('available_quantity', 1);
+                if ($ticket->available_quantity <= 0) {
+                    $ticket->update(['status' => 'sold_out']);
+                }
+                DB::commit();
+                session()->flush();
+                Log::info('Thanh toán thành công', ['transaction_id' => $transaction->id, 'ticket_id' => $ticket->id]);
+                return response()->json(['message' => 'Thanh toán thành công', 'transaction_id' => $transaction->id]);
+            }
         } catch (Exception $e) {
-            DB::rollBack();
+            Log::error('Lỗi khi gọi API PayPal', [
+                'response_code' => $e->getCode(),
+                'response_body' => $e->getMessage(),
+                'request' => $request->all()
+            ]);
 
-            Log::error("errors" . $e->getMessage());
+            DB::rollBack();
+            Log::error('Lỗi xử lý thanh toán sự kiện', ['error' => $e->getMessage(), 'request' => $request->all()]);
+            Log::info('PayPal Config', [
+                'client_id' => env('PAYPAL_CLIENT_ID'),
+                'secret' => env('PAYPAL_CLIENT_SECRET'),
+            ]);
+            Log::error('Thông tin yêu cầu gửi đến PayPal', ['request' => $request->all()]);
+
+            return response()->json(['message' => 'Có lỗi trong quá trình thanh toán'], 500);
         }
+    }
+
+    public function paymentSuccess(Request $request)
+    {
+        $transactionId = $request->query('transaction_id');
+        $ticketId = $request->query('ticket_id');
+
+        if (!$transactionId) {
+            return response()->json(['message' => 'Không tìm thấy mã giao dịch'], 400);
+        }
+
+        $transaction = $this->transactionRepository->findTransactionById($transactionId);
+
+        if (!$transaction) {
+            return response()->json(['message' => 'Giao dịch không tồn tại'], 404);
+        }
+
+        $ticket = $this->ticketRepository->find($ticketId);
+
+        $ticket->decrement('available_quantity', 1);
+                if ($ticket->available_quantity <= 0) {
+                    $ticket->update(['status' => 'sold_out']);
+                }
+        $transaction->update(['status' => 'COMPLETED']);
+
+        event(new TransactionVerified($transaction));
+        return response()->json(['message' => 'Thanh toán thành công!']);
+    }
+
+    public function paymentCancel(Request $request)
+    {
+        $transactionId = $request->query('transaction_id');
+
+        if (!$transactionId) {
+            return response()->json(['message' => 'Không tìm thấy mã giao dịch'], 400);
+        }
+
+        $transaction = $this->transactionRepository->findTransactionById($transactionId);
+
+        if (!$transaction) {
+            return response()->json(['message' => 'Giao dịch không tồn tại'], 404);
+        }
+
+        $transaction->update(['status' => 'FAILED']);
+        return response()->json(['message' => 'Thanh toán đã bị hủy.']);
     }
 }

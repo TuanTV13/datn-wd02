@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Events\EventCompleted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
+use App\Mail\ThankYouMail;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -41,9 +44,11 @@ class EventController extends Controller
             ], 404);
         }
 
-        return response()->json([
-            'data' => $event
-        ], 200);
+        return view('event-detail', compact('event'));
+        // return response()->json([
+        //     'message' => 'Xem chi tiết sự kiện.',
+        //     'data' => $event
+        // ], 200);
     }
 
     public function verifiedEvent($id)
@@ -285,5 +290,38 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Khôi phục sự kiện thành công'
         ], 200);
+    }
+
+    public function sendFeedbackEmail($id) 
+    {
+        $event = $this->eventRepository->find($id);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Sự kiện không tồn tại.'
+            ], 404);
+        }
+
+        if (Carbon::parse($event->end_date) < now() && $event->status != 'completed') {
+            return response()->json([
+                'message' => 'Không thể gửi mail khi sự kiện chưa hoàn thành.'
+            ], 400);
+        }
+
+        $users = $event->users()->wherePivot('checked_in', 1)->get();
+
+        try {
+            event(new EventCompleted($users, $event));
+            return response()->json([
+                'message' => 'Đã gửi mail thành công.'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return response()->json([
+                'message' => 'Có lỗi xảy ra khi gửi mail.',
+            ], 500);
+        }
+        
     }
 }
