@@ -91,12 +91,13 @@ const LayoutAdmin = () => {
           <MenuSidebar />
         </Drawer>
       ) : (
-        <Sider trigger={null} collapsible collapsed={collapsed}>
+        <Sider trigger={null} collapsible collapsed={collapsed} width="20%"
+        style={{ minWidth: "200px" }}>
           <MenuSidebar collapsed={collapsed} />
         </Sider>
       )}
 
-      <Layout>
+      <Layout style={{ width: isMobile ? "100%" : "80%" }}>
         <Header style={{ padding: 0, background: colorBgContainer }}>
           <div className="flex items-center justify-between pr-5">
             <Button
