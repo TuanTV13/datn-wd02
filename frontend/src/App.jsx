@@ -16,6 +16,7 @@ import DetailEvents from "./pages/Admin/Events/DetailEvent";
 import ListUser from "./pages/Admin/User/ListUser";
 import AddUser from "./pages/Admin/User/AddUser";
 import EventListing from "./pages/Client/EventList";
+import EventDetail from "./pages/Client/EventDetail";
 function App() {
   const route = useRoutes([
     {
@@ -23,7 +24,8 @@ function App() {
       element: <Client />,
       children: [
         { path: "", element: <Home /> },
-        { path: "event-list", element: <EventListing /> }
+        { path: "event-list", element: <EventListing /> },
+        { path: "event-detail", element:<EventDetail/>}
       ],
     },
     {path:'admin',element: <LayoutAdmin />,children:[

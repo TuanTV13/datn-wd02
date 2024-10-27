@@ -13,7 +13,10 @@ use App\Http\Controllers\V1\FeedbackController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
+use App\Http\Controllers\v1\VNPayController;
 use App\Http\Controllers\V1\VoucherController;
+use App\Http\Services\Payments\VNPayService;
+use App\Http\Services\Payments\ZaloPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -77,7 +80,7 @@ Route::prefix('v1')->group(function () {
 
     Route::get('categories', [CategoryController::class, 'index']);
 
-    Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-categories'])->group(function () {
+    Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-event-categories'])->group(function () {
         Route::post('create', [CategoryController::class, 'create']);
         Route::put('{id}/update', [CategoryController::class, 'update']);
         Route::delete('{id}/delete', [CategoryController::class, 'delete']);
@@ -95,9 +98,9 @@ Route::prefix('v1')->group(function () {
     Route::prefix('transactions')->middleware(['check.jwt'])->group(function () {
         Route::get('/', [TransactionController::class, 'index']);
         Route::get('{id}/detail', [TransactionController::class, 'show']);
+        Route::put('{id}/verified', [TransactionController::class, 'verified']);
+        Route::put('{id}/failed', [TransactionController::class, 'failed']);
     });
-
-    Route::get('vouchers', [VoucherController::class, 'index']);
 
     Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
@@ -128,11 +131,11 @@ Route::prefix('v1')->group(function () {
         Route::prefix('carts')->middleware('check.jwt')->group(function () {
             Route::get('/', [CartController::class, 'getCart']);
             Route::post('add', [CartController::class, 'addToCart']);
-            Route::put('increase', [CartController::class, 'increaseQuantity']);
-            Route::put('{cartItem}/decrease', [CartController::class, 'updateCartItem']);
+            Route::put('{cartItem}/increase', [CartController::class, 'increaseQuantity']);
+            Route::put('{cartItem}/decrease', [CartController::class, 'decreaseQuantity']);
         });
 
-        Route::post('checkout/cart', [PaymentController::class, 'checkoutCart']);
-        Route::post('checkout/event', [PaymentController::class, 'checkoutEvent']);
+        Route::post('checkout', [PaymentController::class, 'checkout']);
+        Route::post('payment/process', [PaymentController::class, 'processPayment']);
     });
 });
