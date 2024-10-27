@@ -1,228 +1,130 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo sự kiện mới</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Liên kết tệp CSS -->
+    <title>Xác nhận giao dịch</title>
     <style>
-        /* CSS cho popup và giao diện */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #F5F5F5;
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
             padding: 20px;
+            color: #333;
         }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        input[type="file"],
-        input[type="url"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .popup {
-            display: none;
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        .popup-content {
-            background-color: #fff;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
+        .container {
             max-width: 600px;
+            margin: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007BFF;
+            font-size: 26px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            font-size: 20px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin: 8px 0;
+            padding: 10px;
+            background: #e9ecef;
             border-radius: 5px;
         }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
         }
 
-        .close:hover,
-        .close:focus {
-            color: black;
+        img {
+            border: 1px solid #007BFF;
+            border-radius: 5px;
+            margin-top: 10px;
+            width: 200px;
+            height: auto;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+
+        a {
+            color: #007BFF;
             text-decoration: none;
-            cursor: pointer;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .thank-you {
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
         }
     </style>
 </head>
+
 <body>
+    <div class="container">
+        <h1>Xác Nhận Giao Dịch</h1>
+        <p>Chào {{ $user->name }},</p>
+        <p>Giao dịch của bạn đã được xác nhận thành công!</p>
 
-    <h1>Tạo sự kiện mới</h1>
-    <form id="createEventForm">
-        <div class="form-group">
-            <label for="eventName">Tên sự kiện:</label>
-            <input type="text" id="eventName" required placeholder="Vui lòng nhập tên sự kiện">
-        </div>
-        <div class="form-group">
-            <label for="city">Tỉnh/Thành phố:</label>
-            <select id="city" required>
-                <option value="">Chọn tỉnh/thành phố</option>
-                <option value="Hà Nội">Hà Nội</option>
-                <option value="TP HCM">TP HCM</option>
-                <!-- Thêm các tỉnh/thành phố khác -->
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="district">Quận/Huyện:</label>
-            <select id="district" required>
-                <option value="">Chọn quận/huyện</option>
-                <option value="Hoàn Kiếm">Hoàn Kiếm</option>
-                <option value="1">Quận 1</option>
-                <!-- Thêm các quận/huyện khác -->
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="startTime">Thời gian bắt đầu:</label>
-            <input type="datetime-local" id="startTime" required>
-        </div>
-        <div class="form-group">
-            <label for="endTime">Thời gian kết thúc:</label>
-            <input type="datetime-local" id="endTime" required>
-        </div>
-        <div class="form-group">
-            <label for="category">Danh mục sự kiện:</label>
-            <select id="category" required>
-                <option value="">Chọn danh mục</option>
-                <option value="Hội thảo">Hội thảo</option>
-                <option value="Sự kiện">Sự kiện</option>
-                <!-- Thêm các danh mục khác -->
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="location">Địa điểm cụ thể:</label>
-            <input type="text" id="location" required placeholder="Nhập địa điểm cụ thể">
-        </div>
-        <div class="form-group">
-            <label for="limit">Giới hạn tham gia:</label>
-            <input type="number" id="limit" required placeholder="Nhập giới hạn tham gia">
-        </div>
-        <div class="form-group">
-            <label for="onlineLink">Link online:</label>
-            <input type="url" id="onlineLink" placeholder="Nhập link online">
-        </div>
-        <div class="form-group">
-            <label for="description">Mô tả chi tiết sự kiện:</label>
-            <textarea id="description" rows="4" placeholder="Nhập mô tả"></textarea>
-        </div>
-        <button type="button" id="openAddSpeakerPopupBtn">Thêm diễn giả</button>
-        <button type="button" id="openAddTicketPopupBtn">Tạo vé</button>
-        <button type="submit">Lưu</button>
-    </form>
+        <h2>Thông tin giao dịch:</h2>
+        <ul>
+            <li><strong>Mã giao dịch:</strong> {{ $transaction->id }}</li>
+            <li><strong>Tổng số tiền:</strong> {{ $transaction->total_amount }} VNĐ</li>
+            <li><strong>Phương thức thanh toán:</strong> {{ $transaction->payment_method }}</li>
+        </ul>
 
-    <!-- Popup thêm diễn giả -->
-    <div id="addSpeakerPopup" class="popup">
-        <div class="popup-content">
-            <span id="closeAddSpeakerPopup" class="close">&times;</span>
-            <h2>Thêm diễn giả</h2>
-            <form id="addSpeakerForm">
-                <label for="speakerName">Tên:</label>
-                <input type="text" id="speakerName" required placeholder="Nhập tên diễn giả">
-                
-                <label for="speakerEmail">Email:</label>
-                <input type="email" id="speakerEmail" required placeholder="Nhập email diễn giả">
-                
-                <label for="speakerPhone">Điện thoại:</label>
-                <input type="tel" id="speakerPhone" required placeholder="Nhập số điện thoại diễn giả">
-                
-                <label for="speakerImage">Hình ảnh:</label>
-                <input type="file" id="speakerImage" accept="image/*" required>
-                
-                <label for="speakerProfile">Mô tả:</label>
-                <textarea id="speakerProfile" rows="4" required placeholder="Nhập mô tả về diễn giả"></textarea>
+        <h2>Thông tin sự kiện:</h2>
+        <ul>
+            <li><strong>Tên sự kiện:</strong> {{ $event->name }}</li>
+            <li><strong>Thời gian:</strong> {{ $event->start_time }}</li>
+            <li><strong>Địa điểm:</strong> {{ $event->location }}</li>
+        </ul>
 
-                <button type="submit">Lưu diễn giả</button>
-            </form>
+        <h2>Thông tin vé:</h2>
+        <ul>
+            <li><strong>Mã vé:</strong> {{ $transaction->ticket_code }} - <strong>Giá:</strong> {{ $transaction->ticket->price }} VNĐ</li>
+        </ul>
+
+        <div class="qr-code">
+            <h2>Mã QR của vé:</h2>
+            <img src="{{ $qrCodeUrl }}" alt="Mã QR của vé">
+        </div>
+
+        <p class="thank-you">Cảm ơn bạn đã tham gia!</p>
+
+        <div class="footer">
+            <p>Nếu bạn có bất kỳ câu hỏi nào, hãy liên hệ với chúng tôi qua email: <a href="mailto:support@example.com">support@example.com</a></p>
+            <p>Địa chỉ: 123 Đường ABC, Thành phố XYZ</p>
+            <p>Số điện thoại: (012) 345-6789</p>
         </div>
     </div>
-
-    <!-- Popup tạo vé -->
-    <div id="addTicketPopup" class="popup">
-        <div class="popup-content">
-            <span id="closeAddTicketPopup" class="close">&times;</span>
-            <h2>Tạo vé</h2>
-            <form id="addTicketForm">
-                <label for="ticketName">Tên vé:</label>
-                <input type="text" id="ticketName" required placeholder="Nhập tên vé">
-                
-                <label for="ticketPrice">Giá vé:</label>
-                <input type="number" id="ticketPrice" required placeholder="Nhập giá vé">
-                
-                <label for="ticketQuantity">Số lượng:</label>
-                <input type="number" id="ticketQuantity" required placeholder="Nhập số lượng vé">
-
-                <label for="ticketDescription">Mô tả:</label>
-                <textarea id="ticketDescription" rows="4" required placeholder="Nhập mô tả về vé"></textarea>
-
-                <button type="submit">Lưu vé</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // Mở và đóng popup thêm diễn giả
-        document.getElementById("openAddSpeakerPopupBtn").onclick = function() {
-            document.getElementById("addSpeakerPopup").style.display = "block";
-        }
-        document.getElementById("closeAddSpeakerPopup").onclick = function() {
-            document.getElementById("addSpeakerPopup").style.display = "none";
-        }
-
-        // Mở và đóng popup tạo vé
-        document.getElementById("openAddTicketPopupBtn").onclick = function() {
-            document.getElementById("addTicketPopup").style.display = "block";
-        }
-        document.getElementById("closeAddTicketPopup").onclick = function() {
-            document.getElementById("addTicketPopup").style.display = "none";
-        }
-
-        // Đóng popup khi nhấn ra ngoài popup
-        window.onclick = function(event) {
-            if (event.target == document.getElementById("addSpeakerPopup")) {
-                document.getElementById("addSpeakerPopup").style.display = "none";
-            }
-            if (event.target == document.getElementById("addTicketPopup")) {
-                document.getElementById("addTicketPopup").style.display = "none";
-            }
-        }
-    </script>
 </body>
+
 </html>
