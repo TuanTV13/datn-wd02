@@ -17,7 +17,7 @@ const EventListing = () => {
   return (
     <div className="w-full lg:py-10 py-4 border pb-[199px] mt-36">
       <div className="lg:container lg:mx-auto lg:w-[1315px] mb:w-full grid lg:grid-cols-[304px_978px] mb:grid-cols-[100%] *:w-full justify-between">
-        <div className="lg:block hidden py-3 mt-0.5 bg-gray-200 rounded-[50px]">
+        <div className="lg:block hidden py-3 mt-0.5 bg-gray-100 rounded-[50px]">
           <span className="lg:text-xl tracking-[-0.4px] ml-8">Filters</span>
           <section className="flex flex-col pt-[47px] pb-4 items-center">
             <div
@@ -74,7 +74,7 @@ const EventListing = () => {
             <div className="flex justify-between *:px-2.5 my-5 *:py-1 *:bg-[#F4F4F4] *:rounded-[100px] *:text-xs ml-7">
               <input
                 type="date"
-                className=" px-4 py-2 border border-gray-300 rounded-lg"
+                className=" px-4 py-2 border border-gray-300 rounded-lg w-32"
                 placeholder="Từ ngày"
               />
               <div>
@@ -95,7 +95,7 @@ const EventListing = () => {
               </div>
               <input
                 type="date"
-                className=" px-4 py-2 border border-gray-300 rounded-lg"
+                className=" px-4 py-2 border border-gray-300 rounded-lg w-32"
                 placeholder="Đến ngày"
               />
             </div>

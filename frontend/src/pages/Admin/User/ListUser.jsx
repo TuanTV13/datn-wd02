@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
 
 const ListUser = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false);
+  const [eventModalIsOpen, setEventModalIsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [confirmDeleteUserId, setConfirmDeleteUserId] = useState(null);
   const [showDeletedUsers, setShowDeletedUsers] = useState(false);
@@ -21,6 +21,7 @@ const ListUser = () => {
       birthday: '01/01/1990',
       gender: 'Nam',
       createdAt: '01/01/2023',
+      events: ['Sự kiện A', 'Sự kiện B'], // Thêm danh sách sự kiện
     },
     {
       id: 2,
@@ -32,6 +33,7 @@ const ListUser = () => {
       birthday: '02/02/1992',
       gender: 'Nữ',
       createdAt: '05/05/2023',
+      events: ['Sự kiện C'], // Thêm danh sách sự kiện
     },
   ]);
 
@@ -44,6 +46,16 @@ const ListUser = () => {
 
   const closeModal = () => {
     setModalIsOpen(false);
+    setSelectedUser(null);
+  };
+
+  const openEventModal = (user) => {
+    setSelectedUser(user);
+    setEventModalIsOpen(true);
+  };
+
+  const closeEventModal = () => {
+    setEventModalIsOpen(false);
     setSelectedUser(null);
   };
 
@@ -135,6 +147,12 @@ const ListUser = () => {
                     >
                       Chi tiết
                     </button>
+                    <button 
+                      className="bg-blue-500 text-white w-full h-8 rounded-[10px]"
+                      onClick={() => openEventModal(user)} // Mở modal sự kiện
+                    >
+                      Xem Sự kiện
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -180,17 +198,44 @@ const ListUser = () => {
           className="fixed inset-0 flex items-center justify-center z-50"
           overlayClassName="fixed inset-0 bg-black bg-opacity-50"
         >
-          <div className="bg-white rounded-lg p-6 w-1/3 mx-auto">
+          <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
             <h2 className="text-lg font-bold mb-4">Xác nhận xóa</h2>
             <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
-            <div className="mt-4 flex justify-between">
+            <div className="flex justify-end mt-4">
+              <button onClick={closeConfirmModal} className="bg-gray-300 px-4 py-2 rounded mr-2">
+                Hủy
+              </button>
               <button onClick={() => handleDeleteUser(confirmDeleteUserId)} className="bg-red-500 text-white px-4 py-2 rounded">
                 Xóa
               </button>
-              <button onClick={closeConfirmModal} className="bg-gray-300 px-4 py-2 rounded">
-                Hủy
-              </button>
             </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal xem sự kiện */}
+      {selectedUser && (
+        <Modal
+          isOpen={eventModalIsOpen}
+          onRequestClose={closeEventModal}
+          ariaHideApp={false}
+          className="fixed inset-0 flex items-center justify-center z-50"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        >
+          <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
+            <h2 className="text-2xl font-bold mb-4">Sự kiện đã tham gia</h2>
+            <ul className="list-disc pl-6">
+              {selectedUser.events.length > 0 ? (
+                selectedUser.events.map((event, index) => (
+                  <li key={index}>{event}</li>
+                ))
+              ) : (
+                <li>Không có sự kiện nào.</li>
+              )}
+            </ul>
+            <button onClick={closeEventModal} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+              Đóng
+            </button>
           </div>
         </Modal>
       )}
