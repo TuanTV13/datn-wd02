@@ -16,4 +16,4 @@ class Feedback extends Model
         'feedback',
         'suggestions',
     ];
-}
+}  

@@ -10,14 +10,12 @@
             <tr>
                 <td align="center" style="padding: 20px;">
                     <table class="content" width="900" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                        <!-- Header -->
                         <tr>
                             <td class="header" style="padding: 20px; text-align: center; color: #333; font-size: 24px;">
                                 Cảm ơn bạn đã tham dự sự kiện "{{ $event->name }}"!
                             </td>
                         </tr>
     
-                        <!-- Body -->
                         <tr>
                             <td class="body" style="padding: 20px; text-align: center; font-size: 16px; line-height: 1.6;">
                                 Chúng tôi xin chân thành cảm ơn bạn đã tham gia sự kiện!
@@ -26,10 +24,8 @@
                             </td>
                         </tr>
     
-                        <!-- Call to action Button -->
                         <tr>
                             <td style="padding: 0px 20px 0px 20px; text-align: center;">
-                                <!-- CTA Button -->
                                 <table cellspacing="0" cellpadding="0" style="margin: auto;">
                                     <tr>
                                         <td align="center" style="background: linear-gradient( to right, #c32f74d6, #eb378b96);; padding: 10px 20px; border-radius: 5px;">
@@ -44,7 +40,7 @@
                                 Xin chân thành cảm ơn!             
                             </td>
                         </tr>
-                        <!-- Footer -->
+
                         <tr>
                             <td class="footer" style="padding: 20px; text-align: center; color: #888; font-size: 14px;">
                                 Copyright &copy; Eventify 2024. All rights reserved.

@@ -13,13 +13,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('feedbacks', function (Blueprint $table) {
+        Schema::create('feedback', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Event::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
+            $table->integer('rating')->defaut(0);
             $table->text('feedback');
             $table->text('suggestions')->nullable();
-            $table->integer('rating')->defaut(0);
             $table->timestamps();
         });
     }

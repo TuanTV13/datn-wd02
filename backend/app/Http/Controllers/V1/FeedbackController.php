@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
-use App\Mail\FeedbackConfirmationMail;
 use App\Repositories\EventRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\FeedbackRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class FeedbackController extends Controller
 {
@@ -86,43 +84,39 @@ class FeedbackController extends Controller
     
             $event = $this->eventRepository->find($data['event_id']);
             $user = $this->userRepository->find($data['user_id']);
-         
-            if (!$event || !$user) {
-                return response()->json([
-                    'message' => 'Sự kiện hoặc người dùng không tồn tại.'
-                ], 404);
+
+            if (!$event) {
+                return response()->json(['message' => 'Sự kiện không tồn tại.'], 404);
             }
-            if (!$event->users()->where('user_id', $user->id)->wherePivot('status', 'attended')->exists()) {
-                return response()->json([
-                    'message' => 'Người dùng chưa tham gia sự kiện này.',
-                ], 403);
+            if (!$user) {
+                return response()->json(['message' => 'Người dùng không tồn tại.'], 404);
             }
-            if ($event->feedbacks()->where('user_id', $user->id)->count() > 2) {
-                return response()->json([
-                    'message' => 'Người dùng đã đạt tối đa số lần gửi phản hồi cho sự kiện này.',
-                ], 422);
+
+            if (!$event->users()->where('user_id', $user->id)->wherePivot('checked_in', 1)->exists()) {
+                return response()->json(['message' => 'Người dùng chưa tham gia sự kiện này.'], 403);
             }
-            
+    
+            if ($event->feedbacks()->where('user_id', $user->id)->count() >= 2) {
+                return response()->json(['message' => 'Người dùng đã đạt tối đa số lần gửi phản hồi cho sự kiện này.'], 422);
+            }
+
             $this->feedbackRepository->create($data);
     
-            // return response()->json([
-            //     'message' => 'Đánh giá đã được gửi thành công.'
-            // ], 201);
             DB::commit();
     
-            return redirect('/your-react-url?message=success'); // Chuyển hướng đến trang thông báo đánh giá thành công
+            return response()->json(['message' => 'Đánh giá đã được gửi thành công.'], 201);
+            
         } catch (\Exception $e) {
             DB::rollBack();
-
-            Log::error($e->getMessage());
-
-            return response()->json([
-                'message' => 'Đã có lỗi xảy ra khi gửi đánh giá.'
-            ], 500);
+    
+            Log::error('Error in feedback submission: ' . $e->getMessage());
+    
+            return response()->json(['message' => 'Đã có lỗi xảy ra khi gửi đánh giá.'], 500);
         }
     }
+    
 
-    public function destroy($feedback)
+    public function delete($feedback)
     {
         $feedback = $this->feedbackRepository->find($feedback);
 

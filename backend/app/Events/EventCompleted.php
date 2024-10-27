@@ -34,6 +34,6 @@ class EventCompleted
     {
         return [
             new PrivateChannel('channel-name'),
-        ];
-    }
-}
+        ]; 
+    } 
+} 

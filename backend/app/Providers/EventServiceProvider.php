@@ -49,7 +49,7 @@ class EventServiceProvider extends ServiceProvider
         
         EventCompleted::class => [
             SendFeedbackEmail::class,
-        ]
+        ],
     ];
 
     /**

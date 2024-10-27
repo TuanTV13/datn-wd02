@@ -28,7 +28,12 @@ class SendFeedbackEmail implements ShouldQueue
         foreach ($event->users as $user) {
             $feedbackUrl = URL::temporarySignedRoute('form.feedback', now()->addMinutes(6), ['event' => $event->event->id, 'user' => $user->id]); 
 
-            Mail::to($user->email)->send(new FeedbackMail($event->event, $user, $feedbackUrl));
+            // Mail::to($user->email)->send(new FeedbackMail($event->event, $user, $feedbackUrl));
+
+            Mail::send('emails.email-feedback', ['event' => $event->event, 'user' => $user, 'feedbackUrl' => $feedbackUrl], function ($message) use ($user, $event) {
+                $message->to($user->email)
+                        ->subject('Cảm ơn bạn đã tham gia sự kiện ' . $event->event->name);
+            });
         }
     }
 }

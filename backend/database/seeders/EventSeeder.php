@@ -82,14 +82,15 @@ class EventSeeder extends Seeder
             $randomUserIds = $userIds->random(rand(1, 5));
 
             foreach ($randomUserIds as $userId) {
-                DB::table('user_event')->insert([
-                    'user_id' => $userId,
+                DB::table('event_users')->insert([
                     'event_id' => $event->id,
-                    'status' => 'attended', 
-                    'registered_at' => now(),
-                    'attended_at' => now(),
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'user_id' => $userId,
+                    'ticket_id' => $ticket->id,
+                    'checked_in' => rand(0, 1),
+                    'order_date' => now(),
+                    'original_price' => $ticket->price,
+                    'discount_code' => null,
+                    'amount' => rand(1, 3),
                 ]);
             }
         }

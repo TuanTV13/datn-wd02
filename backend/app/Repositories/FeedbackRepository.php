@@ -33,5 +33,5 @@ class FeedbackRepository
         $feedback = $this->find($id);
 
         return $feedback->delete();
-    }
+    }    
 }

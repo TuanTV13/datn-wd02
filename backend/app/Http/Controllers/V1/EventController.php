@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\UpdateEventRequest;
 use App\Mail\ThankYouMail;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -301,18 +302,26 @@ class EventController extends Controller
             ], 404);
         }
 
-        if ($event->end_date < now() && $event->status != 'completed') {
+        if (Carbon::parse($event->end_date) < now() && $event->status != 'completed') {
             return response()->json([
                 'message' => 'Không thể gửi mail khi sự kiện chưa hoàn thành.'
             ], 400);
         }
 
-        $users = $event->users()->wherePivot('status', 'attended')->get();
+        $users = $event->users()->wherePivot('checked_in', 1)->get();
 
-        event(new EventCompleted($users, $event));
+        try {
+            event(new EventCompleted($users, $event));
+            return response()->json([
+                'message' => 'Đã gửi mail thành công.'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
 
-        return response()->json([
-            'message' => 'Đã gửi mail thành công.'
-        ], 200);
+            return response()->json([
+                'message' => 'Có lỗi xảy ra khi gửi mail.',
+            ], 500);
+        }
+        
     }
 }

@@ -66,7 +66,7 @@ Route::prefix('v1')->group(function () {
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
 
-        Route::post('{event}/feedback-mail', [EventController::class, 'sendFeedbackEmail']);
+        Route::post('{event}/feedback-mail', [EventController::class, 'sendFeedbackEmail']);     
     });
 
     Route::get('users', [UserController::class, 'index']);
@@ -112,13 +112,13 @@ Route::prefix('v1')->group(function () {
         Route::post('apply', [VoucherController::class, 'apply']);
     });
 
-    Route::get('feedbacks', [FeedbackController::class, 'index']);
-    Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {
-        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá
-        Route::get('{id}/show', [FeedbackController::class, 'show']);
-        Route::post('submit', [FeedbackController::class, 'submit']);
-        Route::delete('{id}/delete', [FeedbackController::class, 'delete']);
-    });
+    Route::get('feedbacks', [FeedbackController::class, 'index']);  
+    Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {  
+        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá  
+        Route::get('{id}/show', [FeedbackController::class, 'show']);   
+        Route::post('submit', [FeedbackController::class, 'submit']);  
+        Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
+    });  
 
     Route::prefix('clients')->group(function () {
 
