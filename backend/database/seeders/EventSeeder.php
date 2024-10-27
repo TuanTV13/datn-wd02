@@ -12,6 +12,7 @@ use App\Models\Ticket;
 use App\Models\Voucher;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class EventSeeder extends Seeder
 {
@@ -76,6 +77,22 @@ class EventSeeder extends Seeder
                 'issue_quantity' => 50,
                 'used_limit' => 1,
             ]);
+
+            $userIds = DB::table('users')->pluck('id');
+            $randomUserIds = $userIds->random(rand(1, 5));
+
+            foreach ($randomUserIds as $userId) {
+                DB::table('event_users')->insert([
+                    'event_id' => $event->id,
+                    'user_id' => $userId,
+                    'ticket_id' => $ticket->id,
+                    'checked_in' => rand(0, 1),
+                    'order_date' => now(),
+                    'original_price' => $ticket->price,
+                    'discount_code' => null,
+                    'amount' => rand(1, 3),
+                ]);
+            }
         }
     }
 }

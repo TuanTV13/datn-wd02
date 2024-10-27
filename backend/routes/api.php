@@ -9,6 +9,7 @@ use App\Http\Controllers\V1\Client\CartController;
 use App\Http\Controllers\V1\Client\EventController as ClientEventController;
 use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
+use App\Http\Controllers\V1\FeedbackController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
@@ -59,17 +60,20 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('events')->middleware(['check.jwt', 'check.permission:manage-events'])->group(function () {
         Route::post('create', [EventController::class, 'create']);
+        Route::get('{event}/show', [EventController::class, 'show']);
         Route::put('{event}/update', [EventController::class, 'update']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
+
+        Route::post('{event}/feedback-mail', [EventController::class, 'sendFeedbackEmail']);     
     });
 
     Route::get('users', [UserController::class, 'index']);
 
     Route::prefix('users')->middleware(['check.jwt', 'check.permission:manage-users'])->group(function () {
         Route::post('create', [UserController::class, 'create']);
-        Route::delete('{id}/delete', [UserController::class, 'delete']);
+        Route::delete('{id}/delete', [UserController::class, 'destroy']);
         Route::get('trashed', [UserController::class, 'trashed']);
         Route::post('{id}/restore', [UserController::class, 'restore']);
     });
@@ -108,6 +112,14 @@ Route::prefix('v1')->group(function () {
         Route::post('apply', [VoucherController::class, 'apply']);
     });
 
+    Route::get('feedbacks', [FeedbackController::class, 'index']);  
+    Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {  
+        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá  
+        Route::get('{id}/show', [FeedbackController::class, 'show']);   
+        Route::post('submit', [FeedbackController::class, 'submit']);  
+        Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
+    });  
+
     Route::prefix('clients')->group(function () {
 
         Route::prefix('events')->group(function () {
@@ -125,5 +137,7 @@ Route::prefix('v1')->group(function () {
 
         Route::post('checkout', [PaymentController::class, 'checkout']);
         Route::post('payment/process', [PaymentController::class, 'processPayment']);
+        Route::get('payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+        Route::get('payment/cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
     });
 });
