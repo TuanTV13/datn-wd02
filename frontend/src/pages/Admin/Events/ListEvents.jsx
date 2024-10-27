@@ -67,7 +67,8 @@ const EventList = () => {
               <div key={event.id} className="relative flex flex-col bg-white p-4 rounded-md shadow-sm cursor-pointer border-2 border-gray-50 hover:border-black transition-colors duration-300 w-64 h-80 mx-auto">
                 {/* Trạng thái sự kiện */}
                 <div className={`absolute top-2 left-2 ${getStatusColor(event.status_id)} text-white px-3 py-1 text-sm rounded-br-md z-10`}>
-                  {event.status.name} {/* Hiển thị tên trạng thái */}
+                {event.status ? event.status.name : 'Trạng thái không xác định'}
+                {/* Hiển thị tên trạng thái */}
                 </div>
 
                 {/* Icons sửa và xóa */}
