@@ -13,9 +13,14 @@ class TransactionRepository
         $this->transaction = $transaction;
     }
 
+    public function findByTxnRef($txnRef)
+    {
+        return Transaction::where('txn_ref', $txnRef)->first();
+    }
+
     public function getAllTransactions()
     {
-        return $this->transaction->with(['user'])->get();
+        return $this->transaction->with(['user', 'ticket', 'event'])->get();
     }
 
     public function createTransaction(array $data)
@@ -25,7 +30,7 @@ class TransactionRepository
 
     public function findTransactionById($id)
     {
-        return $this->transaction->with(['user'])->find($id);
+        return $this->transaction->with(['user', 'ticket', 'event'])->find($id);
     }
 
     public function getUserTransactions($userId)

@@ -71,14 +71,9 @@ class CartController extends Controller
         ]);
     }
 
-    public function increaseQuantity(Request $request)
+    public function increaseQuantity(Request $request, $cart_item_id)
     {
-        $request->validate([
-            'cart_item_id' => 'required',
-            'quantity' => 'required|integer|min:1'
-        ]);
-
-        $cartItem = $this->cartRepository->findCartItemById($request->cart_item_id);
+        $cartItem = $this->cartRepository->findCartItemById($cart_item_id);
         if (!$cartItem) {
             return response()->json([
                 'error' => 'Không tìm thấy item trong giỏ hàng'
@@ -87,11 +82,11 @@ class CartController extends Controller
 
         $ticket = $this->ticketRepository->find($cartItem->ticket_id);
 
-        if ($cartItem->quantity + $request->quantity > $ticket->available_quantity) {
+        if ($cartItem->quantity + 1 > $ticket->available_quantity) {
             return response()->json(['message' => 'Số lượng không đủ'], 400);
         }
 
-        $newQuantity = $cartItem->quantity + $request->quantity;
+        $newQuantity = $cartItem->quantity + 1;
         $item = $this->cartRepository->updateCartItem($cartItem->id, $newQuantity);
 
         return response()->json([
@@ -100,7 +95,8 @@ class CartController extends Controller
         ]);
     }
 
-    public function updateCartItem(Request $request, $cartItemId)
+
+    public function decreaseQuantity(Request $request, $cartItemId)
     {
         $cartItem = $this->cartRepository->findCartItemById($cartItemId);
 
@@ -108,11 +104,10 @@ class CartController extends Controller
             return response()->json(['message' => 'Mục giỏ hàng không tồn tại'], 404);
         }
 
-        $newQuantity = $cartItem->quantity - $request->quantity;
+        $newQuantity = $cartItem->quantity - 1;
 
         if ($newQuantity <= 0) {
             $this->cartRepository->removeCartItem($cartItem->id);
-
             return response()->json([
                 'message' => 'Xóa mục giỏ hàng vì số lượng bằng 0',
             ], 200);
@@ -121,9 +116,7 @@ class CartController extends Controller
         $this->cartRepository->updateCartItem($cartItem->id, $newQuantity);
 
         return response()->json([
-            'message' => 'Cập nhật giỏ hàng thành công',
+            'message' => 'Giảm số lượng thành công',
         ], 200);
     }
-
-    
 }

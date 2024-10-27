@@ -14,6 +14,7 @@ use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Client;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,62 +31,17 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 class AuthController extends Controller
 {
     protected $userRepository;
-    protected $api_key;
-    protected $client;
     protected $refreshRepository;
 
     public function __construct(UserRepository $userRepository, RefreshRepository $refreshRepository)
     {
         $this->userRepository = $userRepository;
-        $this->client = new Client();
-        $this->api_key = env('KICKBOX_API_KEY');
-        // $this->api_key = env('NEVERBOUNCE_API_KEY');
         $this->refreshRepository = $refreshRepository;
-    }
-
-    // https://api.neverbounce.com/v4/single/check
-    public function verifyEmail($email)
-    {
-        try {
-            $response = $this->client->request('GET', 'https://api.kickbox.com/v2/verify', [
-                'query' => [
-                    'email' => $email,
-                    'apikey' => $this->api_key
-                ]
-            ]);
-
-            if ($response->getStatusCode() !== 200) {
-                Log::error("Kickbox API trả về lỗi: {$response->getStatusCode()}");
-                return false;
-            }
-
-            $result = json_decode($response->getBody(), true);
-            Log::info("Kết quả kiểm tra email: ", $result); 
-
-            if (isset($result['result']) && $result['result'] === 'deliverable') {
-                return true;
-            }
-
-            Log::warning("Kickbox không xác nhận được email: " . $email);
-            return false;
-        } catch (Exception $e) {
-            Log::error("Lỗi khi gọi API Kickbox: " . $e->getMessage());
-            return false;
-        }
     }
 
     public function register(RegisterRequest $request)
     {
         $data = $request->validated();
-
-        $email = EmailHelper::trimEmail($data['email']);
-
-        if (!$this->verifyEmail($email)) {
-            Log::info("Email không hợp lệ: " . $email);
-            throw ValidationException::withMessages([
-                'email' => 'Email không hợp lệ hoặc không tồn tại. Vui lòng thử lại với một địa chỉ email khác.',
-            ]);
-        }
 
         try {
             if ($request->hasFile('image')) {
@@ -130,7 +86,7 @@ class AuthController extends Controller
         }
 
         $user->email_verified_at = now();
-        $user->email_verification_token = null; 
+        $user->email_verification_token = null;
         $user->save();
 
         return redirect('/your-react-url?status=success');
@@ -238,7 +194,7 @@ class AuthController extends Controller
             ]);
         }
 
-        $key = $request->ip(); 
+        $key = $request->ip();
         if (RateLimiter::tooManyAttempts('sendCode:' . $key, 5)) {
             $retryAfter = RateLimiter::availableIn('sendCode:' . $key);
             return response()->json([
