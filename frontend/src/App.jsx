@@ -20,6 +20,7 @@ import CategoryEven from "./pages/Client/CategoryEven";
 import Cart from "./pages/Client/Cart";
 import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
+import VerifyEmailPage from "./components/Auth/VerifyEmailPage"
 function App() {
   const route = useRoutes([
     {
@@ -48,6 +49,9 @@ function App() {
     ]},
     {
       path:'auth', element: <Auth/>
+    },
+    {
+      path:'verify-email', element:<VerifyEmailPage/>
     }
   ]);
   return route;

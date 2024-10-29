@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { Modal, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import './Auth.css';
 
 const RegisterForm = ({ toggleForm }) => {
@@ -15,7 +16,8 @@ const RegisterForm = ({ toggleForm }) => {
   const [showEmailError, setShowEmailError] = useState(false);
   const [showPasswordError, setShowPasswordError] = useState(false);
   const [showConfirmPasswordError, setShowConfirmPasswordError] = useState(false);
-
+  
+  const navigate = useNavigate(); // Thêm hook để điều hướng sau khi đăng ký thành công
   const password = watch('password');
 
   const onSubmit = async (data) => {
@@ -23,7 +25,8 @@ const RegisterForm = ({ toggleForm }) => {
       const { confirmPassword, ...restData } = data; // Loại bỏ confirmPassword
       const response = await axios.post('http://127.0.0.1:8000/api/v1/register', restData);
       if (response.status === 200) {
-        alert('Đăng ký thành công!');
+        // Chuyển hướng đến trang verify email sau khi đăng ký thành công
+        navigate('/verify-email');
       }
     } catch (error) {
       if (error.response && error.response.data.errors) {
