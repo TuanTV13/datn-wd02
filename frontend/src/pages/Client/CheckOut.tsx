@@ -133,11 +133,11 @@ const CheckOut = () => {
                   <img
                     alt="MoMo logo"
                     className="mr-2"
-                    height="80"
-                    src="https://developers.momo.vn/v3/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png"
-                    width="80"
+                    height="40"
+                    src="../../../public/images/logo_paypal.png"
+                    width="40"
                   />
-                  <label>Ví Momo</label>
+                  <label>Thanh toán bằng paypal</label>
                 </div>
               </div>
             </div>
@@ -187,35 +187,9 @@ const CheckOut = () => {
               </div>
             </div>
 
-            {/* <!-- voucher xu --> */}
-            {/* <div className="flex items-center justify-between mt-0.5">
-              <span className="flex items-center text-sm gap-x-2">
-                <img src="../Images/xu_icon.png" alt="xu" />
-                Your point <p>10.850</p>
-              </span> */}
-
-            {/* <!-- toggle --> */}
-            {/* <div className="relative group w-[49px] h-6 rounded-[100px] bg-[#C8C9CB] cursor-pointer hover:bg-[#007BFF] duration-300">
-                <div className="group-hover:left-[27px] w-5 h-5 bg-white absolute rounded-[50%] left-0.5 top-[2.5px] duration-300"></div>
-              </div>
-            </div> */}
-
             <button className="bg-[#007BFF] px-10 h-14 rounded-[100px] text-white flex gap-x-4 place-items-center justify-center">
               <span>Đặt vé</span>|<span>$547.00</span>
             </button>
-
-            {/* <!-- payment --> */}
-            <div className="flex flex-col gap-y-4">
-              <span className="tracking-[0.8px] text-[#717378] text-xs">
-                SECURE PAYMENTS PROVIDED BY
-              </span>
-              <div className="flex items-center gap-x-3 *:cursor-pointer">
-                <img src="../../../public/images/mastercard_v1.png" alt="" />
-                <img src="../../../public/images/mastercard_v2.png" alt="" />
-                <img src="../../../public/images/mastercard_v3.png" alt="" />
-                <img src="../../../public/images/mastercard_v4.png" alt="" />
-              </div>
-            </div>
           </div>
         </div>
       </form>
