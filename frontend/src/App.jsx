@@ -20,6 +20,7 @@ import CategoryEven from "./pages/Client/CategoryEven";
 import Cart from "./pages/Client/Cart";
 import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
+import EventHistory from "./pages/Client/EventHistory";
 function App() {
   const route = useRoutes([
     {
@@ -32,6 +33,7 @@ function App() {
         { path: "event-category", element: <CategoryEven /> },
         { path: "cart", element: <Cart/>},
         { path: "checkout", element: <CheckOut/>},
+        { path: "event-history", element: <EventHistory/>},
       ],
     },
     {path:'admin',element: <LayoutAdmin />,children:[
