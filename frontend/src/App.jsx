@@ -52,6 +52,9 @@ function App() {
     ]},
     {
       path:'auth', element: <Auth/>
+    },
+    {
+      path:'verify-email', element:<VerifyEmailPage/>
     }
   ]);
   return route;
