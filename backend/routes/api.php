@@ -122,9 +122,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('clients')->group(function () {
 
         Route::prefix('events')->group(function () {
-            Route::get('/', [ClientEventController::class, 'index']);
-            Route::get('{id}', [ClientEventController::class, 'show']);
-            Route::get('filter/{categoryId}', [ClientEventController::class, 'filter']);
+            Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
         });
 
         Route::prefix('home')->group(function () {

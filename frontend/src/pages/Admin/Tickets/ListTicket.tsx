@@ -23,7 +23,7 @@ const ListTicket = () => {
                       </div>
                 </div>
                 <table className="min-w-full table-auto border border-gray-700">
-                    <thead className="bg-gray-100 text-left items-center text-center">
+                    <thead className="bg-gray-100 items-center text-center">
                         <tr>
                             <th className="p-4 border border-gray-300">STT</th>
                             <th className="p-4 border border-gray-300">Mã vé</th>

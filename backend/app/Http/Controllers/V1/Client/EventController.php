@@ -3,65 +3,69 @@
 namespace App\Http\Controllers\V1\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\EventUser;
 use App\Repositories\EventRepository;
 use App\Repositories\TicketRepository;
+use App\Repositories\TransactionRepository;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
-    protected $eventRepository, $ticketRepository;
+    protected $eventRepository, $ticketRepository, $transactionRepository;
 
-    public function __construct(EventRepository $eventRepository, TicketRepository $ticketRepository)
+    public function __construct(EventRepository $eventRepository, TicketRepository $ticketRepository, TransactionRepository $transactionRepository)
     {
         $this->eventRepository = $eventRepository;
         $this->ticketRepository = $ticketRepository;
+        $this->transactionRepository = $transactionRepository;
     }
 
-    public function index()
+    public function checkIn(Request $request, $eventId)
     {
-        $events = $this->eventRepository->getAll();
-
-        if (!$events) {
-            return response()->json([
-                'message' => 'Không có sự kiện nào'
-            ]);
-        }
-
-        return response()->json([
-            'data' => $events
+        $request->validate([
+            'ticket_code' => 'required|string|max:100',
         ]);
-    }
 
-    public function show($id)
-    {
-        $event = $this->eventRepository->find($id);
-        $tickets = $this->ticketRepository->findByEvent($id);
+        $ticketCode = strtoupper($request->input('ticket_code'));
 
-        if (!$event) {
+        $transaction = $this->transactionRepository->findByTicketCode($ticketCode, $eventId);
+        $userId = $transaction->user_id;
+        $ticketId = $transaction->ticket_id;
+
+        if(!$transaction){
             return response()->json([
-                'message' => 'Không tồn tại sự kiện'
+                'error' => 'Vé không hợp lệ vui lòng kiểm tra lại'
+            ], 404);
+        }
+
+        $user = EventUser::where('user_id', $userId)
+            ->where('event_id', $eventId)
+            ->where('ticket_id', $ticketId)
+            ->first();
+
+        if(!$user){
+            return response()->json([
+                'message' => 'Vé của bạn không hợp lệ cho sự kiện này'
             ]);
+        }
+        if($user->checked_in == 1){
+            return response()->json([
+                'message' => 'Bạn đã check in trước đó rồi!'
+            ], 403);
+        }
+
+        $statusEvent = $transaction->event->status;
+        if($statusEvent === 'checkin'){
+            $user->checked_in = 1;
+            $user->save();
+
+            return response()->json([
+                'message' => 'Check-in sự kiện thành công'
+            ], 201);
         }
 
         return response()->json([
-            'data' => $event,
-            'tickets' => $tickets
-        ]);
-    }
-
-    public function filter(Request $request, $categoryId)
-    {
-        $category = $request->input('category');
-        $event = $this->eventRepository->findByCategory($categoryId);
-
-        if (!$event) {
-            return response()->json([
-                'message' => 'Không tồn tại sự kiện'
-            ]);
-        }
-
-        return response()->json([
-            'data' => $event
+            'message' => 'Chưa đến thời gian check-in sự kiện'
         ]);
     }
 }

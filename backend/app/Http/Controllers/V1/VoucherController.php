@@ -158,7 +158,7 @@ class VoucherController extends Controller
         }
     }
 
-    public function apply(Request $request)
+    public function apply(Request $request, $totalAmount)
     {
         $request->validate([
             'event_id' => ['required', 'integer'], 
@@ -177,7 +177,7 @@ class VoucherController extends Controller
                 return $validateResponse;
             }
 
-            $totalPrice = $this->calculateDiscountPrice($voucher);
+            $totalPrice = $this->calculateDiscountPrice($voucher, $totalAmount);
             
             if ($applyResponse = $this->applyVoucherForUser($voucher, $request->user_id)) {
                 return $applyResponse;
@@ -188,6 +188,7 @@ class VoucherController extends Controller
                 'voucher' => $voucher->only(['code', 'discount_value', 'discount_type']),
             ]);
         } catch (Exception $e) {
+            Log::info('Total Price before PayPal call: ', ['total_price' => $totalPrice]);
             Log::error('Error:' . $e->getMessage());
 
             return $this->jsonResponse(false, 'Có lỗi xảy ra khi áp dụng mã giảm giá.', [], 500);
@@ -216,9 +217,9 @@ class VoucherController extends Controller
         }
     }
 
-    private function calculateDiscountPrice($voucher)
+    private function calculateDiscountPrice($voucher, $totalPrice)
     {
-        $totalPrice = 1000000; // Đang fix cứng khi chưa có thông tin về tổng giá trị đơn hàng
+        // $totalPrice = 1000000; // Đang fix cứng khi chưa có thông tin về tổng giá trị đơn hàng
 
         return max(
             $voucher->discount_type === 'percent' ? $totalPrice * ((100 - $voucher->discount_value) / 100) : $totalPrice - $voucher->discount_value, 0

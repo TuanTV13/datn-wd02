@@ -82,7 +82,7 @@ const ForgotPassword = ({ toggleForm }) => {
   };
 
   return (
-    <div className="forgot">
+   
       <div className="auth-container">
         <div className="auth-action-left">
           <div className="auth-form-outer">
@@ -180,7 +180,7 @@ const ForgotPassword = ({ toggleForm }) => {
           </Modal.Footer>
         </Modal>
       </div>
-    </div>
+   
   );
 };
 
