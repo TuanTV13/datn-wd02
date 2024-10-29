@@ -20,6 +20,10 @@ class EventUser extends Model
         'amount',
     ];
 
+    protected $casts = [
+        'checked_in' => 'boolean',
+    ];
+
     /**
      * Mối quan hệ với bảng Event.
      */
