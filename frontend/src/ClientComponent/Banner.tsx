@@ -11,7 +11,9 @@ const Banner = () => {
       content: (
         <div className="lg:h-[600px] h-[300px] pl-16 flex flex-col md:flex-row items-center bg-gradient-to-r from-[#007BFF] to-[#F5F5F5] px-4 py-16">
           <div className="md:w-1/2">
-            <p className="text-yellow-500 text-base tracking-[4px] mb-2">DỊCH VỤ</p>
+            <p className="text-yellow-500 text-base tracking-[4px] mb-2">
+              DỊCH VỤ
+            </p>
             <h1 className="lg:text-[64px] md:text-5xl font-medium mb-4 text-white">
               TỔ CHỨC SỰ KIỆN THEO YÊU CẦU
             </h1>
@@ -21,7 +23,7 @@ const Banner = () => {
               <p>Free Shipping</p>
             </div>
             <button className="bg-[#6C757D] text-white py-2 px-6 rounded-full">
-            Tạo sự kiện
+              Chi tiết sự kiện
             </button>
           </div>
         </div>

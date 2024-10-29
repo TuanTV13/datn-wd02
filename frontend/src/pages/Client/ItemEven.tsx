@@ -160,7 +160,7 @@ const ItemEven = () => {
       {/* 2 */}
       <div className="lg:w-[1200px] mx-auto sm:w-full mb:w-full flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px] mt-4 mb-4">
         <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px] xm:mt-5">
-          SỰ KIỆN ĐẶC BIỆT
+          SỰ KIỆN NỔI BẬT
         </strong>
 
         <div className="grid lg:pt-16 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-[250px_250px_250px_250px_250px]  gap-y-8 mb:gap-y-4 mx-6 md:grid-cols-2">
