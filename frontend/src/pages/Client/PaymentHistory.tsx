@@ -1,28 +1,23 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-const EventHistory = () => {
-  // Dữ liệu tạm thời
+const PaymentHistory = () => {
   const eventData = Array.from({ length: 30 }, (_, index) => ({
     id: index + 1,
     name: `Sự kiện ${String.fromCharCode(65 + (index % 26))}`,
     time: `10:00 - 12:00 (${index + 1}/01/2024)`,
-    location: `Địa điểm ${String.fromCharCode(65 + (index % 26))}`,
-    image: "https://via.placeholder.com/50",
-    status: "Đã tham gia",
+    price: `10000`,
+    payment: "Paypal",
+    status: Math.random() > 0.5 ? "Thành công" : "Thất bại",
   }));
 
-  const eventsPerPage = 6; // Số sự kiện trên mỗi trang
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-
-  // Tính tổng số trang
+  const eventsPerPage = 6;
+  const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(eventData.length / eventsPerPage);
 
-  // Tính các sự kiện cần hiển thị dựa trên trang hiện tại
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = eventData.slice(indexOfFirstEvent, indexOfLastEvent);
 
-  // Hàm xử lý thay đổi trang
   const handlePageChange = (direction) => {
     setCurrentPage((prevPage) => {
       if (direction === "next" && prevPage < totalPages) {
@@ -37,7 +32,7 @@ const EventHistory = () => {
   return (
     <div className="mt-36">
       <div className="p-4 bg-gray-100 rounded-md shadow-md mx-10">
-        <h2 className="text-lg font-semibold mb-4">LỊCH SỬ THAM GIA</h2>
+        <h2 className="text-lg font-semibold mb-4">LỊCH SỬ GIAO DỊCH</h2>
         <div className="overflow-x-auto rounded-md">
           <table className="min-w-full bg-white border border-gray-400">
             <thead>
@@ -45,8 +40,8 @@ const EventHistory = () => {
                 <th className="border border-gray-400 p-2 text-center">STT</th>
                 <th className="border border-gray-400 p-2 text-center">Tên sự kiện</th>
                 <th className="border border-gray-400 p-2 text-center">Thời gian</th>
-                <th className="border border-gray-400 p-2 text-center">Địa điểm</th>
-                <th className="border border-gray-400 p-2 text-center">Hình ảnh</th>
+                <th className="border border-gray-400 p-2 text-center">Số tiền</th>
+                <th className="border border-gray-400 p-2 text-center">Phương thức thanh toán</th>
                 <th className="border border-gray-400 p-2 text-center">Trạng thái</th>
               </tr>
             </thead>
@@ -54,15 +49,23 @@ const EventHistory = () => {
               {currentEvents.map((event, index) => (
                 <tr key={event.id}>
                   <td className="border border-gray-400 p-2 text-center">
-                    {indexOfFirstEvent + index + 1} {/* Tính chỉ số chính xác */}
+                    {indexOfFirstEvent + index + 1}
                   </td>
                   <td className="border border-gray-400 p-2 text-center">{event.name}</td>
                   <td className="border border-gray-400 p-2 text-center">{event.time}</td>
-                  <td className="border border-gray-400 p-2 text-center">{event.location}</td>
+                  <td className="border border-gray-400 p-2 text-center">{event.price}</td>
                   <td className="border border-gray-400 p-2 text-center">
-                    <img src={event.image} alt="Event" className="w-12 h-auto mx-auto" />
+                    {event.payment}
                   </td>
-                  <td className="border border-gray-400 p-2 text-center">{event.status}</td>
+                  <td className="border border-gray-400 p-2 text-center">
+                    <span
+                      className={`px-2 py-1 text-white rounded-[100px] w-24 inline-block text-center ${
+                        event.status === "Thành công" ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    >
+                      {event.status}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -77,7 +80,7 @@ const EventHistory = () => {
             «
           </button>
           <span className="px-3 py-1 border border-gray-400 text-gray-500">
-            {currentPage} / {totalPages} {/* Hiển thị trang hiện tại và tổng số trang */}
+            {currentPage} / {totalPages}
           </span>
           <button
             onClick={() => handlePageChange("next")}
@@ -92,4 +95,4 @@ const EventHistory = () => {
   );
 };
 
-export default EventHistory;
+export default PaymentHistory;
