@@ -7,6 +7,7 @@ use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\CategoryController;
 use App\Http\Controllers\V1\Client\CartController;
 use App\Http\Controllers\V1\Client\EventController as ClientEventController;
+use App\Http\Controllers\V1\Client\HomeController;
 use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
 use App\Http\Controllers\V1\FeedbackController;
@@ -65,8 +66,6 @@ Route::prefix('v1')->group(function () {
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
-
-        Route::post('{event}/feedback-mail', [EventController::class, 'sendFeedbackEmail']);     
     });
 
     Route::get('users', [UserController::class, 'index']);
@@ -114,7 +113,7 @@ Route::prefix('v1')->group(function () {
 
     Route::get('feedbacks', [FeedbackController::class, 'index']);  
     Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {  
-        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá  
+        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData']);  // Lấy dữ liệu đổ ra form đánh giá  
         Route::get('{id}/show', [FeedbackController::class, 'show']);   
         Route::post('submit', [FeedbackController::class, 'submit']);  
         Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
@@ -126,6 +125,13 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [ClientEventController::class, 'index']);
             Route::get('{id}', [ClientEventController::class, 'show']);
             Route::get('filter/{categoryId}', [ClientEventController::class, 'filter']);
+        });
+
+        Route::prefix('home')->group(function () {
+            Route::get('header-events', [HomeController::class, 'headerEvents']);
+            Route::get('upcoming-events', [HomeController::class, 'upcomingEvents']);
+            Route::get('featured-events', [HomeController::class, 'featuredEvents']);
+            Route::get('top-rated-events', [HomeController::class, 'topRatedEvents']);
         });
 
         Route::prefix('carts')->middleware('check.jwt')->group(function () {

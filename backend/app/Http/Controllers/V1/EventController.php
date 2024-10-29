@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers\V1;
 
-use App\Events\EventCompleted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
-use App\Mail\ThankYouMail;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -44,11 +41,10 @@ class EventController extends Controller
             ], 404);
         }
 
-        return view('event-detail', compact('event'));
-        // return response()->json([
-        //     'message' => 'Xem chi tiết sự kiện.',
-        //     'data' => $event
-        // ], 200);
+        return response()->json([
+            'message' => 'Xem chi tiết sự kiện.',
+            'data' => $event
+        ], 200);
     }
 
     public function verifiedEvent($id)
@@ -146,6 +142,11 @@ class EventController extends Controller
                 ], 400);
             }
 
+            $data['display_header'] ??= 0;
+            if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
+                return $validateEventHeader;
+            }
+
             $event = $this->eventRepository->create($data);
 
             $this->handleSpeakers($request, $data, $event);
@@ -165,6 +166,16 @@ class EventController extends Controller
             'message' => 'Tạo sự kiện thành công, vui lòng kiểm tra',
             'data' => $event
         ]);
+    }
+
+    private function validateEventDisplayHeader($data)
+    {
+        $headerEventCount = $this->eventRepository->countHeaderEvents();
+        if ($headerEventCount >= 4 && $data == 1) {
+            return response()->json([
+                'message' => 'Chỉ có thể hiển thị tối đa 4 sự kiện ở phần đầu trang.',
+            ], 400);
+        }
     }
 
     private function validateEventTiming($event, array $data)
@@ -207,7 +218,7 @@ class EventController extends Controller
             ], 404);
         }
 
-        if ($event->status != "PENDING") {
+        if ($event->status != "pending") {
             return response()->json([
                 'message' => 'Sự kiện đã được xác nhận không thể cập nhật'
             ], 403);
@@ -234,6 +245,11 @@ class EventController extends Controller
                 'message' => 'Thời gian và địa điểm (tỉnh, huyện, xã) đã được sử dụng cho sự kiện khác.',
                 'conflicting_event' => $conflictingEvent
             ], 400);
+        }
+
+        $data['display_header'] ??= 0;
+        if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
+            return $validateEventHeader;
         }
 
         try {
@@ -290,38 +306,5 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Khôi phục sự kiện thành công'
         ], 200);
-    }
-
-    public function sendFeedbackEmail($id) 
-    {
-        $event = $this->eventRepository->find($id);
-
-        if (!$event) {
-            return response()->json([
-                'message' => 'Sự kiện không tồn tại.'
-            ], 404);
-        }
-
-        if (Carbon::parse($event->end_date) < now() && $event->status != 'completed') {
-            return response()->json([
-                'message' => 'Không thể gửi mail khi sự kiện chưa hoàn thành.'
-            ], 400);
-        }
-
-        $users = $event->users()->wherePivot('checked_in', 1)->get();
-
-        try {
-            event(new EventCompleted($users, $event));
-            return response()->json([
-                'message' => 'Đã gửi mail thành công.'
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-
-            return response()->json([
-                'message' => 'Có lỗi xảy ra khi gửi mail.',
-            ], 500);
-        }
-        
     }
 }

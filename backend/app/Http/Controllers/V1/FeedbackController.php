@@ -33,15 +33,20 @@ class FeedbackController extends Controller
         ], 200);
     }
 
-    public function getFeedbackFormData($eventId, $userId)
+    public function getFeedbackFormData(Request $request, $eventId, $userId)
     {
         $event = $this->eventRepository->find($eventId);
         $user = $this->userRepository->find($userId);
 
-        if (!$event || !$user) {
-            return response()->json([
-                'message' => 'Không tìm thấy sự kiện hoặc người dùng'
-            ], 404);
+        if (!$request->hasValidSignature()) {
+            return response()->json(['message' => 'Đường dẫn không hợp lệ hoặc đã hết hạn.'], 403);
+        }
+
+        if (!$event) {
+            return response()->json(['message' => 'Sự kiện không tồn tại.'], 404);
+        }
+        if (!$user) {
+            return response()->json(['message' => 'Người dùng không tồn tại.'], 404);
         }
         
         // return response()->json([
@@ -80,6 +85,16 @@ class FeedbackController extends Controller
                 'rating' => 'required|numeric',
                 'feedback' => 'nullable|string',
                 'suggestions' => 'nullable|string',
+            ], 
+            [
+                'event_id.required' => 'Sự kiện không được để trống.',
+                'event_id.exists' => 'Sự kiện không tồn tại.',
+                'user_id.required' => 'Người dùng không được để trống.',
+                'user_id.exists' => 'Người dùng không tồn tại.',
+                'rating.required' => 'Đánh giá không được để trống.',
+                'rating.numeric' => 'Đánh giá phải là số.',
+                'feedback.string' => 'Phản hồi phải là chuỗi.',
+                'suggestions.string' => 'Góp ý phải là chuỗi.',
             ]);
     
             $event = $this->eventRepository->find($data['event_id']);
@@ -109,7 +124,7 @@ class FeedbackController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
     
-            Log::error('Error in feedback submission: ' . $e->getMessage());
+            Log::error('Có lỗi xảy ra khi gửi đánh giá: ' . $e->getMessage());
     
             return response()->json(['message' => 'Đã có lỗi xảy ra khi gửi đánh giá.'], 500);
         }
