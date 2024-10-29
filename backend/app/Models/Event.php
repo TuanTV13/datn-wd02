@@ -77,6 +77,11 @@ class Event extends Model
         return $this->belongsToMany(User::class, 'event_users');
     }
 
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
     public function registrants()
     {
         return $this->hasMany(EventUser::class);
