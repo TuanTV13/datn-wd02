@@ -6,6 +6,7 @@ class EventStatus
 {
     const PENDING = 'pending';
     const CONFIRMED = 'confirmed';
+    const CHECKIN = 'checkin';
     const ONGOING = 'ongoing';
     const CANCELLED = 'cancaled';
     const COMPLETED = 'completed';
@@ -18,6 +19,7 @@ class EventStatus
             self::ONGOING,
             self::CANCELLED,
             self::COMPLETED,
+            self::CHECKIN,
         ];
     }
 }
