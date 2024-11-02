@@ -70,4 +70,52 @@ class EventRepository
 
         return $query->first();
     }
+    
+    public function countHeaderEvents()
+    {
+        return $this->event
+            ->where('display_header', true)
+            ->count();
+    }
+
+    public function getHeaderEvents()
+    {
+        return $this->event
+            ->where('status', 'confirmed')
+            ->where('display_header', true)
+            ->select('id', 'name', 'description', 'thumbnail', 'start_time')
+            ->orderBy('start_time', 'asc')
+            ->limit(4)
+            ->get();
+    }
+    
+    public function getUpcomingEvents()
+    {
+        return $this->event
+            ->where('status', 'confirmed')
+            ->where('start_time', '>', now())
+            ->where('start_time', '<=', now()->addDays(7))
+            ->orderBy('start_time', 'asc')
+            ->limit(12)
+            ->get();
+    }
+
+    public function getFeaturedEvents()
+    {
+        return $this->event
+            ->withCount('registrants')
+            ->orderBy('registrants_count', 'desc')
+            ->limit(10)
+            ->get();
+    }
+
+    public function getTopRatedEvents()
+    {
+        return $this->event
+            ->withSum('feedbacks', 'rating')
+            ->having('feedbacks_sum_rating', '>', 0)
+            ->orderByDesc('feedbacks_sum_rating') 
+            ->limit(12) 
+            ->get();
+    }
 }
