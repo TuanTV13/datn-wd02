@@ -4,7 +4,6 @@ use App\Enums\EventStatus;
 use App\Models\Category;
 use App\Models\District;
 use App\Models\Province;
-use App\Models\Status;
 use App\Models\Ward;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -34,6 +33,7 @@ return new class extends Migration
             $table->string('link_online', 255)->nullable();
             $table->bigInteger('max_attendees')->nullable();
             $table->bigInteger('registed_attendees')->nullable();
+            $table->boolean('display_header')->default(false);
             $table->softDeletes();
             $table->timestamps();
         });
