@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import App from './App.jsx'; // Import component chính của bạn
 import './index.css'; // Import CSS
 import { BrowserRouter } from 'react-router-dom';
+import "react-toastify/dist/ReactToastify.css";
+import TicketsContext from './Contexts/TicketContext.tsx';
 
 // Khởi tạo root chỉ một lần
 const container = document.getElementById('root');
@@ -12,7 +14,9 @@ const root = createRoot(container);
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <TicketsContext>
+        <App />
+      </TicketsContext>
     </BrowserRouter>
   </React.StrictMode>
 );
