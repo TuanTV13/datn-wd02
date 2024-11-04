@@ -24,7 +24,7 @@ class SendFeedbackEmail implements ShouldQueue
     public function handle(EventCompleted $event): void
     {
         foreach ($event->users as $user) {
-            $feedbackUrl = URL::temporarySignedRoute('form.feedback', now()->addMinutes(1), ['event' => $event->event->id, 'user' => $user->id]); 
+            $feedbackUrl = URL::temporarySignedRoute('form.feedback', now()->addMinutes(5), ['event' => $event->event->id, 'user' => $user->id]); 
 
             Mail::send('emails.email-feedback', ['event' => $event->event, 'user' => $user, 'feedbackUrl' => $feedbackUrl], function ($message) use ($user, $event) {
                 $message->to($user->email)
