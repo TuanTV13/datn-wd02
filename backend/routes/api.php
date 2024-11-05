@@ -10,6 +10,7 @@ use App\Http\Controllers\V1\Client\EventController as ClientEventController;
 use App\Http\Controllers\V1\Client\HomeController;
 use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
+use App\Http\Controllers\V1\EventTrackingController;
 use App\Http\Controllers\V1\FeedbackController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
@@ -119,6 +120,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
     });  
 
+    Route::get('getEventDetails/{id}', [EventTrackingController::class, 'getEventDetails']);
     Route::prefix('clients')->group(function () {
 
         Route::prefix('events')->group(function () {

@@ -31,9 +31,10 @@ class EventController extends Controller
         ]);
     }
 
-    public function show($event)
+    public function show($eventId)
     {
-        $event = $this->eventRepository->find($event);
+        $event = $this->eventRepository->find($eventId);
+        $eventAttendees = $this->eventRepository->getEventAttendees($eventId);
 
         if (!$event) {
             return response()->json([
@@ -43,7 +44,8 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Xem chi tiết sự kiện.',
-            'data' => $event
+            'data' => $event,
+            'users' => $eventAttendees
         ], 200);
     }
 
@@ -122,7 +124,6 @@ class EventController extends Controller
             $event->speakers()->attach($existingSpeaker->id);
         }
     }
-
 
     public function create(StoreEventRequest $request)
     {
