@@ -22,6 +22,7 @@ import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
 import EventHistory from "./pages/Client/EventHistory";
 import PaymentHistory from "./pages/Client/PaymentHistory";
+import VerifyEmailPage from './components/Auth/VerifyEmailPage';
 function App() {
   const route = useRoutes([
     {
