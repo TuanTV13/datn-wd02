@@ -22,6 +22,8 @@ import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
 import EventHistory from "./pages/Client/EventHistory";
 import PaymentHistory from "./pages/Client/PaymentHistory";
+import VerifyEmailPage from "./components/Auth/VerifyEmailPage"
+import PaymentPage from "./pages/Client/PaymentPage";
 function App() {
   const route = useRoutes([
     {
@@ -55,6 +57,9 @@ function App() {
     },
     {
       path:'verify-email', element:<VerifyEmailPage/>
+    },
+    {
+      path:'payment', element:<PaymentPage/>
     }
   ]);
   return route;
