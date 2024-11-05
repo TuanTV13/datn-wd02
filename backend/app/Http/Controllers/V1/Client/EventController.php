@@ -68,4 +68,28 @@ class EventController extends Controller
             'message' => 'Chưa đến thời gian check-in sự kiện'
         ]);
     }
+
+    public function show($eventId)
+    {
+        $event = $this->eventRepository->find($eventId);
+
+        if(!$event){
+            return response()->json([
+                'error' => 'Không tìm thấy sự kiện'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $event
+        ], 200);
+    }
+
+    public function index()
+    {
+        $events = $this->eventRepository->getAll();
+
+        return response()->json([
+            'data' => $events
+        ]);
+    }
 }
