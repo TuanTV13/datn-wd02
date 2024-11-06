@@ -7,42 +7,73 @@ const ItemEven = () => {
   // const toggleShowAll = () => {
   //   setShowAll(!showAll);
   // };
+  const [filter, setFilter] = useState("Mới nhất");
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [showFeatured, setShowFeatured] = useState(false);
   const { upcomingEvents, featuredEvents, topRatedEvents } = useContext(HomeCT);
+  // Hàm lọc sự kiện theo tên thành phố hoặc bộ lọc
+  const filteredEvents = upcomingEvents.filter((event) => {
+    // Chuyển đổi giá trị bộ lọc và location của sự kiện thành chữ thường để so sánh không phân biệt hoa thường
+    const normalizedLocation = event.location.toLowerCase();
+    const normalizedFilter = filter.toLowerCase();
+
+    if (normalizedFilter === "mới nhất") {
+      return true; // Hiển thị tất cả sự kiện khi chọn "Mới nhất"
+    } else if (normalizedFilter === "hà nội") {
+      return normalizedLocation === "hà nội";
+    } else if (normalizedFilter === "hồ chí minh") {
+      return normalizedLocation === "hồ chí minh";
+    }
+    return true;
+  });
   return (
     <div>
       {/* 1 */}
       <div className="lg:w-[1200px] mx-auto sm:w-[95vw] mb:w-[342px] flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px]">
-        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px]">
+        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px] ml-2">
           SỰ KIỆN SẮP DIỄN RA
         </strong>
 
-        <div className="flex bg-white lg:mt-6">
+        <div className="flex lg:mt-6">
           <div className="overflow-x-auto w-full">
             <ul className="flex space-x-4 w-max px-4 mb-4 mt-4">
-              <li className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full border border-black whitespace-nowrap">
+              <li
+                className={`px-4 py-2 ${
+                  filter === "Mới nhất"
+                    ? "bg-gray-100"
+                    : "hover:text-[#6C757D] hover:bg-[#F2F6F4]"
+                } rounded-full border whitespace-nowrap`}
+                onClick={() => setFilter("Mới nhất")}
+              >
                 <Link to={""}>Mới nhất</Link>
               </li>
-              <li className="px-4 py-2 hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black rounded-full border-gray-300 border whitespace-nowrap">
-                <Link to={""}>Đại nhạc hội</Link>
-              </li>
-              <li className="px-4 py-2 hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black rounded-full border-gray-300 border whitespace-nowrap">
+              <li
+                className={`px-4 py-2 ${
+                  filter === "Hà Nội"
+                    ? "bg-gray-100"
+                    : "hover:text-[#6C757D] hover:bg-[#F2F6F4]"
+                } rounded-full border-gray-300 border whitespace-nowrap`}
+                onClick={() => setFilter("Hà Nội")}
+              >
                 <Link to={""}>Hà Nội</Link>
               </li>
-              <li className="px-4 py-2 hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black rounded-full border-gray-300 border whitespace-nowrap">
+              <li
+                className={`px-4 py-2 ${
+                  filter === "Hồ Chí Minh"
+                    ? "bg-gray-100"
+                    : "hover:text-[#6C757D] hover:bg-[#F2F6F4]"
+                } rounded-full border-gray-300 border whitespace-nowrap`}
+                onClick={() => setFilter("Hồ Chí Minh")}
+              >
                 <Link to={""}>Hồ Chí Minh</Link>
-              </li>
-              <li className="px-4 py-2 hover:text-[#6C757D] hover:bg-[#F2F6F4] hover:border-black rounded-full border-gray-300 border whitespace-nowrap">
-                <Link to={""}>Lễ hội</Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="grid lg:pt-8 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-6">
-          {upcomingEvents
-            .slice(0, showUpcoming ? upcomingEvents.length : 4)
+        <div className="grid lg:pt-8 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-12 mt-4">
+          {filteredEvents
+            .slice(0, showUpcoming ? filteredEvents.length : 4)
             .map((event) => (
               <div
                 key={event.id}
@@ -111,11 +142,11 @@ const ItemEven = () => {
 
       {/* 2 */}
       <div className="lg:w-[1200px] mx-auto sm:w-full mb:w-full flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px] mt-4 mb-4">
-        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px] xm:mt-5">
+        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px] xm:mt-5 ml-2">
           SỰ KIỆN NỔI BẬT
         </strong>
 
-        <div className="grid lg:pt-16 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-[250px_250px_250px_250px_250px] gap-y-8 mb:gap-y-4 mx-6 md:grid-cols-2">
+        <div className="grid lg:pt-16 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-[250px_250px_250px_250px_250px] gap-y-8 mb:gap-y-4 mx-12 md:grid-cols-2 mt-4">
           {featuredEvents
             .slice(0, showFeatured ? featuredEvents.length : 5)
             .map((event) => (
@@ -123,7 +154,7 @@ const ItemEven = () => {
                 key={event.id}
                 className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3"
               >
-                <div className="w-full h-[99px] bg-gray-200 mb-2">
+                <div className="w-full h-[120px] bg-gray-200 mb-2">
                   <img
                     src={event.thumbnail || ""}
                     alt={event.name}
@@ -186,11 +217,11 @@ const ItemEven = () => {
 
       {/* 3 */}
       <div className="lg:w-[1200px] mx-auto sm:w-full mb:w-full flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px] mt-4 mb-4">
-        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px] xm:mt-5">
+        <strong className="lg:text-[30px] mb:text-[32px] lg:leading-[30px] mb:leading-[40px] xm:mt-5 ml-2">
           SỰ KIỆN ĐƯỢC ĐÁNH GIÁ CAO
         </strong>
 
-        <div className="grid lg:pt-16 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-6">
+        <div className="grid lg:pt-16 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-12 mt-4">
           {/* <!-- item1 --> */}
           {topRatedEvents?.map((event) => (
             <div
