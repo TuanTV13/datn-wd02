@@ -79,11 +79,11 @@ class AuthController extends Controller
             return redirect('/your-react-url?status=already_verified');
         }
 
-        if ($user->email_verified_at) {
-            return response()->json([
-                'message' => 'Tài khoản của bạn đã được xác thực trước đó.'
-            ]);
-        }
+        // if ($user->email_verified_at) {
+        //     return response()->json([
+        //         'message' => 'Tài khoản của bạn đã được xác thực trước đó.'
+        //     ]);
+        // }
 
         $user->email_verified_at = now();
         $user->email_verification_token = null;
@@ -211,8 +211,6 @@ class AuthController extends Controller
             'message' => 'Mã xác thực đã được gửi vào email của bạn, vui lòng kiểm tra.'
         ]);
     }
-
-
 
     public function resetPasswordWithOTP(Request $request)
     {

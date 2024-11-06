@@ -23,6 +23,7 @@ return new class extends Migration
             $table->foreignIdFor(Province::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(District::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(Ward::class)->constrained()->onDelete('cascade');
+            $table->json('speakers')->nullable();
             $table->string('name', 255);
             $table->text('description');
             $table->string('thumbnail', 255);

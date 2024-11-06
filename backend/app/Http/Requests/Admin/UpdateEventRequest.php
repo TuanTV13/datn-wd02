@@ -29,6 +29,7 @@ class UpdateEventRequest extends FormRequest
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
             'display_header' => 'boolean',
+
         ];
     }
 
