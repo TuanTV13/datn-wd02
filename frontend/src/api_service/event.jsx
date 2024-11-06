@@ -21,13 +21,15 @@ export const getEvents = async () => {
  const addEvent = async (eventData) => {
    // Lấy token từ localStorage (hoặc nơi bạn lưu token)
    const token = localStorage.getItem('token'); // Điều chỉnh theo cách bạn lưu token
- 
+  
+  
    // Tạo headers với token
    const headers = {
        'Authorization': `Bearer ${token}`,
        'Content-Type': 'multipart/form-data', // Nếu bạn gửi FormData
    };
- 
+  
+
    try {
        const response = await axios.post(`${API_URL}/events/create`, eventData, { headers });
        return response.data;
@@ -56,3 +58,14 @@ export const getEvents = async () => {
      throw new Error('Lỗi khi cập nhật sự kiện: ' + error.message);
    }
  };
+
+
+export const fetchCategories = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/categories`);
+    return response.data;  // Đảm bảo trả về đối tượng chứa trường 'data'
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return { data: [] };  // Trả về mảng rỗng nếu có lỗi
+  }
+};

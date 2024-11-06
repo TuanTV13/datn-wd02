@@ -1,332 +1,255 @@
 import React, { useState, useEffect } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { useForm } from 'react-hook-form';
-import { addEvent } from '../../../api_service/event'; // Import hàm addEvent
-import ModalInfo from '../../../components/Admin/ErrorModal'; // Import ModalInfo
-import AddSpeakerModal from '../../../components/Admin/AddSpeakerModal'; // Import AddSpeakerModal
-import { getSpeakers, addSpeaker } from '../../../api_service/speaker'; // Import hàm getSpeakers và addSpeaker
-
+import { addEvent, fetchCategories } from '../../../api_service/event';
+import { fetchProvinces, fetchDistricts, fetchWards } from '../../../api_service/location';
 const AddEvent = () => {
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm();
-  const [description, setDescription] = useState('');
-  const [thumbnail, setThumbnail] = useState(null);
-  const [selectedSpeakers, setSelectedSpeakers] = useState([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [modalInfo, setModalInfo] = useState({ show: false, message: '', type: '' });
-  const [showAddSpeakerModal, setShowAddSpeakerModal] = useState(false);
-  const [speakers, setSpeakers] = useState([]); // Khai báo state cho danh sách diễn giả
-  
-  const [speakerName, setSpeakerName] = useState('');
-  const [speakerEmail, setSpeakerEmail] = useState('');
-  const [speakerPhone, setSpeakerPhone] = useState('');
-  const [speakerProfile, setSpeakerProfile] = useState('');
-  const [speakerImageUrl, setSpeakerImageUrl] = useState('');
+  const [formData, setFormData] = useState({
+    category_id: '',
+    province_id: '',
+    district_id: '',
+    ward_id: '',
+    name: '',
+    description: '',
+    start_time: '',
+    end_time: '',
+    location: '',
+    event_type: '',
+    thumbnail: null,
+  });
 
-  const categories = [
-    { id: 1, name: 'Hội thảo' },
-    { id: 2, name: 'Buổi tọa đàm' },
-    { id: 3, name: 'Khóa học' }
-  ];
-
-  const modules = {
-    toolbar: [
-      [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'align': [] }],
-      ['link', 'image'] // Giữ icon ảnh có sẵn của Quill
-    ],
-  };
-
-  const onSubmit = async (data) => {
-    const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-
-    if (thumbnail) {
-      formData.append('thumbnail', thumbnail);
-    }
-
-    formData.append('speakers', JSON.stringify(selectedSpeakers));
-
-    try {
-      const response = await addEvent(formData); // Gọi service addEvent
-      setModalInfo({ show: true, message: 'Sự kiện đã được thêm thành công.', type: 'success' });
-      resetForm();
-    } catch (error) {
-      setModalInfo({ show: true, message: error.message || 'Có lỗi xảy ra. Vui lòng thử lại.', type: 'error' });
-    }
-  };
-
-  const resetForm = () => {
-    setValue('name', '');
-    setValue('eventType', '');
-    setValue('startDate', '');
-    setValue('endDate', '');
-    setValue('participants', '');
-    setValue('location', '');
-    setValue('zoomLink', '');
-    setDescription('');
-    setThumbnail(null);
-    setSelectedSpeakers([]);
-  };
-
-  const handleFileChange = (e) => {
-    setThumbnail(e.target.files[0]);
-  };
-
-  const toggleSpeakerSelection = (speakerId) => {
-    if (selectedSpeakers.includes(speakerId)) {
-      setSelectedSpeakers(selectedSpeakers.filter((id) => id !== speakerId));
-    } else {
-      setSelectedSpeakers([...selectedSpeakers, speakerId]);
-    }
-  };
+  const [categories, setCategories] = useState([]);
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
 
   useEffect(() => {
-    // Lấy danh sách diễn giả từ API khi component được mount
-    const loadSpeakers = async () => {
-      try {
-        const data = await getSpeakers(); // Gọi hàm getSpeakers
-        setSpeakers(data); // Cập nhật danh sách diễn giả
-      } catch (error) {
-        setModalInfo({ show: true, message: 'Không thể tải danh sách diễn giả.', type: 'error' });
+    // Kiểm tra nếu dữ liệu trả về từ API là mảng
+    fetchCategories()  // Giả sử fetchCategories là hàm gọi API
+    .then((response) => {
+      // Kiểm tra nếu dữ liệu trả về có trường 'data' và là mảng
+      if (response && response.data && Array.isArray(response.data)) {
+        setCategories(response.data);  // Gán mảng danh mục vào state
+      } else {
+        console.error('Dữ liệu trả về không chứa trường "data" hoặc không phải mảng');
+        setCategories([]);  // Gán mảng rỗng nếu không đúng cấu trúc
       }
-    };
+    })
+    .catch((error) => {
+      console.error('Có lỗi khi gọi API:', error);
+      setCategories([]);  // Đảm bảo mảng rỗng khi có lỗi
+    });
 
-    loadSpeakers();
+    fetchProvinces().then((data) => {
+      if (Array.isArray(data)) {
+        setProvinces(data);
+      } else {
+        console.error('Dữ liệu trả về không phải là mảng:', data);
+        setProvinces([]); // Gán giá trị mặc định là mảng rỗng nếu dữ liệu không phải mảng
+      }
+    });
   }, []);
 
-  const addNewSpeaker = async () => {
-    if (speakerName && speakerEmail && speakerPhone) {
-      try {
-        const newSpeaker = await addSpeaker({
-          name: speakerName,
-          email: speakerEmail,
-          phone: speakerPhone,
-          profile: speakerProfile,
-          image_url: speakerImageUrl
-        }); // Gửi yêu cầu thêm diễn giả mới
-        setSpeakers([...speakers, newSpeaker]); // Cập nhật danh sách diễn giả
-        resetSpeakerForm(); // Reset form diễn giả
-        setShowAddSpeakerModal(false);
-      } catch (error) {
-        setModalInfo({ show: true, message: 'Không thể thêm diễn giả mới.', type: 'error' });
+  const handleProvinceChange = async (provinceId) => {
+    setFormData({ ...formData, province_id: provinceId, district_id: '', ward_id: '' });
+    const districtsData = await fetchDistricts(provinceId);
+    setDistricts(districtsData);
+  };
+
+  const handleDistrictChange = async (districtId) => {
+    setFormData({ ...formData, district_id: districtId, ward_id: '' });
+    const wardsData = await fetchWards(districtId);
+    setWards(wardsData);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData);  // Kiểm tra giá trị của formData trước khi gửi
+  
+    // Tạo FormData và gửi yêu cầu lên backend
+    const dataToSubmit = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      // Kiểm tra nếu giá trị là file
+      if (key === "thumbnail" && value) {
+        dataToSubmit.append(key, value);
+      } else if (value && value !== "") {
+        dataToSubmit.append(key, value);
       }
+    });
+  
+    // Kiểm tra xem có thiếu trường nào không
+    if (dataToSubmit.has("category_id") && dataToSubmit.has("description") && dataToSubmit.has("district_id") &&
+      dataToSubmit.has("start_time") && dataToSubmit.has("end_time") && dataToSubmit.has("thumbnail")) {
+      addEvent(dataToSubmit);
+    } else {
+      console.error("Dữ liệu gửi lên chưa đầy đủ");
     }
   };
-
-  const resetSpeakerForm = () => {
-    setSpeakerName('');
-    setSpeakerEmail('');
-    setSpeakerPhone('');
-    setSpeakerProfile('');
-    setSpeakerImageUrl('');
-  };
-
-
-  
   return (
-    <div>
-      <form className="mx-auto p-6 bg-white shadow-md rounded-lg" onSubmit={handleSubmit(onSubmit)}>
-        <h2 className="text-2xl font-bold text-center mb-5">Thêm mới sự kiện</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="event-name" className="block text-sm font-medium text-gray-700">Tên sự kiện</label>
-            <input
-              type="text"
-              id="event-name"
-              {...register('name', { required: 'Tên sự kiện là bắt buộc' })}
-              className={`mt-1 block w-full px-4 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-            />
-            {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="event-type" className="block text-sm font-medium text-gray-700">Loại hình sự kiện</label>
-            <select
-              id="event-type"
-              {...register('eventType', { required: 'Vui lòng chọn loại hình sự kiện' })}
-              className={`mt-1 block w-full px-4 py-2 border ${errors.eventType ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-            >
-              <option value="">Chọn loại hình</option>
-              <option value="Online">Trực tuyến</option>
-              <option value="Offline">Trực tiếp</option>
-            </select>
-            {errors.eventType && <p className="text-red-500 text-sm">{errors.eventType.message}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="start-date" className="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
-            <input
-              type="date"
-              id="start-date"
-              {...register('startDate', { required: 'Ngày bắt đầu là bắt buộc' })}
-              className={`mt-1 block w-full px-4 py-2 border ${errors.startDate ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-            />
-            {errors.startDate && <p className="text-red-500 text-sm">{errors.startDate.message}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="end-date" className="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
-            <input
-              type="date"
-              id="end-date"
-              {...register('endDate', { required: 'Ngày kết thúc là bắt buộc' })}
-              className={`mt-1 block w-full px-4 py-2 border ${errors.endDate ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-            />
-            {errors.endDate && <p className="text-red-500 text-sm">{errors.endDate.message}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="participants" className="block text-sm font-medium text-gray-700">Số lượng tham gia</label>
-            <input
-              type="number"
-              id="participants"
-              {...register('participants', { required: 'Số lượng tham gia là bắt buộc' })}
-              className={`mt-1 block w-full px-4 py-2 border ${errors.participants ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-            />
-            {errors.participants && <p className="text-red-500 text-sm">{errors.participants.message}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="speakers" className="block text-sm font-medium text-gray-700">Diễn giả</label>
-            <div className="relative mt-1">
-              <button
-                type="button"
-                className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              >
-                Chọn diễn giả
-              </button>
-
-              {isDropdownOpen && (
-                <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg">
-                  {speakers.map((speaker) => (
-                    <li
-                      key={speaker.id}
-                      className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                      onClick={() => toggleSpeakerSelection(speaker.id)}
-                    >
-                      <input
-                        type="checkbox"
-                        className="mr-2"
-                        checked={selectedSpeakers.includes(speaker.id)}
-                        readOnly
-                      />
-                      {speaker.name}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div className="mt-2">
-              <button
-                type="button"
-                onClick={() => setShowAddSpeakerModal(true)}
-                className="text-blue-500 hover:underline"
-              >
-                Thêm mới diễn giả
-              </button>
-            </div>
-          </div>
-          <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700">Địa điểm</label>
-            <input
-              type="text"
-              id="location"
-              {...register('location', { required: 'Địa điểm tổ chức là bắt buộc' })}
-              className={`mt-1 block w-full px-4 py-2 border ${errors.location ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-           
-              />
-              {errors.location && <p className="text-red-500 text-sm">{errors.location.message}</p>}
-            </div>
-            <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700">Danh mục</label>
-          <select
-            id="category"
-            {...register('category', { required: 'Vui lòng chọn danh mục' })}
-            className={`mt-1 block w-full px-4 py-2 border ${errors.category ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-          >
-            <option value="">Chọn danh mục</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
-        </div>
-            <div>
-              <label htmlFor="zoomLink" className="block text-sm font-medium text-gray-700">Link Zoom</label>
-              <input
-                type="url"
-                id="zoomLink"
-                {...register('zoomLink')}
-                className={`mt-1 block w-full px-4 py-2 border ${errors.zoomLink ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-              />
-              {errors.zoomLink && <p className="text-red-500 text-sm">{errors.zoomLink.message}</p>}
-            </div>
-              
-            <div>
-              <label htmlFor="thumbnail" className="block text-sm font-medium text-gray-700">Hình ảnh đại diện</label>
-              <input
-                type="file"
-                id="thumbnail"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-            </div>
-          </div>
-  
-          <div className="mt-4">
-  <label htmlFor="description" className="block text-sm font-medium text-gray-700">Mô tả sự kiện</label>
-  <ReactQuill
-    theme="snow"
-    value={description}
-    onChange={setDescription}
-    modules={modules}
-    className="mt-1 border border-gray-300 rounded-md"
-  />
-</div>
-
-  
-    <div className="mt-6 flex justify-end space-x-4">
-          <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-           Thêm sự kiện
-          </button>
-        </div>
-        </form>
-  
-        <ModalInfo 
-        show={modalInfo.show}
-        message={modalInfo.message}
-        type={modalInfo.type}
-        onClose={() => setModalInfo({ show: false })}
-      />
-
-      <AddSpeakerModal 
-        show={showAddSpeakerModal}
-        speakerName={speakerName}
-        setSpeakerName={setSpeakerName}
-        speakerEmail={speakerEmail}
-        setSpeakerEmail={setSpeakerEmail}
-        speakerPhone={speakerPhone}
-        setSpeakerPhone={setSpeakerPhone}
-        speakerProfile={speakerProfile}
-        setSpeakerProfile={setSpeakerProfile}
-        speakerImageUrl={speakerImageUrl}
-        setSpeakerImageUrl={setSpeakerImageUrl}
-        addNewSpeaker={addNewSpeaker}
-        onClose={() => setShowAddSpeakerModal(false)}
-      />
+    <form onSubmit={handleSubmit}>
+       {/* Danh mục */}
+       <div>
+        <label htmlFor="category_id">Danh mục sự kiện:</label>
+        <select
+  id="category_id"
+  value={formData.category_id}
+  onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+  required
+>
+  <option value="">Chọn danh mục</option>
+  {categories.length > 0 ? (
+    categories.map((category) => (
+      <option key={category.id} value={category.id}>
+        {category.name}
+      </option>
+    ))
+  ) : (
+    <option disabled>Không có danh mục</option>
+  )}
+</select>
       </div>
-    );
-  };
-  
-  export default AddEvent;
-  
+
+      {/* Tỉnh */}
+      <div>
+        <label htmlFor="province_id">Tỉnh:</label>
+        <select
+          id="province_id"
+          value={formData.province_id}
+          onChange={(e) => handleProvinceChange(e.target.value)}
+          required
+        >
+          <option value="">Chọn tỉnh</option>
+          {provinces.map((province) => (
+            <option key={province.id} value={province.id}>
+              {province.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Quận/Huyện */}
+      <div>
+        <label htmlFor="district_id">Quận/Huyện:</label>
+        <select
+          id="district_id"
+          value={formData.district_id}
+          onChange={(e) => handleDistrictChange(e.target.value)}
+          required
+        >
+          <option value="">Chọn quận/huyện</option>
+          {districts.map((district) => (
+            <option key={district.id} value={district.id}>
+              {district.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Phường/Xã */}
+      <div>
+        <label htmlFor="ward_id">Phường/Xã:</label>
+        <select
+          id="ward_id"
+          value={formData.ward_id}
+          onChange={(e) => setFormData({ ...formData, ward_id: e.target.value })}
+          required
+        >
+          <option value="">Chọn phường/xã</option>
+          {wards.map((ward) => (
+            <option key={ward.id} value={ward.id}>
+              {ward.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Tên sự kiện */}
+      <div>
+        <label htmlFor="name">Tên sự kiện:</label>
+        <input
+          type="text"
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          required
+        />
+      </div>
+
+      {/* Mô tả sự kiện */}
+      <div>
+        <label htmlFor="description">Mô tả sự kiện:</label>
+        <textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          required
+        />
+      </div>
+
+      {/* Thời gian bắt đầu */}
+      <div>
+        <label htmlFor="start_time">Thời gian bắt đầu:</label>
+        <input
+          type="datetime-local"
+          id="start_time"
+          value={formData.start_time}
+          onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+          required
+        />
+      </div>
+
+      {/* Thời gian kết thúc */}
+      <div>
+        <label htmlFor="end_time">Thời gian kết thúc:</label>
+        <input
+          type="datetime-local"
+          id="end_time"
+          value={formData.end_time}
+          onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+          required
+        />
+      </div>
+
+      {/* Địa điểm */}
+      <div>
+        <label htmlFor="location">Địa điểm:</label>
+        <input
+          type="text"
+          id="location"
+          value={formData.location}
+          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+          required
+        />
+      </div>
+
+      {/* Loại sự kiện */}
+      <div>
+        <label htmlFor="event_type">Loại sự kiện:</label>
+        <select
+          id="event_type"
+          value={formData.event_type}
+          onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
+          required
+        >
+          <option value="">Chọn loại sự kiện</option>
+          <option value="online">Online</option>
+          <option value="offline">Offline</option>
+        </select>
+      </div>
+
+      {/* Ảnh đại diện */}
+      <div>
+        <label htmlFor="thumbnail">Ảnh đại diện:</label>
+        <input
+          type="file"
+          id="thumbnail"
+          onChange={(e) => setFormData({ ...formData, thumbnail: e.target.files[0] })}
+          required
+        />
+      </div>
+
+      <button type="submit">Thêm sự kiện</button>
+    </form>
+  );
+};
+
+export default AddEvent;
