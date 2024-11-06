@@ -18,6 +18,7 @@ class Event extends Model
         'district_id',
         'ward_id',
         'status',
+        'speakers',
         'name',
         'description',
         'thumbnail',
@@ -60,11 +61,6 @@ class Event extends Model
     public function ward()
     {
         return $this->belongsTo(Ward::class);
-    }
-
-    public function speakers()
-    {
-        return $this->belongsToMany(Speaker::class, 'event_speakers');
     }
 
     public function tickets()

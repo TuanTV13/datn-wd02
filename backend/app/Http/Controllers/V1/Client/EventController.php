@@ -38,9 +38,7 @@ class EventController extends Controller
             ], 404);
         }
 
-        $user = EventUser::where('user_id', $userId)
-            ->where('event_id', $eventId)
-            ->where('ticket_id', $ticketId)
+        $user = EventUser::where('ticket_code', $ticketCode)
             ->first();
 
         if(!$user){

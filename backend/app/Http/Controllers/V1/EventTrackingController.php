@@ -18,6 +18,7 @@ class EventTrackingController extends Controller
     public function getEventDetails($eventId)
     {
         $event = $this->eventRepository->find($eventId);
+        $event->speakers = $event->speakers ? json_decode($event->speakers, true) : null;
 
         $eventAttendees = $this->eventRepository->getEventAttendees($eventId);
 

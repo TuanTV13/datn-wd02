@@ -18,7 +18,7 @@ class EventRepository
     {
         $event = $this->find($eventId);
 
-        return $event->users()->get();
+        return $event->users()->withPivot('checked_in')->get();
     }
 
     public function getTicketsSold($eventId)

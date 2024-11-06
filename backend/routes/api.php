@@ -38,13 +38,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('locations')->group(function () {
+Route::prefix('v1/locations')->group(function () {
     Route::get('/provinces', [LocationController::class, 'showProvinces']);
     Route::get('/districts/{provinceId}', [LocationController::class, 'getDistricts']);
     Route::get('/wards/{districtId}', [LocationController::class, 'getWards']);
 });
 
-Route::prefix('role')->middleware(['check.jwt'])->group(function () {
+Route::prefix('v1/role')->middleware(['check.jwt'])->group(function () {
     Route::get('/{id}/permissions', [RolePermissionController::class, 'getPermissionsByRole']);
     Route::get('/{id}', [RolePermissionController::class, 'assignAdminRole'])->name('add.role');
     Route::post('/{id}/permissions', [RolePermissionController::class, 'assignPermissionsToRole']);
