@@ -22,8 +22,7 @@ import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
 import EventHistory from "./pages/Client/EventHistory";
 import PaymentHistory from "./pages/Client/PaymentHistory";
-import VerifyEmailPage from "./components/Auth/VerifyEmailPage"
-import PaymentPage from "./pages/Client/PaymentPage";
+import VerifyEmailPage from "./components/Auth/VerifyEmailPage";
 function App() {
   const route = useRoutes([
     {
@@ -36,8 +35,6 @@ function App() {
         { path: "event-category", element: <CategoryEven /> },
         { path: "cart", element: <Cart/>},
         { path: "checkout", element: <CheckOut/>},
-        { path: "event-history", element: <EventHistory/>},
-        { path: "payment-history", element: <PaymentHistory/>},
       ],
     },
     {path:'admin',element: <LayoutAdmin />,children:[
@@ -54,12 +51,6 @@ function App() {
     ]},
     {
       path:'auth', element: <Auth/>
-    },
-    {
-      path:'verify-email', element:<VerifyEmailPage/>
-    },
-    {
-      path:'payment', element:<PaymentPage/>
     }
   ]);
   return route;

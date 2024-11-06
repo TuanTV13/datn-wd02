@@ -14,14 +14,37 @@ class EventRepository
         $this->event = $event;
     }
 
+    public function getEventAttendees($eventId)
+    {
+        $event = $this->find($eventId);
+
+        return $event->users()->withPivot('checked_in')->get();
+    }
+
+    public function getTicketsSold($eventId)
+    {
+        $event = $this->find($eventId);
+
+        return $event->transactions()->where('status', 'completed')->count();
+    }
+
+    public function toltalAmount($eventId)
+    {
+        $event = $this->find($eventId);
+
+        return $event->transactions()
+            ->where('status', 'completed')
+            ->sum('total_amount');
+    }
+
     public function getAll()
     {
-        return $this->event->with(['speakers', 'category', 'province', 'district', 'ward'])->get();
+        return $this->event->get();
     }
 
     public function find($id)
     {
-        return $this->event->with(['speakers', 'category', 'province', 'district', 'ward'])->find($id);
+        return $this->event->find($id);
     }
 
     public function findByCategory($categoryId)
@@ -70,7 +93,7 @@ class EventRepository
 
         return $query->first();
     }
-    
+
     public function countHeaderEvents()
     {
         return $this->event
@@ -88,7 +111,7 @@ class EventRepository
             ->limit(4)
             ->get();
     }
-    
+
     public function getUpcomingEvents()
     {
         return $this->event
@@ -114,8 +137,8 @@ class EventRepository
         return $this->event
             ->withSum('feedbacks', 'rating')
             ->having('feedbacks_sum_rating', '>', 0)
-            ->orderByDesc('feedbacks_sum_rating') 
-            ->limit(12) 
+            ->orderByDesc('feedbacks_sum_rating')
+            ->limit(12)
             ->get();
     }
 }

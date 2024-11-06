@@ -10,6 +10,7 @@ use App\Http\Controllers\V1\Client\EventController as ClientEventController;
 use App\Http\Controllers\V1\Client\HomeController;
 use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
+use App\Http\Controllers\V1\EventTrackingController;
 use App\Http\Controllers\V1\FeedbackController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
@@ -37,13 +38,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('locations')->group(function () {
+Route::prefix('v1/locations')->group(function () {
     Route::get('/provinces', [LocationController::class, 'showProvinces']);
     Route::get('/districts/{provinceId}', [LocationController::class, 'getDistricts']);
     Route::get('/wards/{districtId}', [LocationController::class, 'getWards']);
 });
 
-Route::prefix('role')->middleware(['check.jwt'])->group(function () {
+Route::prefix('v1/role')->middleware(['check.jwt'])->group(function () {
     Route::get('/{id}/permissions', [RolePermissionController::class, 'getPermissionsByRole']);
     Route::get('/{id}', [RolePermissionController::class, 'assignAdminRole'])->name('add.role');
     Route::post('/{id}/permissions', [RolePermissionController::class, 'assignPermissionsToRole']);
@@ -119,9 +120,12 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
     });  
 
+    Route::get('getEventDetails/{id}', [EventTrackingController::class, 'getEventDetails']);
     Route::prefix('clients')->group(function () {
 
         Route::prefix('events')->group(function () {
+            Route::get('/', [ClientEventController::class, 'index']);
+            Route::get('{id}', [ClientEventController::class, 'show']);
             Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
         });
 
