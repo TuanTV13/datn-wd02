@@ -211,7 +211,7 @@ const Header = () => {
               <Link to={``}>Trang chủ</Link>
             </li>
             <li className="relative">
-              <Link to={`event-category`}>Sự kiện</Link>
+              <Link to={`event-list`}>Sự kiện</Link>
               {/* {openMenu === "suKien" && (
                 <ul className="absolute bg-gray-100 shadow-lg mt-2 rounded-lg p-2 w-[230px]">
                   <li className="flex hover:bg-gray-300">
