@@ -123,6 +123,8 @@ const Header = () => {
             </form>
           </div>
 
+
+
           <div className="flex gap-x-4 items-center">
             <Link to={"auth"}>
               <span className="text-sm">Your Account</span>
@@ -188,7 +190,19 @@ const Header = () => {
           </div>
         </div>
       </div>
-
+                {/* <!-- form mobile --> */}
+                <div className=" *:h-[58px] lg:hidden mb:block w-full">
+            <form className="flex *:h-[36px] justify-center items-center gap-x-2">
+                <input type="text" className="border rounded-full w-[298px] px-5" placeholder="Search"/>
+                <button className="rounded-[50%] bg-[#6C757D] w-[36px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" className="size-6 text-white mx-auto">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </button>
+            </form>
+        </div>
       {/* Desktop Menu */}
       <div className="w-full hidden lg:flex justify-center items-center">
         <div>
@@ -197,7 +211,7 @@ const Header = () => {
               <Link to={``}>Trang chủ</Link>
             </li>
             <li className="relative">
-              <Link to={`event-category`}>Sự kiện</Link>
+              <Link to={`event-list`}>Sự kiện</Link>
               {/* {openMenu === "suKien" && (
                 <ul className="absolute bg-gray-100 shadow-lg mt-2 rounded-lg p-2 w-[230px]">
                   <li className="flex hover:bg-gray-300">

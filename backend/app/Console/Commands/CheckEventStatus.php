@@ -3,9 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Events\EventCompleted;
+use App\Events\EventUpcoming;
 use App\Models\Event;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class CheckEventStatus extends Command
 {
@@ -40,6 +42,9 @@ class CheckEventStatus extends Command
             
             if ($startTime->greaterThan($now) && $now->lessThanOrEqualTo($addHourLater) && $event->status === 'confirmed') {
                 $event->update(['status' => 'checkin']);
+                $users = $event->users()->select('users.id', 'users.name', 'users.email')->distinct()->get();
+                
+                event(new EventUpcoming($users, $event));
                 $this->info("Đã cập nhật trạng thái của sự kiện {$event->id} thành checkin.");
             }
             
