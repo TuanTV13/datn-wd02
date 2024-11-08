@@ -19,7 +19,7 @@ class EventController extends Controller
         $this->ticketRepository = $ticketRepository;
         $this->transactionRepository = $transactionRepository;
     }
-
+    
     public function checkIn(Request $request, $eventId)
     {
         $request->validate([

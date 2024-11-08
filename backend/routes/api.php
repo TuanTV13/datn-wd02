@@ -125,7 +125,7 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('events')->group(function () {
             Route::get('/', [ClientEventController::class, 'index']);
-            Route::get('{id}', [ClientEventController::class, 'show']);
+            Route::get('{id}', [ClientEventController::class, 'show'])->name('client.event.show');
             Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
         });
 
