@@ -179,6 +179,7 @@ class PaymentController extends Controller
                 // Lưu dữ liệu thông tin người dùng mua vé
                 $user->events()->attach($ticket->event_id, [
                     'ticket_id' => $ticket->id,
+                    'ticket_code' => $ticketCode,
                     'checked_in' => false,
                     'order_date' => now(),
                     'original_price' => $ticket->price,
@@ -206,6 +207,7 @@ class PaymentController extends Controller
                 // Lưu dữ liệu thông tin người dùng mua vé
                 $user->events()->attach($ticket->event_id, [
                     'ticket_id' => $ticket->id,
+                    'ticket_code' => $ticketCode,
                     'checked_in' => false,
                     'order_date' => now(),
                     'original_price' => $ticket->price,

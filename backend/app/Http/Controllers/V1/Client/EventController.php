@@ -19,22 +19,6 @@ class EventController extends Controller
         $this->ticketRepository = $ticketRepository;
         $this->transactionRepository = $transactionRepository;
     }
-
-    public function show($event)
-    {
-        $event = $this->eventRepository->find($event);
-
-        if (!$event) {
-            return response()->json([
-                'message' => 'Không tìm thấy sự kiện'
-            ], 404);
-        }
-
-        return response()->json([
-            'message' => 'Xem chi tiết sự kiện.',
-            'data' => $event
-        ], 200);
-    }
     
     public function checkIn(Request $request, $eventId)
     {
@@ -54,9 +38,7 @@ class EventController extends Controller
             ], 404);
         }
 
-        $user = EventUser::where('user_id', $userId)
-            ->where('event_id', $eventId)
-            ->where('ticket_id', $ticketId)
+        $user = EventUser::where('ticket_code', $ticketCode)
             ->first();
 
         if(!$user){
@@ -82,6 +64,30 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Chưa đến thời gian check-in sự kiện'
+        ]);
+    }
+
+    public function show($eventId)
+    {
+        $event = $this->eventRepository->find($eventId);
+
+        if(!$event){
+            return response()->json([
+                'error' => 'Không tìm thấy sự kiện'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $event
+        ], 200);
+    }
+
+    public function index()
+    {
+        $events = $this->eventRepository->getAll();
+
+        return response()->json([
+            'data' => $events
         ]);
     }
 }
