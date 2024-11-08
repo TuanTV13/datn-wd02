@@ -20,6 +20,22 @@ class EventController extends Controller
         $this->transactionRepository = $transactionRepository;
     }
 
+    public function show($event)
+    {
+        $event = $this->eventRepository->find($event);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Không tìm thấy sự kiện'
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Xem chi tiết sự kiện.',
+            'data' => $event
+        ], 200);
+    }
+    
     public function checkIn(Request $request, $eventId)
     {
         $request->validate([
