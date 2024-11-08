@@ -17,9 +17,6 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Province::class)->nullable()->constrained()->onDelete('cascade');
-            $table->foreignIdFor(District::class)->nullable()->constrained()->onDelete('cascade');
-            $table->foreignIdFor(Ward::class)->nullable()->constrained()->onDelete('cascade');
             $table->string('name', 50);
             $table->string('email', 50)->unique();
             $table->string('password', 255)->nullable();

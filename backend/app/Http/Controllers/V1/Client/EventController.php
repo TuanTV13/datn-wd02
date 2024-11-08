@@ -22,6 +22,13 @@ class EventController extends Controller
 
     public function checkIn(Request $request, $eventId)
     {
+        $clientIp = $request->ip();
+        if (!str_starts_with($clientIp, '192.168.')) {
+            return response()->json([
+                'error' => 'Yêu cầu chỉ được thực hiện từ mạng nội bộ.'
+            ], 403);
+        }
+
         $request->validate([
             'ticket_code' => 'required|string|max:100',
         ]);
@@ -32,7 +39,7 @@ class EventController extends Controller
         $userId = $transaction->user_id;
         $ticketId = $transaction->ticket_id;
 
-        if(!$transaction){
+        if (!$transaction) {
             return response()->json([
                 'error' => 'Vé không hợp lệ vui lòng kiểm tra lại'
             ], 404);
@@ -41,19 +48,19 @@ class EventController extends Controller
         $user = EventUser::where('ticket_code', $ticketCode)
             ->first();
 
-        if(!$user){
+        if (!$user) {
             return response()->json([
                 'message' => 'Vé của bạn không hợp lệ cho sự kiện này'
             ]);
         }
-        if($user->checked_in == 1){
+        if ($user->checked_in == 1) {
             return response()->json([
                 'message' => 'Bạn đã check in trước đó rồi!'
             ], 403);
         }
 
         $statusEvent = $transaction->event->status;
-        if($statusEvent === 'checkin'){
+        if ($statusEvent === 'checkin') {
             $user->checked_in = 1;
             $user->save();
 
@@ -71,11 +78,12 @@ class EventController extends Controller
     {
         $event = $this->eventRepository->find($eventId);
 
-        if(!$event){
+        if (!$event) {
             return response()->json([
                 'error' => 'Không tìm thấy sự kiện'
             ], 404);
         }
+        $event->speakers = $event->speakers ? json_decode($event->speakers, true) : null;
 
         return response()->json([
             'data' => $event
@@ -85,7 +93,18 @@ class EventController extends Controller
     public function index()
     {
         $events = $this->eventRepository->getAll();
-
+        foreach ($events as $event) {
+            if ($event->speakers) {
+                $speakers = json_decode($event->speakers, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $event->speakers = null;
+                } else {
+                    $event->speakers = $speakers;
+                }
+            } else {
+                $event->speakers = null;
+            }
+        }
         return response()->json([
             'data' => $events
         ]);
