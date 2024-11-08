@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import "react-toastify/dist/ReactToastify.css";
 import TicketsContext from './Contexts/TicketContext.tsx';
 import HomeContexts from './Contexts/HomeContext.tsx';
+import EventContexts from './Contexts/ClientEventContext.tsx';
 
 // Khởi tạo root chỉ một lần
 const container = document.getElementById('root');
@@ -17,7 +18,9 @@ root.render(
     <BrowserRouter>
       <HomeContexts>
       <TicketsContext>
+        <EventContexts>
         <App />
+        </EventContexts>
       </TicketsContext>
       </HomeContexts>
     </BrowserRouter>
