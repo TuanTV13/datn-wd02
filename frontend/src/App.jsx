@@ -22,7 +22,7 @@ import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
 import EventHistory from "./pages/Client/EventHistory";
 import PaymentHistory from "./pages/Client/PaymentHistory";
-import VerifyEmailPage from './components/Auth/VerifyEmailPage';
+import VerifyEmailPage from "./components/Auth/VerifyEmailPage";
 function App() {
   const route = useRoutes([
     {
@@ -31,32 +31,38 @@ function App() {
       children: [
         { path: "", element: <Home /> },
         { path: "event-list", element: <EventListing /> },
-        { path: "event-detail", element:<EventDetail/>},
+        { path: "event-detail", element: <EventDetail /> },
         { path: "event-category", element: <CategoryEven /> },
-        { path: "cart", element: <Cart/>},
-        { path: "checkout", element: <CheckOut/>},
-        { path: "event-history", element: <EventHistory/>},
-        { path: "payment-history", element: <PaymentHistory/>},
+        { path: "cart", element: <Cart /> },
+        { path: "checkout", element: <CheckOut /> },
+        { path: "event-history", element: <EventHistory /> },
+        { path: "payment-history", element: <PaymentHistory /> },
       ],
     },
-    {path:'admin',element: <LayoutAdmin />,children:[
-      {path: 'ticket-list', element: <ListTicket/>},
-      {path: 'ticket-list-user', element: <ListUserBuyTicket/>},
-      {path: 'add-ticket', element: <AddTicket/>},
-      {path: 'edit-ticket/:id', element: <EditTicket/>},
-      {path:'event-list', element:<ListEvent/>},
-      {path:'add-event', element:<AddEvent/>},
-      {path:'update-event/', element:<UpdateEvent/>},
-      {path:'detail-event/', element:<DetailEvents/>},
-      {path:'user-list', element:<ListUser/>},
-      {path:'add-user', element:<AddUser/>}
-    ]},
     {
-      path:'auth', element: <Auth/>
+      path: "admin",
+      element: <LayoutAdmin />,
+      children: [
+        { path: "ticket-list", element: <ListTicket /> },
+        { path: "ticket-list-user", element: <ListUserBuyTicket /> },
+        { path: "add-ticket", element: <AddTicket /> },
+        { path: "edit-ticket/:id", element: <EditTicket /> },
+        { path: "event-list", element: <ListEvent /> },
+        { path: "add-event", element: <AddEvent /> },
+        { path: "update-event/", element: <UpdateEvent /> },
+        { path: "detail-event/", element: <DetailEvents /> },
+        { path: "user-list", element: <ListUser /> },
+        { path: "add-user", element: <AddUser /> },
+      ],
     },
     {
-      path:'verify-email', element:<VerifyEmailPage/>
-    }
+      path: "auth",
+      element: <Auth />,
+    },
+    {
+      path: "verify-email",
+      element: <VerifyEmailPage />,
+    },
   ]);
   return route;
 }
