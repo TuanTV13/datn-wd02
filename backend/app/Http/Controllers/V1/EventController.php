@@ -100,18 +100,6 @@ class EventController extends Controller
                 $data['speakers'] = null;
             }
 
-            $conflictingEvent = $this->eventRepository->checkConflict(
-                $data['start_time'],
-                $data['end_time'],
-                $data['ward_id']
-            );
-
-            if ($conflictingEvent) {
-                return response()->json([
-                    'message' => 'Thời gian và địa điểm (tỉnh, huyện, xã) đã được sử dụng cho sự kiện khác.',
-                ], 400);
-            }
-
             $data['display_header'] ??= 0;
             if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
                 return $validateEventHeader;
@@ -198,20 +186,6 @@ class EventController extends Controller
         if (!$validationResult['status']) {
             return response()->json([
                 'message' => $validationResult['message']
-            ], 400);
-        }
-
-        $conflictingEvent = $this->eventRepository->checkConflict(
-            $data['start_time'],
-            $data['end_time'],
-            $data['ward_id'],
-            $event
-        );
-
-        if ($conflictingEvent) {
-            return response()->json([
-                'message' => 'Thời gian và địa điểm (tỉnh, huyện, xã) đã được sử dụng cho sự kiện khác.',
-                'conflicting_event' => $conflictingEvent
             ], 400);
         }
 

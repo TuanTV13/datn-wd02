@@ -272,7 +272,7 @@ class PaymentController extends Controller
         $transaction->update(['status' => 'COMPLETED']);
         event(new TransactionVerified($transaction));
 
-        return response()->json(['message' => 'Thanh toán thành công!']);
+        return response()->json(['message' => 'Bạn đã thanh toán thành công 1 đơn hàng!']);
     }
 
     // Xử lý giao dịch khi bị hủy thanh toán
