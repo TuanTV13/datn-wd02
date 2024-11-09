@@ -44,12 +44,12 @@ class EventRepository
 
     public function find($id)
     {
-        return $this->event->find($id);
+        return $this->event->with('tickets')->find($id);
     }
 
     public function findByCategory($categoryId)
     {
-        return $this->event->with(['speakers', 'category', 'province', 'district', 'ward'])->where('category_id', $categoryId)->get();
+        return $this->event->where('category_id', $categoryId)->get();
     }
 
     public function findTrashed($id)
@@ -93,7 +93,7 @@ class EventRepository
             ->get();
     }
 
-    public function getUpcomingEvents()
+    public function getUpcomingEvents($province)
     {
         return $this->event
             ->where('status', 'confirmed')

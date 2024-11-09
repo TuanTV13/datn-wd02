@@ -29,14 +29,14 @@ class HomeController extends Controller
         ], 200);
     }
     
-    public function upcomingEvents()
+    public function upcomingEvents($province)
     {
-        $upcomingEvents = $this->eventRepository->getUpcomingEvents();
+        $upcomingEvents = $this->eventRepository->getUpcomingEvents($province);
 
         if ($upcomingEvents->isEmpty()) {
             return response()->json([
                 'message' => 'Không có sự kiện nào sắp diễn ra.'
-            ]);
+            ], 404);
         }
     
         return response()->json([

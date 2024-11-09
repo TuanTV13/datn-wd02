@@ -109,4 +109,25 @@ class EventController extends Controller
             'data' => $events
         ]);
     }
+
+    public function getEventsByCategory($categoryId)
+    {
+        $events = $this->eventRepository->findByCategory($categoryId);
+        
+        foreach ($events as $event) {
+            if ($event->speakers) {
+                $speakers = json_decode($event->speakers, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $event->speakers = null;
+                } else {
+                    $event->speakers = $speakers;
+                }
+            } else {
+                $event->speakers = null;
+            }
+        }
+        return response()->json([
+            'data' => $events
+        ]);
+    }
 }
