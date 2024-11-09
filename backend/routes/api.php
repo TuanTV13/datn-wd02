@@ -38,12 +38,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('v1/locations')->group(function () {
-    Route::get('/provinces', [LocationController::class, 'showProvinces']);
-    Route::get('/districts/{provinceId}', [LocationController::class, 'getDistricts']);
-    Route::get('/wards/{districtId}', [LocationController::class, 'getWards']);
-});
-
 Route::prefix('v1/role')->middleware(['check.jwt'])->group(function () {
     Route::get('/{id}/permissions', [RolePermissionController::class, 'getPermissionsByRole']);
     Route::get('/{id}', [RolePermissionController::class, 'assignAdminRole'])->name('add.role');
@@ -134,13 +128,6 @@ Route::prefix('v1')->group(function () {
             Route::get('upcoming-events', [HomeController::class, 'upcomingEvents']);
             Route::get('featured-events', [HomeController::class, 'featuredEvents']);
             Route::get('top-rated-events', [HomeController::class, 'topRatedEvents']);
-        });
-
-        Route::prefix('carts')->middleware('check.jwt')->group(function () {
-            Route::get('/', [CartController::class, 'getCart']);
-            Route::post('add', [CartController::class, 'addToCart']);
-            Route::put('{cartItem}/increase', [CartController::class, 'increaseQuantity']);
-            Route::put('{cartItem}/decrease', [CartController::class, 'decreaseQuantity']);
         });
 
         Route::post('checkout', [PaymentController::class, 'checkout']);
