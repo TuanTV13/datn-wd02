@@ -60,4 +60,24 @@ class EventController extends Controller
             'data' => $event
         ]);
     }
+
+    public function search(Request $request)
+    {
+        $name = $request->input('name');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $categoryId = $request->input('category_id');
+
+        $events = $this->eventRepository->search($name, $startDate, $endDate, $categoryId);
+
+        if ($events->isEmpty()) {
+            return response()->json([
+                'message' => 'Không tìm thấy sự kiện nào'
+            ]);
+        }
+
+        return response()->json([
+            'data' => $events
+        ]);
+    }
 }

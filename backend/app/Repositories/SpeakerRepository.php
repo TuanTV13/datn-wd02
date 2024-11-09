@@ -25,12 +25,27 @@ class SpeakerRepository
 
     public function findByEmail($email)
     {
-        return Speaker::where('email', $email)->first();
+        return $this->speaker->where('email', $email)->first();
     }
 
 
     public function create(array $data)
     {
         return $this->speaker->create($data);
+    }
+
+    public function update($id, array $data)
+    {
+        $speaker = $this->speaker->find($id);
+        $speaker->update($data);
+
+        return $speaker;
+    }
+
+    public function delete($id)
+    {
+        $speaker = $this->speaker->find($id);
+
+        return $speaker->delete();
     }
 }

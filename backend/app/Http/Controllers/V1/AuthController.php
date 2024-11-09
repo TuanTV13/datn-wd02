@@ -60,7 +60,7 @@ class AuthController extends Controller
             }
 
             $result = json_decode($response->getBody(), true);
-            Log::info("Kết quả kiểm tra email: ", $result); 
+            Log::info("Kết quả kiểm tra email: ", $result);
 
             if (isset($result['result']) && $result['result'] === 'deliverable') {
                 return true;
@@ -78,14 +78,14 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-        $email = EmailHelper::trimEmail($data['email']);
+        // $email = EmailHelper::trimEmail($data['email']);
 
-        if (!$this->verifyEmail($email)) {
-            Log::info("Email không hợp lệ: " . $email);
-            throw ValidationException::withMessages([
-                'email' => 'Email không hợp lệ hoặc không tồn tại. Vui lòng thử lại với một địa chỉ email khác.',
-            ]);
-        }
+        // if (!$this->verifyEmail($email)) {
+        //     Log::info("Email không hợp lệ: " . $email);
+        //     throw ValidationException::withMessages([
+        //         'email' => 'Email không hợp lệ hoặc không tồn tại. Vui lòng thử lại với một địa chỉ email khác.',
+        //     ]);
+        // }
 
         try {
             if ($request->hasFile('image')) {
@@ -130,7 +130,7 @@ class AuthController extends Controller
         }
 
         $user->email_verified_at = now();
-        $user->email_verification_token = null; 
+        $user->email_verification_token = null;
         $user->save();
 
         return redirect('/your-react-url?status=success');
@@ -238,7 +238,7 @@ class AuthController extends Controller
             ]);
         }
 
-        $key = $request->ip(); 
+        $key = $request->ip();
         if (RateLimiter::tooManyAttempts('sendCode:' . $key, 5)) {
             $retryAfter = RateLimiter::availableIn('sendCode:' . $key);
             return response()->json([

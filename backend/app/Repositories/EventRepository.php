@@ -70,4 +70,27 @@ class EventRepository
 
         return $query->first();
     }
+
+    public function search($name, $startDate = null, $endDate = null, $categoryId = null)
+    {
+        $query = Event::query();
+
+        if ($name) {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+
+        if ($startDate) {
+            $query->where('start_time', '>=', $startDate);
+        }
+
+        if ($endDate) {
+            $query->where('end_time', '<=', $endDate);
+        }
+
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        return $query->get();
+    }
 }

@@ -4,7 +4,10 @@ namespace App\Http\Controllers\V1;
 
 use App\Helpers\EmailHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ChangePasswordRequest;
 use App\Http\Requests\Admin\StoreUserRequest;
+use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Http\Requests\UpdateUserRequest as RequestsUpdateUserRequest;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,15 +16,15 @@ use Illuminate\Support\Facades\Storage;
 class UserController extends Controller
 {
     const PATH_UPLOAD = 'images/users';
-    
+
     protected $userRepository;
-    
+
     public function __construct(UserRepository $userRepository)
     {
         $this->userRepository = $userRepository;
     }
 
-    public function index() 
+    public function index()
     {
         $users = $this->userRepository->all();
         return response()->json([
@@ -30,32 +33,31 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function create (StoreUserRequest $request) 
+    public function create(StoreUserRequest $request)
     {
         DB::beginTransaction();
         try {
             $data = $request->validated();
             $data['email'] = EmailHelper::trimEmail(EmailHelper::toLowerCase($data['email']));
             $data['password'] = Hash::make($data['password']);
-    
+
             if ($request->hasFile('image')) {
                 $data['image'] = Storage::put(self::PATH_UPLOAD, $request->file('image'));
             }
-    
+
             $data['email_verified_at'] = now();
             $user = $this->userRepository->create($data);
-    
+
             $user->assignRole('user');
-    
+
             DB::commit();
-    
+
             return response()->json(['message' => 'Tạo người dùng thành công!'], 201);
-    
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Đã xảy ra lỗi khi thêm người dùng!'], 500);
         }
-    }    
+    }
 
     public function destroy(string $id)
     {
@@ -64,26 +66,25 @@ class UserController extends Controller
             if (!$user) {
                 return response()->json(['error' => 'Người dùng không tồn tại!'], 404);
             }
-            
+
             $user->delete();
-    
+
             return response()->json(['message' => 'Xóa người dùng thành công!'], 200);
-    
         } catch (\Exception $e) {
             return response()->json(['error' => 'Đã xảy ra lỗi khi xóa người dùng!'], 500);
         }
-    }    
+    }
 
     public function trashed()
     {
-        $usersTrashed = $this->userRepository->trashed(); 
+        $usersTrashed = $this->userRepository->trashed();
 
         if ($usersTrashed->isEmpty()) {
             return response()->json([
                 'message' => 'Không có người dùng nào đã xóa!'
             ], 200);
         }
-        
+
         return response()->json([
             'message' => 'Danh sách người dùng đã xóa',
             'usersTrashed' => $usersTrashed
@@ -105,5 +106,60 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Khôi phục người dùng thành công!'
         ], 200);
+    }
+
+    public function showProfile()
+    {
+        $user = auth()->user();
+        return response()->json(['user' => $user], 200);
+    }
+
+    // Cập nhật thông tin tài khoản
+    public function updateProfile(RequestsUpdateUserRequest $request)
+    {
+        try {
+            $user = auth()->user();
+            $data = $request->validated();
+
+            // Kiểm tra và xử lý ảnh đại diện nếu có
+            if ($request->hasFile('image')) {
+                if ($user->image) {
+                    Storage::delete($user->image);
+                }
+                $data['image'] = Storage::put('images/users', $request->file('image'));
+            }
+
+            // Cập nhật thông tin người dùng
+            if (!empty($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            } else {
+                unset($data['password']);
+            }
+
+            $this->userRepository->update($user->id, $data);
+
+            return response()->json(['message' => 'Cập nhật thông tin thành công!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Đã xảy ra lỗi khi cập nhật thông tin!'], 500);
+        }
+    }
+
+
+    // Thay đổi mật khẩu
+    public function changePassword(ChangePasswordRequest $request)
+    {
+        $user = auth()->user();
+
+        // Kiểm tra mật khẩu hiện tại
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['error' => 'Mật khẩu hiện tại không đúng!'], 400);
+        }
+
+        // Cập nhật mật khẩu mới
+        $this->userRepository->update($user->id, [
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return response()->json(['message' => 'Thay đổi mật khẩu thành công!'], 200);
     }
 }

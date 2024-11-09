@@ -7,6 +7,7 @@ use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\CategoryController;
 use App\Http\Controllers\V1\Client\EventController as ClientEventController;
 use App\Http\Controllers\V1\EventController;
+use App\Http\Controllers\V1\SpeakerController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\UserController;
 use App\Http\Controllers\V1\VoucherController;
@@ -67,6 +68,12 @@ Route::prefix('v1')->group(function () {
         Route::post('{id}/restore', [UserController::class, 'restore']);
     });
 
+    Route::middleware(['check.jwt'])->group(function () {
+        Route::get('user/profile', [UserController::class, 'showProfile']);
+        Route::put('user/update-profile', [UserController::class, 'updateProfile']);
+        Route::put('user/change-password', [UserController::class, 'changePassword']);
+    });
+
     Route::get('categories', [CategoryController::class, 'index']);
 
     Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-categories'])->group(function () {
@@ -95,6 +102,15 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [ClientEventController::class, 'index']);
             Route::get('{id}', [ClientEventController::class, 'show']);
             Route::get('filter/{categoryId}', [ClientEventController::class, 'filter']);
+            Route::post('search', [ClientEventController::class, 'search']);
         });
+    });
+
+    Route::get('speakers', [SpeakerController::class, 'index']);
+
+    Route::prefix('speakers')->middleware(['check.jwt', 'check.permission:manage-users'])->group(function () {
+        Route::post('create', [SpeakerController::class, 'create']);
+        Route::put('{id}/update', [SpeakerController::class, 'update']);
+        Route::delete('{id}/delete', [SpeakerController::class, 'delete']);
     });
 });
