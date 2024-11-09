@@ -93,7 +93,7 @@ class EventRepository
             ->get();
     }
 
-    public function getUpcomingEvents($province)
+    public function getUpcomingEvents()
     {
         return $this->event
             ->where('status', 'confirmed')
@@ -121,5 +121,15 @@ class EventRepository
             ->orderByDesc('feedbacks_sum_rating')
             ->limit(12)
             ->get();
+    }
+
+    public function getIp($eventId)
+    {
+        $event = $this->event->find($eventId);
+        if ($event) {
+            return $event->subnets->pluck('subnet');
+        }
+    
+        return null; 
     }
 }
