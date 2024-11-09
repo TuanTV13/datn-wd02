@@ -21,10 +21,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleAndPermissionSeeder::class,
-            AssignStatusesSeeder::class,
+            LocationSeeder::class,
+            UserSeeder::class,
             CategorySeeder::class,
-            StatusesTableSeeder::class,
-            LocationSeeder::class
+            EventSeeder::class,
         ]);
     }
 }

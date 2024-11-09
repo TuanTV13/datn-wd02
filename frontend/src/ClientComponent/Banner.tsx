@@ -1,71 +1,84 @@
-import React from 'react'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import { Pagination, Autoplay } from 'swiper/modules'
+import React, { useContext } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Pagination, Autoplay } from "swiper/modules";
+import { HomeCT } from "../Contexts/HomeContext";
+import { Events } from "../interfaces/Event";
 
-const Banner = () => {
-    const slides = [
-        {
-            type: 'text',
-            content: (
-                <div className="flex flex-col justify-center h-[600px] bg-gradient-to-r from-[#007BFF] to-[#F5F5F5]">
-                    <div className="flex flex-col md:pl-16 md:py-[120px] mb:py-[57px]">
-                        <span className="text-[#030303] text-base tracking-[4px]">Dịch vụ</span>
-                        <strong className="text-[64px] w-[664px] font-medium leading-[70.4px] tracking-[-3.4px] my-4 text-white">
-                            Tổ chức sự kiện theo yêu cầu
-                        </strong>
-                        <div className="mt-[20px]">
-                            <span className="flex items-center w-[356px] justify-between gap-x-[22px]">Get 25% off</span>
-                            <a className="bg-[#6C757D] mt-11 text-lg w-[185px] grid place-items-center h-[64px] rounded-[100px]" href="#">
-                                Tạo sự kiện
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            ),
-        },
-        {
-            type: 'image',
-            src: 'https://p-vn.ipricegroup.com/trends-article/cong-nghe-det-adidas-climacool-va-adidas-climachill-medium.jpg',
-            alt: 'Slide 1',
-        },
-        {
-            type: 'image',
-            src: 'https://example.com/image2.jpg',
-            alt: 'Slide 2',
-        },
-        {
-            type: 'image',
-            src: 'https://example.com/image3.jpg',
-            alt: 'Slide 3',
-        },
-    ]
-
-    return (
-        <div className="relative w-full">
-            <Swiper
-                modules={[Pagination, Autoplay]}
-                spaceBetween={30}
-                slidesPerView={1}
-                pagination={{ clickable: true }}
-                autoplay={{ delay: 3000, pauseOnMouseEnter: false}}
-                loop={true}
-                allowTouchMove={true} 
-                className="w-full h-[600px]"
-            >
-                {slides.map((slide, index) => (
-                    <SwiperSlide key={index}>
-                        {slide.type === 'text' ? (
-                            slide.content
-                        ) : (
-                            <img src={slide.src} alt={slide.alt} className="w-full h-auto max-h-full object-cover" />
-                        )}
-                    </SwiperSlide>
-                ))}
-            </Swiper>
-        </div>
-    )
+interface SlideType {
+  type: "image" | "text";
+  src?: string; 
+  alt?: string;
+  content?: JSX.Element;
 }
+const Banner = () => {
+  const {headerEvents} = useContext(HomeCT)
+  const slides: SlideType[] = [
+    {
+      type: "text",
+      content: (
+        <div className="lg:h-[600px] h-[300px] pl-16 flex flex-col md:flex-row items-center bg-gradient-to-r from-[#007BFF] to-[#F5F5F5] px-4 py-16"
+        style={{
+          backgroundImage: `url(${headerEvents[0]?.thumbnail})`, // Dùng ảnh làm background
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+        >
+          <div className="md:w-1/2">
+            <p className="text-[#007BFF] text-base tracking-[4px] mb-2">
+              DỊCH VỤ
+            </p>
+            <h1 className="lg:text-[64px] md:text-5xl font-medium mb-4 text-white">
+              {headerEvents[0]?.name}
+            </h1>
+            {/* <div className="flex items-center mb-6">
+              <p className="mr-4">Get 25% off</p>
+              <span className="mx-2">|</span>
+              <p>Free Shipping</p>
+            </div> */}
+            <button className="bg-[#6C757D] text-white py-2 px-6 rounded-full">
+              Chi tiết sự kiện
+            </button>
+          </div>
+        </div>
+      ),
+    },
+    ...headerEvents?.map((event: Events) => ({
+      type: "image",
+      src: event.thumbnail,
+      alt: event.name,
+    })),
+  ];
 
-export default Banner
+  return (
+    <div className="w-full mt-36 mb-4">
+      <Swiper
+        modules={[Pagination, Autoplay]}
+        spaceBetween={30}
+        slidesPerView={1}
+        pagination={{ clickable: true }}
+        autoplay={{ delay: 3000, pauseOnMouseEnter: false }}
+        loop={true}
+        allowTouchMove={true}
+        className="lg:h-[600px] h-[300px]"
+      >
+        {slides?.map((slide, index) => (
+          <SwiperSlide key={index}>
+            {slide.type === "text" ? (
+              slide.content
+            ) : (
+              <img
+                src={slide.src}
+                alt={slide.alt}
+                className="w-full h-[300px] lg:h-[600px] max-h-full object-cover"
+              />
+            )}
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
+  );
+};
+
+export default Banner;

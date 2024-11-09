@@ -14,19 +14,42 @@ class EventRepository
         $this->event = $event;
     }
 
+    public function getEventAttendees($eventId)
+    {
+        $event = $this->find($eventId);
+
+        return $event->users()->withPivot('checked_in')->get();
+    }
+
+    public function getTicketsSold($eventId)
+    {
+        $event = $this->find($eventId);
+
+        return $event->transactions()->where('status', 'completed')->count();
+    }
+
+    public function toltalAmount($eventId)
+    {
+        $event = $this->find($eventId);
+
+        return $event->transactions()
+            ->where('status', 'completed')
+            ->sum('total_amount');
+    }
+
     public function getAll()
     {
-        return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->get();
+        return $this->event->get();
     }
 
     public function find($id)
     {
-        return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->find($id);
+        return $this->event->find($id);
     }
 
     public function findByCategory($categoryId)
     {
-        return $this->event->with(['status', 'speakers', 'category', 'province', 'district', 'ward'])->where('category_id', $categoryId)->get();
+        return $this->event->with(['speakers', 'category', 'province', 'district', 'ward'])->where('category_id', $categoryId)->get();
     }
 
     public function findTrashed($id)
@@ -71,26 +94,51 @@ class EventRepository
         return $query->first();
     }
 
-    public function search($name, $startDate = null, $endDate = null, $categoryId = null)
+    public function countHeaderEvents()
     {
-        $query = Event::query();
+        return $this->event
+            ->where('display_header', true)
+            ->count();
+    }
 
-        if ($name) {
-            $query->where('name', 'like', '%' . $name . '%');
-        }
+    public function getHeaderEvents()
+    {
+        return $this->event
+            ->where('status', 'confirmed')
+            ->where('display_header', true)
+            ->select('id', 'name', 'description', 'thumbnail', 'start_time')
+            ->orderBy('start_time', 'asc')
+            ->limit(4)
+            ->get();
+    }
 
-        if ($startDate) {
-            $query->where('start_time', '>=', $startDate);
-        }
+    public function getUpcomingEvents()
+    {
+        return $this->event
+            ->where('status', 'confirmed')
+            ->where('start_time', '>', now())
+            ->where('start_time', '<=', now()->addDays(7))
+            ->orderBy('start_time', 'asc')
+            ->limit(12)
+            ->get();
+    }
 
-        if ($endDate) {
-            $query->where('end_time', '<=', $endDate);
-        }
+    public function getFeaturedEvents()
+    {
+        return $this->event
+            ->withCount('registrants')
+            ->orderBy('registrants_count', 'desc')
+            ->limit(10)
+            ->get();
+    }
 
-        if ($categoryId) {
-            $query->where('category_id', $categoryId);
-        }
-
-        return $query->get();
+    public function getTopRatedEvents()
+    {
+        return $this->event
+            ->withSum('feedbacks', 'rating')
+            ->having('feedbacks_sum_rating', '>', 0)
+            ->orderByDesc('feedbacks_sum_rating')
+            ->limit(12)
+            ->get();
     }
 }

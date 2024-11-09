@@ -40,7 +40,11 @@ class TicketController extends Controller
 
     public function index()
     {
-        return $this->ticketRepository->getAll();
+        $tickets = $this->ticketRepository->getAll();
+
+        return response()->json([
+            'data' => $tickets
+        ]);
     }
 
     public function verifiedTicket($id)
@@ -53,8 +57,8 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status_id == 10) {
-            $ticket->status_id = 8;
+        if ($ticket->status == "pending") {
+            $ticket->status = 'confirmed';
             $ticket->save();
 
             return response()->json([
@@ -67,7 +71,6 @@ class TicketController extends Controller
             'message' => 'Vé đã được xác nhận trước đó hoặc không đủ điều kiện để xác nhận.'
         ], 400);
     }
-
 
     public function create(StoreTicketRequest $request)
     {
@@ -132,7 +135,7 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status_id != 10) {
+        if ($ticket->status_id != 'pending') {
             return response()->json([
                 'message' => 'Không thể cập nhật vé trong trạng thái này'
             ], 403);
@@ -180,7 +183,7 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status_id != 10) {
+        if ($ticket->status_id != 'pending') {
             return response()->json([
                 'message' => 'Không thể xóa vé trong trạng thái này'
             ], 403);

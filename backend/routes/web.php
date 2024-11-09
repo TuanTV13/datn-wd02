@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\EventController;
-use App\Http\Controllers\web\SetLangController;
+use App\Http\Controllers\V1\FeedbackController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,4 +18,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/abc/{id}', [EventController::class, 'update']);
+Route::get('feedbacks/{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->name('form.feedback'); // Lấy form đánh giá khi nhấn vào button trong email    
+Route::post('evaluation/submit', [FeedbackController::class, 'submit'])->name('feedback.store'); // Submit form đánh giá   

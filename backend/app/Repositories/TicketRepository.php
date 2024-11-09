@@ -20,7 +20,12 @@ class TicketRepository
 
     public function find($id)
     {
-        return $this->ticket->find($id);
+        return $this->ticket->with('event')->find($id);
+    }
+
+    public function findByEvent($eventId)
+    {
+        return $this->ticket->where('event_id', $eventId)->get();
     }
 
     public function findTrashed($id)

@@ -12,8 +12,9 @@ class Ticket extends Model
 
     protected $fillable = [
         'event_id',
+        'status',
         'ticket_type',
-        'status_id',
+        'status',
         'price',
         'quantity',
         'available_quantity',
@@ -27,10 +28,9 @@ class Ticket extends Model
     {
         return $this->belongsTo(Event::class);
     }
-    
-    public function status()
-    {
-        return $this->belongsTo(Status::class);
-    }
 
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

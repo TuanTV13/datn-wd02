@@ -83,14 +83,9 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->belongsTo(Ward::class);
     }
 
-    public function status()
-    {
-        return $this->belongsTo(Status::class);
-    }
-
     public function vouchers()
     {
-        return $this->belongsToMany(Voucher::class, 'user_vouchers')
+        return $this->belongsToMany(Voucher::class, 'user_voucher')
             ->withPivot('used_at');
     }
 
@@ -107,6 +102,11 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     public function refreshTokens()
     {
         return $this->hasMany(RefreshToken::class);
+    }
+
+    public function events()
+    {
+        return $this->belongsToMany(Event::class, 'event_users');
     }
 
 }

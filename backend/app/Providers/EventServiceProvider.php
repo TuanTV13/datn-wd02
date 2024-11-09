@@ -3,11 +3,17 @@
 namespace App\Providers;
 
 use App\Events\AttendeesNotified;
+use App\Events\EventCompleted;
+use App\Events\EventUpcoming;
 use App\Events\EventUpdate;
+use App\Events\TransactionVerified;
 use App\Events\UserForgotPassword;
 use App\Events\UserRegisterdSuccess;
 use App\Listeners\AttendeesNotifiedListener;
 use App\Listeners\EventUpdateNotification;
+use App\Listeners\SendFeedbackEmail;
+use App\Listeners\SendTransactionConfirmationEmail;
+use App\Listeners\SendUpcomingEventEmail;
 use App\Listeners\UserForgotPasswordSendCode;
 use App\Listeners\UserRegisterdSuccessVerification;
 use Illuminate\Auth\Events\Registered;
@@ -38,7 +44,18 @@ class EventServiceProvider extends ServiceProvider
         EventUpdate::class => [
             EventUpdateNotification::class,
         ],
+
+        TransactionVerified::class => [
+            SendTransactionConfirmationEmail::class,
+        ],
         
+        EventCompleted::class => [
+            SendFeedbackEmail::class,
+        ],
+
+        EventUpcoming::class => [
+            SendUpcomingEventEmail::class,
+        ],
     ];
 
     /**

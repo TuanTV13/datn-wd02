@@ -13,8 +13,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('users:delete-unverified')->everyMinute();
-        $schedule->command('queue:run')->everyMinute();
+        $schedule->command('check:event-status')->everyMinute();
+        // $schedule->command('users:delete-unverified')->everyMinute();
+        // $schedule->command('queue:run')->everyMinute();
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\EventUpdate;
+use App\Models\EventUser;
 use App\Models\UserEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -29,7 +30,7 @@ class EventUpdateNotification implements ShouldQueue
         $eventData = $event->event;
 
         // Lấy tất cả các bản ghi UserEvent liên quan đến sự kiện
-        $userEvents = UserEvent::where('event_id', $eventData->id)->get();
+        $userEvents = EventUser::where('event_id', $eventData->id)->get();
 
         // Gửi email cho từng người tham gia sự kiện
         foreach ($userEvents as $userEvent) {
