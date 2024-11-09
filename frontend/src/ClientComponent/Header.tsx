@@ -123,8 +123,6 @@ const Header = () => {
             </form>
           </div>
 
-
-
           <div className="flex gap-x-4 items-center">
             <Link to={"auth"}>
               <span className="text-sm">Your Account</span>
@@ -149,11 +147,7 @@ const Header = () => {
                 2
               </span>
             </Link>
-            
-            <div
-              className="relative h-[24px] lg:ml-10"
-              ref={notificationRef}
-            >
+            <div className="relative h-[24px] lg:ml-10" ref={notificationRef}>
               <button onClick={toggleNotificationPopup}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -170,8 +164,8 @@ const Header = () => {
                   />
                 </svg>
                 <span className="absolute bg-red-500 top-0 right-0 rounded-full w-[16px] h-[16px] text-xs text-white flex items-center justify-center">
-                2
-              </span>
+                  2
+                </span>
               </button>
               {isNotificationOpen && (
                 <div className="absolute right-0 mt-2 w-[400px] bg-white shadow-lg rounded-lg p-4 z-10">
@@ -190,19 +184,32 @@ const Header = () => {
           </div>
         </div>
       </div>
-                {/* <!-- form mobile --> */}
-                <div className=" *:h-[58px] lg:hidden mb:block w-full">
-            <form className="flex *:h-[36px] justify-center items-center gap-x-2">
-                <input type="text" className="border rounded-full w-[298px] px-5" placeholder="Search"/>
-                <button className="rounded-[50%] bg-[#6C757D] w-[36px]">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" className="size-6 text-white mx-auto">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                    </svg>
-                </button>
-            </form>
-        </div>
+      {/* <!-- form mobile --> */}
+      <div className=" *:h-[58px] lg:hidden mb:block w-full">
+        <form className="flex *:h-[36px] justify-center items-center gap-x-2">
+          <input
+            type="text"
+            className="border rounded-full w-[298px] px-5"
+            placeholder="Search"
+          />
+          <button className="rounded-[50%] bg-[#6C757D] w-[36px]">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              className="size-6 text-white mx-auto"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+              />
+            </svg>
+          </button>
+        </form>
+      </div>
       {/* Desktop Menu */}
       <div className="w-full hidden lg:flex justify-center items-center">
         <div>

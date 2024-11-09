@@ -8,22 +8,23 @@ import { Events } from "../interfaces/Event";
 
 interface SlideType {
   type: "image" | "text";
-  src?: string; 
+  src?: string;
   alt?: string;
   content?: JSX.Element;
 }
 const Banner = () => {
-  const {headerEvents} = useContext(HomeCT)
+  const { headerEvents } = useContext(HomeCT);
   const slides: SlideType[] = [
     {
       type: "text",
       content: (
-        <div className="lg:h-[600px] h-[300px] pl-16 flex flex-col md:flex-row items-center bg-gradient-to-r from-[#007BFF] to-[#F5F5F5] px-4 py-16"
-        style={{
-          backgroundImage: `url(${headerEvents[0]?.thumbnail})`, // Dùng ảnh làm background
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        <div
+          className="lg:h-[600px] h-[300px] pl-16 flex flex-col md:flex-row items-center bg-gradient-to-r from-[#007BFF] to-[#F5F5F5] px-4 py-16"
+          style={{
+            backgroundImage: `url(${headerEvents[0]?.thumbnail})`, // Dùng ảnh làm background
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         >
           <div className="md:w-1/2">
             <p className="text-[#007BFF] text-base tracking-[4px] mb-2">

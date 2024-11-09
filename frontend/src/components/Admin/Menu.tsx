@@ -9,8 +9,7 @@ import {
 } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { Badge, Tooltip } from "antd"; // Thêm Badge và Tooltip
-import React from 'react';
-
+import React from "react";
 
 type Props = {
   collapsed?: boolean;
@@ -20,9 +19,13 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
   return (
     <div className="flex flex-col justify-between h-full bg-gray-50 shadow-lg transition-all duration-300">
       <div>
-      <div className="py-5 px-6 bg-blue-500 text-white font-bold text-lg">
+        <div className="py-5 px-6 bg-blue-500 text-white font-bold text-lg">
           {collapsed ? (
-            <img src="../../../public/images/logo.webp" alt="Logo" className="h-8 w-8" />
+            <img
+              src="../../../public/images/logo.webp"
+              alt="Logo"
+              className="h-8 w-8"
+            />
           ) : (
             "AdminDashBoard"
           )}
@@ -134,11 +137,12 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
               ),
               label: (
                 <span className="relative">
-                <Badge count={5} offset={[10, 0]}>
-                  <span className="whitespace-nowrap">Danh sách đánh giá</span>
-                </Badge>
-              </span>
-              
+                  <Badge count={5} offset={[10, 0]}>
+                    <span className="whitespace-nowrap">
+                      Danh sách đánh giá
+                    </span>
+                  </Badge>
+                </span>
               ),
             },
           ]}
