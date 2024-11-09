@@ -22,6 +22,13 @@ class EventController extends Controller
 
     public function checkIn(Request $request, $eventId)
     {
+        $clientIp = $request->ip();
+        if (!str_starts_with($clientIp, '192.168.')) {
+            return response()->json([
+                'error' => 'Yêu cầu chỉ được thực hiện từ mạng nội bộ.'
+            ], 403);
+        }
+
         $request->validate([
             'ticket_code' => 'required|string|max:100',
         ]);
@@ -76,6 +83,7 @@ class EventController extends Controller
                 'error' => 'Không tìm thấy sự kiện'
             ], 404);
         }
+        $event->speakers = $event->speakers ? json_decode($event->speakers, true) : null;
 
         return response()->json([
             'data' => $event
@@ -85,7 +93,39 @@ class EventController extends Controller
     public function index()
     {
         $events = $this->eventRepository->getAll();
+        foreach ($events as $event) {
+            if ($event->speakers) {
+                $speakers = json_decode($event->speakers, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $event->speakers = null;
+                } else {
+                    $event->speakers = $speakers;
+                }
+            } else {
+                $event->speakers = null;
+            }
+        }
+        return response()->json([
+            'data' => $events
+        ]);
+    }
 
+    public function getEventsByCategory($categoryId)
+    {
+        $events = $this->eventRepository->findByCategory($categoryId);
+        
+        foreach ($events as $event) {
+            if ($event->speakers) {
+                $speakers = json_decode($event->speakers, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $event->speakers = null;
+                } else {
+                    $event->speakers = $speakers;
+                }
+            } else {
+                $event->speakers = null;
+            }
+        }
         return response()->json([
             'data' => $events
         ]);
