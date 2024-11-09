@@ -114,18 +114,20 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
     });  
 
-    Route::get('getEventDetails/{id}', [EventTrackingController::class, 'getEventDetails']);
     Route::prefix('clients')->group(function () {
+
+        Route::get('getEventDetails/{id}', [EventTrackingController::class, 'getEventDetails']);
 
         Route::prefix('events')->group(function () {
             Route::get('/', [ClientEventController::class, 'index']);
             Route::get('{id}', [ClientEventController::class, 'show'])->name('client.event.show');
             Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
+            Route::get('category/{categoryId}', [ClientEventController::class, 'getEventsByCategory']); // Bài viết theo danh mục
         });
 
         Route::prefix('home')->group(function () {
             Route::get('header-events', [HomeController::class, 'headerEvents']);
-            Route::get('upcoming-events', [HomeController::class, 'upcomingEvents']);
+            Route::get('upcoming-events/{province}', [HomeController::class, 'upcomingEvents']);
             Route::get('featured-events', [HomeController::class, 'featuredEvents']);
             Route::get('top-rated-events', [HomeController::class, 'topRatedEvents']);
         });
