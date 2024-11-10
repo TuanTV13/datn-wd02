@@ -14,7 +14,12 @@ import { Outlet } from "react-router-dom";
 import MenuSidebar from "../components/admin/Menu";
 import Notification from "../components/admin/Notification";
 import useWindowSize from "../hooks/hook";
+<<<<<<< HEAD
+import React from 'react';
+
+=======
 import React from "react";
+>>>>>>> origin/main
 
 const { Header, Sider, Content } = Layout;
 const { Search } = Input;
@@ -90,6 +95,10 @@ const LayoutAdmin = () => {
           <MenuSidebar />
         </Drawer>
       ) : (
+<<<<<<< HEAD
+        <Sider trigger={null} collapsible collapsed={collapsed} width="20%"
+        style={{ minWidth: "200px" }}>
+=======
         <Sider
           trigger={null}
           collapsible
@@ -97,6 +106,7 @@ const LayoutAdmin = () => {
           width="20%"
           style={{ minWidth: "200px" }}
         >
+>>>>>>> origin/main
           <MenuSidebar collapsed={collapsed} />
         </Sider>
       )}
@@ -140,7 +150,11 @@ const LayoutAdmin = () => {
             minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
+<<<<<<< HEAD
+            overflow: 'auto'
+=======
             overflow: "auto",
+>>>>>>> origin/main
           }}
         >
           <Outlet />

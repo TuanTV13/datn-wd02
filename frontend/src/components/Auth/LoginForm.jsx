@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { login } from '../../api_service/auth';
+import { Modal, Button } from 'react-bootstrap';
+import './Auth.css';
+
+const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+=======
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { login } from "../../api_service/auth";
@@ -10,6 +20,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+>>>>>>> origin/main
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -27,19 +38,32 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
     try {
       const response = await login(data.email, data.password);
       if (response.token) {
+<<<<<<< HEAD
+        setErrorMessage('Đăng nhập thành công!');
+        setShowErrorModal(true);
+        if (rememberMe) {
+          localStorage.setItem('email', data.email);
+        } else {
+          localStorage.removeItem('email');
+=======
         setErrorMessage("Đăng nhập thành công!");
         setShowErrorModal(true);
         if (rememberMe) {
           localStorage.setItem("email", data.email);
         } else {
           localStorage.removeItem("email");
+>>>>>>> origin/main
         }
       } else {
         setErrorMessage(response.message);
         setShowErrorModal(true);
       }
     } catch (error) {
+<<<<<<< HEAD
+      setErrorMessage(error.message || 'Đăng nhập thất bại!');
+=======
       setErrorMessage(error.message || "Đăng nhập thất bại!");
+>>>>>>> origin/main
       setShowErrorModal(true);
     }
 
@@ -58,6 +82,12 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
               <input
                 id="email"
                 type="text"
+<<<<<<< HEAD
+                placeholder='Email'
+                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                {...register('email', { required: 'Email là bắt buộc', pattern: { value: /^\S+@\S+$/i, message: 'Email không hợp lệ' } })}
+                defaultValue={localStorage.getItem('email') || ''}
+=======
                 placeholder="Email"
                 className={`form-control ${errors.email ? "is-invalid" : ""}`}
                 {...register("email", {
@@ -68,6 +98,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
                   },
                 })}
                 defaultValue={localStorage.getItem("email") || ""}
+>>>>>>> origin/main
                 onMouseEnter={() => errors.email && setShowEmailError(true)}
                 onMouseLeave={() => errors.email && setShowEmailError(false)}
               />
@@ -79,6 +110,14 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
             <div className="mb-3 position-relative input-container">
               <input
                 id="password"
+<<<<<<< HEAD
+                type={showPassword ? 'text' : 'password'}
+                placeholder='Mật khẩu'
+                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                {...register('password', { required: 'Mật khẩu là bắt buộc' })}
+                onMouseEnter={() => errors.password && setShowPasswordError(true)}
+                onMouseLeave={() => errors.password && setShowPasswordError(false)}
+=======
                 type={showPassword ? "text" : "password"}
                 placeholder="Mật khẩu"
                 className={`form-control ${
@@ -91,11 +130,17 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
                 onMouseLeave={() =>
                   errors.password && setShowPasswordError(false)
                 }
+>>>>>>> origin/main
               />
 
               {/* Chỉ hiển thị icon khi không có lỗi validate */}
               {!errors.password && (
                 <i
+<<<<<<< HEAD
+                  className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', top: '50%', right: '10px', cursor: 'pointer', transform: 'translateY(-50%)' }}
+=======
                   className={`fas ${showPassword ? "fa-eye" : "fa-eye-slash"}`}
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
@@ -105,6 +150,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
                     cursor: "pointer",
                     transform: "translateY(-50%)",
                   }}
+>>>>>>> origin/main
                 />
               )}
 
@@ -120,6 +166,24 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
                 id="rememberMe"
                 checked={rememberMe}
                 onChange={() => setRememberMe(!rememberMe)}
+<<<<<<< HEAD
+                style={{ display: 'none' }} // Ẩn checkbox mặc định
+              />
+              <i
+                className={`far ${rememberMe ? 'fa-check-square' : 'fa-square'}`}
+                onClick={() => setRememberMe(!rememberMe)}
+                style={{ cursor: 'pointer', fontSize: '1.2rem', marginRight: '10px' }}
+              />
+              <label className="form-check-label" htmlFor="rememberMe">Lưu thông tin đăng nhập</label>
+            </div>
+
+            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+              {loading ? 'Đang xử lý...' : 'Đăng nhập'}
+            </button>
+          </form>
+
+          <p className="forgot-pass mt-3 text-center" onClick={showForgotPasswordForm}>
+=======
                 style={{ display: "none" }} // Ẩn checkbox mặc định
               />
               <i
@@ -151,14 +215,19 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
             className="forgot-pass mt-3 text-center"
             onClick={showForgotPasswordForm}
           >
+>>>>>>> origin/main
             Quên mật khẩu?
           </p>
 
           <p className="text-center">
+<<<<<<< HEAD
+            Chưa có tài khoản? <button className="btn btn-link" onClick={toggleForm}>Đăng ký ngay</button>
+=======
             Chưa có tài khoản?{" "}
             <button className="btn btn-link" onClick={toggleForm}>
               Đăng ký ngay
             </button>
+>>>>>>> origin/main
           </p>
 
           <Modal show={showErrorModal} onHide={handleClose}>
@@ -175,6 +244,12 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
         </div>
       </div>
       <div className="auth-action-right">
+<<<<<<< HEAD
+  <h2 className="welcome-text">Chào mừng đến với Eventify</h2>
+  <img src='../../public/images/logo.webp' alt="Logo" className="auth-logo" />
+</div>
+
+=======
         <h2 className="welcome-text">Chào mừng đến với Eventify</h2>
         <img
           src="../../public/images/logo.webp"
@@ -182,6 +257,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
           className="auth-logo"
         />
       </div>
+>>>>>>> origin/main
     </div>
   );
 };

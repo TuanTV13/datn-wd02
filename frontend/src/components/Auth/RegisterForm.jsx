@@ -1,3 +1,14 @@
+<<<<<<< HEAD
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import axios from 'axios';
+import { Modal, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import './Auth.css';
+
+const RegisterForm = ({ toggleForm }) => {
+  const { register, handleSubmit, formState: { errors }, watch } = useForm();
+=======
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
@@ -12,6 +23,7 @@ const RegisterForm = ({ toggleForm }) => {
     formState: { errors },
     watch,
   } = useForm();
+>>>>>>> origin/main
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessages, setErrorMessages] = useState([]);
@@ -20,15 +32,28 @@ const RegisterForm = ({ toggleForm }) => {
   const [showNameError, setShowNameError] = useState(false);
   const [showEmailError, setShowEmailError] = useState(false);
   const [showPasswordError, setShowPasswordError] = useState(false);
+<<<<<<< HEAD
+  const [showConfirmPasswordError, setShowConfirmPasswordError] = useState(false);
+  
+  const navigate = useNavigate(); // Thêm hook để điều hướng sau khi đăng ký thành công
+  const password = watch('password');
+=======
   const [showConfirmPasswordError, setShowConfirmPasswordError] =
     useState(false);
 
   const navigate = useNavigate(); // Thêm hook để điều hướng sau khi đăng ký thành công
   const password = watch("password");
+>>>>>>> origin/main
 
   const onSubmit = async (data) => {
     try {
       const { confirmPassword, ...restData } = data; // Loại bỏ confirmPassword
+<<<<<<< HEAD
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/register', restData);
+      if (response.status === 200) {
+        // Chuyển hướng đến trang verify email sau khi đăng ký thành công
+        navigate('/verify-email');
+=======
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/register",
         restData
@@ -36,15 +61,20 @@ const RegisterForm = ({ toggleForm }) => {
       if (response.status === 200) {
         // Chuyển hướng đến trang verify email sau khi đăng ký thành công
         navigate("/verify-email");
+>>>>>>> origin/main
       }
     } catch (error) {
       if (error.response && error.response.data.errors) {
         const backendErrors = Object.values(error.response.data.errors).flat();
         setErrorMessages(backendErrors);
       } else {
+<<<<<<< HEAD
+        setErrorMessages(['Đăng ký thất bại. Vui lòng kiểm tra lại thông tin!']);
+=======
         setErrorMessages([
           "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin!",
         ]);
+>>>>>>> origin/main
       }
       setCurrentErrorIndex(0);
       setShowModal(true);
@@ -67,14 +97,23 @@ const RegisterForm = ({ toggleForm }) => {
           <h2 className="auth-form-title">Đăng Ký</h2>
           <br />
           <form onSubmit={handleSubmit(onSubmit)}>
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
             {/* Input Tên */}
             <div className="mb-3 input-container">
               <input
                 id="name"
                 type="text"
                 placeholder="Nhập tên"
+<<<<<<< HEAD
+                className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                {...register('name', { required: 'Tên là bắt buộc' })}
+=======
                 className={`form-control ${errors.name ? "is-invalid" : ""}`}
                 {...register("name", { required: "Tên là bắt buộc" })}
+>>>>>>> origin/main
                 onMouseEnter={() => errors.name && setShowNameError(true)}
                 onMouseLeave={() => errors.name && setShowNameError(false)}
               />
@@ -89,6 +128,10 @@ const RegisterForm = ({ toggleForm }) => {
                 id="email"
                 type="text"
                 placeholder="Nhập email"
+<<<<<<< HEAD
+                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                {...register('email', { required: 'Email là bắt buộc', pattern: { value: /^\S+@\S+$/i, message: 'Email không hợp lệ' } })}
+=======
                 className={`form-control ${errors.email ? "is-invalid" : ""}`}
                 {...register("email", {
                   required: "Email là bắt buộc",
@@ -97,6 +140,7 @@ const RegisterForm = ({ toggleForm }) => {
                     message: "Email không hợp lệ",
                   },
                 })}
+>>>>>>> origin/main
                 onMouseEnter={() => errors.email && setShowEmailError(true)}
                 onMouseLeave={() => errors.email && setShowEmailError(false)}
               />
@@ -111,6 +155,22 @@ const RegisterForm = ({ toggleForm }) => {
                 id="phone"
                 type="text"
                 placeholder="Nhập số điện thoại"
+<<<<<<< HEAD
+                className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
+                {...register('phone', {
+                  required: 'Số điện thoại là bắt buộc',
+                  pattern: {
+                    value: /^[0-9]+$/,
+                    message: 'Số điện thoại không hợp lệ',
+                  },
+                  maxLength: {
+                    value: 10,
+                    message: 'Số điện thoại không thể dài hơn 10 số',
+                  },
+                })}
+              />
+              {errors.phone && <div className="input-error">{errors.phone.message}</div>}
+=======
                 className={`form-control ${errors.phone ? "is-invalid" : ""}`}
                 {...register("phone", {
                   required: "Số điện thoại là bắt buộc",
@@ -127,12 +187,27 @@ const RegisterForm = ({ toggleForm }) => {
               {errors.phone && (
                 <div className="input-error">{errors.phone.message}</div>
               )}
+>>>>>>> origin/main
             </div>
 
             {/* Input Mật Khẩu */}
             <div className="mb-3 position-relative input-container">
               <input
                 id="password"
+<<<<<<< HEAD
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Nhập mật khẩu"
+                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                {...register('password', { required: 'Mật khẩu là bắt buộc' })}
+                onMouseEnter={() => errors.password && setShowPasswordError(true)}
+                onMouseLeave={() => errors.password && setShowPasswordError(false)}
+              />
+              {!errors.password && (
+                <i
+                  className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', top: '50%', right: '10px', cursor: 'pointer', transform: 'translateY(-50%)' }}
+=======
                 type={showPassword ? "text" : "password"}
                 placeholder="Nhập mật khẩu"
                 className={`form-control ${
@@ -157,6 +232,7 @@ const RegisterForm = ({ toggleForm }) => {
                     cursor: "pointer",
                     transform: "translateY(-50%)",
                   }}
+>>>>>>> origin/main
                 />
               )}
               {errors.password && showPasswordError && (
@@ -168,6 +244,37 @@ const RegisterForm = ({ toggleForm }) => {
             <div className="mb-3 position-relative input-container">
               <input
                 id="password_confirmation" // Sửa ở đây
+<<<<<<< HEAD
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Xác nhận mật khẩu"
+                className={`form-control ${errors.password_confirmation ? 'is-invalid' : ''}`} // Sửa ở đây
+                {...register('password_confirmation', { // Sửa ở đây
+                  required: 'Cần nhập lại mật khẩu',
+                  validate: value => {
+                    return value === password || 'Mật khẩu xác nhận không khớp';
+                  },
+                })}
+                onMouseEnter={() => errors.password_confirmation && setShowConfirmPasswordError(true)} // Sửa ở đây
+                onMouseLeave={() => errors.password_confirmation && setShowConfirmPasswordError(false)} // Sửa ở đây
+              />
+              {!errors.password_confirmation && ( // Sửa ở đây
+                <i
+                  className={`fas ${showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'}`}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ position: 'absolute', top: '50%', right: '10px', cursor: 'pointer', transform: 'translateY(-50%)' }}
+                />
+              )}
+              {errors.password_confirmation && showConfirmPasswordError && ( // Sửa ở đây
+                <div className="input-error">{errors.password_confirmation.message}</div>
+              )}
+            </div>
+
+            <button type="submit" className="btn btn-primary w-100">Đăng ký</button>
+          </form>
+
+          <p className="mt-3">
+            Đã là thành viên? <button className="btn btn-link" onClick={toggleForm}>Đăng nhập ngay</button>
+=======
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Xác nhận mật khẩu"
                 className={`form-control ${
@@ -222,17 +329,22 @@ const RegisterForm = ({ toggleForm }) => {
             <button className="btn btn-link" onClick={toggleForm}>
               Đăng nhập ngay
             </button>
+>>>>>>> origin/main
           </p>
         </div>
       </div>
 
       <div className="auth-action-right">
         <h2 className="welcome-text">Chào mừng đến với Eventify</h2>
+<<<<<<< HEAD
+        <img src='../../public/images/logo.webp' alt="Logo" className="auth-logo" />
+=======
         <img
           src="../../public/images/logo.webp"
           alt="Logo"
           className="auth-logo"
         />
+>>>>>>> origin/main
       </div>
 
       {/* Modal thông báo lỗi */}

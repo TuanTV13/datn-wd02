@@ -1,11 +1,20 @@
+<<<<<<< HEAD
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+=======
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css");
+>>>>>>> origin/main
 
 body {
   margin: 0;
   padding: 0;
   background-color: #f7f8f9;
+<<<<<<< HEAD
+  font-family: 'Roboto', sans-serif;
+=======
   font-family: "Roboto", sans-serif;
+>>>>>>> origin/main
   font-size: 14px;
   box-sizing: border-box;
 }
@@ -20,6 +29,10 @@ body {
   display: flex;
   margin-top: 9rem;
   overflow: hidden;
+<<<<<<< HEAD
+ 
+=======
+>>>>>>> origin/main
 }
 
 .auth-image img {
@@ -188,6 +201,31 @@ a.auth-btn-direct:focus {
   }
 }
 .auth-action-right {
+<<<<<<< HEAD
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background-color:#007BFF;
+  }
+  
+  .welcome-text {
+    font-size: 3.5rem;
+    color: rgb(255, 255, 255); /* Thay đổi màu chữ nếu cần */
+    text-align: center;
+    margin-bottom: 1rem;
+    font-family: 'Dancing Script', cursive; /* Áp dụng font Dancing Script */
+  }
+  
+  .auth-logo {
+    width: 140px; /* Đặt kích thước logo */
+    height: auto;
+    margin-top: 1rem;
+  }
+  
+=======
   width: 320px;
   display: flex;
   flex-direction: column;
@@ -211,6 +249,7 @@ a.auth-btn-direct:focus {
   margin-top: 1rem;
 }
 
+>>>>>>> origin/main
 /* Đặt màu cho placeholder */
 .auth-form-outer input::placeholder {
   color: #2196f3b5; /* Màu placeholder mới */
@@ -236,6 +275,11 @@ label input[type="checkbox"] ~ i.fa.fa-square-o {
   text-decoration: underline; /* Gạch chân chữ khi hover */
 }
 
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> origin/main
 /* bao loi valid*/
 .auth-form-outer {
   position: relative; /* Đảm bảo vị trí cho thông báo lỗi */

@@ -7,7 +7,11 @@ import {
   AiOutlinePercentage,
   AiOutlineCheckCircle,
 } from "react-icons/ai";
+<<<<<<< HEAD
+import { Link, useLocation } from "react-router-dom";
+=======
 import { Link } from "react-router-dom";
+>>>>>>> origin/main
 import { Badge, Tooltip } from "antd"; // Thêm Badge và Tooltip
 import React from "react";
 
@@ -16,6 +20,30 @@ type Props = {
 };
 
 const MenuSidebar = ({ collapsed = false }: Props) => {
+<<<<<<< HEAD
+  const location = useLocation();
+  const getSelectedKey = () => {
+    const path = location.pathname;
+
+    if (path === "/admin") return "1";
+    if (path.startsWith("/admin/user-list")) return "2.1";
+    if (path.startsWith("/admin/add-user")) return "2.2";
+    if (path.startsWith("/admin/client-list")) return "7.1";
+    if (path.startsWith("/admin/add-client")) return "7.2";
+    if (path.startsWith("/admin/event-list")) return "3.1";
+    if (path.startsWith("/admin/add-event")) return "3.2";
+    if (path.startsWith("/admin/ticket-list")) return "4.1";
+    if (path.startsWith("/admin/add-ticket")) return "4.2";
+    if (path.startsWith("/admin/discount-code-list")) return "5.1";
+    if (path.startsWith("/admin/discount-code")) return "5.2";
+    if (path.startsWith("/admin/expiring-vouchers")) return "5.3";
+    if (path.startsWith("/admin/voucher-analytics")) return "5.6";
+    if (path.startsWith("/admin/review-list")) return "6.1";
+
+    return "1";
+  };
+=======
+>>>>>>> origin/main
   return (
     <div className="flex flex-col justify-between h-full bg-gray-50 shadow-lg transition-all duration-300">
       <div>
@@ -33,7 +61,11 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
         <Menu
           theme="light"
           mode="inline"
+<<<<<<< HEAD
+          defaultSelectedKeys={[getSelectedKey()]}
+=======
           defaultSelectedKeys={["1"]}
+>>>>>>> origin/main
           items={[
             {
               key: "1",
@@ -66,6 +98,32 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
               ],
             },
             {
+<<<<<<< HEAD
+              key: "7",
+              icon: (
+                <Tooltip title={!collapsed ? "" : "Quản lý khách hàng"}>
+                  <LuUsers />
+                </Tooltip>
+              ),
+              label: "Quản lý khách hàng",
+              children: [
+                {
+                  key: "7.1",
+                  label: (
+                    <Link to="/admin/client-list">Danh sách khách hàng</Link>
+                  ),
+                },
+                {
+                  key: "7.2",
+                  label: (
+                    <Link to="/admin/add-client">Thêm mới khách hàng</Link>
+                  ),
+                },
+              ],
+            },
+            {
+=======
+>>>>>>> origin/main
               key: "3",
               icon: (
                 <Tooltip title={!collapsed ? "" : "Quản lý sự kiện"}>
@@ -126,6 +184,17 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
                     <Link to="/admin/discount-code">Thêm mới mã giảm giá</Link>
                   ),
                 },
+<<<<<<< HEAD
+                {
+                  key: "5.3",
+                  label: (
+                    <Link to="/admin/expiring-vouchers">
+                      Cập nhật voucher sắp hết hạn
+                    </Link>
+                  ),
+                },
+=======
+>>>>>>> origin/main
               ],
             },
             {
