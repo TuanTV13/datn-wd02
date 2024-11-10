@@ -36,7 +36,7 @@ class HomeController extends Controller
         if ($upcomingEvents->isEmpty()) {
             return response()->json([
                 'message' => 'Không có sự kiện nào sắp diễn ra.'
-            ]);
+            ], 404);
         }
     
         return response()->json([

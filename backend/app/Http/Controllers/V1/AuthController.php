@@ -250,4 +250,14 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Mật khẩu đã được cập nhật thành công'], 200);
     }
+
+    public function me()
+    {
+
+        $user = Auth()->user();
+
+        return response()->json([
+            'user' => $user
+        ]);
+    }
 }

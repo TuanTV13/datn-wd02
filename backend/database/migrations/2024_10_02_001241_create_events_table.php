@@ -20,9 +20,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Category::class)->constrained()->onDelete('cascade');
             $table->enum('status', EventStatus::getValues())->default(EventStatus::PENDING);
-            $table->foreignIdFor(Province::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(District::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(Ward::class)->constrained()->onDelete('cascade');
+            $table->string('province');
+            $table->string('district');
+            $table->string('ward');
             $table->json('speakers')->nullable();
             $table->string('name', 255);
             $table->text('description');

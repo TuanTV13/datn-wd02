@@ -44,12 +44,12 @@ class EventRepository
 
     public function find($id)
     {
-        return $this->event->find($id);
+        return $this->event->with('tickets')->find($id);
     }
 
     public function findByCategory($categoryId)
     {
-        return $this->event->with(['speakers', 'category', 'province', 'district', 'ward'])->where('category_id', $categoryId)->get();
+        return $this->event->where('category_id', $categoryId)->get();
     }
 
     public function findTrashed($id)
@@ -73,25 +73,6 @@ class EventRepository
     {
         $event = $this->find($id);
         return $event->delete();
-    }
-
-    public function checkConflict($startTime, $endTime, $wardId, $excludeId = null)
-    {
-        $query = Event::where('ward_id', $wardId)
-            ->where(function ($q) use ($startTime, $endTime) {
-                $q->whereBetween('start_time', [$startTime, $endTime])
-                    ->orWhereBetween('end_time', [$startTime, $endTime])
-                    ->orWhere(function ($q2) use ($startTime, $endTime) {
-                        $q2->where('start_time', '<=', $startTime)
-                            ->where('end_time', '>=', $endTime);
-                    });
-            });
-
-        if ($excludeId) {
-            $query->where('id', '<>', $excludeId);
-        }
-
-        return $query->first();
     }
 
     public function countHeaderEvents()
@@ -146,5 +127,15 @@ class EventRepository
             ->orderByDesc('feedbacks_sum_rating')
             ->limit(12)
             ->get();
+    }
+
+    public function getIp($eventId)
+    {
+        $event = $this->event->find($eventId);
+        if ($event) {
+            return $event->subnets->pluck('subnet');
+        }
+    
+        return null; 
     }
 }

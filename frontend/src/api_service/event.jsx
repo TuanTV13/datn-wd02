@@ -21,13 +21,15 @@ export const getEvents = async () => {
  const addEvent = async (eventData) => {
    // Lấy token từ localStorage (hoặc nơi bạn lưu token)
    const token = localStorage.getItem('token'); // Điều chỉnh theo cách bạn lưu token
- 
+  
+  
    // Tạo headers với token
    const headers = {
        'Authorization': `Bearer ${token}`,
        'Content-Type': 'multipart/form-data', // Nếu bạn gửi FormData
    };
- 
+  
+
    try {
        const response = await axios.post(`${API_URL}/events/create`, eventData, { headers });
        return response.data;

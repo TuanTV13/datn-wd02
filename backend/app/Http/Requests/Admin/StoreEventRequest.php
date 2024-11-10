@@ -16,19 +16,19 @@ class StoreEventRequest extends FormRequest
     {
         return [
 
-            'event' => 'required_array_keys:category_id,province_id,district_id,ward_id,name,description,start_time,end_time,location,event_type,thumbnail',
+            'event' => 'required_array_keys:category_id,province,district,ward,name,description,start_time,end_time,location,event_type,thumbnail',
 
             'category_id' => 'required|integer|exists:categories,id',
-            'province_id' => 'required|integer|exists:provinces,id',
-            'district_id' => 'required|integer|exists:districts,id',
-            'ward_id' => 'required|integer|exists:wards,id',
+            'province' => 'required|string',
+            'district' => 'required|string',
+            'ward' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'location' => 'required|string|max:255',
             'event_type' => 'required|in:online,offline',
             'link_online' => 'nullable|string|255',
             'max_attendess' => 'nullable',
-            'thumbnail' => 'required|string|max:255',
+            'thumbnail' => 'required|max:2048',
             'start_time' => [
                 'required',
                 'date',
@@ -68,22 +68,6 @@ class StoreEventRequest extends FormRequest
     {
         return [
             'required_array_keys' => 'Các trường thể loại sự kiện, Tỉnh, Huyện, Xã, Tên sự kiện, Mô tả sự kiện, Thời gian bắt đầu, Thời gian kết thúc, Đại điểm cụ thể, Loại sự kiện và Ảnh đại diện là bắt buộc.',
-
-            'category_id.required' => 'Vui lòng chọn thể loại sự kiện.',
-            'category_id.integer' => 'Thể loại sự kiện phải là một số nguyên.',
-            'category_id.exists' => 'Thể loại sự kiện không tồn tại trong danh sách danh mục.',
-
-            'province_id.required' => 'Vui lòng chọn tỉnh',
-            'province_id.integer' => 'Tỉnh phải là một số nguyên.',
-            'province_id.exists' => 'Tỉnh không tồn tại trong danh sách tỉnh.',
-
-            'district_id.required' => 'Vui lòng chọn huyện',
-            'district_id.integer' => 'Huyện phải là một số nguyên.',
-            'district_id.exists' => 'Huyện không tồn tại trong danh sách',
-
-            'ward_id.required' => 'Vui lòng chọn xã.',
-            'ward_id.integer' => 'Xã phải là một số nguyên.',
-            'ward_id.exists' => 'Xã không tồn tại trong danh sách.',
 
             'name.required' => 'Vui lòng nhập tên sự kiện',
             'name.max' => 'Tên sự kiện không được vượt quá :max ký tự.',

@@ -5,20 +5,23 @@ namespace App\Http\Controllers\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
+use App\Http\Services\CheckEventIPService;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
-    protected $eventRepository;
+    protected $eventRepository, $checkEventIPService;
 
-    public function __construct(EventRepository $eventRepository)
+    public function __construct(EventRepository $eventRepository, CheckEventIPService $checkEventIPService)
     {
         $this->eventRepository = $eventRepository;
+        $this->checkEventIPService = $checkEventIPService;
     }
 
     public function index()
@@ -98,18 +101,6 @@ class EventController extends Controller
                 $data['speakers'] = json_encode($request->speakers);
             } else {
                 $data['speakers'] = null;
-            }
-
-            $conflictingEvent = $this->eventRepository->checkConflict(
-                $data['start_time'],
-                $data['end_time'],
-                $data['ward_id']
-            );
-
-            if ($conflictingEvent) {
-                return response()->json([
-                    'message' => 'Thời gian và địa điểm (tỉnh, huyện, xã) đã được sử dụng cho sự kiện khác.',
-                ], 400);
             }
 
             $data['display_header'] ??= 0;
@@ -201,20 +192,6 @@ class EventController extends Controller
             ], 400);
         }
 
-        $conflictingEvent = $this->eventRepository->checkConflict(
-            $data['start_time'],
-            $data['end_time'],
-            $data['ward_id'],
-            $event
-        );
-
-        if ($conflictingEvent) {
-            return response()->json([
-                'message' => 'Thời gian và địa điểm (tỉnh, huyện, xã) đã được sử dụng cho sự kiện khác.',
-                'conflicting_event' => $conflictingEvent
-            ], 400);
-        }
-
         $data['display_header'] ??= 0;
 
         if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
@@ -276,5 +253,16 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Khôi phục sự kiện thành công'
         ], 200);
+    }
+
+    public function checkEventIP(): JsonResponse
+    {
+        $result = $this->checkEventIPService->checkEventsWithoutIP();
+
+        return response()->json([
+            'status' => $result['status'],
+            'message' => $result['message'],
+            'events' => $result['events'] ?? []
+        ]);
     }
 }

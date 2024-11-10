@@ -14,9 +14,9 @@ class Event extends Model
 
     protected $fillable = [
         'category_id',
-        'province_id',
-        'district_id',
-        'ward_id',
+        'province',
+        'district',
+        'ward',
         'status',
         'speakers',
         'name',
@@ -48,21 +48,6 @@ class Event extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function province()
-    {
-        return $this->belongsTo(Province::class);
-    }
-
-    public function district()
-    {
-        return $this->belongsTo(District::class);
-    }
-
-    public function ward()
-    {
-        return $this->belongsTo(Ward::class);
-    }
-
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
@@ -86,5 +71,10 @@ class Event extends Model
     public function registrants()
     {
         return $this->hasMany(EventUser::class);
+    }
+
+    public function subnets()
+    {
+        return $this->hasMany(EventSubnet::class)->select('subnet');
     }
 }
