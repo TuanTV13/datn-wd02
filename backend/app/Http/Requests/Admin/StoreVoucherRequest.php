@@ -26,7 +26,7 @@ class StoreVoucherRequest extends FormRequest
         return [
             'creator_id'        => ['required', 'integer', 'exists:users,id'],       
             'event_id'          => ['required', 'integer', 'exists:events,id'],       
-            'status'            => ['required', 'in:draft,pending,published'],     
+            'status'            => ['nullable', 'in:draft,pending,published'],     
             'code'              => ['required', 'string', 'max:100', 'unique:vouchers,code'],  
             'discount_type'     => ['required', 'in:percent,fixed'],                 
             'discount_value'    => ['required', 'numeric', 'gt:0'],                        

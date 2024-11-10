@@ -11,18 +11,12 @@
         "php": "^8.1",
         "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^10.10",
-<<<<<<< HEAD
         "laravel/sanctum": "3.3",
         "laravel/tinker": "^2.8",
         "maatwebsite/excel": "^3.1",
         "paypal/paypal-checkout-sdk": "^1.0",
         "paypal/rest-api-sdk-php": "1.0.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
-=======
-        "laravel/sanctum": "^3.3",
-        "laravel/tinker": "^2.8",
-        "maatwebsite/excel": "^3.1",
->>>>>>> origin/main
         "spatie/laravel-permission": "^6.9",
         "tymon/jwt-auth": "^2.1",
         "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.1"

@@ -7,11 +7,7 @@ import {
   AiOutlinePercentage,
   AiOutlineCheckCircle,
 } from "react-icons/ai";
-<<<<<<< HEAD
 import { Link, useLocation } from "react-router-dom";
-=======
-import { Link } from "react-router-dom";
->>>>>>> origin/main
 import { Badge, Tooltip } from "antd"; // Thêm Badge và Tooltip
 import React from "react";
 
@@ -20,7 +16,6 @@ type Props = {
 };
 
 const MenuSidebar = ({ collapsed = false }: Props) => {
-<<<<<<< HEAD
   const location = useLocation();
   const getSelectedKey = () => {
     const path = location.pathname;
@@ -42,8 +37,6 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
 
     return "1";
   };
-=======
->>>>>>> origin/main
   return (
     <div className="flex flex-col justify-between h-full bg-gray-50 shadow-lg transition-all duration-300">
       <div>
@@ -61,11 +54,7 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
         <Menu
           theme="light"
           mode="inline"
-<<<<<<< HEAD
           defaultSelectedKeys={[getSelectedKey()]}
-=======
-          defaultSelectedKeys={["1"]}
->>>>>>> origin/main
           items={[
             {
               key: "1",
@@ -98,7 +87,6 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
               ],
             },
             {
-<<<<<<< HEAD
               key: "7",
               icon: (
                 <Tooltip title={!collapsed ? "" : "Quản lý khách hàng"}>
@@ -122,8 +110,6 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
               ],
             },
             {
-=======
->>>>>>> origin/main
               key: "3",
               icon: (
                 <Tooltip title={!collapsed ? "" : "Quản lý sự kiện"}>
@@ -184,7 +170,6 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
                     <Link to="/admin/discount-code">Thêm mới mã giảm giá</Link>
                   ),
                 },
-<<<<<<< HEAD
                 {
                   key: "5.3",
                   label: (
@@ -193,8 +178,6 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
                     </Link>
                   ),
                 },
-=======
->>>>>>> origin/main
               ],
             },
             {

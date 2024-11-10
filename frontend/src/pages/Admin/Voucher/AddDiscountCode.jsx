@@ -9,7 +9,6 @@ const AddDiscountCode = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-<<<<<<< HEAD
   const [formData, setFormData] = useState({
     code: "",
     status: "",
@@ -46,30 +45,15 @@ const AddDiscountCode = () => {
       });
       setLoading(false);
       navigate("/admin/discount-code");
-=======
-  const onFinish = (values) => {
-    setLoading(true);
-    setTimeout(() => {
-      notification.success({
-        message: "Thêm mã giảm giá thành công",
-        description: `Mã giảm giá "${values.code}" đã được thêm.`,
-      });
-      setLoading(false);
-      navigate("/admin/discount-code-list");
->>>>>>> origin/main
     }, 1500);
   };
 
   return (
     <div>
-<<<<<<< HEAD
       <form
         className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg"
         onSubmit={handleSubmit}
       >
-=======
-      <form className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
->>>>>>> origin/main
         <h2 className="text-2xl font-bold text-center mb-5">
           Thêm mới voucher
         </h2>
@@ -85,11 +69,8 @@ const AddDiscountCode = () => {
             <input
               type="text"
               id="code"
-<<<<<<< HEAD
               value={formData.code}
               onChange={handleChange}
-=======
->>>>>>> origin/main
               placeholder="Nhập mã giảm giá"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -104,11 +85,8 @@ const AddDiscountCode = () => {
             </label>
             <select
               id="status"
-<<<<<<< HEAD
               value={formData.status}
               onChange={(e) => handleSelectChange(e.target.value, "status")}
-=======
->>>>>>> origin/main
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option>Chọn trạng thái</option>
@@ -127,19 +105,12 @@ const AddDiscountCode = () => {
             <input
               type="date"
               id="expiryDate"
-<<<<<<< HEAD
               value={formData.expiryDate}
               onChange={handleChange}
-=======
->>>>>>> origin/main
               placeholder="dd/mm/yyyy"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
           <div>
             <label
               htmlFor="usageCount"
@@ -150,11 +121,8 @@ const AddDiscountCode = () => {
             <input
               type="number"
               id="usageCount"
-<<<<<<< HEAD
               value={formData.usageCount}
               onChange={handleChange}
-=======
->>>>>>> origin/main
               placeholder="Nhập số lần sử dụng"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -169,20 +137,13 @@ const AddDiscountCode = () => {
             </label>
             <textarea
               id="description"
-<<<<<<< HEAD
               value={formData.description}
               onChange={handleChange}
-=======
->>>>>>> origin/main
               rows={3}
               placeholder="Mô tả mã giảm giá..."
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             ></textarea>
           </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
           <div>
             <label
               htmlFor="discountType"
@@ -192,13 +153,10 @@ const AddDiscountCode = () => {
             </label>
             <select
               id="discountType"
-<<<<<<< HEAD
               value={formData.discountType}
               onChange={(e) =>
                 handleSelectChange(e.target.value, "discountType")
               }
-=======
->>>>>>> origin/main
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option>Chọn loại mã giảm giá</option>
@@ -217,11 +175,8 @@ const AddDiscountCode = () => {
             <input
               type="date"
               id="startDate"
-<<<<<<< HEAD
               value={formData.startDate}
               onChange={handleChange}
-=======
->>>>>>> origin/main
               placeholder="dd/mm/yyyy"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -232,7 +187,6 @@ const AddDiscountCode = () => {
           <button
             type="submit"
             className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-<<<<<<< HEAD
             disabled={loading}
           >
             {loading ? "Đang lưu..." : "Lưu"}
@@ -240,13 +194,6 @@ const AddDiscountCode = () => {
           <button
             type="button"
             onClick={() => navigate("/admin/discount-code-list")}
-=======
-          >
-            Lưu
-          </button>
-          <button
-            type="button"
->>>>>>> origin/main
             className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             Quay lại

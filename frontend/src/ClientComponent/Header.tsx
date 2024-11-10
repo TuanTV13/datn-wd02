@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-<<<<<<< HEAD
 import { Dropdown, MenuProps } from "antd";
-=======
->>>>>>> origin/main
 
 const Header = () => {
   const [openMenu, setOpenMenu] = useState(null);
@@ -13,7 +10,6 @@ const Header = () => {
   const mobileMenuRef = useRef(null);
   const notificationRef = useRef(null);
 
-<<<<<<< HEAD
   const items: MenuProps["items"] = [
     {
       key: "1",
@@ -33,8 +29,6 @@ const Header = () => {
     },
   ];
 
-=======
->>>>>>> origin/main
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -153,14 +147,11 @@ const Header = () => {
             <Link to={"auth"}>
               <span className="text-sm">Your Account</span>
             </Link>{" "}
-<<<<<<< HEAD
             <Dropdown menu={{ items }}>
               <Link to={""}>
                 <span className="text-sm">Your info</span>
               </Link>
             </Dropdown>
-=======
->>>>>>> origin/main
             |
             <Link to={`/cart`} className="relative h-[24px]">
               <svg
