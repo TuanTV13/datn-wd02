@@ -30,7 +30,7 @@ class SendUpcomingEventEmail implements ShouldQueue
             try {
                 Mail::send('emails.event-upcoming', ['user' => $user, 'event' => $event->event, 'eventUrl' => $eventUrl], function ($message) use ($user, $event) {
                     $message->to($user->email, $user->name)
-                            ->subject('Sự kiện sắp diễn ra: ' . $event->event->name);
+                            ->subject('Thông báo sự kiện ' . $event->event->name . ' sắp diễn ra ' );
                 });
             } catch (Exception $e) {
                 Log::error("Lỗi khi gửi email cho user {$user->name} về sự kiện {$event->event->id}: " . $e->getMessage());
