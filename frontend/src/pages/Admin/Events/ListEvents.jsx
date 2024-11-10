@@ -3,19 +3,17 @@ import { Link } from 'react-router-dom';
 import { getEvents, deleteEvent } from '../../../api_service/event'; // Gọi API từ file auth-service
 
 const EventList = () => {
-  const [list, setList] = useState([]); // Danh sách sự kiện
+  const [list, setList] = useState([]); 
 
-  // Gọi API để lấy danh sách sự kiện từ backend
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await getEvents();
-        // Kiểm tra xem dữ liệu có trường 'data' và là mảng không
         if (response && Array.isArray(response.data)) {
-          setList(response.data); // Cập nhật danh sách sự kiện từ API
+          setList(response.data);
         } else {
           console.error('Dữ liệu trả về không phải là mảng:', response);
-          setList([]); // Đặt list về mảng rỗng nếu không phải mảng
+          setList([]);
         }
       } catch (error) {
         console.error('Lỗi khi tải dữ liệu sự kiện:', error);
@@ -24,13 +22,12 @@ const EventList = () => {
     fetchEvents();
   }, []);
 
-  // Hàm xóa sự kiện thông qua API
   const onDelete = async (id) => {
     const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa sự kiện này?');
     if (confirmDelete) {
       try {
-        await deleteEvent(id); // Gọi API để xóa sự kiện từ backend
-        const updatedList = list.filter(event => event.id !== id); // Cập nhật danh sách
+        await deleteEvent(id);
+        const updatedList = list.filter(event => event.id !== id);
         setList(updatedList);
       } catch (error) {
         console.error('Lỗi khi xóa sự kiện:', error);
@@ -43,14 +40,12 @@ const EventList = () => {
     switch (statusId) {
       case 1:
         return 'bg-green-500'; // Đang diễn ra
-      case 2:
-        return 'bg-yellow-500'; // Sắp diễn ra
-      case 3:
-        return 'bg-red-500'; // Đã kết thúc
-      case 4:
-        return 'bg-gray-500'; // Bị hủy
-      case 5:
-        return 'bg-blue-500'; // Chờ duyệt
+      case 'confirmed':
+        return 'bg-blue-500'; // Đã xác nhận
+      case 'pending':
+        return 'bg-yellow-500'; // Chờ duyệt
+      case 'canceled':
+        return 'bg-red-500'; // Đã hủy
       default:
         return 'bg-gray-300'; // Trạng thái khác
     }
@@ -67,8 +62,11 @@ const EventList = () => {
             list.map((event) => (
               <div key={event.id} className="relative flex flex-col bg-white p-4 rounded-md shadow-sm cursor-pointer border-2 border-gray-50 hover:border-black transition-colors duration-300 w-64 h-80 mx-auto">
                 {/* Trạng thái sự kiện */}
-                <div className={`absolute top-2 left-2 ${getStatusColor(event.status_id)} text-white px-3 py-1 text-sm rounded-br-md z-10`}>
-                  {event.status ? event.status.name : 'Trạng thái không xác định'}
+                <div className={`absolute top-2 left-2 ${getStatusColor(event.status)} text-white px-3 py-1 text-sm rounded-br-md z-10`}>
+                  {event.status === 'pending' ? 'Chờ duyệt' :
+                   event.status === 'confirmed' ? 'Đã xác nhận' :
+                   event.status === 'ongoing' ? 'Đang diễn ra' :
+                   event.status === 'canceled' ? 'Đã hủy' : 'Trạng thái không xác định'}
                 </div>
 
                 {/* Icons sửa và xóa */}
@@ -80,13 +78,13 @@ const EventList = () => {
                 </div>
 
                 {/* Ảnh sự kiện thumbnail */}
-                <img src={event.thumbnail} className="w-full h-40 rounded-lg shadow-lg object-cover mt-4" alt={event.name} />
+                <img src={event.thumbnail} className="w-full h-[100px] rounded-lg shadow-lg object-cover mt-4" alt={event.name} />
 
                 <h2 className="text-xl font-semibold mb-2">{event.name}</h2>
                 <p className="text-gray-600 mb-2">Loại hình: {event.event_type === 'online' ? 'Trực tuyến' : 'Trực tiếp'}</p>
                 <p className="text-green-500 mb-2">
-                  {event.status_id === 1 ? `Đang diễn ra từ ${new Date(event.start_time).toLocaleDateString()}` : 
-                    event.status_id === 2 ? `Sẽ diễn ra vào ${new Date(event.start_time).toLocaleDateString()}` : 
+                  {event.status === 'ongoing' ? `Đang diễn ra từ ${new Date(event.start_time).toLocaleDateString()}` : 
+                    event.status === 'confirmed' ? `Sẽ diễn ra vào ${new Date(event.start_time).toLocaleDateString()}` : 
                     'Sự kiện đã kết thúc'}
                 </p>
                 {event.event_type === 'online' && (

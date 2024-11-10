@@ -41,7 +41,7 @@ function App() {
       children: [
         { path: "", element: <Home /> },
         { path: "event-list", element: <EventListing /> },
-        { path: "event-detail", element: <EventDetail /> },
+        { path: "event-detail/:id", element:<EventDetail/>},
         { path: "event-category", element: <CategoryEven /> },
         { path: "cart", element: <Cart /> },
         { path: "checkout", element: <CheckOut /> },
