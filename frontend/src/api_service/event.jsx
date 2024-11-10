@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 
 // Base URL for your API
@@ -59,14 +58,3 @@ export const getEvents = async () => {
      throw new Error('Lỗi khi cập nhật sự kiện: ' + error.message);
    }
  };
-
-
-export const fetchCategories = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/categories`);
-    return response.data;  // Đảm bảo trả về đối tượng chứa trường 'data'
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    return { data: [] };  // Trả về mảng rỗng nếu có lỗi
-  }
-};

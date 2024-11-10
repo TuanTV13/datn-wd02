@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Enums\EventStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreTicketRequest;
 use App\Http\Requests\Admin\UpdateTicketRequest;
@@ -128,6 +129,9 @@ class TicketController extends Controller
 
         $data = $request->validated();
         $ticket = $this->ticketRepository->find($id);
+        // dd($ticket->status);
+
+        // $status = EventStatus::PENDING;
 
         if (!$ticket) {
             return response()->json([
@@ -135,7 +139,7 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status_id != 'pending') {
+        if ($ticket->status != 'pending') {
             return response()->json([
                 'message' => 'Không thể cập nhật vé trong trạng thái này'
             ], 403);

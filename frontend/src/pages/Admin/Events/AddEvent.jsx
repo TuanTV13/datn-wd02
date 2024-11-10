@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { addEvent, fetchCategories } from '../../../api_service/event';
+// import { addEvent, fetchCategories } from '../../../api_service/event';
 import { fetchProvinces, fetchDistricts, fetchWards } from '../../../api_service/location';
 const AddEvent = () => {
   const [formData, setFormData] = useState({

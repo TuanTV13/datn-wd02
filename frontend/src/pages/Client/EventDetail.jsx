@@ -53,9 +53,11 @@ const EventDetail = () => {
   const handleConfirmPurchase = () => {
     if (selectedTicket) {
       const totalPrice = selectedTicket.price;
-      window.location.href = `/checkout?ticketType=${selectedTicket.ticket_type}&totalPrice=${totalPrice}`;
+      const ticketId = selectedTicket.id;  // Lấy id vé
+      window.location.href = `/checkout?ticketType=${selectedTicket.ticket_type}&totalPrice=${totalPrice}&ticketId=${ticketId}`;  // Thêm id vé vào URL
     }
   };
+  
 
   if (!event) {
     return <div>Đang tải sự kiện...</div>;

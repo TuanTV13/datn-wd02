@@ -29,9 +29,9 @@ class HomeController extends Controller
         ], 200);
     }
     
-    public function upcomingEvents($province)
+    public function upcomingEvents()
     {
-        $upcomingEvents = $this->eventRepository->getUpcomingEvents($province);
+        $upcomingEvents = $this->eventRepository->getUpcomingEvents();
 
         if ($upcomingEvents->isEmpty()) {
             return response()->json([

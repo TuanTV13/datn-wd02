@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getEvents, deleteEvent } from '../../../api_service/event';
+import { getEvents, deleteEvent } from '../../../api_service/event'; // Gọi API từ file auth-service
 
 const EventList = () => {
   const [list, setList] = useState([]); 
@@ -35,9 +35,10 @@ const EventList = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'ongoing':
+  // Hàm lấy màu sắc cho trạng thái sự kiện
+  const getStatusColor = (statusId) => {
+    switch (statusId) {
+      case 1:
         return 'bg-green-500'; // Đang diễn ra
       case 'confirmed':
         return 'bg-blue-500'; // Đã xác nhận
@@ -91,6 +92,8 @@ const EventList = () => {
                     Tham gia Zoom
                   </a>
                 )}
+                
+                <div className="flex-grow"></div> {/* Tạo không gian cho nút */}
 
                 {/* Nút "Xem chi tiết" */}
                 <Link to={`/detail/${event.id}`}>
