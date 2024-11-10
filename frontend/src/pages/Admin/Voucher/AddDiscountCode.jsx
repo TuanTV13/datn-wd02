@@ -9,21 +9,51 @@ const AddDiscountCode = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const onFinish = (values) => {
+  const [formData, setFormData] = useState({
+    code: "",
+    status: "",
+    expiryDate: "",
+    usageCount: "",
+    description: "",
+    discountType: "",
+    startDate: "",
+  });
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({
+      ...formData,
+      [id]: value,
+    });
+  };
+
+  const handleSelectChange = (value, id) => {
+    setFormData({
+      ...formData,
+      [id]: value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
     setLoading(true);
+
     setTimeout(() => {
       notification.success({
         message: "Thêm mã giảm giá thành công",
-        description: `Mã giảm giá "${values.code}" đã được thêm.`,
+        description: `Mã giảm giá "${formData.code}" đã được thêm.`,
       });
       setLoading(false);
-      navigate("/admin/discount-code-list");
+      navigate("/admin/discount-code");
     }, 1500);
   };
 
   return (
     <div>
-      <form className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+      <form
+        className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg"
+        onSubmit={handleSubmit}
+      >
         <h2 className="text-2xl font-bold text-center mb-5">
           Thêm mới voucher
         </h2>
@@ -39,6 +69,8 @@ const AddDiscountCode = () => {
             <input
               type="text"
               id="code"
+              value={formData.code}
+              onChange={handleChange}
               placeholder="Nhập mã giảm giá"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -53,6 +85,8 @@ const AddDiscountCode = () => {
             </label>
             <select
               id="status"
+              value={formData.status}
+              onChange={(e) => handleSelectChange(e.target.value, "status")}
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option>Chọn trạng thái</option>
@@ -71,6 +105,8 @@ const AddDiscountCode = () => {
             <input
               type="date"
               id="expiryDate"
+              value={formData.expiryDate}
+              onChange={handleChange}
               placeholder="dd/mm/yyyy"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -85,6 +121,8 @@ const AddDiscountCode = () => {
             <input
               type="number"
               id="usageCount"
+              value={formData.usageCount}
+              onChange={handleChange}
               placeholder="Nhập số lần sử dụng"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -99,6 +137,8 @@ const AddDiscountCode = () => {
             </label>
             <textarea
               id="description"
+              value={formData.description}
+              onChange={handleChange}
               rows={3}
               placeholder="Mô tả mã giảm giá..."
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -113,6 +153,10 @@ const AddDiscountCode = () => {
             </label>
             <select
               id="discountType"
+              value={formData.discountType}
+              onChange={(e) =>
+                handleSelectChange(e.target.value, "discountType")
+              }
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option>Chọn loại mã giảm giá</option>
@@ -131,6 +175,8 @@ const AddDiscountCode = () => {
             <input
               type="date"
               id="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
               placeholder="dd/mm/yyyy"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -141,11 +187,13 @@ const AddDiscountCode = () => {
           <button
             type="submit"
             className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
           >
-            Lưu
+            {loading ? "Đang lưu..." : "Lưu"}
           </button>
           <button
             type="button"
+            onClick={() => navigate("/admin/discount-code-list")}
             className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             Quay lại

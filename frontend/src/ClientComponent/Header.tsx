@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { Dropdown, MenuProps } from "antd";
 
 const Header = () => {
   const [openMenu, setOpenMenu] = useState(null);
@@ -8,6 +9,25 @@ const Header = () => {
   const menuRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const notificationRef = useRef(null);
+
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <a rel="noopener noreferrer" href="/profile">
+          Thông tin cá nhân{" "}
+        </a>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <a rel="noopener noreferrer" href="change-password">
+          Đổi mật khẩu{" "}
+        </a>
+      ),
+    },
+  ];
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -127,6 +147,11 @@ const Header = () => {
             <Link to={"auth"}>
               <span className="text-sm">Your Account</span>
             </Link>{" "}
+            <Dropdown menu={{ items }}>
+              <Link to={""}>
+                <span className="text-sm">Your info</span>
+              </Link>
+            </Dropdown>
             |
             <Link to={`/cart`} className="relative h-[24px]">
               <svg

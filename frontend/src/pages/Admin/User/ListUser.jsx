@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Modal from "react-modal";
+import React, { useState } from 'react';
+import Modal from 'react-modal';
 
 const ListUser = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -13,27 +13,27 @@ const ListUser = () => {
   const [users, setUsers] = useState([
     {
       id: 1,
-      name: "Nguyễn Văn A",
-      email: "nguyenvana@example.com",
-      phone: "0123456789",
-      status: "Đang hoạt động",
-      address: "Hà Nội",
-      birthday: "01/01/1990",
-      gender: "Nam",
-      createdAt: "01/01/2023",
-      events: ["Sự kiện A", "Sự kiện B"], // Thêm danh sách sự kiện
+      name: 'Nguyễn Văn A',
+      email: 'nguyenvana@example.com',
+      phone: '0123456789',
+      status: 'Đang hoạt động',
+      address: 'Hà Nội',
+      birthday: '01/01/1990',
+      gender: 'Nam',
+      createdAt: '01/01/2023',
+      events: ['Sự kiện A', 'Sự kiện B'], // Thêm danh sách sự kiện
     },
     {
       id: 2,
-      name: "Trần Thị B",
-      email: "tranthib@example.com",
-      phone: "0987654321",
-      status: "Ngưng hoạt động",
-      address: "Đà Nẵng",
-      birthday: "02/02/1992",
-      gender: "Nữ",
-      createdAt: "05/05/2023",
-      events: ["Sự kiện C"], // Thêm danh sách sự kiện
+      name: 'Trần Thị B',
+      email: 'tranthib@example.com',
+      phone: '0987654321',
+      status: 'Ngưng hoạt động',
+      address: 'Đà Nẵng',
+      birthday: '02/02/1992',
+      gender: 'Nữ',
+      createdAt: '05/05/2023',
+      events: ['Sự kiện C'], // Thêm danh sách sự kiện
     },
   ]);
 
@@ -64,16 +64,16 @@ const ListUser = () => {
   };
 
   const handleDeleteUser = (userId) => {
-    const userToDelete = users.find((user) => user.id === userId);
-    setUsers(users.filter((user) => user.id !== userId));
-    setDeletedUsers([...deletedUsers, { ...userToDelete, status: "Đã xóa" }]);
+    const userToDelete = users.find(user => user.id === userId);
+    setUsers(users.filter(user => user.id !== userId));
+    setDeletedUsers([...deletedUsers, { ...userToDelete, status: 'Đã xóa' }]);
     closeConfirmModal();
   };
 
   const handleRestoreUser = (userId) => {
-    const userToRestore = deletedUsers.find((user) => user.id === userId);
-    setDeletedUsers(deletedUsers.filter((user) => user.id !== userId));
-    setUsers([...users, { ...userToRestore, status: "Đang hoạt động" }]);
+    const userToRestore = deletedUsers.find(user => user.id === userId);
+    setDeletedUsers(deletedUsers.filter(user => user.id !== userId));
+    setUsers([...users, { ...userToRestore, status: 'Đang hoạt động' }]);
   };
 
   const openConfirmModal = (userId) => {
@@ -88,14 +88,11 @@ const ListUser = () => {
 
   return (
     <div>
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-lg shadow"> 
         <h2 className="text-2xl font-bold text-center">Danh sách người dùng</h2>
         <div className="p-4 flex justify-between">
-          <button
-            onClick={toggleDeletedUsers}
-            className="bg-blue-500 text-white px-4 py-2 rounded-[10px]"
-          >
-            {showDeletedUsers ? "Danh sách người dùng" : "Người dùng đã xóa"}
+          <button onClick={toggleDeletedUsers} className="bg-blue-500 text-white px-4 py-2 rounded-[10px]">
+            {showDeletedUsers ? 'Danh sách người dùng' : 'Người dùng đã xóa'}
           </button>
           <div className="flex space-x-4 items-center">
             <span>Hiển thị:</span>
@@ -104,12 +101,8 @@ const ListUser = () => {
               <option value="10">10</option>
               <option value="20">20</option>
             </select>
-            <button className="bg-gray-200 px-4 py-2 rounded-[10px]">
-              Bộ lọc
-            </button>
-            <button className="bg-yellow-500 text-white px-4 py-2 rounded-[10px]">
-              Xuất PDF
-            </button>
+            <button className="bg-gray-200 px-4 py-2 rounded-[10px]">Bộ lọc</button>
+            <button className="bg-yellow-500 text-white px-4 py-2 rounded-[10px]">Xuất PDF</button>
           </div>
         </div>
 
@@ -134,27 +127,27 @@ const ListUser = () => {
                 <td className="p-4 border border-gray-300">{user.status}</td>
                 <td className="p-4 border border-gray-300">
                   <div className="flex flex-col items-center space-y-1">
-                    <button
+                    <button 
                       className="bg-red-500 text-white w-full h-8 rounded-[10px]"
                       onClick={() => openConfirmModal(user.id)}
                     >
                       Xóa
                     </button>
                     {showDeletedUsers && (
-                      <button
+                      <button 
                         className="bg-green-500 text-white w-full h-8 rounded-[10px]"
                         onClick={() => handleRestoreUser(user.id)}
                       >
                         Khôi phục
                       </button>
                     )}
-                    <button
+                    <button 
                       className="bg-yellow-500 text-white w-full h-8 rounded-[10px]"
                       onClick={() => openModal(user)}
                     >
                       Chi tiết
                     </button>
-                    <button
+                    <button 
                       className="bg-blue-500 text-white w-full h-8 rounded-[10px]"
                       onClick={() => openEventModal(user)} // Mở modal sự kiện
                     >
@@ -180,35 +173,16 @@ const ListUser = () => {
           <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
             <h2 className="text-2xl font-bold mb-4">Chi tiết người dùng</h2>
             <div>
-              <p>
-                <strong>Tên:</strong> {selectedUser.name}
-              </p>
-              <p>
-                <strong>Email:</strong> {selectedUser.email}
-              </p>
-              <p>
-                <strong>Số điện thoại:</strong> {selectedUser.phone}
-              </p>
-              <p>
-                <strong>Địa chỉ:</strong> {selectedUser.address}
-              </p>
-              <p>
-                <strong>Ngày sinh:</strong> {selectedUser.birthday}
-              </p>
-              <p>
-                <strong>Giới tính:</strong> {selectedUser.gender}
-              </p>
-              <p>
-                <strong>Trạng thái:</strong> {selectedUser.status}
-              </p>
-              <p>
-                <strong>Ngày tạo:</strong> {selectedUser.createdAt}
-              </p>
+              <p><strong>Tên:</strong> {selectedUser.name}</p>
+              <p><strong>Email:</strong> {selectedUser.email}</p>
+              <p><strong>Số điện thoại:</strong> {selectedUser.phone}</p>
+              <p><strong>Địa chỉ:</strong> {selectedUser.address}</p>
+              <p><strong>Ngày sinh:</strong> {selectedUser.birthday}</p>
+              <p><strong>Giới tính:</strong> {selectedUser.gender}</p>
+              <p><strong>Trạng thái:</strong> {selectedUser.status}</p>
+              <p><strong>Ngày tạo:</strong> {selectedUser.createdAt}</p>
             </div>
-            <button
-              onClick={closeModal}
-              className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-            >
+            <button onClick={closeModal} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
               Đóng
             </button>
           </div>
@@ -228,16 +202,10 @@ const ListUser = () => {
             <h2 className="text-lg font-bold mb-4">Xác nhận xóa</h2>
             <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
             <div className="flex justify-end mt-4">
-              <button
-                onClick={closeConfirmModal}
-                className="bg-gray-300 px-4 py-2 rounded mr-2"
-              >
+              <button onClick={closeConfirmModal} className="bg-gray-300 px-4 py-2 rounded mr-2">
                 Hủy
               </button>
-              <button
-                onClick={() => handleDeleteUser(confirmDeleteUserId)}
-                className="bg-red-500 text-white px-4 py-2 rounded"
-              >
+              <button onClick={() => handleDeleteUser(confirmDeleteUserId)} className="bg-red-500 text-white px-4 py-2 rounded">
                 Xóa
               </button>
             </div>
@@ -265,10 +233,7 @@ const ListUser = () => {
                 <li>Không có sự kiện nào.</li>
               )}
             </ul>
-            <button
-              onClick={closeEventModal}
-              className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-            >
+            <button onClick={closeEventModal} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
               Đóng
             </button>
           </div>
