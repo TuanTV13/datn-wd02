@@ -16,7 +16,7 @@ class StoreEventRequest extends FormRequest
     {
         return [
 
-            'event' => 'required_array_keys:category_id,province_id,district_id,ward_id,name,description,start_time,end_time,location,event_type,thumbnail',
+            // 'event' => 'required_array_keys:category_id,province_id,district_id,ward_id,name,description,start_time,end_time,location,event_type,thumbnail',
 
             'category_id' => 'required|integer|exists:categories,id',
             'province_id' => 'required|integer|exists:provinces,id',
@@ -28,7 +28,7 @@ class StoreEventRequest extends FormRequest
             'event_type' => 'required|in:online,offline',
             'link_online' => 'nullable|string|255',
             'max_attendess' => 'nullable',
-            'thumbnail' => 'required|string|max:255',
+            'thumbnail' => 'required|max:2048',
             'start_time' => [
                 'required',
                 'date',

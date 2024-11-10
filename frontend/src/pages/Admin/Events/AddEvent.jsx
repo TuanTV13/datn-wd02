@@ -14,7 +14,7 @@ const AddEvent = () => {
     end_time: '',
     location: '',
     event_type: '',
-    thumbnail: null,
+    thumbnail: 'hhhh',
   });
 
   const [categories, setCategories] = useState([]);
@@ -64,26 +64,33 @@ const AddEvent = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(formData);  // Kiểm tra giá trị của formData trước khi gửi
-  
-    // Tạo FormData và gửi yêu cầu lên backend
+    
     const dataToSubmit = new FormData();
+  
+    // Kiểm tra và xử lý trường ảnh
+    if (formData.thumbnail) {
+      dataToSubmit.append("thumbnail", formData.thumbnail);  // Gửi file ảnh (nếu có)
+    }
+    
+    // Gửi các trường còn lại
     Object.entries(formData).forEach(([key, value]) => {
-      // Kiểm tra nếu giá trị là file
-      if (key === "thumbnail" && value) {
-        dataToSubmit.append(key, value);
-      } else if (value && value !== "") {
+      if (key !== "thumbnail" && value !== "") {
         dataToSubmit.append(key, value);
       }
     });
-  
-    // Kiểm tra xem có thiếu trường nào không
-    if (dataToSubmit.has("category_id") && dataToSubmit.has("description") && dataToSubmit.has("district_id") &&
-      dataToSubmit.has("start_time") && dataToSubmit.has("end_time") && dataToSubmit.has("thumbnail")) {
-      addEvent(dataToSubmit);
+    
+    // Kiểm tra dữ liệu trước khi gửi
+    if (dataToSubmit.has("category_id") && dataToSubmit.has("description") && 
+      dataToSubmit.has("district_id") && dataToSubmit.has("start_time") && 
+      dataToSubmit.has("end_time") && dataToSubmit.has("thumbnail")) {
+        
+      addEvent(dataToSubmit);  // Gọi API thêm sự kiện
     } else {
       console.error("Dữ liệu gửi lên chưa đầy đủ");
     }
   };
+  
+  
   return (
     <form onSubmit={handleSubmit}>
        {/* Danh mục */}
@@ -238,14 +245,15 @@ const AddEvent = () => {
 
       {/* Ảnh đại diện */}
       <div>
-        <label htmlFor="thumbnail">Ảnh đại diện:</label>
-        <input
-          type="file"
-          id="thumbnail"
-          onChange={(e) => setFormData({ ...formData, thumbnail: e.target.files[0] })}
-          required
-        />
-      </div>
+  <label htmlFor="thumbnail">Ảnh đại diện:</label>
+  <input
+    type="file"
+    id="thumbnail"
+    onChange={(e) => setFormData({ ...formData, thumbnail: e.target.files[0] })}
+    required
+  />
+</div>
+
 
       <button type="submit">Thêm sự kiện</button>
     </form>

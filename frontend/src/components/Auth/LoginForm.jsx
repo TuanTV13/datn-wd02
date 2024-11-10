@@ -22,7 +22,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
 
     try {
       const response = await login(data.email, data.password);
-      if (response.token) {
+      
         setErrorMessage('Đăng nhập thành công!');
         setShowErrorModal(true);
         if (rememberMe) {
@@ -30,10 +30,9 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
         } else {
           localStorage.removeItem('email');
         }
-      } else {
-        setErrorMessage(response.message);
-        setShowErrorModal(true);
-      }
+        localStorage.setItem('token', response.token);
+      
+      
     } catch (error) {
       setErrorMessage(error.message || 'Đăng nhập thất bại!');
       setShowErrorModal(true);

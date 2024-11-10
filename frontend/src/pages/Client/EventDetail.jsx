@@ -1,242 +1,199 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
-// Popup Component for ticket selection
-const TicketPopup = ({ onClose, onConfirm }) => {
-  const [selectedType, setSelectedType] = useState('VIP');
-  const [quantity, setQuantity] = useState(1);
-
-  // Giả lập dữ liệu vé từ database
-  const ticketData = [
-    {
-      id: 1,
-      ticket_type: 'VIP',
-      price: 500000,
-      available_quantity: 20,
-      seat_location: 'Khu VIP, hàng đầu',
-      sale_start: '2024-10-20',
-      sale_end: '2024-11-20',
-      description: 'Vé VIP mang đến trải nghiệm đẳng cấp nhất trong sự kiện.',
-    },
-    {
-      id: 2,
-      ticket_type: 'Thường',
-      price: 200000,
-      available_quantity: 100,
-      seat_location: 'Khu vực thường',
-      sale_start: '2024-10-20',
-      sale_end: '2024-11-20',
-      description: 'Vé Thường giúp bạn tham gia sự kiện với giá hợp lý.',
-    },
-  ];
-
-  const selectedTicket = ticketData.find((ticket) => ticket.ticket_type === selectedType);
-
-  const increaseQuantity = () => {
-    if (quantity < selectedTicket.available_quantity) {
-      setQuantity(quantity + 1);
-    }
-  };
-
-  const decreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
-  };
-
-  const totalPrice = selectedTicket.price * quantity;
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto space-y-6">
-        <h2 className="text-2xl font-bold mb-4 text-center">Chọn loại vé</h2>
-
-        {/* Chọn loại vé với 2 nút */}
-        <div className="flex justify-center space-x-4 mb-4">
-          <button
-            onClick={() => {
-              setSelectedType('VIP');
-              setQuantity(1); // Reset số lượng khi đổi loại vé
-            }}
-            className={`px-4 py-2 font-semibold rounded-md focus:outline-none ${
-              selectedType === 'VIP' ? 'bg-blue-600 text-white' : 'bg-gray-200'
-            }`}
-          >
-            Vé VIP
-          </button>
-          <button
-            onClick={() => {
-              setSelectedType('Thường');
-              setQuantity(1); // Reset số lượng khi đổi loại vé
-            }}
-            className={`px-4 py-2 font-semibold rounded-md focus:outline-none ${
-              selectedType === 'Thường' ? 'bg-blue-600 text-white' : 'bg-gray-200'
-            }`}
-          >
-            Vé Thường
-          </button>
-        </div>
-
-        {/* Thông tin vé được chọn */}
-        <div className="bg-gray-100 rounded-lg p-4 space-y-2">
-          <p><strong>Giá vé:</strong> {selectedTicket.price.toLocaleString()} VND</p>
-          <p><strong>Số lượng còn:</strong> {selectedTicket.available_quantity}</p>
-          <p><strong>Vị trí chỗ ngồi:</strong> {selectedTicket.seat_location}</p>
-          <p><strong>Thời gian bán:</strong> {selectedTicket.sale_start} - {selectedTicket.sale_end}</p>
-          <p><strong>Mô tả:</strong> {selectedTicket.description}</p>
-        </div>
-
-        {/* Nhập số lượng vé với nút cộng trừ */}
-        <div className="flex items-center justify-center mt-4 space-x-4">
-          <button 
-            onClick={decreaseQuantity} 
-            className="w-10 h-10 flex items-center justify-center bg-gray-300 rounded-full text-lg font-bold focus:outline-none"
-            disabled={quantity <= 1}
-          >
-            -
-          </button>
-          <span className="w-10 text-center text-xl font-semibold">{quantity}</span>
-          <button 
-            onClick={increaseQuantity} 
-            className="w-10 h-10 flex items-center justify-center bg-gray-300 rounded-full text-lg font-bold focus:outline-none"
-            disabled={quantity >= selectedTicket.available_quantity}
-          >
-            +
-          </button>
-        </div>
-
-        {/* Tổng giá */}
-        <div className="text-center">
-          <p className="text-lg font-semibold">Tổng giá: <span className="text-blue-600">{totalPrice.toLocaleString()} VND</span></p>
-        </div>
-
-        {/* Nút xác nhận và hủy */}
-        <div className="flex justify-end space-x-4 mt-6">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded-md font-semibold focus:outline-none">Hủy</button>
-          <button onClick={() => onConfirm(selectedType, quantity, totalPrice)} className="px-4 py-2 bg-blue-600 text-white rounded-md font-semibold focus:outline-none">
-            Xác nhận
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-// Main EventDetail component
 const EventDetail = () => {
+  const { id } = useParams();
+  const [event, setEvent] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-
-  // Giả lập trạng thái sự kiện
-  const eventStatus = {
-    id: 1,
-    name: 'Đang diễn ra',
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [similarEvents, setSimilarEvents] = useState([]);
+  useEffect(() => {
+    axios.get(`http://192.168.2.112:8000/api/v1/clients/events/${id}`)
+      .then((response) => {
+        setEvent(response.data.data);
+      })
+      .catch((error) => {
+        console.error('Lỗi khi gọi API:', error);
+      });
+  }, [id]);
+  const fetchSimilarEvents = (categoryId) => {
+    axios.get(`http://192.168.2.112:8000/api/v1/clients/category/${categoryId}`)
+      .then((response) => {
+        setSimilarEvents(response.data.data.filter((e) => e.id !== id)); // Lọc bỏ sự kiện hiện tại
+      })
+      .catch((error) => {
+        console.error('Lỗi khi lấy sự kiện tương tự:', error);
+      });
   };
-  
-  const eventDescription = "Chào mừng bạn đến với sự kiện 'Những Thành Phố Mơ Màng'. Đây là một trải nghiệm tuyệt vời để khám phá những địa điểm tuyệt đẹp và những câu chuyện hấp dẫn về các thành phố nổi tiếng.";
-  const eventImages = [
-    "https://i.pinimg.com/736x/2f/37/8c/2f378ce8cc27a74ca5d0b351da1c341a.jpg",
-    "https://i.pinimg.com/736x/2f/37/8c/2f378ce8cc27a74ca5d0b351da1c341a.jpg",
-    "https://i.pinimg.com/736x/2f/37/8c/2f378ce8cc27a74ca5d0b351da1c341a.jpg",
-    "https://i.pinimg.com/736x/2f/37/8c/2f378ce8cc27a74ca5d0b351da1c341a.jpg"
-  ];
-
-  const similarEvents = [
-    { id: 1, name: 'Sự kiện A', status: 'Đã kết thúc', thumbnail: 'https://i.pinimg.com/736x/2f/37/8c/2f378ce8cc27a74ca5d0b351da1c341a.jpg' },
-    { id: 2, name: 'Sự kiện B', status: 'Sắp diễn ra', thumbnail: 'https://i.pinimg.com/736x/2f/37/8c/2f378ce8cc27a74ca5d0b351da1c341a.jpg' },
-    { id: 3, name: 'Sự kiện C', status: 'Chờ duyệt', thumbnail: 'https://i.pinimg.com/736x/2f/37/8c/2f378ce8cc27a74ca5d0b351da1c341a.jpg' },
-    { id: 4, name: 'Sự kiện D', status: 'Đang diễn ra', thumbnail: 'https://i.pinimg.com/736x/2f/37/8c/2f378ce8cc27a74ca5d0b351da1c341a.jpg' },
-  ];
-
-  const getStatusColor = (statusId) => {
-    switch (statusId) {
-      case 1:
-        return 'bg-green-500';
-      case 2:
-        return 'bg-yellow-500';
-      case 3:
-        return 'bg-red-500';
-      case 4:
-        return 'bg-gray-500';
-      case 5:
-        return 'bg-blue-500';
+  const getStatusTextAndColor = (status) => {
+    switch (status) {
+      case 'confirmed':
+        return { text: 'Đang chuẩn bị', color: 'bg-yellow-500' };
+      case 'checkin':
+        return { text: 'Đang check-in', color: 'bg-green-500' };
+      case 'ongoing':
+        return { text: 'Đang diễn ra', color: 'bg-blue-500' };
+      case 'completed':
+        return { text: 'Đã kết thúc', color: 'bg-gray-500' };
       default:
-        return 'bg-gray-300';
+        return null;
     }
   };
 
-  const handleBuyTicketClick = () => setShowPopup(true);
-  const handleClosePopup = () => setShowPopup(false);
+  const handleBuyTicketClick = (ticket) => {
+    setSelectedTicket(ticket);
+  };
 
- // Cập nhật hàm handleConfirmPurchase trong EventDetail
-const handleConfirmPurchase = (ticketType, quantity, totalPrice) => {
-  // Chuyển hướng sang trang thanh toán cùng với thông tin vé
-  window.location.href = `/payment?ticketType=${ticketType}&quantity=${quantity}&totalPrice=${totalPrice}`;
-};
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    setSelectedTicket(null);
+  };
+
+  const handleConfirmPurchase = () => {
+    if (selectedTicket) {
+      const totalPrice = selectedTicket.price;
+      window.location.href = `/checkout?ticketType=${selectedTicket.ticket_type}&totalPrice=${totalPrice}`;
+    }
+  };
+
+  if (!event) {
+    return <div>Đang tải sự kiện...</div>;
+  }
+
+  const statusInfo = getStatusTextAndColor(event.status);
 
   return (
-    <div className='container pt-40'>
-      <div 
-        className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden" 
-        style={{ backgroundImage: "url('https://i.pinimg.com/736x/2f/37/8c/2f378ce8cc27a74ca5d0b351da1c341a.jpg')" }}
+    <div className="container pt-40">
+      {/* Ảnh nền sự kiện */}
+      <div
+        className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden"
+        style={{ backgroundImage: `url('${event.thumbnail}')` }}
       >
         <div className="absolute inset-0 bg-black opacity-20"></div>
-        
-        <div className="absolute inset-0 text-white p-8 flex flex-col items-center justify-center" style={{ left: '60%' }}>
+
+        <div
+          className="absolute inset-0 text-white p-8 flex flex-col items-center justify-center"
+          style={{ left: '60%' }}
+        >
           <h1 style={{ fontFamily: 'Dancing Script, cursive' }} className="text-5xl font-bold text-center">
-            NHỮNG THÀNH PHỐ MƠ MÀNG
+            {event.name}
           </h1>
-          <br />
-          <button 
-            onClick={handleBuyTicketClick} 
-            className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
-          >
-            Mua vé
-          </button>
+
+          {event.status !== 'completed' && (
+            <>
+              <p className="mt-4 text-lg">
+                Thời gian bắt đầu: {new Date(event.start_time).toLocaleString()}
+              </p>
+              <p className="text-lg">
+                Thời gian kết thúc: {new Date(event.end_time).toLocaleString()}
+              </p>
+              <br />
+              <button
+                onClick={() => setShowPopup(true)}
+                className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
+              >
+                Mua vé
+              </button>
+            </>
+          )}
           <div className="mt-4 text-center">
-            <p className="text-lg">Thời gian bắt đầu: 20:00, 30/10/2024</p>
-            <p className="text-lg">Thời gian kết thúc: 22:00, 30/10/2024</p>
-            <p className="text-lg">Địa điểm: Nhà hát lớn</p>
+            <p className="text-lg">Địa điểm: {`${event.ward}, ${event.district}, ${event.province}`}</p>
           </div>
-          <div className={`mt-4 px-4 py-2 rounded-full text-white ${getStatusColor(eventStatus.id)}`}>
-            {eventStatus.name}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">Mô tả sự kiện</h2>
-        <p className="mb-4 text-gray-700">{eventDescription}</p>
-        
-        <h3 className="text-xl font-semibold mb-2">Hình ảnh sự kiện</h3>
-        <div className="grid grid-cols-2 gap-4 justify-items-center">
-          {eventImages.map((image, index) => (
-            <img key={index} src={image} alt={`Sự kiện ${index + 1}`} className="w-[80%] h-auto rounded-md shadow-lg" />
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">Sự kiện tương tự</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-items-center">
-          {similarEvents.map((event) => (
-            <div key={event.id} className="flex flex-col items-center p-4 border border-gray-300 rounded-lg shadow-sm">
-              <img src={event.thumbnail} alt={event.name} className="w-[200px] h-auto rounded-md mb-2" />
-              <div className="text-center">
-                <h3 className="font-semibold text-lg">{event.name}</h3>
-                <div className={`mt-1 px-2 py-1 rounded-full text-white ${getStatusColor(event.id)}`}>
-                  {event.status}
-                </div>
-              </div>
+          {statusInfo && (
+            <div className={`mt-4 px-4 py-2 rounded-full text-white ${statusInfo.color}`}>
+              {statusInfo.text}
             </div>
-          ))}
+          )}
         </div>
       </div>
 
+           {/* Diễn giả */}
+      <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-4">Diễn giả</h2>
+        <ul className="list-disc list-inside">
+          {event.speakers.map((speaker, index) => (
+            <li key={index} className="text-gray-700">{speaker}</li>
+          ))}
+        </ul>
+      </div>
+      {/* Mô tả sự kiện */}
+      <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-4">Mô tả sự kiện</h2>
+        <div
+          className="mb-4 text-gray-700 leading-relaxed"
+          dangerouslySetInnerHTML={{
+            __html: event.description.replace(
+              /<img/g, 
+              '<img class="max-w-[40%] h-auto mx-auto my-4 p-2 border border-gray-300 rounded-md shadow-sm"'
+            )
+          }}
+        ></div>
+
+      </div>
+     {/* Sự kiện tương tự */}
+<div className="mt-8 p-8 bg-white rounded-lg shadow-md">
+  <h2 className="text-2xl font-bold mb-4">Sự kiện tương tự</h2>
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {similarEvents.map((event) => (
+      <div key={event.id} className="border p-4 rounded-lg">
+        <img 
+          src={event.thumbnail} 
+          alt={event.name} 
+          className="w-full h-48 object-cover rounded-lg mb-4"
+        />
+        <h3 className="text-lg font-semibold text-center">{event.name}</h3>
+        <button  
+          className="text-blue-500 hover:underline mt-2 block text-center"
+          onClick={() => window.location.href = `/event-detail/${event.id}`}
+        >
+          Xem chi tiết
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
+
+     
+
+      {/* Hiển thị Popup nếu showPopup là true */}
       {showPopup && (
-        <TicketPopup onClose={handleClosePopup} onConfirm={handleConfirmPurchase} />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-[400px]">
+            <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
+            
+            {event.tickets.map((ticket) => (
+              <div 
+                key={ticket.id} 
+                className={`border p-4 rounded-lg mb-4 cursor-pointer hover:bg-gray-100 ${selectedTicket?.id === ticket.id ? 'bg-blue-100 border-blue-500' : ''}`}
+                onClick={() => handleBuyTicketClick(ticket)}
+              >
+                <h3 className="text-lg font-semibold">{ticket.ticket_type}</h3>
+                <p>Giá: {ticket.price} VND</p>
+                <p>Số lượng còn lại: {ticket.available_quantity}</p>
+                <p>Vị trí: {ticket.seat_location}</p>
+              </div>
+            ))}
+
+            <div className="mt-4 flex justify-between">
+              <button 
+                onClick={handleClosePopup} 
+                className="bg-gray-500 text-white py-2 px-4 rounded"
+              >
+                Đóng
+              </button>
+              <button 
+                onClick={handleConfirmPurchase} 
+                className="bg-blue-500 text-white py-2 px-4 rounded"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
-}
+};
 
 export default EventDetail;
