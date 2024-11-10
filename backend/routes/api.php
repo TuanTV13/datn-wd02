@@ -130,7 +130,7 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('home')->group(function () {
             Route::get('header-events', [HomeController::class, 'headerEvents']);
-            Route::get('upcoming-events', [HomeController::class, 'upcomingEvents']);
+            Route::get('upcoming-events/{provinceSlug?}', [HomeController::class, 'upcomingEvents']);
             Route::get('featured-events', [HomeController::class, 'featuredEvents']);
             Route::get('top-rated-events', [HomeController::class, 'topRatedEvents']);
         });

@@ -87,15 +87,21 @@ class EventRepository
         return $this->event
             ->where('status', 'confirmed')
             ->where('display_header', true)
-            ->select('id', 'name', 'description', 'thumbnail', 'start_time')
+            ->select('id', 'category_id', 'name', 'description', 'thumbnail', 'start_time')
             ->orderBy('start_time', 'asc')
             ->limit(4)
             ->get();
     }
 
-    public function getUpcomingEvents()
+    public function getUpcomingEvents($province = null)
     {
         return $this->event
+            ->when($province, function ($query) use ($province) {
+                $query->whereRaw(
+                    "LOWER(REPLACE(province, ' ', '-')) = ?", 
+                    [strtolower($province)]
+                );
+            })
             ->where('status', 'confirmed')
             ->where('start_time', '>', now())
             ->where('start_time', '<=', now()->addDays(7))
