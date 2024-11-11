@@ -6,7 +6,7 @@ import api from './api';
 export const getAllTickets = async () => {
     try {
         const {data} = await api.get(`/tickets`)
-        return data
+        return data.data
     } catch (error) {
         console.log(error)
     }
@@ -15,7 +15,7 @@ export const getAllTickets = async () => {
 export const getTicketsId = async (id: string) => {
     try {
         const {data} = await api.get(`/tickets/${id}`)
-        return data
+        return data.data
     } catch (error) {
         console.log(error)
     }
@@ -25,7 +25,7 @@ export const getTicketsId = async (id: string) => {
 export const addTicket = async (ticketData: Tickets) => {
     try {
         const {data} = await api.post(`/tickets/create`,ticketData)
-        return data
+        return data.data
     } catch (error) {
         console.error("Error adding ticket:", error);
         throw error;
@@ -36,7 +36,7 @@ export const addTicket = async (ticketData: Tickets) => {
 export const editTicket = async (ticketData: Tickets) => {
     try {
         const {data} = await api.put(`/tickets/${ticketData.id}/update`, ticketData);
-        return data
+        return data.data
     } catch (error) {
         console.error("Error editing ticket:", error);
         throw error;
@@ -47,7 +47,7 @@ export const editTicket = async (ticketData: Tickets) => {
 export const deleteTicket = async (id: number)=> {
     try {
         const {data} = await api.delete(`/tickets/${id}/delete`);
-        return data
+        return data.data
     } catch (error) {
         console.error("Error deleting ticket:", error);
         throw error;
@@ -58,7 +58,7 @@ export const deleteTicket = async (id: number)=> {
 export const restoreTicket = async (id: number)=> {
     try {
         const {data} = await api.post(`/tickets/${id}/restore`);
-        return data;
+        return data.data
     } catch (error) {
         console.error("Error restoring ticket:", error);
         throw error;
@@ -69,7 +69,7 @@ export const restoreTicket = async (id: number)=> {
 export const verifyTicket = async (id: number)=> {
     try {
         const {data} = await api.put(`/tickets/${id}/verified`);
-        return data;
+        return data.data
     } catch (error) {
         console.error("Error verifying ticket:", error);
         throw error;
