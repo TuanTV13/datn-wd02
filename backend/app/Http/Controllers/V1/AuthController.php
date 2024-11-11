@@ -250,4 +250,57 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Mật khẩu đã được cập nhật thành công'], 200);
     }
+
+    public function showProfile(Request $request)
+    {
+
+        return response()->json($request->user());
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:15',
+            'address' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = auth()->user();
+
+        // Update user attributes
+        $user->update($request->only(['name', 'email', 'phone', 'address']));
+
+        // If there's a new image, store it and update the user's image field
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('images', 'public');
+            $user->image = $path;
+            $user->save();
+        }
+
+        return response()->json(['message' => 'Profile updated successfully']);
+    }
+
+
+    public function changePassword(Request $request)
+    {
+        $data = $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed'
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($data['current_password'], $user->password)) {
+            return response()->json(['message' => 'Mật khẩu hiện tại không đúng'], 400);
+        }
+
+        try {
+            $user->password->update(['password' => Hash::make($data['new_password'])]);
+            return response()->json(['message' => 'Mật khẩu đã được thay đổi thành công'], 200);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi cập nhật mật khẩu: ' . $e->getMessage());
+            return response()->json(['message' => 'Lỗi khi cập nhật mật khẩu'], 500);
+        }
+    }
 }

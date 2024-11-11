@@ -52,6 +52,14 @@ Route::prefix('v1')->group(function () {
     Route::post('password/sendOTP', [AuthController::class, 'sendResetOTPEmail']);
     Route::post('password/reset', [AuthController::class, 'resetPasswordWithOTP']);
 
+    Route::get('user/profile', [AuthController::class, 'showProfile']);
+
+    // Route cập nhật thông tin tài khoản
+    Route::put('user/update-profile', [AuthController::class, 'updateProfile']);
+
+    // Route thay đổi mật khẩu
+    Route::put('user/change-password', [AuthController::class, 'changePassword']);
+
     Route::get('events', [EventController::class, 'index']);
 
     Route::prefix('events')->middleware(['check.jwt', 'check.permission:manage-events'])->group(function () {
@@ -70,12 +78,6 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [UserController::class, 'destroy']);
         Route::get('trashed', [UserController::class, 'trashed']);
         Route::post('{id}/restore', [UserController::class, 'restore']);
-    });
-
-    Route::middleware(['check.jwt'])->group(function () {
-        Route::get('user/profile', [UserController::class, 'showProfile']);
-        Route::put('user/update-profile', [UserController::class, 'updateProfile']);
-        Route::put('user/change-password', [UserController::class, 'changePassword']);
     });
 
     Route::get('categories', [CategoryController::class, 'index']);
