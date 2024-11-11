@@ -25,20 +25,8 @@ class EventController extends Controller
     {
         $allowedIpRanges = $this->eventRepository->getIp($eventId);
         // dd($subnets);
-        $allowedIpRanges = $this->eventRepository->getIp($eventId);
-        // dd($subnets);
         $clientIp = $request->ip();
-
-        $isAllowed = false;
-        foreach ($allowedIpRanges as $range) {
-            if (str_starts_with($clientIp, $range)) {
-                $isAllowed = true;
-                break;
-            }
-        }
-
-        if (!$isAllowed) {
-
+        
         $isAllowed = false;
         foreach ($allowedIpRanges as $range) {
             if (str_starts_with($clientIp, $range)) {
