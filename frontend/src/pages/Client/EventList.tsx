@@ -31,6 +31,7 @@ const EventListing = () => {
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = events.slice(indexOfFirstEvent, indexOfLastEvent);
+  const [filter, setFilter] = useState("");
 
   // Hàm xử lý thay đổi trang
   const handlePageChange = (direction) => {
@@ -47,6 +48,24 @@ const EventListing = () => {
   const handleCategoryClick = async (categoryId: number | string) => {
     await fetchEventsByCategory(categoryId); // Fetch events by category
     navigate(`/event-category/${categoryId}`); // Navigate to the category page
+  };
+
+  const cities = [...new Set(currentEvents.map((event) => event.location))];
+
+  // Hàm xử lý thay đổi thành phố
+  const handleLocationChange = (city: string) => {
+    setFilter(city); // Cập nhật filter theo thành phố đã chọn
+  };
+
+  // Lọc các sự kiện theo thành phố
+  const filteredEvents = currentEvents.filter((event) => {
+    return filter ? event.location.toLowerCase() === filter.toLowerCase() : true;
+  });
+
+  const clearFilters = () => {
+    setFilter("");
+    setCurrentPage(1);
+    navigate("/event-list");
   };
 
   return (
@@ -87,16 +106,14 @@ const EventListing = () => {
               {/* Show or hide location submenu */}
               {isLocationOpen && (
                 <ul className="mt-2 ml-4">
-                  <li className="">
-                    <Link to={""} className=" text-[#9D9EA2]">
-                      Hà Nội
-                    </Link>
+                  {cities.map((city) =>(
+                    <li className="">
+                    <button onClick={() => handleLocationChange(city)} className=" text-[#9D9EA2] ">
+                      {city}
+                    </button>
                   </li>
-                  <li>
-                    <Link to={""} className="text-[#9D9EA2]">
-                      Đà Nẵng
-                    </Link>
-                  </li>
+                  ))}
+                  
                 </ul>
               )}
             </div>
@@ -155,7 +172,7 @@ const EventListing = () => {
             </ul>
           </section>
 
-          <button className="bg-[#F3FBF4] rounded-[100px] text-[14px] leading-[21px] text-[#007BFF] mt-3 h-10 px-8 ml-20">
+          <button onClick={clearFilters} className="bg-[#F3FBF4] rounded-[100px] text-[14px] leading-[21px] text-[#007BFF] mt-3 h-10 px-8 ml-20">
             Clear Filters
           </button>
         </div>
@@ -223,7 +240,7 @@ const EventListing = () => {
           <div className="lg:w-[1000px] mb:w-[342px] lg:mt-9 lg:pb-8 mb:pb-6 mb:mt-6">
             <div className="w-full p-4 space-y-6">
               {/* Event Card 1 */}
-              {currentEvents.map((item) => (
+              {filteredEvents.map((item) => (
                 <div
                   key={item.id}
                   className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row h-auto md:h-[250px]"
