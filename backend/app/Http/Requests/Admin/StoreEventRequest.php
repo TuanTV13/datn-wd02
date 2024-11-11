@@ -28,7 +28,7 @@ class StoreEventRequest extends FormRequest
             'event_type' => 'required|in:online,offline',
             'link_online' => 'nullable|string|255',
             'max_attendess' => 'nullable',
-            'thumbnail' => 'required|string|max:255',
+            'thumbnail' => 'required|max:2048',
             'start_time' => [
                 'required',
                 'date',

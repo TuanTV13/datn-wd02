@@ -69,20 +69,18 @@ class PaymentController extends Controller
     // Thanh toán
     public function processPayment(Request $request, VoucherController $voucherController)
     {
-        // Lấy dữ liệu vé lưu vào session
-        $checkoutData = session('checkout_data');
-        if (!$checkoutData) {
-            return response()->json(['message' => 'Không có thông tin thanh toán'], 400);
-        }
-        $ticket_id = $checkoutData['ticket_id'];
+        $ticket_id = $request->input('ticket_id');
+
+        $ticket = $this->ticketRepository->find($ticket_id);
+            if (!$ticket) {
+                return response()->json(['message' => 'Vé không tồn tại'], 404);
+            }
+
+        $totalAmount = $ticket->price;
 
         // BEGIN
         DB::beginTransaction();
         try {
-            $ticket = $this->ticketRepository->find($checkoutData['ticket_id']);
-            if (!$ticket) {
-                return response()->json(['message' => 'Vé không tồn tại'], 404);
-            }
 
             // Kiểm tra có đăng nhập hay không, Nếu có lấy thông tin người dùng đăng nhập, ngược lại đăng kí mới và lấy thông tin đó
             $user = Auth::check() ? Auth::user() : $this->userRepository->create($request->validate([
@@ -99,7 +97,7 @@ class PaymentController extends Controller
             // Mã vé
             $ticketCode = strtoupper(uniqid('TICKET-'));
 
-            $totalAmount = $checkoutData['total_amount']; // Giá trị ban đầu của vé
+            $totalAmount = $totalAmount; // Giá trị ban đầu của vé
             $discountCode = $request->input('discount_code');  // Mã giảm giá
             $voucher = $this->voucherRepository->findByCode($discountCode); // Tìm kiếm theo discount_code
 
@@ -146,7 +144,7 @@ class PaymentController extends Controller
 
             // Tiến hành thanh toán theo phương thức đã chọn
             if ($request->payment_method === 'paypal') {
-                if (empty($ticket->ticket_type) || empty($checkoutData['total_amount']) || !is_numeric($checkoutData['total_amount'])) {
+                if (empty($ticket->ticket_type) || empty($totalAmount) || !is_numeric($totalAmount)) {
                     return response()->json(['message' => 'Thông tin vé không đầy đủ'], 400);
                 }
 
@@ -189,7 +187,7 @@ class PaymentController extends Controller
 
                 $transaction->update(['payment_url' => $paymentUrl, 'transaction_id' => $transaction->id]);
                 DB::commit();
-                session()->flush();
+                // session()->flush();
                 return response()->json(['message' => 'Chuyển hướng đến PayPal', 'payment_url' => $paymentUrl]);
             } else {
 
@@ -216,7 +214,7 @@ class PaymentController extends Controller
                 ]);
 
                 DB::commit();
-                session()->flush();
+                // session()->flush();
                 Log::info('Thanh toán thành công', ['transaction_id' => $transaction->id, 'ticket_id' => $ticket->id]);
                 return response()->json(['message' => 'Thanh toán thành công', 'transaction_id' => $transaction->id]);
             }

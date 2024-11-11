@@ -56,7 +56,6 @@ const RegisterForm = ({ toggleForm }) => {
           <h2 className="auth-form-title">Đăng Ký</h2>
           <br />
           <form onSubmit={handleSubmit(onSubmit)}>
-
             {/* Input Tên */}
             <div className="mb-3 input-container">
               <input

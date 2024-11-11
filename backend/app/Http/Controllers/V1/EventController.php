@@ -5,20 +5,23 @@ namespace App\Http\Controllers\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
+use App\Http\Services\CheckEventIPService;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
-    protected $eventRepository;
+    protected $eventRepository, $checkEventIPService;
 
-    public function __construct(EventRepository $eventRepository)
+    public function __construct(EventRepository $eventRepository, CheckEventIPService $checkEventIPService)
     {
         $this->eventRepository = $eventRepository;
+        $this->checkEventIPService = $checkEventIPService;
     }
 
     public function index()
@@ -250,5 +253,16 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Khôi phục sự kiện thành công'
         ], 200);
+    }
+
+    public function checkEventIP(): JsonResponse
+    {
+        $result = $this->checkEventIPService->checkEventsWithoutIP();
+
+        return response()->json([
+            'status' => $result['status'],
+            'message' => $result['message'],
+            'events' => $result['events'] ?? []
+        ]);
     }
 }

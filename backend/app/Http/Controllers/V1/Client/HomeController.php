@@ -29,7 +29,7 @@ class HomeController extends Controller
         ], 200);
     }
     
-    public function upcomingEvents($province)
+    public function upcomingEvents($province = null)
     {
         $upcomingEvents = $this->eventRepository->getUpcomingEvents($province);
 
@@ -58,6 +58,7 @@ class HomeController extends Controller
             'data' => $featuredEvents
         ], 200);
     }
+
     public function topRatedEvents()
     {
         $topRatedEvents = $this->eventRepository->getTopRatedEvents();
