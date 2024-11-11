@@ -16,15 +16,26 @@ import DetailEvents from "./pages/Admin/Events/DetailEvent";
 import ListClient from "./pages/Admin/Client/ListClient";
 import AddClient from "./pages/Admin/Client/AddClient";
 
+import ListClient from "./pages/Admin/Client/ListClient";
+import AddClient from "./pages/Admin/Client/AddClient";
+
 import ListUser from "./pages/Admin/User/ListUser";
 import AddUser from "./pages/Admin/User/AddUser";
 import EventListing from "./pages/Client/EventList";
-import CategoryEven from "./pages/Client/CategoryEven";
 import Cart from "./pages/Client/Cart";
 import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
 import EventHistory from "./pages/Client/EventHistory";
 import PaymentHistory from "./pages/Client/PaymentHistory";
+import VerifyEmailPage from './components/Auth/VerifyEmailPage';
+import CategoryEvent from "./pages/Client/CategoryEven";
+import UserProfileEdit from "./pages/Client/UserProfileEdit";
+import UserChangePassword from "./pages/Client/UserChangePassword";
+import UserProfile from "./pages/Client/UserProfile";
+import AddDiscountCode from "./pages/Admin/Voucher/AddDiscountCode";
+import DiscountCodeList from "./pages/Admin/Voucher/DiscountCodeList";
+import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
+
 import VerifyEmailPage from "./components/Auth/VerifyEmailPage";
 import UserProfileEdit from "./pages/Client/UserProfileEdit";
 import UserChangePassword from "./pages/Client/UserChangePassword";
@@ -41,6 +52,21 @@ function App() {
       children: [
         { path: "", element: <Home /> },
         { path: "event-list", element: <EventListing /> },
+        { path: "event-detail/:id", element:<EventDetail/>},
+        { path: "event-category/:id", element: <CategoryEvent /> },
+        { path: "cart", element: <Cart/>},
+        { path: "checkout", element: <CheckOut/>},
+        { path: "event-history", element: <EventHistory/>},
+        { path: "payment-history", element: <PaymentHistory/>},
+        { path: "event-detail/:id", element:<EventDetail/>},
+        { path: "event-category", element: <CategoryEvent /> },
+        { path: "cart", element: <Cart /> },
+        { path: "checkout", element: <CheckOut /> },
+        { path: "event-history", element: <EventHistory /> },
+        { path: "payment-history", element: <PaymentHistory /> },
+        { path: "profile", element: <UserProfile /> },
+        { path: "profile/edit", element: <UserProfileEdit /> },
+        { path: "change-password", element: <UserChangePassword /> },
         { path: "event-detail/:id", element:<EventDetail/>},
         { path: "event-category", element: <CategoryEven /> },
         { path: "cart", element: <Cart /> },
@@ -74,10 +100,36 @@ function App() {
       ],
     },
     {
+      path: "admin",
+      element: <LayoutAdmin />,
+      children: [
+        { path: "ticket-list", element: <ListTicket /> },
+        { path: "ticket-list-user", element: <ListUserBuyTicket /> },
+        { path: "add-ticket", element: <AddTicket /> },
+        { path: "edit-ticket/:id", element: <EditTicket /> },
+        { path: "event-list", element: <ListEvent /> },
+        { path: "add-event", element: <AddEvent /> },
+        { path: "update-event/", element: <UpdateEvent /> },
+        { path: "detail-event/", element: <DetailEvents /> },
+        { path: "user-list", element: <ListUser /> },
+        { path: "add-user", element: <AddUser /> },
+        { path: "client-list", element: <ListClient /> },
+        { path: "add-client", element: <AddClient /> },
+        { path: "discount-code-list", element: <DiscountCodeList /> },
+        { path: "discount-code", element: <AddDiscountCode /> },
+        { path: "expiring-vouchers", element: <ExpiringVoucherForm /> },
+      ],
+    },
+    {
+      path: "auth",
+      element: <Auth />,
       path: "auth",
       element: <Auth />,
     },
     {
+      path: "verify-email",
+      element: <VerifyEmailPage />,
+    },
       path: "verify-email",
       element: <VerifyEmailPage />,
     },

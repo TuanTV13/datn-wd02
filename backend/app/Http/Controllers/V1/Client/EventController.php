@@ -20,12 +20,15 @@ class EventController extends Controller
         $this->transactionRepository = $transactionRepository;
     }
 
+
     public function checkIn(Request $request, $eventId)
     {
         $allowedIpRanges = $this->eventRepository->getIp($eventId);
         // dd($subnets);
+        $allowedIpRanges = $this->eventRepository->getIp($eventId);
+        // dd($subnets);
         $clientIp = $request->ip();
-        
+
         $isAllowed = false;
         foreach ($allowedIpRanges as $range) {
             if (str_starts_with($clientIp, $range)) {
@@ -33,7 +36,17 @@ class EventController extends Controller
                 break;
             }
         }
-        
+
+        if (!$isAllowed) {
+
+        $isAllowed = false;
+        foreach ($allowedIpRanges as $range) {
+            if (str_starts_with($clientIp, $range)) {
+                $isAllowed = true;
+                break;
+            }
+        }
+
         if (!$isAllowed) {
             return response()->json([
                 'error' => 'Yêu cầu chỉ được thực hiện từ mạng nội bộ.'
@@ -124,7 +137,7 @@ class EventController extends Controller
     public function getEventsByCategory($categoryId)
     {
         $events = $this->eventRepository->findByCategory($categoryId);
-        
+
         foreach ($events as $event) {
             if ($event->speakers) {
                 $speakers = json_decode($event->speakers, true);
@@ -142,6 +155,9 @@ class EventController extends Controller
         ]);
     }
 
-    // public function 
+    // public function
+
+
+    // public function
 
 }

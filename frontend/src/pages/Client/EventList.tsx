@@ -1,12 +1,16 @@
-import React, { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { EventCT } from "../../Contexts/ClientEventContext";
+import { CategoryCT } from "../../Contexts/CategoryContext";
 
 const EventListing = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
+  const { categories, fetchEventsByCategory } = useContext(CategoryCT);
   const { events } = useContext(EventCT);
+
   // Function to toggle category menu
   const toggleCategory = () => {
     setIsCategoryOpen(!isCategoryOpen);
@@ -27,6 +31,7 @@ const EventListing = () => {
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = events.slice(indexOfFirstEvent, indexOfLastEvent);
+  const [filter, setFilter] = useState("");
 
   // Hàm xử lý thay đổi trang
   const handlePageChange = (direction) => {
@@ -39,6 +44,30 @@ const EventListing = () => {
       return prevPage;
     });
   };
+  const navigate = useNavigate();
+  const handleCategoryClick = async (categoryId: number | string) => {
+    await fetchEventsByCategory(categoryId); // Fetch events by category
+    navigate(`/event-category/${categoryId}`); // Navigate to the category page
+  };
+
+  const cities = [...new Set(currentEvents.map((event) => event.location))];
+
+  // Hàm xử lý thay đổi thành phố
+  const handleLocationChange = (city: string) => {
+    setFilter(city); // Cập nhật filter theo thành phố đã chọn
+  };
+
+  // Lọc các sự kiện theo thành phố
+  const filteredEvents = currentEvents.filter((event) => {
+    return filter ? event.location.toLowerCase() === filter.toLowerCase() : true;
+  });
+
+  const clearFilters = () => {
+    setFilter("");
+    setCurrentPage(1);
+    navigate("/event-list");
+  };
+
   return (
     <div className="w-full lg:py-10 py-4 border pb-[199px] mt-36">
       <div className="lg:container lg:mx-auto lg:w-[1315px] mb:w-full grid lg:grid-cols-[304px_978px] mb:grid-cols-[100%] *:w-full justify-between">
@@ -53,16 +82,16 @@ const EventListing = () => {
               {/* Show or hide category submenu */}
               {isCategoryOpen && (
                 <ul className="mt-2 ml-4">
-                  <li className="">
-                    <Link to={""} className=" text-[#9D9EA2]">
-                      Danh mục 1
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to={""} className="text-[#9D9EA2]">
-                      Danh mục 2
-                    </Link>
-                  </li>
+                  {categories.map((category) => (
+                    <li
+                      key={category.id}
+                      onClick={() => handleCategoryClick(category.id)}
+                    >
+                      <Link to={``} className="text-[#9D9EA2]">
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
@@ -77,16 +106,14 @@ const EventListing = () => {
               {/* Show or hide location submenu */}
               {isLocationOpen && (
                 <ul className="mt-2 ml-4">
-                  <li className="">
-                    <Link to={""} className=" text-[#9D9EA2]">
-                      Hà Nội
-                    </Link>
+                  {cities.map((city) =>(
+                    <li className="">
+                    <button onClick={() => handleLocationChange(city)} className=" text-[#9D9EA2] ">
+                      {city}
+                    </button>
                   </li>
-                  <li>
-                    <Link to={""} className="text-[#9D9EA2]">
-                      Đà Nẵng
-                    </Link>
-                  </li>
+                  ))}
+                  
                 </ul>
               )}
             </div>
@@ -145,7 +172,7 @@ const EventListing = () => {
             </ul>
           </section>
 
-          <button className="bg-[#F3FBF4] rounded-[100px] text-[14px] leading-[21px] text-[#007BFF] mt-3 h-10 px-8 ml-20">
+          <button onClick={clearFilters} className="bg-[#F3FBF4] rounded-[100px] text-[14px] leading-[21px] text-[#007BFF] mt-3 h-10 px-8 ml-20">
             Clear Filters
           </button>
         </div>
@@ -213,8 +240,11 @@ const EventListing = () => {
           <div className="lg:w-[1000px] mb:w-[342px] lg:mt-9 lg:pb-8 mb:pb-6 mb:mt-6">
             <div className="w-full p-4 space-y-6">
               {/* Event Card 1 */}
-              {currentEvents.map((item) => (
-                <div className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row h-auto md:h-[250px]">
+              {filteredEvents.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row h-auto md:h-[250px]"
+                >
                   <div className="w-full md:w-1/3 ">
                     <img
                       src={item.thumbnail}
@@ -228,9 +258,18 @@ const EventListing = () => {
                       Thời gian: {item.start_time} <br />
                       Địa điểm: {item.location}
                     </p>
-                    <p className="text-gray-600 mt-4">
+                    <p
+                      className={`text-gray-600 mt-4 ${
+                        showFullDescription ? "" : "line-clamp-1"
+                      }`}
+                    >
                       Mô tả: {item.description}
                     </p>
+                    {!showFullDescription && (
+                      <Link to={`/event-detail/${item.id}`} className="text-blue-500 mt-2">
+                        Xem thêm
+                      </Link>
+                    )}
                   </div>
                 </div>
               ))}
