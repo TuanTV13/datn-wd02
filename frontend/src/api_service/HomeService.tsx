@@ -12,9 +12,9 @@ export const getHeaderEvents = async () => {
 };
 
 // Lấy sự kiện sắp diễn ra
-export const getUpcomingEvents = async () => {
+export const getUpcomingEvents = async (province) => {
     try {
-        const { data } = await api.get('/clients/home/upcoming-events');
+        const { data } = await api.get(`/clients/home/upcoming-events/${province}`);
         return data.data;
     } catch (error) {
         console.error("Error fetching upcoming events:", error);

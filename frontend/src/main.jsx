@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import TicketsContext from './Contexts/TicketContext.tsx';
 import HomeContexts from './Contexts/HomeContext.tsx';
 import EventContexts from './Contexts/ClientEventContext.tsx';
+import CategoryContexts from './Contexts/CategoryContext.tsx';
 
 // Khởi tạo root chỉ một lần
 const container = document.getElementById('root');
@@ -19,7 +20,9 @@ root.render(
       <HomeContexts>
       <TicketsContext>
         <EventContexts>
-        <App />
+          <CategoryContexts>
+          <App />
+          </CategoryContexts>
         </EventContexts>
       </TicketsContext>
       </HomeContexts>
