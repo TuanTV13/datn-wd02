@@ -39,7 +39,7 @@ class EventController extends Controller
                 $event->speakers = null;
             }
         }
-        
+
 
         return response()->json([
             'message' => 'Danh sách sự kiện',

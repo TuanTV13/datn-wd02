@@ -53,6 +53,14 @@ Route::prefix('v1')->group(function () {
     Route::post('password/sendOTP', [AuthController::class, 'sendResetOTPEmail']);
     Route::post('password/reset', [AuthController::class, 'resetPasswordWithOTP']);
 
+    Route::get('user/profile', [AuthController::class, 'showProfile']);
+
+    // Route cập nhật thông tin tài khoản
+    Route::put('user/update-profile/{id}', [AuthController::class, 'updateProfile']);
+
+    // Route thay đổi mật khẩu
+    Route::put('user/change-password/{id}', [AuthController::class, 'changePassword']);
+
     Route::get('events', [EventController::class, 'index']);
 
     Route::prefix('events')->middleware(['check.jwt', 'check.permission:manage-events'])->group(function () {
@@ -109,13 +117,13 @@ Route::prefix('v1')->group(function () {
         Route::post('apply', [VoucherController::class, 'apply']);
     });
 
-    Route::get('feedbacks', [FeedbackController::class, 'index']);  
-    Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {  
-        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData']);  // Lấy dữ liệu đổ ra form đánh giá  
-        Route::get('{id}/show', [FeedbackController::class, 'show']);   
-        Route::post('submit', [FeedbackController::class, 'submit']);  
-        Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
-    });  
+    Route::get('feedbacks', [FeedbackController::class, 'index']);
+    Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {
+        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData']);  // Lấy dữ liệu đổ ra form đánh giá
+        Route::get('{id}/show', [FeedbackController::class, 'show']);
+        Route::post('submit', [FeedbackController::class, 'submit']);
+        Route::delete('{id}/delete', [FeedbackController::class, 'delete']);
+    });
 
     Route::prefix('clients')->group(function () {
 

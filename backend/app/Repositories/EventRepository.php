@@ -95,11 +95,27 @@ public function findByCategory($categoryId)
         ->limit(4)
         ->get();
 }
+    {
+        return $this->event
+            ->where('status', 'confirmed')
+            ->where('display_header', true)
+            ->select('id', 'category_id', 'name', 'description', 'thumbnail', 'start_time')
+            ->orderBy('start_time', 'asc')
+            ->limit(4)
+            ->get();
+    }
 
 
     public function getUpcomingEvents($province = null)
+    public function getUpcomingEvents($province = null)
     {
         return $this->event
+            ->when($province, function ($query) use ($province) {
+                $query->whereRaw(
+                    "LOWER(REPLACE(province, ' ', '-')) = ?",
+                    [strtolower($province)]
+                );
+            })
             ->when($province, function ($query) use ($province) {
                 $query->whereRaw(
                     "LOWER(REPLACE(province, ' ', '-')) = ?",
@@ -131,6 +147,16 @@ public function findByCategory($categoryId)
             ->orderByDesc('feedbacks_sum_rating')
             ->limit(12)
             ->get();
+    }
+
+    public function getIp($eventId)
+    {
+        $event = $this->event->find($eventId);
+        if ($event) {
+            return $event->subnets->pluck('subnet');
+        }
+
+        return null;
     }
 
     public function getIp($eventId)
