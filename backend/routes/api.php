@@ -45,6 +45,7 @@ Route::prefix('v1/role')->middleware(['check.jwt'])->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
+    Route::get('user', [AuthController::class, 'me'])->middleware('check.jwt'); // Thông tin cá nhân của user đang login
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     Route::get('email/verify/{token}', [AuthController::class, 'verify'])->name('verification.verify');
@@ -61,6 +62,8 @@ Route::prefix('v1')->group(function () {
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
+        Route::get('/check-event-ip', [EventController::class, 'checkEventIP']); // Thông báo hi chưa có ip checkin cục bộ
+
     });
 
     Route::get('users', [UserController::class, 'index']);
@@ -127,7 +130,7 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('home')->group(function () {
             Route::get('header-events', [HomeController::class, 'headerEvents']);
-            Route::get('upcoming-events/{province}', [HomeController::class, 'upcomingEvents']);
+            Route::get('upcoming-events/{provinceSlug?}', [HomeController::class, 'upcomingEvents']);
             Route::get('featured-events', [HomeController::class, 'featuredEvents']);
             Route::get('top-rated-events', [HomeController::class, 'topRatedEvents']);
         });

@@ -24,7 +24,7 @@ class UpdateEventRequest extends FormRequest
         $event = $this->route('event');
 
         return [
-            'ward_id' => 'required|integer|exists:wards,id',
+            'ward' => 'required|string',
             'location' => 'required|string|max:255',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
@@ -36,8 +36,6 @@ class UpdateEventRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'ward_id.required' => 'Vui lòng chọn xã.',
-            'ward_id.exists' => 'Xã không tồn tại trong danh sách.',
 
             'location.required' => 'Hãy nhập địa điểm cụ thể của sự kiện.',
             'location.max' => 'Địa điểm không được vượt quá :max ký tự.',
