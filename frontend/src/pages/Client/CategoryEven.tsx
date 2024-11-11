@@ -79,7 +79,7 @@ const CategoryEven = () => {
 
       <div className="lg:w-[1200px] mx-auto sm:w-[95vw] mb:w-[342px] flex flex-col lg:mt-[10px] lg:pt-4 mb:pt-[39px]">
         <p className="lg:text-[25px] mb:text-[28px] lg:leading-[30px] mb:leading-[40px]">
-          Danh mục
+          Danh mục {events[0].category?.name}
         </p>
 
         <div className="grid lg:pt-8 lg:pb-[15px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-6">

@@ -1,9 +1,10 @@
 export interface Events {
   id: number | string;
   category_id: number | string;
-  province_id: number;
-  district_id: number;
-  ward_id: number;
+  category_name: string;
+  province: string;
+  district: string;
+  ward: string;
   name: string;
   description: string;
   thumbnail: string;
@@ -15,7 +16,7 @@ export interface Events {
   max_attendees: number;
   registed_attendees: number;
   created_at: string;
-  categories?: {
+  category?: {
     id: number
     name: string
   }

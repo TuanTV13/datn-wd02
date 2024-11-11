@@ -249,7 +249,7 @@ const EventListing = () => {
                       Mô tả: {item.description}
                     </p>
                     {!showFullDescription && (
-                      <Link to={`/event-detail`} className="text-blue-500 mt-2">
+                      <Link to={`/event-detail/${item.id}`} className="text-blue-500 mt-2">
                         Xem thêm
                       </Link>
                     )}

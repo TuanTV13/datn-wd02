@@ -32,7 +32,7 @@ const HomeContexts = ({ children }: Props) => {
 
             try {
                 const headerData = await getHeaderEvents();
-                const upcomingData = await getUpcomingEvents("default-province"); // Thay "default-province" bằng tỉnh mặc định hoặc giá trị cần thiết.
+                const upcomingData = await getUpcomingEvents();
                 const featuredData = await getFeaturedEvents();
                 const topRatedData = await getTopRatedEvents();
 

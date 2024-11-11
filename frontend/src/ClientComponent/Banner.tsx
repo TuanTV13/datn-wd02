@@ -27,7 +27,7 @@ const Banner = () => {
         >
           <div className="md:w-1/2">
             <p className="text-[#007BFF] text-base tracking-[4px] mb-2">
-            {headerEvents[0]?.categories?.name || "No Category"}
+            {headerEvents[0]?.category_name || ""}
             </p>
             <h1 className="lg:text-[64px] md:text-5xl font-medium mb-4 text-white">
               {headerEvents[0]?.name}

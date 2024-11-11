@@ -15,15 +15,15 @@ const ItemEven = () => {
   // Lấy danh sách các thành phố duy nhất từ trường location của sự kiện
   const cities = [
     "Mới nhất",
-    ...new Set(upcomingEvents.map((event) => event.location)),
+    ...new Set(upcomingEvents.map((event) => event.province)),
   ];
 
   const filteredEvents = upcomingEvents.filter((event) => {
-    const normalizedLocation = event.location.toLowerCase();
+    const normalizedProvince = event.province.toLowerCase();
     const normalizedFilter = filter.toLowerCase();
 
     if (normalizedFilter === "mới nhất") return true;
-    return normalizedLocation === normalizedFilter;
+    return normalizedProvince === normalizedFilter;
   });
   return (
     <div>
