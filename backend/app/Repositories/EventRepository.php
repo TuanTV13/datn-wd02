@@ -141,4 +141,9 @@ class EventRepository
 
         return null;
     }
+
+    public function query()
+    {
+        return $this->event->newQuery();
+    }
 }
