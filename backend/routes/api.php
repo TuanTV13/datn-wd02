@@ -134,6 +134,8 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}', [ClientEventController::class, 'show'])->name('client.event.show');
             Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
             Route::get('category/{categoryId}', [ClientEventController::class, 'getEventsByCategory']); // Bài viết theo danh mục
+            Route::post('filter', [ClientEventController::class, 'filter']);
+            Route::post('search', [ClientEventController::class, 'search']);
         });
 
         Route::prefix('home')->group(function () {
