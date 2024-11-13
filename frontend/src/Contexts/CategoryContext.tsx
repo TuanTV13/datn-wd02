@@ -11,7 +11,7 @@ interface CategoryContextType {
   categories: Categories[];
   events: Events[];
   loading: boolean
-  fetchEventsByCategory: (categoryId: number | string) => Promise<void>
+  fetchEventsByCategory: (id: number | string) => Promise<void>
 }
 
 export const CategoryCT = createContext<CategoryContextType>({} as CategoryContextType);
@@ -29,10 +29,10 @@ const CategoryContexts = ({ children }: Props) => {
     })();
   }, []);
 
-  const fetchEventsByCategory = async (categoryId: number | string) => {
+  const fetchEventsByCategory = async (id: number | string) => {
     setLoading(true);
     try {
-      const eventData = await getEventsByCategory(categoryId);
+      const eventData = await getEventsByCategory(id);
       setEvents(eventData);
     } catch (error) {
       console.error('Error fetching events:', error);

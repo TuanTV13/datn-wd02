@@ -246,14 +246,14 @@ const EventListing = () => {
                   className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row h-auto md:h-[250px]"
                 >
                   <div className="w-full md:w-1/3 ">
-                    <img
+                    <Link to={`/event-detail/${item.id}`}><img
                       src={item.thumbnail}
                       alt={item.name}
                       className=" rounded-[50px]"
-                    />
+                    /></Link>
                   </div>
                   <div className="w-full md:w-2/3 mt-4 md:mt-0 md:ml-4">
-                    <h2 className="text-xl font-bold">{item.name}</h2>
+                    <h2 className="text-xl font-bold"><Link to={`/event-detail/${item.id}`}>{item.name}</Link></h2>
                     <p className="text-gray-600 mt-2">
                       Thời gian: {item.start_time} <br />
                       Địa điểm: {item.location}

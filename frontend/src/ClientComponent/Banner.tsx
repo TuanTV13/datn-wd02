@@ -5,6 +5,7 @@ import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
 import { HomeCT } from "../Contexts/HomeContext";
 import { Events } from "../interfaces/Event";
+import { Link } from "react-router-dom";
 
 interface SlideType {
   type: "image" | "text";
@@ -37,9 +38,9 @@ const Banner = () => {
               <span className="mx-2">|</span>
               <p>Free Shipping</p>
             </div> */}
-            <button className="bg-[#6C757D] text-white py-2 px-6 rounded-full">
+            <Link to={`/event-detail/${headerEvents[0]?.id}`} className="bg-[#6C757D] text-white py-2 px-6 rounded-full">
               Chi tiết sự kiện
-            </button>
+            </Link>
           </div>
         </div>
       ),

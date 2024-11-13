@@ -17,7 +17,7 @@ export interface Events {
   registed_attendees: number;
   created_at: string;
   category?: {
-    id: number
+    id: number | string
     name: string
   }
 }
