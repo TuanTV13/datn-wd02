@@ -31,9 +31,9 @@ export const checkInEvent = async (eventId) => {
 };
 
 // Lấy sự kiện theo danh mục
-export const getEventsByCategory = async (categoryId: number | string) => {
+export const getEventsByCategory = async (id: number | string) => {
   try {
-      const { data } = await api.get(`/clients/events/category/${categoryId}`);
+      const { data } = await api.get(`/clients/events/category/${id}`);
       return data.data; 
   } catch (error) {
       console.error("Error fetching events by category:", error);

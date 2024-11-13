@@ -60,16 +60,21 @@ const ItemEven = () => {
                 key={event.id}
                 className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3"
               >
-                <div className="w-full h-[120px] bg-gray-200 mb-2">
+                <Link
+                  to={`/event-detail/${event.id}`}
+                  className="w-full h-[120px] bg-gray-200 mb-2"
+                >
                   <img
                     src={event.thumbnail || ""}
                     alt={event.name}
                     className="h-[120px] w-full"
                   />
-                </div>
-                <div className="text-xs text-gray-700 mb-2">
+                </Link>
+                <div className="text-xs text-gray-700 mb-2 mt-2">
                   <p>{event.location}</p>
-                  <p>{event.name}</p>
+                  <p>
+                    <Link to={"/event-detail/" + event.id}>{event.name}</Link>
+                  </p>
                   <p className="text-gray-500 pt-4">Vào cổng tự do</p>
                 </div>
                 <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
@@ -136,15 +141,19 @@ const ItemEven = () => {
                 className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3"
               >
                 <div className="w-full h-[120px] bg-gray-200 mb-2">
-                  <img
-                    src={event.thumbnail || ""}
-                    alt={event.name}
-                    className="h-full w-full object-cover"
-                  />
+                  <Link to={"/event-detail/" + event.id}>
+                    <img
+                      src={event.thumbnail || ""}
+                      alt={event.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </Link>
                 </div>
                 <div className="text-xs text-gray-700 mb-2">
-                  <p className="pt-4">{event.location}</p>
-                  <p>{event.name}</p>
+                  <p className="pt-2">{event.location}</p>
+                  <p>
+                    <Link to={"/event-detail/" + event.id}>{event.name}</Link>
+                  </p>
                   <p className="text-gray-500 pt-3">Vào cổng tự do</p>
                 </div>
                 <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
@@ -214,7 +223,9 @@ const ItemEven = () => {
               </div>
               <div className="text-xs text-gray-700 mb-2">
                 <p>{event.location}</p>
-                <p>{event.name}</p>
+                <p>
+                  <Link to={"/event-detail/" + event.id}>{event.name}</Link>
+                </p>
                 <p className="text-gray-500 pt-3">Vào cổng tự do</p>
               </div>
               <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">

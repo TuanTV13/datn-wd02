@@ -35,6 +35,7 @@ import UserProfile from "./pages/Client/UserProfile";
 import AddDiscountCode from "./pages/Admin/Voucher/AddDiscountCode";
 import DiscountCodeList from "./pages/Admin/Voucher/DiscountCodeList";
 import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
+import Order from "./pages/Client/Order";
 
 import VerifyEmailPage from "./components/Auth/VerifyEmailPage";
 import UserProfileEdit from "./pages/Client/UserProfileEdit";
@@ -56,12 +57,7 @@ function App() {
         { path: "event-category/:id", element: <CategoryEvent /> },
         { path: "cart", element: <Cart/>},
         { path: "checkout", element: <CheckOut/>},
-        { path: "event-history", element: <EventHistory/>},
-        { path: "payment-history", element: <PaymentHistory/>},
-        { path: "event-detail/:id", element:<EventDetail/>},
-        { path: "event-category", element: <CategoryEvent /> },
-        { path: "cart", element: <Cart /> },
-        { path: "checkout", element: <CheckOut /> },
+        { path: "order", element: <Order/>},
         { path: "event-history", element: <EventHistory /> },
         { path: "payment-history", element: <PaymentHistory /> },
         { path: "profile", element: <UserProfile /> },
