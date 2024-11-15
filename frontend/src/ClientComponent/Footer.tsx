@@ -31,9 +31,7 @@ const Footer = () => {
             <div className="flex-grow p-4 text-xs">
                 <h3 className="text-lg">Phương thức thanh toán</h3>
                 <p className="grid grid-cols-3 md:grid-cols-5 gap-2">
-                    <img src="../../public/images/Frame1.png" alt="Thanh toán 1" className="h-auto" />
-                    <img src="../../public/images/Frame4.png" alt="Thanh toán 2" className="h-auto" />
-                    <img src="../../public/images/Frame5.png" alt="Thanh toán 3" className="h-auto" />
+                    <img src="../../public/images/logo_paypal.png" alt="Thanh toán 1" className="h-auto w-9" />
                 </p>
             </div>
 
@@ -44,12 +42,6 @@ const Footer = () => {
                     <img className="ml-2" src="../../public/images/doitac/Frame.png" alt="Đối tác 1" />
                     <img className="ml-2" src="../../public/images/doitac/Frame1.png" alt="Đối tác 2" />
                     <img className="ml-2" src="../../public/images/doitac/Frame2.png" alt="Đối tác 3" />
-                </div>
-
-                {/* Language Selection */}
-                <div className="flex flex-col items-center mt-4">
-                    <p className="text-lg">Ngôn ngữ</p>
-                    <img src="../../public/images/doitac/language.jpg" alt="Language Icon" className="w-8 h-8 mt-1" />
                 </div>
             </div>
         </div>

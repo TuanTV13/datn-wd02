@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for your API
-const API_URL = 'http://127.0.0.1:8000/api/v1'; // Replace with your actual API URL
+const API_URL = 'http://192.168.2.112:8000/api/v1'; // Replace with your actual API URL
 export const getEvents = async () => {
    try {
      const response = await axios.get(`${API_URL}/events`);
@@ -21,13 +21,15 @@ export const getEvents = async () => {
  const addEvent = async (eventData) => {
    // Lấy token từ localStorage (hoặc nơi bạn lưu token)
    const token = localStorage.getItem('token'); // Điều chỉnh theo cách bạn lưu token
- 
+  
+  
    // Tạo headers với token
    const headers = {
        'Authorization': `Bearer ${token}`,
        'Content-Type': 'multipart/form-data', // Nếu bạn gửi FormData
    };
- 
+  
+
    try {
        const response = await axios.post(`${API_URL}/events/create`, eventData, { headers });
        return response.data;

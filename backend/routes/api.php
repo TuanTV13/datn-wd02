@@ -7,9 +7,12 @@ use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\CategoryController;
 use App\Http\Controllers\V1\Client\CartController;
 use App\Http\Controllers\V1\Client\EventController as ClientEventController;
+use App\Http\Controllers\V1\Client\HomeController;
 use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
+use App\Http\Controllers\V1\EventTrackingController;
 use App\Http\Controllers\V1\FeedbackController;
+use App\Http\Controllers\V1\StatisticsController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
@@ -36,25 +39,28 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('locations')->group(function () {
-    Route::get('/provinces', [LocationController::class, 'showProvinces']);
-    Route::get('/districts/{provinceId}', [LocationController::class, 'getDistricts']);
-    Route::get('/wards/{districtId}', [LocationController::class, 'getWards']);
-});
-
-Route::prefix('role')->middleware(['check.jwt'])->group(function () {
+Route::prefix('v1/role')->middleware(['check.jwt'])->group(function () {
     Route::get('/{id}/permissions', [RolePermissionController::class, 'getPermissionsByRole']);
     Route::get('/{id}', [RolePermissionController::class, 'assignAdminRole'])->name('add.role');
     Route::post('/{id}/permissions', [RolePermissionController::class, 'assignPermissionsToRole']);
 });
 
 Route::prefix('v1')->group(function () {
+    Route::get('user', [AuthController::class, 'me'])->middleware('check.jwt'); // Thông tin cá nhân của user đang login
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     Route::get('email/verify/{token}', [AuthController::class, 'verify'])->name('verification.verify');
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('password/sendOTP', [AuthController::class, 'sendResetOTPEmail']);
     Route::post('password/reset', [AuthController::class, 'resetPasswordWithOTP']);
+
+    Route::get('user/profile', [AuthController::class, 'showProfile']);
+
+    // Route cập nhật thông tin tài khoản
+    Route::put('user/update-profile/{id}', [AuthController::class, 'updateProfile']);
+
+    // Route thay đổi mật khẩu
+    Route::put('user/change-password/{id}', [AuthController::class, 'changePassword']);
 
     Route::get('events', [EventController::class, 'index']);
 
@@ -65,8 +71,10 @@ Route::prefix('v1')->group(function () {
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
+        Route::get('/check-event-ip', [EventController::class, 'checkEventIP']); // Thông báo hi chưa có ip checkin cục bộ
+        Route::get('statistics/top-revenue-events', [StatisticsController::class, 'topRevenueEvents']); // Thống kê trong khoảng thời gian chọn
+        Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng 
 
-        Route::post('{event}/feedback-mail', [EventController::class, 'sendFeedbackEmail']);     
     });
 
     Route::get('users', [UserController::class, 'index']);
@@ -123,20 +131,27 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('clients')->group(function () {
 
+        Route::get('getEventDetails/{id}', [EventTrackingController::class, 'getEventDetails']);
+
         Route::prefix('events')->group(function () {
             Route::get('/', [ClientEventController::class, 'index']);
-            Route::get('{id}', [ClientEventController::class, 'show']);
-            Route::get('filter/{categoryId}', [ClientEventController::class, 'filter']);
+            Route::get('{id}', [ClientEventController::class, 'show'])->name('client.event.show');
+            Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
+            Route::get('category/{categoryId}', [ClientEventController::class, 'getEventsByCategory']); // Bài viết theo danh mục
+            Route::post('filter', [ClientEventController::class, 'filter']);
+            Route::post('search', [ClientEventController::class, 'search']);
         });
 
-        Route::prefix('carts')->middleware('check.jwt')->group(function () {
-            Route::get('/', [CartController::class, 'getCart']);
-            Route::post('add', [CartController::class, 'addToCart']);
-            Route::put('{cartItem}/increase', [CartController::class, 'increaseQuantity']);
-            Route::put('{cartItem}/decrease', [CartController::class, 'decreaseQuantity']);
+        Route::prefix('home')->group(function () {
+            Route::get('header-events', [HomeController::class, 'headerEvents']);
+            Route::get('upcoming-events/{provinceSlug?}', [HomeController::class, 'upcomingEvents']);
+            Route::get('featured-events', [HomeController::class, 'featuredEvents']);
+            Route::get('top-rated-events', [HomeController::class, 'topRatedEvents']);
         });
 
         Route::post('checkout', [PaymentController::class, 'checkout']);
         Route::post('payment/process', [PaymentController::class, 'processPayment']);
+        Route::get('payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+        Route::get('payment/cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
     });
 });

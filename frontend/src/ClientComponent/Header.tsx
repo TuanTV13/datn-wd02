@@ -1,11 +1,33 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { Dropdown, MenuProps } from "antd";
 
 const Header = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const menuRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const notificationRef = useRef(null);
+
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <a rel="noopener noreferrer" href="/profile">
+          Thông tin cá nhân{" "}
+        </a>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <a rel="noopener noreferrer" href="change-password">
+          Đổi mật khẩu{" "}
+        </a>
+      ),
+    },
+  ];
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -19,11 +41,21 @@ const Header = () => {
     setOpenMenu(null);
   };
 
+  const toggleNotificationPopup = () => {
+    setIsNotificationOpen(!isNotificationOpen);
+  };
+
   // Close sub-menu if click happens outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         closeMenu();
+      }
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setIsNotificationOpen(false);
       }
     };
 
@@ -112,21 +144,97 @@ const Header = () => {
           </div>
 
           <div className="flex gap-x-4 items-center">
-            <Link to={""}>
+            <Link to={"auth"}>
               <span className="text-sm">Your Account</span>
-            </Link> |
-            <Link to={`/cart`} className="relative h-[24px]">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
-                  stroke="currentColor" className="w-[24px]">
-                  <path strokeLinecap="round" strokeLinejoin="round"
-                    d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                </svg>
-                <span className="absolute bg-red-500 top-0 right-0 rounded-full w-[16px] h-[16px] text-xs text-white flex items-center justify-center">2</span>
+            </Link>{" "}
+            <Dropdown menu={{ items }}>
+              <Link to={""}>
+                <span className="text-sm">Your info</span>
               </Link>
+            </Dropdown>
+            |
+            <Link to={`/cart`} className="relative h-[24px]">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="w-[24px]"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                />
+              </svg>
+              <span className="absolute bg-red-500 top-0 right-0 rounded-full w-[16px] h-[16px] text-xs text-white flex items-center justify-center">
+                2
+              </span>
+            </Link>
+            <div className="relative h-[24px] lg:ml-10" ref={notificationRef}>
+              <button onClick={toggleNotificationPopup}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-7"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"
+                  />
+                </svg>
+                <span className="absolute bg-red-500 top-0 right-0 rounded-full w-[16px] h-[16px] text-xs text-white flex items-center justify-center">
+                  2
+                </span>
+              </button>
+              {isNotificationOpen && (
+                <div className="absolute right-0 mt-2 w-[400px] bg-white shadow-lg rounded-lg p-4 z-10">
+                  <p className="text-sm font-medium">Bạn có 2 thông báo mới</p>
+                  <ul className="mt-2">
+                    <li className="py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                      Thông báo 1
+                    </li>
+                    <li className="py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                      Thông báo 2
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-
+      {/* <!-- form mobile --> */}
+      <div className=" *:h-[58px] lg:hidden mb:block w-full">
+        <form className="flex *:h-[36px] justify-center items-center gap-x-2">
+          <input
+            type="text"
+            className="border rounded-full w-[298px] px-5"
+            placeholder="Search"
+          />
+          <button className="rounded-[50%] bg-[#6C757D] w-[36px]">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              className="size-6 text-white mx-auto"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+              />
+            </svg>
+          </button>
+        </form>
+      </div>
       {/* Desktop Menu */}
       <div className="w-full hidden lg:flex justify-center items-center">
         <div>
@@ -134,21 +242,13 @@ const Header = () => {
             <li>
               <Link to={``}>Trang chủ</Link>
             </li>
-            <li className="relative" ref={menuRef}>
-              <Link
-                to={``}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleMenuToggle("suKien");
-                }}
-              >
-                Sự kiện
-              </Link>
-              {openMenu === "suKien" && (
+            <li className="relative">
+              <Link to={`event-list`}>Sự kiện</Link>
+              {/* {openMenu === "suKien" && (
                 <ul className="absolute bg-gray-100 shadow-lg mt-2 rounded-lg p-2 w-[230px]">
                   <li className="flex hover:bg-gray-300">
                     <Link
-                      to={`event-category`}
+                      to={`/event-category`}
                       className="block px-4 py-2"
                       onClick={closeMenu} // Đóng menu khi chọn mục
                     >
@@ -174,7 +274,7 @@ const Header = () => {
                     </Link>
                   </li>
                 </ul>
-              )}
+              )} */}
             </li>
 
             <li>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { Modal, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import './Auth.css';
 
 const RegisterForm = ({ toggleForm }) => {
@@ -15,14 +16,17 @@ const RegisterForm = ({ toggleForm }) => {
   const [showEmailError, setShowEmailError] = useState(false);
   const [showPasswordError, setShowPasswordError] = useState(false);
   const [showConfirmPasswordError, setShowConfirmPasswordError] = useState(false);
-
+  
+  const navigate = useNavigate(); // Thêm hook để điều hướng sau khi đăng ký thành công
   const password = watch('password');
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/register', data);
+      const { confirmPassword, ...restData } = data; // Loại bỏ confirmPassword
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/register', restData);
       if (response.status === 200) {
-        alert('Đăng ký thành công!');
+        // Chuyển hướng đến trang verify email sau khi đăng ký thành công
+        navigate('/verify-email');
       }
     } catch (error) {
       if (error.response && error.response.data.errors) {
@@ -52,7 +56,6 @@ const RegisterForm = ({ toggleForm }) => {
           <h2 className="auth-form-title">Đăng Ký</h2>
           <br />
           <form onSubmit={handleSubmit(onSubmit)}>
-
             {/* Input Tên */}
             <div className="mb-3 input-container">
               <input
@@ -85,6 +88,28 @@ const RegisterForm = ({ toggleForm }) => {
               )}
             </div>
 
+            {/* Input Số Điện Thoại */}
+            <div className="mb-3 input-container">
+              <input
+                id="phone"
+                type="text"
+                placeholder="Nhập số điện thoại"
+                className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
+                {...register('phone', {
+                  required: 'Số điện thoại là bắt buộc',
+                  pattern: {
+                    value: /^[0-9]+$/,
+                    message: 'Số điện thoại không hợp lệ',
+                  },
+                  maxLength: {
+                    value: 10,
+                    message: 'Số điện thoại không thể dài hơn 10 số',
+                  },
+                })}
+              />
+              {errors.phone && <div className="input-error">{errors.phone.message}</div>}
+            </div>
+
             {/* Input Mật Khẩu */}
             <div className="mb-3 position-relative input-container">
               <input
@@ -96,7 +121,6 @@ const RegisterForm = ({ toggleForm }) => {
                 onMouseEnter={() => errors.password && setShowPasswordError(true)}
                 onMouseLeave={() => errors.password && setShowPasswordError(false)}
               />
-              {/* Chỉ hiển thị icon khi không có lỗi validate */}
               {!errors.password && (
                 <i
                   className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}
@@ -112,29 +136,28 @@ const RegisterForm = ({ toggleForm }) => {
             {/* Input Xác Nhận Mật Khẩu */}
             <div className="mb-3 position-relative input-container">
               <input
-                id="confirmPassword"
+                id="password_confirmation" // Sửa ở đây
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Xác nhận mật khẩu"
-                className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
-                {...register('confirmPassword', {
+                className={`form-control ${errors.password_confirmation ? 'is-invalid' : ''}`} // Sửa ở đây
+                {...register('password_confirmation', { // Sửa ở đây
                   required: 'Cần nhập lại mật khẩu',
                   validate: value => {
-                    return value === password || 'Mật khẩu không khớp';
+                    return value === password || 'Mật khẩu xác nhận không khớp';
                   },
                 })}
-                onMouseEnter={() => errors.confirmPassword && setShowConfirmPasswordError(true)}
-                onMouseLeave={() => errors.confirmPassword && setShowConfirmPasswordError(false)}
+                onMouseEnter={() => errors.password_confirmation && setShowConfirmPasswordError(true)} // Sửa ở đây
+                onMouseLeave={() => errors.password_confirmation && setShowConfirmPasswordError(false)} // Sửa ở đây
               />
-              {/* Chỉ hiển thị icon khi không có lỗi validate */}
-              {!errors.confirmPassword && (
+              {!errors.password_confirmation && ( // Sửa ở đây
                 <i
                   className={`fas ${showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'}`}
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={{ position: 'absolute', top: '50%', right: '10px', cursor: 'pointer', transform: 'translateY(-50%)' }}
                 />
               )}
-              {errors.confirmPassword && showConfirmPasswordError && (
-                <div className="input-error">{errors.confirmPassword.message}</div>
+              {errors.password_confirmation && showConfirmPasswordError && ( // Sửa ở đây
+                <div className="input-error">{errors.password_confirmation.message}</div>
               )}
             </div>
 
@@ -148,10 +171,9 @@ const RegisterForm = ({ toggleForm }) => {
       </div>
 
       <div className="auth-action-right">
-  <h2 className="welcome-text">Chào mừng đến với Eventify</h2>
-  <img src='../../public/images/logo.webp' alt="Logo" className="auth-logo" />
-</div>
-
+        <h2 className="welcome-text">Chào mừng đến với Eventify</h2>
+        <img src='../../public/images/logo.webp' alt="Logo" className="auth-logo" />
+      </div>
 
       {/* Modal thông báo lỗi */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>

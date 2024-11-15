@@ -4,13 +4,13 @@ namespace App\Enums;
 
 class PaymentMethod
 {
-    const ZALOPAY = 'ZALOPAY';
+    const PAYPAL = 'PayPal';
     const CASH = 'Cash';
 
     public static function getValues()
     {
         return [
-            self::ZALOPAY,
+            self::PAYPAL,
             self::CASH,
         ];
     }

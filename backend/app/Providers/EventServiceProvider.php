@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\AttendeesNotified;
 use App\Events\EventCompleted;
+use App\Events\EventUpcoming;
 use App\Events\EventUpdate;
 use App\Events\FeedbackReplied;
 use App\Events\TransactionVerified;
@@ -14,6 +15,7 @@ use App\Listeners\EventUpdateNotification;
 use App\Listeners\SendFeedbackEmail;
 use App\Listeners\SendFeedbackResponseEmail;
 use App\Listeners\SendTransactionConfirmationEmail;
+use App\Listeners\SendUpcomingEventEmail;
 use App\Listeners\UserForgotPasswordSendCode;
 use App\Listeners\UserRegisterdSuccessVerification;
 use Illuminate\Auth\Events\Registered;

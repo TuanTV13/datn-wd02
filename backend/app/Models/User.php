@@ -23,9 +23,6 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
-        'province_id',
-        'district_id',
-        'ward_id',
         'name',
         'email',
         'password',
@@ -68,21 +65,6 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->attributes['password'];
     }
 
-    public function province()
-    {
-        return $this->belongsTo(Province::class);
-    }
-
-    public function district()
-    {
-        return $this->belongsTo(District::class);
-    }
-
-    public function ward()
-    {
-        return $this->belongsTo(Ward::class);
-    }
-
     public function vouchers()
     {
         return $this->belongsToMany(Voucher::class, 'user_voucher')
@@ -102,6 +84,11 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     public function refreshTokens()
     {
         return $this->hasMany(RefreshToken::class);
+    }
+
+    public function events()
+    {
+        return $this->belongsToMany(Event::class, 'event_users');
     }
 
 }
