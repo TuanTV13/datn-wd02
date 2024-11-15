@@ -104,9 +104,14 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->hasMany(RefreshToken::class);
     }
 
-    public function events()
-    {
-        return $this->belongsToMany(Event::class, 'event_users');
-    }
+// app/Models/User.php
+// app/Models/User.php
+public function events()
+{
+    return $this->belongsToMany(Event::class, 'event_users')
+                ->withPivot('status') // Nếu bạn muốn lấy thêm cột status từ bảng pivot
+                ->withTimestamps(); // Đảm bảo rằng cột timestamps cũng được lấy
+}
+
 
 }

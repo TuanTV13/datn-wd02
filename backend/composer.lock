@@ -9685,11 +9685,9 @@
     "platform": {
         "php": "^8.1"
     },
-<<<<<<< HEAD
-    "platform-dev": {},
-    "plugin-api-version": "2.6.0"
-=======
+
+
     "platform-dev": [],
     "plugin-api-version": "2.3.0"
->>>>>>> 43e9e97d64e83fc9aef155cdb682bcceacc9109a
+
 }

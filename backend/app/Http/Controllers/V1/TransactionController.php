@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1;
 
 use App\Events\TransactionVerified;
 use App\Http\Controllers\Controller;
+use App\Models\Transaction;
 use App\Repositories\TransactionRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,7 +66,6 @@ class TransactionController extends Controller
         }
     }
 
-
     public function failed($id)
     {
         $transaction = $this->transactionRepository->findTransactionById($id);
@@ -83,5 +83,28 @@ class TransactionController extends Controller
         $transaction->save();
 
         return response()->json(['message' => 'Hủy giao dịch thành công'], 200);
+    }
+
+    // Thêm hàm lấy lịch sử giao dịch của một user
+    public function getTransactionHistory(Request $request)
+    {
+        // Lấy các giao dịch của người dùng đã đăng nhập
+        $transactions = Transaction::with('event')
+            ->where('user_id', $request->user()->id)
+            ->get();
+
+        // Trả về dữ liệu với thông tin yêu cầu
+        $transactionHistory = $transactions->map(function ($transaction) {
+            return [
+                'transaction_id' => $transaction->id,
+                'event_name' => $transaction->event->name,
+                'transaction_time' => $transaction->transaction_time,
+                'amount' => $transaction->amount,
+                'payment_method' => $transaction->payment_method,
+                'status' => $transaction->status,
+            ];
+        });
+
+        return response()->json($transactionHistory);
     }
 }
