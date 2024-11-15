@@ -3,6 +3,9 @@
 namespace App\Repositories;
 
 use App\Models\Event;
+use App\Models\Ticket;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EventRepository
 {
@@ -95,7 +98,7 @@ class EventRepository
             ->limit(4)
             ->get();
     }
-    
+
     public function getUpcomingEvents($province = null)
     {
         return $this->event
@@ -145,5 +148,53 @@ class EventRepository
     public function query()
     {
         return $this->event->newQuery();
+    }
+
+    public function getTopRevenueEvents($limit, $startDate, $endDate)
+    {
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate = Carbon::parse($endDate)->endOfDay();
+
+        $ticket = new Ticket();
+        $totalRevenue = $ticket
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('price');
+
+        $topEvents = $this->event
+            ->select('events.id', 'events.name', DB::raw('SUM(tickets.price) as total_revenue'))
+            ->join('tickets', 'events.id', '=', 'tickets.event_id')
+            ->whereBetween('tickets.created_at', [$startDate, $endDate])
+            ->groupBy('events.id', 'events.name')
+            ->orderByDesc('total_revenue')
+            ->limit($limit)
+            ->get();
+
+        if ($topEvents->isEmpty()) {
+            return $topEvents;
+        }
+
+        $totalTopRevenue = $topEvents->sum('total_revenue');
+
+        foreach ($topEvents as $event) {
+            $event->percentage = ($totalTopRevenue > 0) ? ($event->total_revenue / $totalTopRevenue) * 100 : 0;
+        }
+
+        return [
+            'total_revenue' => $totalRevenue,
+            'top_events' => $topEvents
+        ];
+    }
+
+    public function getEventCount($startDate, $endDate)
+    {
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate = Carbon::parse($endDate)->endOfDay();
+
+        $eventCount = $this->event
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        return $eventCount;
     }
 }
