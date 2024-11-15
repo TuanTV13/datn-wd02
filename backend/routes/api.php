@@ -124,7 +124,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {  
         Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá  
         Route::get('{id}/show', [FeedbackController::class, 'show']);   
-        Route::post('reply', [FeedbackController::class, 'reply']);
+        Route::post('reply', [FeedbackController::class, 'reply']); 
         Route::post('submit', [FeedbackController::class, 'submit']);  
         Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
     });  

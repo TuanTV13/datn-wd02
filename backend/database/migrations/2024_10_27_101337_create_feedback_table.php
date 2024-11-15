@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('rating')->defaut(0);
             $table->text('feedback');
             $table->text('suggestions')->nullable();
-            $table->text('response')->nullable();
+            $table->text('response')->nullable(); 
             $table->timestamps();
         });
     }

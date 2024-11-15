@@ -61,7 +61,7 @@ class EventServiceProvider extends ServiceProvider
 
         FeedbackReplied::class => [
             SendFeedbackResponseEmail::class,
-        ],
+        ], 
     ];
 
     /**

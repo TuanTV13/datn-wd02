@@ -99,7 +99,7 @@ class FeedbackController extends Controller
             'message' => 'Trả lời phản hồi',
             'data'    => $feedback,
         ], 200);
-    }
+    } 
 
     public function submit(Request $request)
     {

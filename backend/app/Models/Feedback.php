@@ -15,7 +15,7 @@ class Feedback extends Model
         'rating',
         'feedback',
         'suggestions',
-        'response',
+        'response', 
     ];
 
     public function event()
