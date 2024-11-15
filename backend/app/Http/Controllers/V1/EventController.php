@@ -5,26 +5,42 @@ namespace App\Http\Controllers\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
+use App\Http\Services\CheckEventIPService;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
-    protected $eventRepository, $speakerRepository;
+    protected $eventRepository, $checkEventIPService;
 
-    public function __construct(EventRepository $eventRepository, SpeakerRepository $speakerRepository)
+    public function __construct(EventRepository $eventRepository, CheckEventIPService $checkEventIPService)
     {
         $this->eventRepository = $eventRepository;
-        $this->speakerRepository = $speakerRepository;
+        $this->checkEventIPService = $checkEventIPService;
     }
 
     public function index()
     {
         $events = $this->eventRepository->getAll();
+        foreach ($events as $event) {
+            if ($event->speakers) {
+                $speakers = json_decode($event->speakers, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $event->speakers = null;
+                } else {
+                    $event->speakers = $speakers;
+                }
+            } else {
+                $event->speakers = null;
+            }
+        }
+
 
         return response()->json([
             'message' => 'Danh sách sự kiện',
@@ -32,9 +48,11 @@ class EventController extends Controller
         ]);
     }
 
-    public function show($event)
+    public function show($eventId)
     {
-        $event = $this->eventRepository->find($event);
+        $event = $this->eventRepository->find($eventId);
+        $event->speakers = $event->speakers ? json_decode($event->speakers, true) : null;
+        $eventAttendees = $this->eventRepository->getEventAttendees($eventId);
 
         if (!$event) {
             return response()->json([
@@ -44,7 +62,8 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Xem chi tiết sự kiện.',
-            'data' => $event
+            'data' => $event,
+            'users' => $eventAttendees
         ], 200);
     }
 
@@ -73,74 +92,16 @@ class EventController extends Controller
         ], 400);
     }
 
-    private function handleSpeakers($request, $data, $event)
-    {
-        $existingSpeakers = $request->input('existing_speakers', []);
-
-        foreach ($existingSpeakers as $existingSpeakerId) {
-            $existingSpeaker = $this->speakerRepository->findById($existingSpeakerId);
-
-            if (!$existingSpeaker) {
-                return response()->json([
-                    'message' => 'Diễn giả không tồn tại.',
-                    'speaker_id' => $existingSpeakerId,
-                ], 404);
-            }
-
-            if ($existingSpeaker->hasConflict($data['start_time'], $data['end_time'])) {
-                return response()->json([
-                    'message' => 'Diễn giả đã tham gia sự kiện khác vào giờ này.',
-                    'speaker' => $existingSpeaker->name,
-                ], 400);
-            }
-
-            $event->speakers()->attach($existingSpeakerId);
-        }
-
-        if ($request->has('speakers')) {
-            $speakers = $request->validated()['speakers'];
-            foreach ($speakers as $speaker) {
-                $this->addNewSpeaker($speaker, $data, $event);
-            }
-        }
-    }
-
-    private function addNewSpeaker($speakerData, $data, $event)
-    {
-        $existingSpeaker = $this->speakerRepository->findByEmail($speakerData['email']);
-
-        if ($existingSpeaker && $existingSpeaker->hasConflict($data['start_time'], $data['end_time'])) {
-            return response()->json([
-                'message' => 'Diễn giả đã tham gia sự kiện khác vào giờ này.',
-                'speaker' => $existingSpeaker->name,
-            ], 400);
-        }
-
-        if (!$existingSpeaker) {
-            $newSpeaker = $this->speakerRepository->create($speakerData);
-            $event->speakers()->attach($newSpeaker->id);
-        } else {
-            $event->speakers()->attach($existingSpeaker->id);
-        }
-    }
-
-
     public function create(StoreEventRequest $request)
     {
         DB::beginTransaction();
         try {
-            $data = $request->validated()['event'];
+            $data = $request->validated();
 
-            $conflictingEvent = $this->eventRepository->checkConflict(
-                $data['start_time'],
-                $data['end_time'],
-                $data['ward_id']
-            );
-
-            if ($conflictingEvent) {
-                return response()->json([
-                    'message' => 'Thời gian và địa điểm (tỉnh, huyện, xã) đã được sử dụng cho sự kiện khác.',
-                ], 400);
+            if ($request->has('speakers') && is_array($request->speakers)) {
+                $data['speakers'] = json_encode($request->speakers);
+            } else {
+                $data['speakers'] = null;
             }
 
             $data['display_header'] ??= 0;
@@ -149,8 +110,6 @@ class EventController extends Controller
             }
 
             $event = $this->eventRepository->create($data);
-
-            $this->handleSpeakers($request, $data, $event);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error("error" . $e->getMessage());
@@ -209,9 +168,9 @@ class EventController extends Controller
         return ['status' => true];
     }
 
-    public function update($event, UpdateEventRequest $request)
+    public function update($eventId, UpdateEventRequest $request)
     {
-        $event = $this->eventRepository->find($event);
+        $event = $this->eventRepository->find($eventId);
 
         if (!$event) {
             return response()->json([
@@ -228,32 +187,20 @@ class EventController extends Controller
         $data = $request->validated();
 
         $validationResult = $this->validateEventTiming($event, $data);
-
         if (!$validationResult['status']) {
             return response()->json([
                 'message' => $validationResult['message']
             ], 400);
         }
-        $conflictingEvent = $this->eventRepository->checkConflict(
-            $data['start_time'],
-            $data['end_time'],
-            $data['ward_id'],
-            $event
-        );
-
-        if ($conflictingEvent) {
-            return response()->json([
-                'message' => 'Thời gian và địa điểm (tỉnh, huyện, xã) đã được sử dụng cho sự kiện khác.',
-                'conflicting_event' => $conflictingEvent
-            ], 400);
-        }
 
         $data['display_header'] ??= 0;
+
         if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
             return $validateEventHeader;
         }
 
         try {
+            // Cập nhật sự kiện
             $event->update($data);
 
             return response()->json([
@@ -261,10 +208,10 @@ class EventController extends Controller
                 'data' => $event
             ], 200);
         } catch (Exception $e) {
-            Log::error("errors" . $e->getMessage());
+            Log::error("errors: " . $e->getMessage());
 
             return response()->json([
-                'errors' => $e->getMessage()
+                'errors' => 'Đã xảy ra lỗi khi cập nhật sự kiện'
             ], 500);
         }
     }
@@ -309,6 +256,17 @@ class EventController extends Controller
         ], 200);
         
     }
+    public function checkEventIP(): JsonResponse
+    {
+        $result = $this->checkEventIPService->checkEventsWithoutIP();
+
+        return response()->json([
+            'status' => $result['status'],
+            'message' => $result['message'],
+            'events' => $result['events'] ?? []
+        ]);
+    }
+    
     public function participationHistory()
     {
         // Lấy người dùng đã đăng nhập
@@ -345,7 +303,6 @@ class EventController extends Controller
             'data' => $data
         ], 200);
     }
-    
-    
+
 }
 

@@ -14,10 +14,11 @@ class Event extends Model
 
     protected $fillable = [
         'category_id',
-        'province_id',
-        'district_id',
-        'ward_id',
+        'province',
+        'district',
+        'ward',
         'status',
+        'speakers',
         'name',
         'description',
         'thumbnail',
@@ -37,39 +38,24 @@ class Event extends Model
     protected function endTime(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ? Carbon::parse($value)->setSeconds(0)->format('Y-m-d H:i:s') : Carbon::now()->format('Y-m-d H:i:s'),
-            set: fn ($value) => $value ? Carbon::parse($value)->setSeconds(0)->format('Y-m-d H:i:s') : Carbon::now()->format('Y-m-d H:i:s'),
+            get: fn($value) => $value ? Carbon::parse($value)->setSeconds(0)->format('Y-m-d H:i:s') : Carbon::now()->format('Y-m-d H:i:s'),
+            set: fn($value) => $value ? Carbon::parse($value)->setSeconds(0)->format('Y-m-d H:i:s') : Carbon::now()->format('Y-m-d H:i:s'),
         );
     }
 
     public function category()
     {
         return $this->belongsTo(Category::class);
-    }   
-
-    public function province()
-    {
-        return $this->belongsTo(Province::class);
-    }
-
-    public function district()
-    {
-        return $this->belongsTo(District::class);
-    }
-
-    public function ward()
-    {
-        return $this->belongsTo(Ward::class);
-    }
-
-    public function speakers()
-    {
-        return $this->belongsToMany(Speaker::class, 'event_speakers');
     }
 
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'event_id', 'id');
     }
 
     public function users()
@@ -89,5 +75,10 @@ class Event extends Model
     {
         return $this->hasMany(EventUser::class);
     }
-    
+
+    public function subnets()
+    {
+        return $this->hasMany(EventSubnet::class)->select('subnet');
+    }
+
 }
