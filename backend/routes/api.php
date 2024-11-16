@@ -120,13 +120,14 @@ Route::prefix('v1')->group(function () {
         Route::post('apply', [VoucherController::class, 'apply']);
     });
 
-    Route::get('feedbacks', [FeedbackController::class, 'index']);
-    Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {
-        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData']);  // Lấy dữ liệu đổ ra form đánh giá
-        Route::get('{id}/show', [FeedbackController::class, 'show']);
-        Route::post('submit', [FeedbackController::class, 'submit']);
-        Route::delete('{id}/delete', [FeedbackController::class, 'delete']);
-    });
+    Route::get('feedbacks', [FeedbackController::class, 'index']);  
+    Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {  
+        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá  
+        Route::get('{id}/show', [FeedbackController::class, 'show']);   
+        Route::post('reply', [FeedbackController::class, 'reply']); 
+        Route::post('submit', [FeedbackController::class, 'submit']);  
+        Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
+    });  
 
     Route::prefix('clients')->group(function () {
 
