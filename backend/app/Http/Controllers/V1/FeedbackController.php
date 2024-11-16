@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Events\FeedbackReplied;
 use App\Http\Controllers\Controller;
 use App\Repositories\EventRepository;
 use App\Repositories\UserRepository;
@@ -74,6 +75,31 @@ class FeedbackController extends Controller
             'data'    => $feedback,
         ], 200);
     }
+
+    public function reply(Request $request)
+    {
+        $data = $request->validate([
+            'feedback_id' => 'required|exists:feedback,id',
+            'response'    => 'required|string',
+        ], [
+            'feedback_id.required' => 'Phản hồi không được để trống.',
+            'feedback_id.exists'   => 'Phản hồi không tồn tại.',
+            'response.required' => 'Nội dung trả lời không được để trống.',
+            'response.string'   => 'Nội dung trả lời phải là chuỗi.',
+        ]);
+
+        $feedback = $this->feedbackRepository->find($data['feedback_id']);
+
+        $feedback->response = $data['response'];
+        $feedback->save();
+
+        event(new FeedbackReplied($feedback));
+
+        return response()->json([
+            'message' => 'Trả lời phản hồi',
+            'data'    => $feedback,
+        ], 200);
+    } 
 
     public function submit(Request $request)
     {
