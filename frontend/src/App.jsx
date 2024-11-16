@@ -19,19 +19,20 @@ import AddClient from "./pages/Admin/Client/AddClient";
 import ListUser from "./pages/Admin/User/ListUser";
 import AddUser from "./pages/Admin/User/AddUser";
 import EventListing from "./pages/Client/EventList";
-import CategoryEven from "./pages/Client/CategoryEven";
 import Cart from "./pages/Client/Cart";
 import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
 import EventHistory from "./pages/Client/EventHistory";
 import PaymentHistory from "./pages/Client/PaymentHistory";
-import VerifyEmailPage from "./components/Auth/VerifyEmailPage";
+import VerifyEmailPage from './components/Auth/VerifyEmailPage';
+import CategoryEvent from "./pages/Client/CategoryEven";
 import UserProfileEdit from "./pages/Client/UserProfileEdit";
 import UserChangePassword from "./pages/Client/UserChangePassword";
 import UserProfile from "./pages/Client/UserProfile";
 import AddDiscountCode from "./pages/Admin/Voucher/AddDiscountCode";
 import DiscountCodeList from "./pages/Admin/Voucher/DiscountCodeList";
 import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
+import Order from "./pages/Client/Order";
 
 function App() {
   const route = useRoutes([
@@ -41,10 +42,11 @@ function App() {
       children: [
         { path: "", element: <Home /> },
         { path: "event-list", element: <EventListing /> },
-        { path: "event-detail/:id", element:<EventDetail/>},
-        { path: "event-category", element: <CategoryEven /> },
+        { path: "event-detail/:id", element: <EventDetail /> },
+        { path: "event-category/:id", element: <CategoryEvent /> },
         { path: "cart", element: <Cart /> },
         { path: "checkout", element: <CheckOut /> },
+        { path: "order", element: <Order /> },
         { path: "event-history", element: <EventHistory /> },
         { path: "payment-history", element: <PaymentHistory /> },
         { path: "profile", element: <UserProfile /> },

@@ -6,12 +6,14 @@ use App\Events\AttendeesNotified;
 use App\Events\EventCompleted;
 use App\Events\EventUpcoming;
 use App\Events\EventUpdate;
+use App\Events\FeedbackReplied;
 use App\Events\TransactionVerified;
 use App\Events\UserForgotPassword;
 use App\Events\UserRegisterdSuccess;
 use App\Listeners\AttendeesNotifiedListener;
 use App\Listeners\EventUpdateNotification;
 use App\Listeners\SendFeedbackEmail;
+use App\Listeners\SendFeedbackResponseEmail;
 use App\Listeners\SendTransactionConfirmationEmail;
 use App\Listeners\SendUpcomingEventEmail;
 use App\Listeners\UserForgotPasswordSendCode;
@@ -56,6 +58,10 @@ class EventServiceProvider extends ServiceProvider
         EventUpcoming::class => [
             SendUpcomingEventEmail::class,
         ],
+
+        FeedbackReplied::class => [
+            SendFeedbackResponseEmail::class,
+        ], 
     ];
 
     /**

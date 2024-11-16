@@ -11,20 +11,19 @@ const ItemEven = () => {
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [showFeatured, setShowFeatured] = useState(false);
   const { upcomingEvents, featuredEvents, topRatedEvents } = useContext(HomeCT);
-  // Hàm lọc sự kiện theo tên thành phố hoặc bộ lọc
+
+  // Lấy danh sách các thành phố duy nhất từ trường location của sự kiện
+  const cities = [
+    "Mới nhất",
+    ...new Set(upcomingEvents.map((event) => event.province)),
+  ];
+
   const filteredEvents = upcomingEvents.filter((event) => {
-    // Chuyển đổi giá trị bộ lọc và location của sự kiện thành chữ thường để so sánh không phân biệt hoa thường
-    const normalizedLocation = event.location.toLowerCase();
+    const normalizedProvince = event.province.toLowerCase();
     const normalizedFilter = filter.toLowerCase();
 
-    if (normalizedFilter === "mới nhất") {
-      return true; // Hiển thị tất cả sự kiện khi chọn "Mới nhất"
-    } else if (normalizedFilter === "hà nội") {
-      return normalizedLocation === "hà nội";
-    } else if (normalizedFilter === "hồ chí minh") {
-      return normalizedLocation === "hồ chí minh";
-    }
-    return true;
+    if (normalizedFilter === "mới nhất") return true;
+    return normalizedProvince === normalizedFilter;
   });
   return (
     <div>
@@ -37,40 +36,22 @@ const ItemEven = () => {
         <div className="flex lg:mt-6">
           <div className="overflow-x-auto w-full">
             <ul className="flex space-x-4 w-max px-4 mb-4 mt-4">
-              <li
-                className={`px-4 py-2 ${
-                  filter === "Mới nhất"
-                    ? "bg-gray-100"
-                    : "hover:text-[#6C757D] hover:bg-[#F2F6F4]"
-                } rounded-full border whitespace-nowrap`}
-                onClick={() => setFilter("Mới nhất")}
-              >
-                <Link to={""}>Mới nhất</Link>
-              </li>
-              <li
-                className={`px-4 py-2 ${
-                  filter === "Hà Nội"
-                    ? "bg-gray-100"
-                    : "hover:text-[#6C757D] hover:bg-[#F2F6F4]"
-                } rounded-full border-gray-300 border whitespace-nowrap`}
-                onClick={() => setFilter("Hà Nội")}
-              >
-                <Link to={""}>Hà Nội</Link>
-              </li>
-              <li
-                className={`px-4 py-2 ${
-                  filter === "Hồ Chí Minh"
-                    ? "bg-gray-100"
-                    : "hover:text-[#6C757D] hover:bg-[#F2F6F4]"
-                } rounded-full border-gray-300 border whitespace-nowrap`}
-                onClick={() => setFilter("Hồ Chí Minh")}
-              >
-                <Link to={""}>Hồ Chí Minh</Link>
-              </li>
+              {cities.map((city) => (
+                <li
+                  key={city}
+                  className={`px-4 py-2 ${
+                    filter === city
+                      ? "bg-gray-100"
+                      : "hover:text-[#6C757D] hover:bg-[#F2F6F4]"
+                  } rounded-full border-gray-300 border whitespace-nowrap`}
+                  onClick={() => setFilter(city)}
+                >
+                  <Link to="">{city}</Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
-
         <div className="grid lg:pt-8 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-12 mt-4">
           {filteredEvents
             .slice(0, showUpcoming ? filteredEvents.length : 4)
@@ -79,16 +60,21 @@ const ItemEven = () => {
                 key={event.id}
                 className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3"
               >
-                <div className="w-full h-[120px] bg-gray-200 mb-2">
+                <Link
+                  to={`/event-detail/${event.id}`}
+                  className="w-full h-[120px] bg-gray-200 mb-2"
+                >
                   <img
                     src={event.thumbnail || ""}
                     alt={event.name}
                     className="h-[120px] w-full"
                   />
-                </div>
-                <div className="text-xs text-gray-700 mb-2">
+                </Link>
+                <div className="text-xs text-gray-700 mb-2 mt-2">
                   <p>{event.location}</p>
-                  <p>{event.name}</p>
+                  <p>
+                    <Link to={"/event-detail/" + event.id}>{event.name}</Link>
+                  </p>
                   <p className="text-gray-500 pt-4">Vào cổng tự do</p>
                 </div>
                 <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
@@ -155,15 +141,19 @@ const ItemEven = () => {
                 className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3"
               >
                 <div className="w-full h-[120px] bg-gray-200 mb-2">
-                  <img
-                    src={event.thumbnail || ""}
-                    alt={event.name}
-                    className="h-full w-full object-cover"
-                  />
+                  <Link to={"/event-detail/" + event.id}>
+                    <img
+                      src={event.thumbnail || ""}
+                      alt={event.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </Link>
                 </div>
                 <div className="text-xs text-gray-700 mb-2">
-                  <p className="pt-4">{event.location}</p>
-                  <p>{event.name}</p>
+                  <p className="pt-2">{event.location}</p>
+                  <p>
+                    <Link to={"/event-detail/" + event.id}>{event.name}</Link>
+                  </p>
                   <p className="text-gray-500 pt-3">Vào cổng tự do</p>
                 </div>
                 <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
@@ -233,7 +223,9 @@ const ItemEven = () => {
               </div>
               <div className="text-xs text-gray-700 mb-2">
                 <p>{event.location}</p>
-                <p>{event.name}</p>
+                <p>
+                  <Link to={"/event-detail/" + event.id}>{event.name}</Link>
+                </p>
                 <p className="text-gray-500 pt-3">Vào cổng tự do</p>
               </div>
               <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
