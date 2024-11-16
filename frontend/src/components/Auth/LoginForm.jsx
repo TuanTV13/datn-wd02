@@ -19,29 +19,42 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
   const onSubmit = async (data) => {
     setErrorMessage(null);
     setLoading(true);
-
+  
     try {
       const response = await login(data.email, data.password);
-      if (response.token) {
+  
+      if (response.access_token) {
         setErrorMessage('Đăng nhập thành công!');
         setShowErrorModal(true);
+  
+        // Lưu token vào localStorage (nếu cần thiết)
+        localStorage.setItem('access_token', response.access_token);
+        localStorage.setItem('refresh_token', response.refresh_token);
+  
+        // Xử lý rememberMe
         if (rememberMe) {
           localStorage.setItem('email', data.email);
         } else {
           localStorage.removeItem('email');
         }
+  
+        // Tự động quay về trang chủ sau 3 giây
+        setTimeout(() => {
+          window.location.href = '/'; // Điều hướng về trang chủ
+        }, 3000);
       } else {
-        setErrorMessage(response.message);
+        setErrorMessage('Đăng nhập thất bại! Vui lòng thử lại.');
         setShowErrorModal(true);
       }
     } catch (error) {
       setErrorMessage(error.message || 'Đăng nhập thất bại!');
       setShowErrorModal(true);
     }
-
+  
     setLoading(false);
   };
-
+  
+  
   return (
     <div className="auth-container mt-36 ">
       <div className="auth-action-left">
