@@ -9,7 +9,7 @@ const EventDetail = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [similarEvents, setSimilarEvents] = useState([]);
   useEffect(() => {
-    axios.get(`http://192.168.2.112:8000/api/v1/clients/events/${id}`)
+    axios.get(`http://192.168.2.145:8000/api/v1/clients/events/${id}`)
       .then((response) => {
         setEvent(response.data.data);
       })
@@ -17,15 +17,7 @@ const EventDetail = () => {
         console.error('Lỗi khi gọi API:', error);
       });
   }, [id]);
-  const fetchSimilarEvents = (categoryId) => {
-    axios.get(`http://192.168.2.112:8000/api/v1/clients/category/${categoryId}`)
-      .then((response) => {
-        setSimilarEvents(response.data.data.filter((e) => e.id !== id)); // Lọc bỏ sự kiện hiện tại
-      })
-      .catch((error) => {
-        console.error('Lỗi khi lấy sự kiện tương tự:', error);
-      });
-  };
+ 
   const getStatusTextAndColor = (status) => {
     switch (status) {
       case 'confirmed':
