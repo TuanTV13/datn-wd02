@@ -7,7 +7,10 @@ use App\Models\EventUser;
 use App\Repositories\EventRepository;
 use App\Repositories\TicketRepository;
 use App\Repositories\TransactionRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -25,19 +28,7 @@ class EventController extends Controller
     {
         $allowedIpRanges = $this->eventRepository->getIp($eventId);
         // dd($subnets);
-        $allowedIpRanges = $this->eventRepository->getIp($eventId);
-        // dd($subnets);
         $clientIp = $request->ip();
-
-        $isAllowed = false;
-        foreach ($allowedIpRanges as $range) {
-            if (str_starts_with($clientIp, $range)) {
-                $isAllowed = true;
-                break;
-            }
-        }
-
-        if (!$isAllowed) {
 
         $isAllowed = false;
         foreach ($allowedIpRanges as $range) {
@@ -155,9 +146,112 @@ class EventController extends Controller
         ]);
     }
 
-    // public function
+    public function filter(Request $request)
+    {
 
+        $query = $this->eventRepository->query();
 
-    // public function
+        if ($request->has('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
 
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+
+        if ($request->has('location')) {
+            $query->where('location', 'like', '%' . $request->input('location') . '%');
+        }
+
+        $startTime = Carbon::parse($request->input('start_time'))->startOfDay();
+        $endTime = Carbon::parse($request->input('end_time'))->endOfDay();
+
+        if ($request->has('start_time') && $request->has('end_time')) {
+            $startTime = Carbon::parse($request->input('start_time'))->startOfDay();
+            $endTime = Carbon::parse($request->input('end_time'))->endOfDay();
+
+            $query->where(function ($q) use ($startTime, $endTime) {
+                $q->where('start_time', '>=', $startTime)
+                    ->where('end_time', '<=', $endTime);
+            });
+        }
+
+        $perPage = $request->input('per_page', 10);
+
+        $events = $query->paginate($perPage);
+
+        if ($events->isEmpty()) {
+            return response()->json([
+                'message' => 'Không tìm thấy sự kiện nào'
+            ], 404);
+        }
+
+        foreach ($events as $event) {
+            if ($event->speakers) {
+                $speakers = json_decode($event->speakers, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $event->speakers = null;
+                } else {
+                    $event->speakers = $speakers;
+                }
+            } else {
+                $event->speakers = null;
+            }
+        }
+
+        return response()->json([
+            'data' => $events,
+            'pagination' => [
+                'total' => $events->total(),
+                'current_page' => $events->currentPage(),
+                'per_page' => $events->perPage(),
+                'last_page' => $events->lastPage(),
+                'from' => $events->firstItem(),
+                'to' => $events->lastItem(),
+            ]
+        ], 200);
+    }
+
+    public function search(Request $request)
+    {
+        $query = $this->eventRepository->query();
+
+        if ($request->has('name') && $request->input('name') !== '') {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $events = $query->paginate($perPage);
+
+        if ($events->isEmpty()) {
+            return response()->json([
+                'message' => 'Không tìm thấy sự kiện nào'
+            ], 404);
+        }
+
+        foreach ($events as $event) {
+            if ($event->speakers) {
+                $speakers = json_decode($event->speakers, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $event->speakers = null;
+                } else {
+                    $event->speakers = $speakers;
+                }
+            } else {
+                $event->speakers = null;
+            }
+        }
+    
+        return response()->json([
+            'data' => $events,
+            'pagination' => [
+                'total' => $events->total(),
+                'current_page' => $events->currentPage(),
+                'per_page' => $events->perPage(),
+                'last_page' => $events->lastPage(),
+                'from' => $events->firstItem(),
+                'to' => $events->lastItem(),
+            ]
+        ], 200);
+    }
 }

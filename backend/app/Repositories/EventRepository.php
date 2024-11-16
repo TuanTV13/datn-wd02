@@ -3,6 +3,9 @@
 namespace App\Repositories;
 
 use App\Models\Event;
+use App\Models\Ticket;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EventRepository
 {
@@ -47,12 +50,12 @@ class EventRepository
         return $this->event->with('tickets')->find($id);
     }
 
-public function findByCategory($categoryId)
-{
-    return $this->event->with('category') // Lấy dữ liệu của bảng category
-        ->where('category_id', $categoryId)
-        ->get();
-}
+    public function findByCategory($categoryId)
+    {
+        return $this->event->with('category') // Lấy dữ liệu của bảng category
+            ->where('category_id', $categoryId)
+            ->get();
+    }
 
     public function findTrashed($id)
     {
@@ -85,37 +88,20 @@ public function findByCategory($categoryId)
     }
 
     public function getHeaderEvents()
-{
-    return $this->event
-        ->where('status', 'confirmed')
-        ->where('display_header', true)
-        ->join('categories', 'events.category_id', '=', 'categories.id') // Thực hiện join với bảng categories
-        ->select('events.id', 'events.category_id', 'events.name', 'events.description', 'events.thumbnail', 'events.start_time', 'categories.name as category_name') // Thêm trường name từ categories
-        ->orderBy('events.start_time', 'asc')
-        ->limit(4)
-        ->get();
-}
     {
         return $this->event
             ->where('status', 'confirmed')
             ->where('display_header', true)
-            ->select('id', 'category_id', 'name', 'description', 'thumbnail', 'start_time')
-            ->orderBy('start_time', 'asc')
+            ->join('categories', 'events.category_id', '=', 'categories.id') // Thực hiện join với bảng categories
+            ->select('events.id', 'events.category_id', 'events.name', 'events.description', 'events.thumbnail', 'events.start_time', 'categories.name as category_name') // Thêm trường name từ categories
+            ->orderBy('events.start_time', 'asc')
             ->limit(4)
             ->get();
     }
 
-
-    public function getUpcomingEvents($province = null)
     public function getUpcomingEvents($province = null)
     {
         return $this->event
-            ->when($province, function ($query) use ($province) {
-                $query->whereRaw(
-                    "LOWER(REPLACE(province, ' ', '-')) = ?",
-                    [strtolower($province)]
-                );
-            })
             ->when($province, function ($query) use ($province) {
                 $query->whereRaw(
                     "LOWER(REPLACE(province, ' ', '-')) = ?",
@@ -159,13 +145,56 @@ public function findByCategory($categoryId)
         return null;
     }
 
-    public function getIp($eventId)
+    public function query()
     {
-        $event = $this->event->find($eventId);
-        if ($event) {
-            return $event->subnets->pluck('subnet');
+        return $this->event->newQuery();
+    }
+
+    public function getTopRevenueEvents($limit, $startDate, $endDate)
+    {
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate = Carbon::parse($endDate)->endOfDay();
+
+        $ticket = new Ticket();
+        $totalRevenue = $ticket
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('price');
+
+        $topEvents = $this->event
+            ->select('events.id', 'events.name', DB::raw('SUM(tickets.price) as total_revenue'))
+            ->join('tickets', 'events.id', '=', 'tickets.event_id')
+            ->whereBetween('tickets.created_at', [$startDate, $endDate])
+            ->groupBy('events.id', 'events.name')
+            ->orderByDesc('total_revenue')
+            ->limit($limit)
+            ->get();
+
+        if ($topEvents->isEmpty()) {
+            return $topEvents;
         }
 
-        return null;
+        $totalTopRevenue = $topEvents->sum('total_revenue');
+
+        foreach ($topEvents as $event) {
+            $event->percentage = ($totalTopRevenue > 0) ? ($event->total_revenue / $totalTopRevenue) * 100 : 0;
+        }
+
+        return [
+            'total_revenue' => $totalRevenue,
+            'top_events' => $topEvents
+        ];
+    }
+
+    public function getEventCount($startDate, $endDate)
+    {
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate = Carbon::parse($endDate)->endOfDay();
+
+        $eventCount = $this->event
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        return $eventCount;
     }
 }

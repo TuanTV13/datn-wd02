@@ -15,5 +15,16 @@ class Feedback extends Model
         'rating',
         'feedback',
         'suggestions',
+        'response', 
     ];
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }  
