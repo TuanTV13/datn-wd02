@@ -276,7 +276,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
             'address' => 'nllable|string|max:255',
-            'image' => 'nullable|stri ng|max:2048',
+            'image' => 'nullable|string|max:2048',
         ]);
 
         $user = $this->userRepository->find($id);
