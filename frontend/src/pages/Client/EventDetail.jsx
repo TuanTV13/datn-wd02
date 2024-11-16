@@ -9,7 +9,11 @@ const EventDetail = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [similarEvents, setSimilarEvents] = useState([]);
   useEffect(() => {
+<<<<<<< HEAD
+    axios.get(`http://192.168.2.145:8000/api/v1/clients/events/${id}`)
+=======
     axios.get(`http://192.168.2.112:8000/api/v1/clients/events/${id}`)
+>>>>>>> 300ec41077ab17a09a4e66676bf4134a7ec9feb9
       .then((response) => {
         setEvent(response.data.data);
       })
@@ -18,7 +22,11 @@ const EventDetail = () => {
       });
   }, [id]);
   const fetchSimilarEvents = (categoryId) => {
+<<<<<<< HEAD
+    axios.get(`http://192.168.2.145:8000/api/v1/clients/category/${categoryId}`)
+=======
     axios.get(`http://192.168.2.112:8000/api/v1/clients/category/${categoryId}`)
+>>>>>>> 300ec41077ab17a09a4e66676bf4134a7ec9feb9
       .then((response) => {
         setSimilarEvents(response.data.data.filter((e) => e.id !== id)); // Lọc bỏ sự kiện hiện tại
       })
