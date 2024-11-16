@@ -110,6 +110,7 @@ Route::prefix('v1')->group(function () {
         Route::put('{id}/failed', [TransactionController::class, 'failed']);
     });
 
+    Route::post('/apply-discount', [PaymentController::class, 'applyDiscount']);
     Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
