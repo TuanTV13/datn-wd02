@@ -260,4 +260,47 @@ class AuthController extends Controller
             'user' => $user
         ]);
     }
+
+    public function updateProfile(Request $request, $id)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:15',
+            'address' => 'nllable|string|max:255',
+            'image' => 'nullable|string|max:2048',
+        ]);
+
+        $user = $this->userRepository->find($id);
+
+        $user->update($data);
+
+        return response()->json(['message' => 'Cập nhật thành công vui lòng kiểm tra', 'data' => $user]);
+    }
+
+    public function changePassword($id, Request $request)
+    {
+
+        $data = $request->validate([
+            'password' => 'required|string',
+            'new_password' => 'required|string|confirmed'
+        ]);
+
+        $user = $this->userRepository->find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'Người dùng không tồn tại'], 404);
+        }
+
+        if (!Hash::check($data['password'], $user->password)) {
+            return response()->json([
+                'message' => 'Mật khẩu cũ không đúng'
+            ], 403);
+        }
+
+        $user->update(['password' => bcrypt($data['new_password'])]);
+
+        return response()->json([
+            'message' => 'Cập nhật mật khẩu thành công'
+        ], 200);
+    }
 }

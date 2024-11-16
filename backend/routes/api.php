@@ -12,6 +12,7 @@ use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
 use App\Http\Controllers\V1\EventTrackingController;
 use App\Http\Controllers\V1\FeedbackController;
+use App\Http\Controllers\V1\StatisticsController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
@@ -53,6 +54,14 @@ Route::prefix('v1')->group(function () {
     Route::post('password/sendOTP', [AuthController::class, 'sendResetOTPEmail']);
     Route::post('password/reset', [AuthController::class, 'resetPasswordWithOTP']);
 
+    Route::get('user/profile', [AuthController::class, 'showProfile']);
+
+    // Route cập nhật thông tin tài khoản
+    Route::put('user/update-profile/{id}', [AuthController::class, 'updateProfile']);
+
+    // Route thay đổi mật khẩu
+    Route::put('user/change-password/{id}', [AuthController::class, 'changePassword']);
+
     Route::get('events', [EventController::class, 'index']);
 
     Route::prefix('events')->middleware(['check.jwt', 'check.permission:manage-events'])->group(function () {
@@ -63,6 +72,8 @@ Route::prefix('v1')->group(function () {
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
         Route::get('/check-event-ip', [EventController::class, 'checkEventIP']); // Thông báo hi chưa có ip checkin cục bộ
+        Route::get('statistics/top-revenue-events', [StatisticsController::class, 'topRevenueEvents']); // Thống kê trong khoảng thời gian chọn
+        Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng 
 
     });
 
@@ -99,6 +110,7 @@ Route::prefix('v1')->group(function () {
         Route::put('{id}/failed', [TransactionController::class, 'failed']);
     });
 
+    Route::post('/apply-discount', [PaymentController::class, 'applyDiscount']);
     Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
@@ -111,8 +123,9 @@ Route::prefix('v1')->group(function () {
 
     Route::get('feedbacks', [FeedbackController::class, 'index']);  
     Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {  
-        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData']);  // Lấy dữ liệu đổ ra form đánh giá  
+        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá  
         Route::get('{id}/show', [FeedbackController::class, 'show']);   
+        Route::post('reply', [FeedbackController::class, 'reply']); 
         Route::post('submit', [FeedbackController::class, 'submit']);  
         Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
     });  
@@ -126,6 +139,8 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}', [ClientEventController::class, 'show'])->name('client.event.show');
             Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
             Route::get('category/{categoryId}', [ClientEventController::class, 'getEventsByCategory']); // Bài viết theo danh mục
+            Route::post('filter', [ClientEventController::class, 'filter']);
+            Route::post('search', [ClientEventController::class, 'search']);
         });
 
         Route::prefix('home')->group(function () {
