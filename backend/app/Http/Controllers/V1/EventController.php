@@ -267,42 +267,9 @@ class EventController extends Controller
         ]);
     }
     
-    public function participationHistory()
-    {
-        // Lấy người dùng đã đăng nhập
-        $user = Auth::user();
-    
-        // Lấy danh sách các sự kiện mà người dùng đã tham gia
-        $events = $user->events()->get();
-    
-        // Kiểm tra nếu người dùng chưa tham gia sự kiện nào
-        if ($events->isEmpty()) {
-            return response()->json([
-                'message' => 'Người dùng chưa tham gia sự kiện nào.',
-                'data' => []
-            ], 200);
-        }
-    
-        // Chuẩn bị dữ liệu lịch sử tham gia
-        $data = [];
-        foreach ($events as $index => $event) {
-            $data[] = [
-                'stt' => $index + 1,
-                'event_name' => $event->name,
-                'start_time' => $event->start_time,
-                'end_time' => $event->end_time,
-                'location' => $event->location,
-                'thumbnail' => $event->thumbnail, // Đường dẫn hình ảnh
-                'status' => $event->pivot->status, // Trạng thái tham gia từ bảng pivot
-            ];
-        }
-    
-        // Trả về dữ liệu dưới dạng JSON
-        return response()->json([
-            'message' => 'Lịch sử tham gia sự kiện của người dùng',
-            'data' => $data
-        ], 200);
+  
+      
     }
+    
 
-}
 

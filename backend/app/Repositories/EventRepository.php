@@ -197,4 +197,60 @@ class EventRepository
 
         return $eventCount;
     }
+    
+        /**
+         * Thống kê sự kiện theo thể loại (chỉ lấy sự kiện có trạng thái confirmed)
+         */
+        public function getStatisticsByEventType($startDate, $endDate)
+        {
+            try {
+                // Truy vấn lấy thống kê theo event_type (thể loại sự kiện)
+                $statistics = DB::table('events')
+                    ->select(
+                        'event_type',
+                        DB::raw('COUNT(*) as total'), // Số lượng sự kiện theo thể loại
+                        DB::raw('GROUP_CONCAT(name) as event_names'), // Danh sách tên sự kiện
+                        DB::raw('GROUP_CONCAT(status) as statuses'), // Danh sách trạng thái của các sự kiện
+                        DB::raw('SUM(registed_attendees) as total_attendees') // Tổng số người tham gia
+                    )
+                    ->where('status', 'confirmed') // Lọc theo trạng thái 'confirmed'
+                    ->whereBetween('start_time', [$startDate, $endDate]) // Lọc theo khoảng thời gian
+                    ->whereNull('deleted_at') // Lọc các sự kiện không bị xóa
+                    ->groupBy('event_type') // Nhóm theo event_type
+                    ->get();
+        
+                return $statistics;
+            } catch (\Exception $e) {
+                throw new \Exception("Lỗi khi lấy thống kê theo event_type: " . $e->getMessage());
+            }
+        }
+        
+
+    
+        public function getStatisticsByProvinceAndStatus($status, $startDate, $endDate)
+        {
+            return $this->event
+                ->select('province', DB::raw('COUNT(*) as total'))
+                ->where('status', $status)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->groupBy('province')
+                ->get();
+        }
+        
+        // Add this method to the EventRepository
+        public function getTopParticipantsEvents($limit, $startDate, $endDate)
+        {
+            return $this->event
+                ->withCount(['participants' => function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('created_at', [$startDate, $endDate]); // Điều kiện cho người tham gia trong khoảng thời gian
+                }])
+                ->whereBetween('event_date', [$startDate, $endDate]) // Điều kiện cho sự kiện trong khoảng thời gian
+                ->orderByDesc('participants_count') // Sắp xếp theo số lượng người tham gia
+                ->limit($limit)
+                ->get();
+        }
+        
+        
+
+    
 }
