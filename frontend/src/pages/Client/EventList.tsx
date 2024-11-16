@@ -34,7 +34,7 @@ const EventListing = () => {
   const [filter, setFilter] = useState("");
 
   // Hàm xử lý thay đổi trang
-  const handlePageChange = (direction) => {
+  const handlePageChange = (direction: any) => {
     setCurrentPage((prevPage) => {
       if (direction === "next" && prevPage < totalPages) {
         return prevPage + 1;
@@ -249,7 +249,7 @@ const EventListing = () => {
                     <Link to={`/event-detail/${item.id}`}><img
                       src={item.thumbnail}
                       alt={item.name}
-                      className=" rounded-[50px]"
+                      className=" rounded-[20px]"
                     /></Link>
                   </div>
                   <div className="w-full md:w-2/3 mt-4 md:mt-0 md:ml-4">
