@@ -84,6 +84,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [UserController::class, 'destroy']);
         Route::get('trashed', [UserController::class, 'trashed']);
         Route::post('{id}/restore', [UserController::class, 'restore']);
+        Route::delete('{id}/force-delete', [UserController::class, 'forceDelete']);
     });
 
     Route::get('categories', [CategoryController::class, 'index']);
