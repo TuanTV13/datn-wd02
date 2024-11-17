@@ -155,4 +155,43 @@ Route::prefix('v1')->group(function () {
         Route::get('payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
         Route::get('payment/cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
     });
+
+    Route::get('/statistics/category', [StatisticsController::class, 'getStatisticsByCategory']);
+
+
+    Route::prefix('statistics')->group(function () {
+        // Route để lấy danh sách các sự kiện có doanh thu cao nhất trong khoảng thời gian
+        Route::get('/top-revenue', [StatisticsController::class, 'topRevenueEvents']);
+    
+        // Route để lấy thống kê số sự kiện hoàn thành trong khoảng thời gian
+        Route::get('/event-statistics', [StatisticsController::class, 'getEventStatistics']);
+    
+        // Route để lấy thống kê sự kiện theo thể loại (chỉ sự kiện đã được xác nhận)
+        Route::get('/statistics-by-category', [StatisticsController::class, 'getStatisticsByEventType']);
+    
+        // Route để lấy thống kê sự kiện theo tỉnh/thành phố (chỉ sự kiện đã được xác nhận)
+        Route::get('/statistics-by-province', [StatisticsController::class, 'getStatisticsByProvince']);
+    
+        // Route để lấy danh sách các sự kiện có số lượng người tham gia cao nhất trong khoảng thời gian
+        Route::get('/top-participants', [StatisticsController::class, 'topParticipantsEvents']);
+    
+        // Route để lấy thống kê số sự kiện đã xác nhận và bị hủy bỏ trong khoảng thời gian
+        Route::get('/event-status-statistics', [StatisticsController::class, 'getEventStatusStatistics']);
+    
+        // Route để lấy doanh thu và số lượng người tham gia của các sự kiện trong khoảng thời gian
+        Route::get('/event-revenue-participants', [StatisticsController::class, 'getEventRevenueAndParticipants']);
+    });
+    
+
+
+
+
+
+
+// Lấy danh sách giao dịch
+Route::get('/transactions', [TransactionController::class, 'getTransactionHistory']);
+
+// Lấy giao dịch theo ID
+Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
+
 });
