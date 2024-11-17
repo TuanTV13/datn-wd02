@@ -4,11 +4,11 @@ namespace App\Http\Controllers\V1;
 
 use App\Events\TransactionVerified;
 use App\Http\Controllers\Controller;
+use App\Models\Transaction;
 use App\Repositories\TransactionRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TransactionController extends Controller
 {
@@ -19,12 +19,14 @@ class TransactionController extends Controller
         $this->transactionRepository = $transactionRepository;
     }
 
+    // Lấy danh sách giao dịch
     public function index(Request $request)
     {
         $transactions = $this->transactionRepository->getAllTransactions();
         return response()->json($transactions, 200);
     }
 
+    // Lấy thông tin giao dịch theo ID
     public function show($id)
     {
         $transaction = $this->transactionRepository->findTransactionById($id);
@@ -36,6 +38,7 @@ class TransactionController extends Controller
         return response()->json($transaction, 200);
     }
 
+    // Xác nhận giao dịch
     public function verified($id)
     {
         DB::beginTransaction();
@@ -59,13 +62,12 @@ class TransactionController extends Controller
             return response()->json(['message' => 'Xác nhận giao dịch thành công'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("message" . $e->getMessage());
-            // Xử lý ngoại lệ và trả về thông báo lỗi
+            Log::error("message: " . $e->getMessage());
             return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
-
+    // Hủy giao dịch
     public function failed($id)
     {
         $transaction = $this->transactionRepository->findTransactionById($id);
@@ -79,9 +81,51 @@ class TransactionController extends Controller
         }
 
         $transaction->status = 'failed';
-
         $transaction->save();
 
         return response()->json(['message' => 'Hủy giao dịch thành công'], 200);
     }
+
+    
+// Lấy danh sách giao dịch (chỉ thông tin cần thiết)
+public function getTransactionHistory(Request $request)
+{
+    $transactions = Transaction::with('event') // Load thông tin sự kiện (event)
+        ->select('id', 'event_id', 'total_amount', 'payment_method', 'status', 'created_at') // Select only necessary columns
+        ->get()
+        ->map(function ($transaction) {
+            return [
+                'id' => $transaction->id,
+                'event_name' => $transaction->event->name, // Only event name
+                'transaction_time' => $transaction->created_at, // Format the created_at as transaction time
+                'total_amount' => $transaction->total_amount,
+                'payment_method' => $transaction->payment_method,
+                'status' => $transaction->status,
+            ];
+        });
+
+    return response()->json($transactions);
 }
+
+
+
+   // Lấy thông tin giao dịch theo ID
+public function showTransaction($id)
+{
+    $transaction = Transaction::with('event') // Load related event
+        ->select('id', 'event_id', 'total_amount', 'payment_method', 'status', 'created_at') // Select only necessary columns
+        ->findOrFail($id); // Find transaction by ID, or fail if not found
+
+    return response()->json([
+        'id' => $transaction->id,
+        'event_name' => $transaction->event->name, // Only event name
+        'transaction_time' => $transaction->created_at, // Format the created_at as transaction time
+        'total_amount' => $transaction->total_amount,
+        'payment_method' => $transaction->payment_method,
+        'status' => $transaction->status,
+    ]);
+}
+
+}
+
+
