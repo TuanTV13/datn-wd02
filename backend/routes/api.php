@@ -156,16 +156,6 @@ Route::prefix('v1')->group(function () {
         Route::get('payment/cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
     });
 
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/transactions/history', [TransactionController::class, 'getTransactionHistory']); // Lấy lịch sử giao dịch
-    });
-
-    Route::get('/user/participation-history', [EventController::class, 'participationHistory']);
-
-
-    Route::middleware('auth:sanctum')->get('/events/history', [EventController::class, 'participationHistory']);
-
     Route::get('/statistics/category', [StatisticsController::class, 'getStatisticsByCategory']);
 
 

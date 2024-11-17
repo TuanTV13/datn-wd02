@@ -128,44 +128,56 @@ class StatisticsController extends Controller
 
 
     // Thống kê sự kiện theo tỉnh/thành phố với trạng thái "confirmed"
-    public function getStatisticsByProvince(Request $request)
-    {
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $timePeriod = $request->input('time_period'); // 'day', 'month', 'quarter', 'year'
-
-        if (!$startDate || !$endDate) {
-            // Xử lý khoảng thời gian từ các lựa chọn
-            if ($timePeriod) {
-                $dates = $this->getDatesForTimePeriod($timePeriod);
-                $startDate = $dates['start'];
-                $endDate = $dates['end'];
-            } else {
+   
+        public function getStatisticsByProvince(Request $request)
+        {
+            // Lấy dữ liệu từ request
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $timePeriod = $request->input('time_period'); // 'day', 'month', 'quarter', 'year'
+    
+            // Kiểm tra và xử lý nếu không có ngày bắt đầu hoặc ngày kết thúc
+            if (!$startDate || !$endDate) {
+                // Xử lý khoảng thời gian từ các lựa chọn
+                if ($timePeriod) {
+                    $dates = $this->getDatesForTimePeriod($timePeriod);
+                    $startDate = $dates['start'];
+                    $endDate = $dates['end'];
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Vui lòng cung cấp ngày bắt đầu (start_date) và ngày kết thúc (end_date) hoặc chọn khoảng thời gian (time_period).'
+                    ], 400);
+                }
+            }
+    
+            try {
+                // Gọi method từ EventRepository để lấy thống kê theo tỉnh/thành phố với trạng thái 'confirmed'
+                $statistics = $this->eventRepository->getStatisticsByProvinceAndStatus(
+                    'confirmed',
+                    $startDate,
+                    $endDate
+                );
+    
+                // Trả về kết quả
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $statistics
+                ]);
+            } catch (\Exception $e) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Vui lòng cung cấp ngày bắt đầu (start_date) và ngày kết thúc (end_date) hoặc chọn khoảng thời gian (time_period).'
-                ], 400);
+                    'message' => $e->getMessage()
+                ], 500);
             }
         }
-
-        try {
-            $statistics = $this->eventRepository->getStatisticsByProvinceAndStatus(
-                'confirmed',
-                $startDate,
-                $endDate
-            );
-
-            return response()->json([
-                'status' => 'success',
-                'data' => $statistics
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
+    
+        /**
+         * Helper method to calculate start and end date for time periods like day, month, quarter, year.
+         */
+      
+    
+    
 
     /**
      * Tính toán ngày bắt đầu và kết thúc dựa trên khoảng thời gian.
@@ -210,47 +222,51 @@ public function topParticipantsEvents(Request $request)
 
 
     // Thống kê sự kiện đã được tổ chức (confirmed) và bị hủy bỏ (canceled)
-    public function getEventStatusStatistics(Request $request)
-    {
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $timePeriod = $request->input('time_period'); // 'day', 'month', 'quarter', 'year'
+   
 
-        if (!$startDate || !$endDate) {
-            // Xử lý khoảng thời gian từ các lựa chọn (ngày, tháng, quý, năm)
-            if ($timePeriod) {
-                $dates = $this->getDatesForTimePeriod($timePeriod);
-                $startDate = $dates['start'];
-                $endDate = $dates['end'];
-            } else {
+  
+        public function getEventStatusStatistics(Request $request)
+        {
+            // Lấy dữ liệu từ request
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $timePeriod = $request->input('time_period'); // 'day', 'month', 'quarter', 'year'
+    
+            // Kiểm tra và xử lý nếu không có ngày bắt đầu hoặc kết thúc
+            if (!$startDate || !$endDate) {
+                // Xử lý khoảng thời gian từ các lựa chọn
+                if ($timePeriod) {
+                    $dates = $this->getDatesForTimePeriod($timePeriod);
+                    $startDate = $dates['start'];
+                    $endDate = $dates['end'];
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Vui lòng cung cấp ngày bắt đầu (start_date) và ngày kết thúc (end_date) hoặc chọn khoảng thời gian (time_period).'
+                    ], 400);
+                }
+            }
+    
+            try {
+                // Đếm số sự kiện theo trạng thái "confirmed" và "canceled"
+                $statistics = $this->eventRepository->getEventStatusStatistics($startDate, $endDate);
+    
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $statistics
+                ]);
+            } catch (\Exception $e) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Vui lòng cung cấp ngày bắt đầu (start_date) và ngày kết thúc (end_date) hoặc chọn khoảng thời gian (time_period).'
-                ], 400);
+                    'message' => $e->getMessage()
+                ], 500);
             }
         }
-
-        try {
-            // Đếm số sự kiện đã được tổ chức (status = confirmed)
-            $confirmedEventCount = $this->getConfirmedEventCount($startDate, $endDate);
-
-            // Đếm số sự kiện bị hủy bỏ (status = canceled)
-            $canceledEventCount = $this->getCanceledEventCount($startDate, $endDate);
-
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'confirmed_events' => $confirmedEventCount,
-                    'canceled_events' => $canceledEventCount
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
+    
+       
+        
+    
+    
 
     // Đếm số sự kiện đã xác nhận (status = confirmed)
     private function getConfirmedEventCount($startDate, $endDate)

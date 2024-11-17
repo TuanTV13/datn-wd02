@@ -227,15 +227,31 @@ class EventRepository
         
 
     
-        public function getStatisticsByProvinceAndStatus($status, $startDate, $endDate)
-        {
-            return $this->event
-                ->select('province', DB::raw('COUNT(*) as total'))
-                ->where('status', $status)
-                ->whereBetween('date', [$startDate, $endDate])
-                ->groupBy('province')
-                ->get();
-        }
+       
+            public function getStatisticsByProvinceAndStatus($status, $startDate, $endDate)
+            {
+                try {
+                    // Truy vấn lấy thống kê theo tỉnh/thành phố và trạng thái 'confirmed'
+                    $statistics = DB::table('events')
+                        ->select(
+                            'province',
+                            DB::raw('COUNT(*) as total'), // Số lượng sự kiện theo tỉnh
+                            DB::raw('GROUP_CONCAT(name) as event_names'), // Danh sách tên sự kiện
+                            DB::raw('GROUP_CONCAT(status) as statuses'), // Danh sách trạng thái các sự kiện
+                            DB::raw('SUM(registed_attendees) as total_attendees') // Tổng số người tham gia
+                        )
+                        ->where('status', $status) // Lọc theo trạng thái 'confirmed'
+                        ->whereBetween('start_time', [$startDate, $endDate]) // Lọc theo khoảng thời gian
+                        ->whereNull('deleted_at') // Lọc các sự kiện không bị xóa
+                        ->groupBy('province') // Nhóm theo tỉnh/thành phố
+                        ->get();
+        
+                    return $statistics;
+                } catch (\Exception $e) {
+                    throw new \Exception("Lỗi khi lấy thống kê theo tỉnh/thành phố: " . $e->getMessage());
+                }
+            }
+        
         
         // Add this method to the EventRepository
         public function getTopParticipantsEvents($limit, $startDate, $endDate)
@@ -252,5 +268,32 @@ class EventRepository
         
         
 
-    
-}
+       
+            public function getEventStatusStatistics($startDate, $endDate)
+            {
+                try {
+                    // Đếm số sự kiện theo trạng thái "confirmed"
+                    $confirmedCount = DB::table('events')
+                        ->where('status', 'confirmed')
+                        ->whereBetween('start_time', [$startDate, $endDate])
+                        ->whereNull('deleted_at')
+                        ->count();
+        
+                    // Đếm số sự kiện theo trạng thái "canceled"
+                    $canceledCount = DB::table('events')
+                        ->where('status', 'canceled')
+                        ->whereBetween('start_time', [$startDate, $endDate])
+                        ->whereNull('deleted_at')
+                        ->count();
+        
+                    return [
+                        'confirmed_events' => $confirmedCount,
+                        'canceled_events' => $canceledCount,
+                    ];
+                } catch (\Exception $e) {
+                    throw new \Exception("Lỗi khi lấy thống kê sự kiện: " . $e->getMessage());
+                }
+            }
+        }
+        
+
