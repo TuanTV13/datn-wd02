@@ -197,4 +197,13 @@ class EventRepository
 
         return $eventCount;
     }
+
+    public function getEventCountByProvince()
+    {
+        return $this->event
+            ->select('province', DB::raw('COUNT(*) as event_count'))
+            ->where('status', '!=', 'pending')
+            ->groupBy('province')
+            ->get();
+    }
 }

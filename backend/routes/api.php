@@ -9,6 +9,7 @@ use App\Http\Controllers\V1\Client\CartController;
 use App\Http\Controllers\V1\Client\EventController as ClientEventController;
 use App\Http\Controllers\V1\Client\HomeController;
 use App\Http\Controllers\V1\Client\PaymentController;
+use App\Http\Controllers\V1\Client\UserController as ClientUserController;
 use App\Http\Controllers\V1\EventController;
 use App\Http\Controllers\V1\EventTrackingController;
 use App\Http\Controllers\V1\FeedbackController;
@@ -131,6 +132,10 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [FeedbackController::class, 'delete']);   
     });  
 
+    Route::prefix('statistics')->middleware('check.permission:view-statistics')->group(function () {
+        Route::get('events/province', [StatisticsController::class, 'getStatisticsByProvince']);
+    });
+
     Route::prefix('clients')->group(function () {
 
         Route::get('getEventDetails/{id}', [EventTrackingController::class, 'getEventDetails']);
@@ -155,5 +160,10 @@ Route::prefix('v1')->group(function () {
         Route::post('payment/process', [PaymentController::class, 'processPayment']);
         Route::get('payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
         Route::get('payment/cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
+
+        Route::get('{id}/participation-history', [ClientUserController::class, 'getEventParticipationHistory'])->middleware('check.permission:view-participation-history');
+        Route::get('{userId}/event/{eventID}/participation-history/', [ClientUserController::class, 'showParticipationHistory'])->middleware('check.permission:view-participation-history');
+
+        Route::get('{id}/transaction-history', [ClientUserController::class, 'getTransactionHistory'])->middleware('check.permission:view-transaction-history');
     });
 });

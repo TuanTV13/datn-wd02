@@ -64,4 +64,27 @@ class StatisticsController extends Controller
             'event_count' => $eventCount,
         ]);
     }
+
+    // Thống kê số lượng sự kiện theo tỉnh thành
+    public function getStatisticsByProvince()
+    {    
+        try {
+            $eventCount = $this->eventRepository->getEventCountByProvince();
+
+            if (!$eventCount) {
+                return response()->json([
+                    'error' => 'Không có sự kiện nào.'
+                ], 404);
+            }
+    
+            return response()->json([
+                'event_count' => $eventCount,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Đã xảy ra lỗi khi lấy số lượng sự kiện.',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
