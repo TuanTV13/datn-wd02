@@ -15,7 +15,7 @@ class TicketRepository
 
     public function getAll()
     {
-        return $this->ticket->all();
+        return $this->ticket->with('event')->get();
     }
 
     public function find($id)
@@ -28,9 +28,9 @@ class TicketRepository
         return $this->ticket->where('event_id', $eventId)->get();
     }
 
-    public function findTrashed($id)
+    public function findTrashed()
     {
-        return $this->ticket->onlyTrashed()->find($id);
+        return $this->ticket->onlyTrashed()->get();
     }
 
     public function findByEventAndType($eventId, $ticketTypeId)
@@ -58,4 +58,5 @@ class TicketRepository
         $ticket = $this->find($id);
         return $ticket->delete();
     }
+
 }

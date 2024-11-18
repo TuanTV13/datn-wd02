@@ -56,6 +56,15 @@ class UserController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        $user = $this->userRepository->find($id);
+
+        return response()->json([
+            'data' => $user
+        ]);
+    }
+
     public function destroy(string $id)
     {
         try {

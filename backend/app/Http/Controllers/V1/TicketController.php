@@ -6,6 +6,7 @@ use App\Enums\EventStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreTicketRequest;
 use App\Http\Requests\Admin\UpdateTicketRequest;
+use App\Models\Ticket;
 use App\Repositories\EventRepository;
 use App\Repositories\TicketRepository;
 use Exception;
@@ -37,6 +38,15 @@ class TicketController extends Controller
         }
 
         return null;
+    }
+
+    public function getByBlock()
+    {
+        $tickets = $this->ticketRepository->findTrashed();
+
+        return response()->json([
+            'data' => $tickets
+        ]);
     }
 
     public function index()
@@ -73,8 +83,33 @@ class TicketController extends Controller
         ], 400);
     }
 
+    // TicketRepository.php
+    public function findTicketDataByEventAndType($eventId = null, $ticketTypeId = null)
+    {
+        // Tìm vé theo event_id và ticket_type
+        $model = new Ticket();
+        $ticket = $model->where('event_id', $eventId)
+            ->where('ticket_type', $ticketTypeId)
+            ->first();
+
+        if ($ticket) {
+            // Trả về vé cùng với các dữ liệu cần thiết
+            return [
+                'sale_start' => $ticket->sale_start,
+                'sale_end' => $ticket->sale_end,
+                'price' => $ticket->price,
+                'seat_location' => $ticket->seat_location
+            ];
+        }
+
+        // Trả về null nếu không tìm thấy vé
+        return null;
+    }
+
+
     public function create(StoreTicketRequest $request)
     {
+        // dd($request->all());
         DB::beginTransaction();
         $data = $request->validated();
         $data['available_quantity'] = $data['quantity'];
@@ -97,6 +132,7 @@ class TicketController extends Controller
             $existingTicket = $this->ticketRepository->findByEventAndType($eventId, $ticketTypeId);
 
             if ($existingTicket) {
+
                 $existingTicket->quantity += $data['quantity'];
                 $existingTicket->available_quantity += $data['quantity'];
                 $existingTicket->save();
@@ -115,6 +151,7 @@ class TicketController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
 
+            // Log::error('errors'. $request->all());
             Log::error("errors" . $e->getMessage());
 
             return response()->json([
@@ -139,11 +176,11 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status != 'pending') {
-            return response()->json([
-                'message' => 'Không thể cập nhật vé trong trạng thái này'
-            ], 403);
-        }
+        // if ($ticket->status != 'pending') {
+        //     return response()->json([
+        //         'message' => 'Không thể cập nhật vé trong trạng thái này'
+        //     ], 403);
+        // }
 
         $event = $this->eventRepository->find($ticket->event_id);
         if (!$event) {
@@ -158,7 +195,9 @@ class TicketController extends Controller
 
         try {
 
-            $ticket = $this->ticketRepository->update($id, $data);
+            $ticket->quantity += $data['quantity'];
+            $ticket->available_quantity += $data['quantity'];
+            $ticket->save();
 
             DB::commit();
 
@@ -187,17 +226,17 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status_id != 'pending') {
-            return response()->json([
-                'message' => 'Không thể xóa vé trong trạng thái này'
-            ], 403);
-        }
+        // if ($ticket->status != 'pending') {
+        //     return response()->json([
+        //         'message' => 'Vé đã được bán không thể xóa'
+        //     ], 403);
+        // }
 
         try {
             $ticket->delete();
 
             return response()->json([
-                'message' => 'Vé đã được xóa'
+                'message' => 'Vé đã được khóa'
             ], 201);
         } catch (Exception $e) {
             Log::error("errors" . $e->getMessage());

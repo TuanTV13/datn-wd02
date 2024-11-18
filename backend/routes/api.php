@@ -54,7 +54,7 @@ Route::prefix('v1')->group(function () {
     Route::post('password/sendOTP', [AuthController::class, 'sendResetOTPEmail']);
     Route::post('password/reset', [AuthController::class, 'resetPasswordWithOTP']);
 
-    Route::get('user/profile', [AuthController::class, 'showProfile']);
+    Route::get('user/profile', [AuthController::class, 'me']);
 
     // Route cập nhật thông tin tài khoản
     Route::put('user/update-profile/{id}', [AuthController::class, 'updateProfile']);
@@ -72,6 +72,7 @@ Route::prefix('v1')->group(function () {
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
         Route::get('/check-event-ip', [EventController::class, 'checkEventIP']); // Thông báo hi chưa có ip checkin cục bộ
+        Route::post('{eventId}/add-ip', [EventController::class, 'addIp']);
         Route::get('statistics/top-revenue-events', [StatisticsController::class, 'topRevenueEvents']); // Thống kê trong khoảng thời gian chọn
         Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng 
 
@@ -80,6 +81,7 @@ Route::prefix('v1')->group(function () {
     Route::get('users', [UserController::class, 'index']);
 
     Route::prefix('users')->middleware(['check.jwt', 'check.permission:manage-users'])->group(function () {
+        Route::get('{id}', [UserController::class, 'show']);
         Route::post('create', [UserController::class, 'create']);
         Route::delete('{id}/delete', [UserController::class, 'destroy']);
         Route::get('trashed', [UserController::class, 'trashed']);
@@ -95,12 +97,15 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('tickets', [TicketController::class, 'index']);
-    Route::prefix('tickets')->middleware(['check.jwt', 'check.permission:manage-tickets'])->group(function () {
+    Route::prefix('tickets')->group(function () {
+        Route::get('block', [TicketController::class, 'getByBlock']);
         Route::post('create', [TicketController::class, 'create']);
         Route::put('{id}/update', [TicketController::class, 'update']);
         Route::delete('{id}/delete', [TicketController::class, 'delete']);
         Route::post('{id}/restore', [TicketController::class, 'restoreTicket']);
         Route::put('{id}/verified', [TicketController::class, 'verifiedTicket']);
+        Route::get('{eventId}/{ticketType}', [TicketController::class, 'findTicketDataByEventAndType']);
+
     });
 
     Route::prefix('transactions')->middleware(['check.jwt'])->group(function () {
@@ -135,7 +140,7 @@ Route::prefix('v1')->group(function () {
         Route::get('getEventDetails/{id}', [EventTrackingController::class, 'getEventDetails']);
 
         Route::prefix('events')->group(function () {
-            Route::get('/', [ClientEventController::class, 'index']);
+            Route::get('/', [ClientEventController::class, 'getByConfirmed']);
             Route::get('{id}', [ClientEventController::class, 'show'])->name('client.event.show');
             Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
             Route::get('category/{categoryId}', [ClientEventController::class, 'getEventsByCategory']); // Bài viết theo danh mục
