@@ -10,6 +10,8 @@ import {
   restoreTicket,
   verifyTicket,
 } from "../api_service/ServiceTicket";
+import { getEvents } from "../api_service/event";
+import { Events } from "../interfaces/Event";
 
 type Props = {
   children: React.ReactNode;
@@ -22,6 +24,7 @@ interface TypeTickets {
   onRestore: (id: number) => void;
   onVerify: (id: number) => void;
   tickets: Tickets[];
+  listUserBuyTicket: Events[]
 }
 
 export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
@@ -29,11 +32,19 @@ export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
 const TicketsContext = ({ children }: Props) => {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<Tickets[]>([]);
+  const [listUserBuyTicket, setListUserBuyTicket] = useState<Events[]>([]);
 
   useEffect(() => {
     (async () => {
         const data = await getAllTickets()
         setTickets(data)
+    })()
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+        const data = await getEvents()
+        setListUserBuyTicket(data)
     })()
   }, []);
 
@@ -56,8 +67,9 @@ const TicketsContext = ({ children }: Props) => {
       setTickets([...tickets, newTicket]);
       toast.success("Thêm thành công");
       navigate("/admin/ticket-list");
+      window.location.reload();
     } catch (error) {
-      console.error("Error adding ticket:", error);
+      console.log("Error adding ticket:", error);
       toast.error("Lỗi khi thêm vé");
     }
   };
@@ -109,6 +121,7 @@ const TicketsContext = ({ children }: Props) => {
         onRestore,
         onVerify,
         tickets,
+        listUserBuyTicket,
       }}
     >
       {children}
