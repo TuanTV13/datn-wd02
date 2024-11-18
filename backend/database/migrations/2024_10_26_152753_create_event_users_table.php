@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
+    /** 
      * Run the migrations.
      */
     public function up(): void
@@ -22,6 +22,7 @@ return new class extends Migration
             $table->double('original_price', 10, 2);
             $table->string('discount_code', 100)->nullable();
             $table->double('amount', 10, 2);
+            $table->string('status')->nullable(); // Thêm cột status
             $table->timestamps();
         });
     }
@@ -34,3 +35,4 @@ return new class extends Migration
         Schema::dropIfExists('event_users');
     }
 };
+

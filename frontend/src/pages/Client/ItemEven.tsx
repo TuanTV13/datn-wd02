@@ -58,16 +58,16 @@ const ItemEven = () => {
             .map((event) => (
               <div
                 key={event.id}
-                className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3"
+                className="border-transparent hover:border-[#007BFF] w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border  rounded-lg p-2 xm:mt-3 "
               >
                 <Link
                   to={`/event-detail/${event.id}`}
-                  className="w-full h-[120px] bg-gray-200 mb-2"
+                  className=" bg-gray-200 mb-2 overflow-hidden"
                 >
                   <img
                     src={event.thumbnail || ""}
                     alt={event.name}
-                    className="h-[120px] w-full"
+                    className="h-[120px] w-full rounded-lg object-cover transition-all duration-300 hover:rounded-none hover:scale-100"
                   />
                 </Link>
                 <div className="text-xs text-gray-700 mb-2 mt-2">
@@ -138,14 +138,14 @@ const ItemEven = () => {
             .map((event) => (
               <div
                 key={event.id}
-                className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3"
+                className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3 "
               >
                 <div className="w-full h-[120px] bg-gray-200 mb-2">
                   <Link to={"/event-detail/" + event.id}>
                     <img
                       src={event.thumbnail || ""}
                       alt={event.name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full rounded-lg object-cover transition-all duration-300 hover:rounded-none hover:scale-100"
                     />
                   </Link>
                 </div>
@@ -218,8 +218,8 @@ const ItemEven = () => {
               key={event.id}
               className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3"
             >
-              <div className="w-full h-[120px] bg-gray-200 mb-2">
-                <img src={event.thumbnail || ""} alt={event.name} />
+              <div className=" bg-gray-200 mb-2">
+                <img src={event.thumbnail || ""} alt={event.name} className="w-full h-[120px] rounded-lg object-cover transition-all duration-300 hover:rounded-none hover:scale-100"/>
               </div>
               <div className="text-xs text-gray-700 mb-2">
                 <p>{event.location}</p>
