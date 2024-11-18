@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateEventRequest;
 use App\Http\Services\CheckEventIPService;
 use App\Repositories\EventRepository;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -253,21 +254,20 @@ class EventController extends Controller
             'message' => 'Khôi phục sự kiện thành công'
         ], 200);
     }
-
     public function checkEventIP(): JsonResponse
     {
         $result = $this->checkEventIPService->checkEventsWithoutIP();
-    
+
         // Kiểm tra xem kết quả trả về có đúng định dạng không
         Log::info('Kết quả kiểm tra sự kiện IP', $result);
-    
+
         return response()->json([
             'status' => $result['status'],
             'message' => $result['message'],
             'events' => $result['events'] ?? []
         ]);
-    } 
-    
+    }
+
     public function addIp(Request $request, $eventId)
     {
         $request->validate([

@@ -83,7 +83,6 @@ class TicketController extends Controller
         ], 400);
     }
 
-    // TicketRepository.php
     public function findTicketDataByEventAndType($eventId = null, $ticketTypeId = null)
     {
         // Tìm vé theo event_id và ticket_type
@@ -105,7 +104,6 @@ class TicketController extends Controller
         // Trả về null nếu không tìm thấy vé
         return null;
     }
-
 
     public function create(StoreTicketRequest $request)
     {
@@ -262,5 +260,14 @@ class TicketController extends Controller
         return response()->json([
             'message' => 'Khôi phục vé thành công'
         ], 200);
+    }
+
+    public function show($id)
+    {
+        $ticket = $this->ticketRepository->find($id);
+
+        return response()->json([
+            'data' => $ticket
+        ]);
     }
 }
