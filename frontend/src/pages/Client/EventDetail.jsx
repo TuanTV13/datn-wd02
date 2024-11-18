@@ -17,15 +17,15 @@ const EventDetail = () => {
         console.error('Lỗi khi gọi API:', error);
       });
   }, [id]);
-  const fetchSimilarEvents = (categoryId) => {
-    axios.get(`http://192.168.2.112:8000/api/v1/clients/category/${categoryId}`)
-      .then((response) => {
-        setSimilarEvents(response.data.data.filter((e) => e.id !== id)); // Lọc bỏ sự kiện hiện tại
-      })
-      .catch((error) => {
-        console.error('Lỗi khi lấy sự kiện tương tự:', error);
-      });
-  };
+  // const fetchSimilarEvents = (categoryId) => {
+  //   axios.get(`http://192.168.2.112:8000/api/v1/clients/category/${categoryId}`)
+  //     .then((response) => {
+  //       setSimilarEvents(response.data.data.filter((e) => e.id !== id)); // Lọc bỏ sự kiện hiện tại
+  //     })
+  //     .catch((error) => {
+  //       console.error('Lỗi khi lấy sự kiện tương tự:', error);
+  //     });
+  // };
   const getStatusTextAndColor = (status) => {
     switch (status) {
       case 'confirmed':
@@ -49,7 +49,10 @@ const EventDetail = () => {
     setShowPopup(false);
     setSelectedTicket(null);
   };
-
+  const handleCheckIn = () => {
+    // Hành động check-in, ví dụ: chuyển hướng hoặc gọi API
+    console.log("Người dùng muốn check-in!");
+  };
   const handleConfirmPurchase = () => {
     if (selectedTicket) {
       const totalPrice = selectedTicket.price;
@@ -103,10 +106,18 @@ const EventDetail = () => {
             <p className="text-lg">Địa điểm: {`${event.ward}, ${event.district}, ${event.province}`}</p>
           </div>
           {statusInfo && (
-            <div className={`mt-4 px-4 py-2 rounded-full text-white ${statusInfo.color}`}>
-              {statusInfo.text}
-            </div>
-          )}
+  <div className={`mt-4 px-4 py-2 rounded-full text-white ${statusInfo.color}`}>
+    {statusInfo.text}
+    {event.status === 'checkin' && (
+      <button
+        onClick={handleCheckIn}
+        className="ml-4 bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200"
+      >
+        Check-in
+      </button>
+    )}
+  </div>
+)}
         </div>
       </div>
 
