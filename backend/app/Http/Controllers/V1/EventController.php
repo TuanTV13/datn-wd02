@@ -7,13 +7,12 @@ use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
 use App\Http\Services\CheckEventIPService;
 use App\Repositories\EventRepository;
-use App\Repositories\SpeakerRepository;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
@@ -254,11 +253,13 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Khôi phục sự kiện thành công'
         ], 200);
-        
     }
     public function checkEventIP(): JsonResponse
     {
         $result = $this->checkEventIPService->checkEventsWithoutIP();
+
+        // Kiểm tra xem kết quả trả về có đúng định dạng không
+        Log::info('Kết quả kiểm tra sự kiện IP', $result);
 
         return response()->json([
             'status' => $result['status'],
@@ -266,10 +267,27 @@ class EventController extends Controller
             'events' => $result['events'] ?? []
         ]);
     }
-    
-  
-      
+
+    public function addIp(Request $request, $eventId)
+    {
+        $request->validate([
+            'subnet' => 'required|string'
+        ]);
+
+        $event = $this->eventRepository->find($eventId);
+
+        if (!$event) {
+            return response()->json([
+                'error' => 'Sự kiện không tồn tại.'
+            ], 404);
+        }
+
+        $event->subnets()->create([
+            'subnet' => $request->input('subnet')
+        ]);
+
+        return response()->json([
+            'message' => 'Thêm địa chỉ IP thành công.'
+        ], 201);
     }
-    
-
-
+}

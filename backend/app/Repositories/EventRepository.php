@@ -3,9 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Event;
-use App\Models\Ticket;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class EventRepository
 {
@@ -15,6 +13,16 @@ class EventRepository
     public function __construct(Event $event)
     {
         $this->event = $event;
+    }
+
+    public function getIp($eventId)
+    {
+        $event = $this->event->find($eventId);
+        if ($event) {
+            return $event->subnets->pluck('subnet');
+        }
+
+        return null;
     }
 
     public function getEventAttendees($eventId)
@@ -42,7 +50,17 @@ class EventRepository
 
     public function getAll()
     {
-        return $this->event->get();
+        return $this->event->with(['users' => function ($query) {
+            $query->distinct();
+        }])->withCount('users as ticket_count')->get();
+    }
+
+    public function getByConfirmed()
+    {
+        return $this->event->where(function ($query) {
+            $query->where('status', 'confirmed')
+                ->orWhere('status', 'checkin');
+        })->get();
     }
 
     public function find($id)
@@ -52,9 +70,7 @@ class EventRepository
 
     public function findByCategory($categoryId)
     {
-        return $this->event->with('category') // Lấy dữ liệu của bảng category
-            ->where('category_id', $categoryId)
-            ->get();
+        return $this->event->where('category_id', $categoryId)->get();
     }
 
     public function findTrashed($id)
@@ -92,22 +108,15 @@ class EventRepository
         return $this->event
             ->where('status', 'confirmed')
             ->where('display_header', true)
-            ->join('categories', 'events.category_id', '=', 'categories.id') // Thực hiện join với bảng categories
-            ->select('events.id', 'events.category_id', 'events.name', 'events.description', 'events.thumbnail', 'events.start_time', 'categories.name as category_name') // Thêm trường name từ categories
-            ->orderBy('events.start_time', 'asc')
+            ->select('id', 'name', 'description', 'thumbnail', 'start_time')
+            ->orderBy('start_time', 'asc')
             ->limit(4)
             ->get();
     }
 
-    public function getUpcomingEvents($province = null)
+    public function getUpcomingEvents($province)
     {
         return $this->event
-            ->when($province, function ($query) use ($province) {
-                $query->whereRaw(
-                    "LOWER(REPLACE(province, ' ', '-')) = ?",
-                    [strtolower($province)]
-                );
-            })
             ->where('status', 'confirmed')
             ->where('start_time', '>', now())
             ->where('start_time', '<=', now()->addDays(7))
@@ -119,6 +128,7 @@ class EventRepository
     public function getFeaturedEvents()
     {
         return $this->event
+            ->where('status', 'confirmed')
             ->withCount('registrants')
             ->orderBy('registrants_count', 'desc')
             ->limit(10)
@@ -133,16 +143,6 @@ class EventRepository
             ->orderByDesc('feedbacks_sum_rating')
             ->limit(12)
             ->get();
-    }
-
-    public function getIp($eventId)
-    {
-        $event = $this->event->find($eventId);
-        if ($event) {
-            return $event->subnets->pluck('subnet');
-        }
-
-        return null;
     }
 
     public function query()
@@ -197,7 +197,7 @@ class EventRepository
 
         return $eventCount;
     }
-    
+
     /**
      * Thống kê sự kiện theo thể loại (chỉ lấy sự kiện có trạng thái confirmed)
      */
@@ -218,13 +218,13 @@ class EventRepository
                 ->whereNull('deleted_at') // Lọc các sự kiện không bị xóa
                 ->groupBy('event_type') // Nhóm theo event_type
                 ->get();
-    
+
             return $statistics;
         } catch (\Exception $e) {
             throw new \Exception("Lỗi khi lấy thống kê theo event_type: " . $e->getMessage());
         }
     }
-    
+
     public function getStatisticsByProvinceAndStatus($status, $startDate, $endDate)
     {
         try {
@@ -248,7 +248,7 @@ class EventRepository
             throw new \Exception("Lỗi khi lấy thống kê theo tỉnh/thành phố: " . $e->getMessage());
         }
     }
-        
+
     // Add this method to the EventRepository
     public function getTopParticipantsEvents($limit, $startDate, $endDate)
     {
@@ -261,7 +261,7 @@ class EventRepository
             ->limit($limit)
             ->get();
     }
-        
+
     public function getEventStatusStatistics($startDate, $endDate)
     {
         try {
@@ -287,5 +287,4 @@ class EventRepository
             throw new \Exception("Lỗi khi lấy thống kê sự kiện: " . $e->getMessage());
         }
     }
-
 }

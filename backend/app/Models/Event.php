@@ -79,7 +79,7 @@ class Event extends Model
 
     public function subnets()
     {
-        return $this->hasMany(EventSubnet::class)->select('subnet');
+        return $this->hasMany(EventSubnet::class);
     }
     
 

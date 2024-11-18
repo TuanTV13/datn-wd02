@@ -7,7 +7,7 @@ use App\Repositories\TransactionRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class HistoryController extends Controller
 {
     public $userRepository;
     public $transactionRepository;

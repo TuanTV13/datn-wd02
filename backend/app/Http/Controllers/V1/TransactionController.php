@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Repositories\TransactionRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -85,47 +86,4 @@ class TransactionController extends Controller
 
         return response()->json(['message' => 'Hủy giao dịch thành công'], 200);
     }
-
-    
-// Lấy danh sách giao dịch (chỉ thông tin cần thiết)
-public function getTransactionHistory(Request $request)
-{
-    $transactions = Transaction::with('event') // Load thông tin sự kiện (event)
-        ->select('id', 'event_id', 'total_amount', 'payment_method', 'status', 'created_at') // Select only necessary columns
-        ->get()
-        ->map(function ($transaction) {
-            return [
-                'id' => $transaction->id,
-                'event_name' => $transaction->event->name, // Only event name
-                'transaction_time' => $transaction->created_at, // Format the created_at as transaction time
-                'total_amount' => $transaction->total_amount,
-                'payment_method' => $transaction->payment_method,
-                'status' => $transaction->status,
-            ];
-        });
-
-    return response()->json($transactions);
 }
-
-
-
-   // Lấy thông tin giao dịch theo ID
-public function showTransaction($id)
-{
-    $transaction = Transaction::with('event') // Load related event
-        ->select('id', 'event_id', 'total_amount', 'payment_method', 'status', 'created_at') // Select only necessary columns
-        ->findOrFail($id); // Find transaction by ID, or fail if not found
-
-    return response()->json([
-        'id' => $transaction->id,
-        'event_name' => $transaction->event->name, // Only event name
-        'transaction_time' => $transaction->created_at, // Format the created_at as transaction time
-        'total_amount' => $transaction->total_amount,
-        'payment_method' => $transaction->payment_method,
-        'status' => $transaction->status,
-    ]);
-}
-
-}
-
-
