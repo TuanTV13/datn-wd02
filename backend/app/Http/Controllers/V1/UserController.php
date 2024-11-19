@@ -30,6 +30,14 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function show($id)
+    {
+        $user = $this->userRepository->find($id);
+        return response()->json([
+            'data' => $user
+        ]);
+    }
+
     public function create(StoreUserRequest $request)
     {
         DB::beginTransaction();

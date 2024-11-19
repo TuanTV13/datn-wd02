@@ -42,7 +42,17 @@ class EventRepository
 
     public function getAll()
     {
-        return $this->event->get();
+        return $this->event->with(['users' => function ($query) {
+            $query->distinct();
+        }])->withCount('users as ticket_count')->get();
+    }
+
+    public function getByConfirmed()
+    {
+        return $this->event->where(function ($query) {
+            $query->where('status', 'confirmed')
+                ->orWhere('status', 'checkin');
+        })->get();
     }
 
     public function find($id)
@@ -52,9 +62,7 @@ class EventRepository
 
     public function findByCategory($categoryId)
     {
-        return $this->event->with('category') // Lấy dữ liệu của bảng category
-            ->where('category_id', $categoryId)
-            ->get();
+        return $this->event->where('category_id', $categoryId)->get();
     }
 
     public function findTrashed($id)
@@ -92,9 +100,8 @@ class EventRepository
         return $this->event
             ->where('status', 'confirmed')
             ->where('display_header', true)
-            ->join('categories', 'events.category_id', '=', 'categories.id') // Thực hiện join với bảng categories
-            ->select('events.id', 'events.category_id', 'events.name', 'events.description', 'events.thumbnail', 'events.start_time', 'categories.name as category_name') // Thêm trường name từ categories
-            ->orderBy('events.start_time', 'asc')
+            ->select('id', 'name', 'description', 'thumbnail', 'start_time')
+            ->orderBy('start_time', 'asc')
             ->limit(4)
             ->get();
     }
