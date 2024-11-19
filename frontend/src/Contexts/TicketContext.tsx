@@ -24,7 +24,7 @@ interface TypeTickets {
   onRestore: (id: number) => void;
   onVerify: (id: number) => void;
   tickets: Tickets[];
-  listUserBuyTicket: Events[]
+  listUserBuyTicket: Events[];
 }
 
 export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
@@ -36,16 +36,16 @@ const TicketsContext = ({ children }: Props) => {
 
   useEffect(() => {
     (async () => {
-        const data = await getAllTickets()
-        setTickets(data)
-    })()
+      const data = await getAllTickets();
+      setTickets(data);
+    })();
   }, []);
 
   useEffect(() => {
     (async () => {
-        const data = await getEvents()
-        setListUserBuyTicket(data)
-    })()
+      const data = await getEvents();
+      setListUserBuyTicket(data);
+    })();
   }, []);
 
   const onDel = async (id: number) => {
@@ -78,7 +78,9 @@ const TicketsContext = ({ children }: Props) => {
     try {
       const updatedTicket = await editTicket(ticket);
       setTickets(
-        tickets.map((item) => (item.id === updatedTicket.id ? updatedTicket : item))
+        tickets.map((item) =>
+          item.id === updatedTicket.id ? updatedTicket : item
+        )
       );
       toast.success("Sửa thành công");
       navigate("/admin/ticket-list");

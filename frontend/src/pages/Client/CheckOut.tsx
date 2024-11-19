@@ -17,7 +17,7 @@ const CheckOut = () => {
     phone: "",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("paypal"); 
+  const [paymentMethod, setPaymentMethod] = useState("paypal");
   const [voucherCode, setVoucherCode] = useState("");
   const [totalPrice, setTotalPrice] = useState(initialTotalPrice);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
@@ -44,7 +44,6 @@ const CheckOut = () => {
         .catch((error) => console.error("Error fetching user data:", error));
     }
   }, []);
-  
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
@@ -53,7 +52,7 @@ const CheckOut = () => {
       [name]: value,
     }));
   };
-  const [isProcessing, setIsProcessing] = useState(false); 
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleVoucherApply = async () => {
     const token = localStorage.getItem("access_token");
@@ -68,7 +67,7 @@ const CheckOut = () => {
         `http://127.0.0.1:8000/api/v1/vouchers/apply/${totalPrice}`,
         {
           event_id: ticketId,
-          user_id:userID, 
+          user_id: userID,
           code: voucherCode,
           totalAmount: totalPrice,
         },
@@ -96,14 +95,13 @@ const CheckOut = () => {
     setPaymentMethod(e.target.value);
   };
 
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true); // Bắt đầu xử lý
-  
+
     // Kiểm tra xem người dùng đã đăng nhập hay chưa
     const token = localStorage.getItem("access_token");
-  
+
     // Nếu người dùng đã đăng nhập, không cần yêu cầu nhập lại thông tin
     if (token) {
       // Lấy thông tin người dùng từ state (đã được set khi người dùng đăng nhập)
@@ -115,19 +113,19 @@ const CheckOut = () => {
         phone: userInfo.phone, // Lấy số điện thoại từ API trả về
         discount_code: voucherCode || null,
       };
-  
+
       try {
         const response = await axios.post(
           "http://127.0.0.1:8000/api/v1/clients/payment/process",
           paymentData,
           {
-            headers: { 
+            headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
-        console.log(response)
+        console.log(response);
         if (response.data.success) {
           setTimeout(() => {
             setIsProcessing(false); // Kết thúc xử lý
@@ -148,13 +146,15 @@ const CheckOut = () => {
       setIsProcessing(false);
     }
   };
-  
+
   return (
     <div className="mt-36 mx-4">
       {isProcessing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <p className="text-lg font-medium">Đang xử lý thanh toán, vui lòng chờ...</p>
+            <p className="text-lg font-medium">
+              Đang xử lý thanh toán, vui lòng chờ...
+            </p>
             <div className="mt-4 loader"></div>
           </div>
         </div>
@@ -279,7 +279,6 @@ const CheckOut = () => {
         <div>
           <div className="border rounded-2xl flex flex-col gap-y-5 lg:p-6 px-5 py-[22px]">
             <div className="flex flex-col gap-y-[17px] border-b pb-5">
-              
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Tên đơn hàng</span>
                 <p>Vé {ticketType}</p>
@@ -304,7 +303,11 @@ const CheckOut = () => {
                   value={voucherCode}
                   onChange={(e) => setVoucherCode(e.target.value)}
                 />
-                <button type="button" onClick={handleVoucherApply} className="text-[#007BFF] font-medium bg-[#F3FBF4] border text-sm rounded-[100px] px-3 py-2">
+                <button
+                  type="button"
+                  onClick={handleVoucherApply}
+                  className="text-[#007BFF] font-medium bg-[#F3FBF4] border text-sm rounded-[100px] px-3 py-2"
+                >
                   Áp dụng
                 </button>
               </div>

@@ -6,7 +6,6 @@ use App\Events\TransactionVerified;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V1\VoucherController;
 use App\Http\Services\PayPalService;
-use App\Models\EventUser;
 use App\Repositories\{TicketRepository, TransactionRepository, UserRepository, VoucherRepository};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, DB, Log};
@@ -84,24 +83,16 @@ class PaymentController extends Controller
         try {
 
             // Kiểm tra có đăng nhập hay không, Nếu có lấy thông tin người dùng đăng nhập, ngược lại đăng kí mới và lấy thông tin đó
-            if (Auth::check()) {
-                // Nếu người dùng đã đăng nhập, lấy thông tin người dùng hiện tại
-                $user = Auth::user();
-            } else {
-                // Nếu người dùng chưa đăng nhập, tạo mới người dùng từ dữ liệu trong request
-                $validatedData = $request->validate([
-                    'name' => 'required',
-                    'email' => 'required|email',
-                    'phone' => 'required'
-                ]);
-                $user = $this->userRepository->create($validatedData);
-            }
-            
+            $user = Auth::check() ? Auth::user() : $this->userRepository->create($request->validate([
+                'name' => 'required',
+                'email' => 'required|email',
+                'phone' => 'required'
+            ]));
+
             $request->validate([
                 'payment_method' => 'required|string|in:cash,paypal',
                 'discount_code' => 'nullable|string'
             ]);
-            
             
             // Mã vé
             $ticketCode = strtoupper(uniqid('TICKET-'));
@@ -178,7 +169,7 @@ class PaymentController extends Controller
 
                 // Gửi dữ liệu cho thành công hoặc hủy giao dịch
                 $paypalService->setReturnUrl(route('payment.success', compact(['transaction_id', 'ticket_id'])))
-                    ->setCancelUrl(route('payment.cancel', compact(['transaction_id', 'ticket_id', 'ticketCode'])));
+                    ->setCancelUrl(route('payment.cancel', compact(['transaction_id', 'ticket_id'])));
 
                 // Tạo URL thanh toán PayPal
                 $paymentUrl = $paypalService->createPayment('Thanh toán vé cho sự kiện #' . $ticket->id);
@@ -279,7 +270,7 @@ class PaymentController extends Controller
         $transaction->update(['status' => 'COMPLETED']);
         event(new TransactionVerified($transaction));
 
-        return redirect('http://localhost:5173/order');
+        return response()->json(['message' => 'Bạn đã thanh toán thành công 1 đơn hàng!']);
     }
 
     // Xử lý giao dịch khi bị hủy thanh toán
@@ -298,12 +289,6 @@ class PaymentController extends Controller
         }
 
         $transaction->update(['status' => 'FAILED']);
-
-        $user = new EventUser();
-        $ticketCode = $request->query('ticketCode');
-        $user = $user->where('ticket_code', $ticketCode)->first();
-        $user->delete();
-
         return response()->json(['message' => 'Thanh toán đã bị hủy.']);
     }
 }

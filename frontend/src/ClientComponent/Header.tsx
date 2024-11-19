@@ -86,14 +86,13 @@ const Header = () => {
     };
   }, [isMobileMenuOpen]);
 
-
   // Search
-  const {register,handleSubmit} = useForm()
-  const navigate = useNavigate()
+  const { register, handleSubmit } = useForm();
+  const navigate = useNavigate();
   const onSubmit = (data: any) => {
-    const { searchKeywords } = data; 
+    const { searchKeywords } = data;
     navigate(`/search?keyword=${searchKeywords}`);
-}
+  };
   return (
     <header className="absolute top-0 left-0 w-full z-50">
       <div className="w-full flex justify-center items-center border-b bg-[#007BFF]">
@@ -127,12 +126,15 @@ const Header = () => {
 
           {/* Desktop Search Bar */}
           <div className="hidden lg:block h-[40px]">
-            <form onSubmit={handleSubmit(onSubmit)} className="w-[456px] flex h-[40px] justify-between">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="w-[456px] flex h-[40px] justify-between"
+            >
               <input
                 type="text"
                 className="border rounded-full w-[400px] px-6"
                 placeholder="Search"
-                {...register('searchKeywords')}
+                {...register("searchKeywords")}
               />
               <button className="rounded-full bg-[#6C757D] w-[40px]">
                 <svg

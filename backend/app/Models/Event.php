@@ -60,12 +60,8 @@ class Event extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'event_user')
-                    ->withPivot('status') // Trạng thái từ bảng pivot
-                    ->withTimestamps();   // Bao gồm các cột thời gian
+        return $this->belongsToMany(User::class, 'event_users');
     }
-    
-    
 
     public function feedbacks()
     {
@@ -79,8 +75,6 @@ class Event extends Model
 
     public function subnets()
     {
-        return $this->hasMany(EventSubnet::class);
+        return $this->hasMany(EventSubnet::class)->select('subnet');
     }
-    
-
 }
