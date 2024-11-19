@@ -15,15 +15,17 @@ const CheckOut = () => {
     name: "",
     email: "",
     phone: "",
-    address: "",
   });
 
   const [paymentMethod, setPaymentMethod] = useState("paypal"); 
   const [voucherCode, setVoucherCode] = useState("");
   const [totalPrice, setTotalPrice] = useState(initialTotalPrice);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
+      setIsLoggedIn(true); // Đánh dấu người dùng đã đăng nhập
       axios
         .get("http://127.0.0.1:8000/api/v1/user", {
           headers: {
@@ -37,12 +39,12 @@ const CheckOut = () => {
             name: userData.name || "",
             email: userData.email || "",
             phone: userData.phone || "",
-            address: userData.address || "",
           });
         })
         .catch((error) => console.error("Error fetching user data:", error));
     }
   }, []);
+  
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
@@ -55,7 +57,7 @@ const CheckOut = () => {
 
   const handleVoucherApply = async () => {
     const token = localStorage.getItem("access_token");
-    const userId = localStorage.getItem("user_id"); // Lấy user_id từ localStorage
+    const userID = localStorage.getItem("user_id");
     if (!voucherCode) {
       alert("Vui lòng nhập mã voucher!");
       return;
@@ -63,10 +65,10 @@ const CheckOut = () => {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/v1/vouchers/apply",
+        `http://127.0.0.1:8000/api/v1/vouchers/apply/${totalPrice}`,
         {
           event_id: ticketId,
-          user_id: userId, 
+          user_id:userID, 
           code: voucherCode,
           totalAmount: totalPrice,
         },
@@ -95,19 +97,31 @@ const CheckOut = () => {
   };
 
   
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true); // Bắt đầu xử lý
+  
+    // Kiểm tra xem người dùng đã đăng nhập hay chưa
+    const token = localStorage.getItem("access_token");
+    
+  
+    // Dữ liệu thanh toán bao gồm thông tin người dùng và voucher
     const paymentData = {
       ticket_id: ticketId,
       payment_method: paymentMethod,
       name: userInfo.name,
       email: userInfo.email,
       phone: userInfo.phone,
-      address: userInfo.address,
       discount_code: voucherCode || null,
     };
-
+  
+    // Nếu người dùng chưa đăng nhập, yêu cầu nhập thông tin
+    if (!token) {
+      alert("Vui lòng  nhập trước khi thanh toán.");
+      setIsProcessing(false);
+      return;
+    }
+  
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/clients/payment/process",
@@ -116,7 +130,7 @@ const CheckOut = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
-      console.log(response)
+      console.log(response);
       if (response.data.success) {
         setTimeout(() => {
           setIsProcessing(false); // Kết thúc xử lý
@@ -132,6 +146,8 @@ const CheckOut = () => {
       alert("Có lỗi xảy ra trong quá trình thanh toán.");
     }
   };
+  
+  
   return (
     <div className="mt-36 mx-4">
       {isProcessing && (
@@ -231,21 +247,6 @@ const CheckOut = () => {
               </div>
             </div>
 
-            {/* Address */}
-            <div className="flex flex-col gap-y-2 *:rounded-lg border-b pb-4">
-              <span className="text-xs uppercase text-[#46494F] tracking-[0.9px]">
-                Địa chỉ
-              </span>
-              <input
-                type="text"
-                className="h-12 border px-4 text-sm"
-                placeholder="Vui lòng nhập địa chỉ"
-                name="address"
-                value={userInfo.address || ""} // Ensure address is handled correctly
-                onChange={handleInputChange}
-              />
-            </div>
-
             {/* Payment Method */}
             <div className="mb-2">
               <h2 className="mb-2">Chọn phương thức thanh toán</h2>
@@ -277,13 +278,18 @@ const CheckOut = () => {
         <div>
           <div className="border rounded-2xl flex flex-col gap-y-5 lg:p-6 px-5 py-[22px]">
             <div className="flex flex-col gap-y-[17px] border-b pb-5">
-              <section className="flex justify-between text-sm">
-                <span className="text-[#9D9EA2]">Tổng cộng</span>
-                <p>{totalPrice} VDN</p>
-              </section>
+              
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Tên đơn hàng</span>
                 <p>Vé {ticketType}</p>
+              </section>
+              <section className="flex justify-between text-sm">
+                <span className="text-[#9D9EA2]">Giá vé</span>
+                <p>{initialTotalPrice}</p>
+              </section>
+              <section className="flex justify-between text-sm">
+                <span className="text-[#9D9EA2]">Tổng cộng</span>
+                <p>{totalPrice} VDN</p>
               </section>
             </div>
 
