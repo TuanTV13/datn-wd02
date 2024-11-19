@@ -27,7 +27,7 @@ class EventController extends Controller
     public function checkIn(Request $request, $eventId)
     {
         $allowedIpRanges = $this->eventRepository->getIp($eventId);
-        // dd($subnets);
+        // dd($allowedIpRanges);
         $clientIp = $request->ip();
 
         $isAllowed = false;
@@ -47,12 +47,6 @@ class EventController extends Controller
                     'error' => 'Yêu cầu chỉ được thực hiện từ mạng nội bộ.'
                 ], 403);
             }
-        }
-
-        if (!$isAllowed) {
-            return response()->json([
-                'error' => 'Yêu cầu chỉ được thực hiện từ mạng nội bộ.'
-            ], 403);
         }
 
         $request->validate([
