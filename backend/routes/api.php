@@ -111,6 +111,8 @@ Route::prefix('v1')->group(function () {
         Route::put('{id}/failed', [TransactionController::class, 'failed']);
     });
 
+    // Route::post('/apply-discount', [PaymentController::class, 'applyDiscount']);
+    Route::post('apply', [VoucherController::class, 'apply']);
     Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
@@ -118,7 +120,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [VoucherController::class, 'delete']);
         Route::get('trashed', [VoucherController::class, 'trashed']);
         Route::post('{id}/restore', [VoucherController::class, 'restore']);
-        Route::post('apply', [VoucherController::class, 'apply']);
+        
     });
 
     Route::get('feedbacks', [FeedbackController::class, 'index']);  
