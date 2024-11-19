@@ -96,59 +96,104 @@ const CheckOut = () => {
     setPaymentMethod(e.target.value);
   };
 
+ // Xử lý khi người dùng gửi form thanh toán
+//  const handleSubmit = async (e: any) => {
+//   e.preventDefault();
+//   setIsProcessing(true); // Bắt đầu xử lý
+//   // Lấy token từ localStorage để xác thực
+//   const token = localStorage.getItem("access_token");
+
+//   if (token) {
+//     // Dữ liệu thanh toán gửi đến backend
+//     const paymentData = {
+//       ticket_id: ticketId,
+//       payment_method: paymentMethod,
+//       name: userInfo.name,
+//       email: userInfo.email,
+//       phone: userInfo.phone,
+//       discount_code: voucherCode || null,
+//     };
+
+//     try {
+//       // Gửi yêu cầu POST tới backend để xử lý thanh toán
+//       const response = await axios.post(
+//         "http://127.0.0.1:8000/api/v1/clients/payment/process",
+//         paymentData,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             "Content-Type": "application/json",
+//           },
+//         }
+//       );
+      
+//       // console.log(response.data)
+
+//       if (response.data.success) {
+//         setTimeout(() => {
+//           // setIsProcessing(false); 
+//       console.log(response.data.payment_url);
+//           window.location.replace(response.data.payment_url); // Chuyển hướng đến PayPal
+//         }, 2000); 
+//       } else {
+//         setIsProcessing(false); // Dừng xử lý
+//         alert(response.data.message || "Thanh toán thất bại.");
+//       }
+//     } catch (error) {
+//       console.error("Lỗi trong quá trình thanh toán:", error);
+//       setIsProcessing(false); // Dừng xử lý
+//       alert("Đã có lỗi xảy ra trong quá trình thanh toán.");
+//     }
+//   } else {
+//     // Nếu người dùng chưa nhập
+//     alert("Vui lòng  nhập trước khi thực hiện thanh toán.");
+//     setIsProcessing(false);
+//   }
+// };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsProcessing(true); // Bắt đầu xử lý
+
+  const token = localStorage.getItem("access_token");
+
+  if (token) {
+    // Dữ liệu thanh toán gửi đến backend
+    const paymentData = {
+      ticket_id: ticketId,
+      payment_method: paymentMethod,
+      name: userInfo.name,
+      email: userInfo.email,
+      phone: userInfo.phone,
+      discount_code: voucherCode || null,
+    };
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsProcessing(true); // Bắt đầu xử lý
-  
-    // Kiểm tra xem người dùng đã đăng nhập hay chưa
-    const token = localStorage.getItem("access_token");
-  
-    // Nếu người dùng đã đăng nhập, không cần yêu cầu nhập lại thông tin
-    if (token) {
-      // Lấy thông tin người dùng từ state (đã được set khi người dùng đăng nhập)
-      const paymentData = {
-        ticket_id: ticketId,
-        payment_method: paymentMethod,
-        name: userInfo.name, // Nếu đã đăng nhập, lấy tên từ API trả về
-        email: userInfo.email, // Lấy email từ API trả về
-        phone: userInfo.phone, // Lấy số điện thoại từ API trả về
-        discount_code: voucherCode || null,
-      };
-  
-      try {
-        const response = await axios.post(
-          "http://127.0.0.1:8000/api/v1/clients/payment/process",
-          paymentData,
-          {
-            headers: { 
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log(response)
-        if (response.data.success) {
-          setTimeout(() => {
-            setIsProcessing(false); // Kết thúc xử lý
-            window.location.href = response.data.payment_url; // Chuyển tới PayPal
-          }, 2000); // Giả sử thời gian xử lý là 2 giây
-        } else {
-          setIsProcessing(false); // Kết thúc xử lý
-          alert(response.data.message || "Thanh toán không thành công.");
-        }
-      } catch (error) {
-        console.error("Error during payment process:", error);
-        setIsProcessing(false); // Kết thúc xử lý
-        alert("Có lỗi xảy ra trong quá trình thanh toán.");
-      }
+
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/api/v1/clients/payment/process", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(paymentData),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Redirect to PayPal payment URL
+      window.location.href = data.payment_url;
     } else {
-      // Nếu người dùng chưa đăng nhập, yêu cầu nhập thông tin
-      alert("Vui lòng đăng nhập trước khi thanh toán.");
-      setIsProcessing(false);
+      alert(data.message || "Thanh toán không thành công.");
     }
-  };
-  
+  } catch (error) {
+    console.error("Error during payment process:", error);
+    alert("Có lỗi xảy ra trong quá trình thanh toán.");
+  }
+};
+}
+
   return (
     <div className="mt-36 mx-4">
       {isProcessing && (

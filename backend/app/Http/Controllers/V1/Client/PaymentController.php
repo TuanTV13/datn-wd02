@@ -96,13 +96,13 @@ class PaymentController extends Controller
                 ]);
                 $user = $this->userRepository->create($validatedData);
             }
-            
+
             $request->validate([
                 'payment_method' => 'required|string|in:cash,paypal',
                 'discount_code' => 'nullable|string'
             ]);
-            
-            
+
+
             // Mã vé
             $ticketCode = strtoupper(uniqid('TICKET-'));
 
@@ -131,7 +131,7 @@ class PaymentController extends Controller
                     return response()->json(['error' => $voucherResponse->getData()->message], 400);
                 }
 
-                $totalAmount = $voucherResponse->getData()->data->total_price; // Giá tiền sau khi sử dụng mã giảm giá 
+                $totalAmount = $voucherResponse->getData()->data->total_price; // Giá tiền sau khi sử dụng mã giảm giá
             }
 
             // Dữ liệu giao dịch

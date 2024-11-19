@@ -93,7 +93,7 @@ const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đ�
 
 
   const clearFilters = () => {
-    setFilter("");
+    window.location.reload();
     navigate("/event-list");
   };
   const [searchQuery, setSearchQuery] = useState("");
