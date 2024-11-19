@@ -15,7 +15,7 @@ class TransactionRepository
 
     public function findByTxnRef($txnRef)
     {
-        return Transaction::where('txn_ref', $txnRef)->first();
+        return $this->transaction->where('txn_ref', $txnRef)->first();
     }
 
     public function getAllTransactions()

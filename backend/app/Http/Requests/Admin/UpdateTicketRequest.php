@@ -27,7 +27,7 @@ class UpdateTicketRequest extends FormRequest
             'available_quantity' => 'nullable|integer',
             'seat_location' => 'sometimes|string|max:100',
             'sale_start' => 'sometimes|date|after_or_equal:today',
-            'sale_end' => 'sometimes|date|after:sale_start',
+            'sale_end' => 'sometimes|date|after:sale_start|after_or_equal:today',
             'description' => 'nullable|string'
         ];
     }

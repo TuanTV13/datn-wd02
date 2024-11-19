@@ -16,7 +16,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('check:event-status')->everyMinute();
         // $schedule->command('users:delete-unverified')->everyMinute();
         // $schedule->command('queue:run')->everyMinute();
-        $schedule->command('app:check-event-i-p-command')->everyMinute();
+        $schedule->command('app:check-event-i-p-command')->dailyAt('07:00');
     }
 
     /**
