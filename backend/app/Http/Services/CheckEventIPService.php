@@ -13,20 +13,21 @@ class CheckEventIPService
         $twoDaysLater = Carbon::now()->addDays(2);
         $eventsWithoutIP = [];
 
-        // Lấy danh sách các sự kiện bắt đầu trước 2 ngày nữa và có quan hệ với subnets
-        $events = Event::where('start_time', '<=', $twoDaysLater)->where('status', 'confirmed')->with('subnets')->get();
-
-        // Duyệt qua tất cả sự kiện để kiểm tra xem có subnets hay không
+        $events = Event::where('start_time', '<=', $twoDaysLater)->with('subnets')->get();
+        // dd($events);
         foreach ($events as $event) {
-            // Kiểm tra sự kiện có subnets hay không
-            if ($event->subnets->isEmpty()) {
-                // Thêm sự kiện không có IP vào mảng
+            $ipCheckin = $event->subnets();
+
+            // dd($ipCheckin);
+            if (empty($ipCheckin)) {
                 $eventsWithoutIP[] = $event->name;
             }
+
+            // dd($eventsWithoutIP);
         }
 
-        // Nếu có sự kiện không có IP, ghi log và trả kết quả
-        if (!empty($eventsWithoutIP)) {
+        if ($eventsWithoutIP) {
+            // Ghi log các sự kiện chưa có IP
             Log::info('Các sự kiện sau chưa có địa chỉ IP cục bộ cho check-in:', $eventsWithoutIP);
 
             return [
@@ -36,11 +37,10 @@ class CheckEventIPService
             ];
         }
 
-        // Nếu tất cả sự kiện đã có IP, ghi log và trả kết quả
         Log::info('Tất cả các sự kiện đã có địa chỉ IP cục bộ.');
         return [
             'status' => 'success',
-            'message' => 'Tất cả các sự kiện đã có địa chỉ IP cục bộ.'
+            'message' => ''
         ];
     }
 }

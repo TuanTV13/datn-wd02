@@ -23,7 +23,7 @@ import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
 import EventHistory from "./pages/Client/EventHistory";
 import PaymentHistory from "./pages/Client/PaymentHistory";
-import VerifyEmailPage from './components/Auth/VerifyEmailPage';
+import VerifyEmailPage from "./components/Auth/VerifyEmailPage";
 import CategoryEvent from "./pages/Client/CategoryEven";
 import UserProfileEdit from "./pages/Client/UserProfileEdit";
 import UserChangePassword from "./pages/Client/UserChangePassword";
