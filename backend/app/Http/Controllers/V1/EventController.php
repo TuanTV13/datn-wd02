@@ -10,6 +10,7 @@ use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -259,10 +260,32 @@ class EventController extends Controller
     {
         $result = $this->checkEventIPService->checkEventsWithoutIP();
 
+        Log::info('Kết quả kiểm tra sự kiện IP', $result);
+        
         return response()->json([
             'status' => $result['status'],
             'message' => $result['message'],
             'events' => $result['events'] ?? []
         ]);
+    }
+
+    public function addIp(Request $request, $eventId)
+    {
+        $request->validate([
+            'subnet' => 'required|string'
+        ]);
+        $event = $this->eventRepository->find($eventId);
+        if (!$event) {
+            return response()->json([
+                'error' => 'Sự kiện không tồn tại.'
+            ], 404);
+        }
+        $event->subnets()->create([
+            'subnet' => $request->input('subnet')
+        ]);
+
+        return response()->json([
+            'message' => 'Thêm địa chỉ IP thành công.'
+        ], 201);
     }
 }
