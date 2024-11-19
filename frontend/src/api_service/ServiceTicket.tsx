@@ -1,6 +1,5 @@
 import { Tickets } from "../interfaces/Ticket";
 import api from "./api";
-import { message } from "antd";
 
 // Lấy danh sách tất cả tickets
 export const getAllTickets = async () => {
@@ -39,15 +38,15 @@ export const addTicket = async (ticketData: Tickets) => {
 };
 
 // Cập nhật thông tin vé
-export const editTicket = async (id: Tickets) => {
+export const editTicket = async (ticket: Tickets) => {
   const token = localStorage.getItem("access_token");
   const headers = {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
   try {
-    const { data } = await api.put(`/tickets/${id}/update`, id, { headers });
-    console.log(data);
+    const { data } = await api.put(`/tickets/${ticket.id}/update`, ticket, { headers });
+    console.log(data.data);
     return data.data;
   } catch (error) {
     console.error("Error editing ticket:", error);
@@ -99,20 +98,18 @@ export const verifyTicket = async (id: number) => {
   }
 };
 
-export const getTicketData = async (eventId: number, ticketType: string) => {
+export const getTicketData = async (eventId: number, ticketType: string)=> {
   const token = localStorage.getItem("access_token");
   const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
   try {
-    const { data } = await api.get(`/tickets/${eventId}/${ticketType}`, {
-      headers,
-    });
-    console.log(data);
-    return data;
+      const {data} = await api.get(`/tickets/${eventId}/${ticketType}`,{headers});
+      console.log(data)
+      return data
   } catch (error) {
-    console.error("Error verifying ticket:", error);
-    throw error;
+      console.error("Error verifying ticket:", error);
+      throw error;
   }
 };
