@@ -6,7 +6,6 @@ import { CategoryCT } from "../../Contexts/CategoryContext";
 const EventListing = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-  const [showFullDescription, setShowFullDescription] = useState(false);
 
   const { categories, fetchEventsByCategory } = useContext(CategoryCT);
   const { events } = useContext(EventCT);
@@ -21,304 +20,306 @@ const EventListing = () => {
     setIsLocationOpen(!isLocationOpen);
   };
 
-  const eventsPerPage = 3; // Số sự kiện trên mỗi trang
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-
-  // Tính tổng số trang
-  const totalPages = Math.ceil(events.length / eventsPerPage);
-
-  // Tính các sự kiện cần hiển thị dựa trên trang hiện tại
-  const indexOfLastEvent = currentPage * eventsPerPage;
-  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = events.slice(indexOfFirstEvent, indexOfLastEvent);
   const [filter, setFilter] = useState("");
 
-  // Hàm xử lý thay đổi trang
-  const handlePageChange = (direction: any) => {
-    setCurrentPage((prevPage) => {
-      if (direction === "next" && prevPage < totalPages) {
-        return prevPage + 1;
-      } else if (direction === "prev" && prevPage > 1) {
-        return prevPage - 1;
-      }
-      return prevPage;
-    });
-  };
   const navigate = useNavigate();
   const handleCategoryClick = async (categoryId: number | string) => {
     await fetchEventsByCategory(categoryId); // Fetch events by category
     navigate(`/event-category/${categoryId}`); // Navigate to the category page
   };
 
-  const cities = [...new Set(currentEvents.map((event) => event.location))];
+  const cities = [...new Set(events.map((event) => event.location))];
 
   // Hàm xử lý thay đổi thành phố
   const handleLocationChange = (city: string) => {
     setFilter(city); // Cập nhật filter theo thành phố đã chọn
   };
+  const [startDate, setStartDate] = useState(""); // Ngày bắt đầu
+  const [endDate, setEndDate] = useState(""); // Ngày kết thúc
+ // Lọc sự kiện theo thành phố và khoảng thời gian
+//  const filteredEvents = events.filter((event) => {
+//   const eventStartDate = new Date(event.start_time); // Ngày bắt đầu của sự kiện
 
-  // Lọc các sự kiện theo thành phố
-  const filteredEvents = currentEvents.filter((event) => {
-    return filter ? event.location.toLowerCase() === filter.toLowerCase() : true;
-  });
+//   // Kiểm tra nếu có bộ lọc thành phố
+//   const isLocationMatch = filter
+//     ? event.location.toLowerCase() === filter.toLowerCase()
+//     : true;
+
+//   // Kiểm tra nếu ngày bắt đầu sự kiện nằm trong khoảng thời gian
+//   const isDateMatch =
+//     (!startDate || eventStartDate >= new Date(startDate)) &&
+//     (!endDate || eventStartDate <= new Date(endDate));
+
+//   return isLocationMatch && isDateMatch;
+// });
+const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
+const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
+
+  // Lọc sự kiện theo thành phố ngay khi người dùng nhập
+  useEffect(() => {
+    const filteredByCity = filter
+      ? events.filter((event) =>
+          event.location.toLowerCase().includes(filter.toLowerCase())
+        )
+      : events;
+
+    setFilteredEvents(filteredByCity);
+  }, [filter, events]);
+
+  // Hàm áp dụng bộ lọc ngày
+  useEffect(() => {
+    if (!applyFilter) return; // Nếu chưa bấm nút Apply thì không lọc
+  
+    // Lọc sự kiện khi startDate hoặc endDate thay đổi
+    const filteredByDate = events.filter((event) => {
+      const eventStartDate = new Date(event.start_time); // Ngày bắt đầu của sự kiện
+      const start = new Date(startDate); // Ngày bắt đầu lọc
+      const end = new Date(endDate); // Ngày kết thúc lọc
+  
+      return (
+        (!startDate || eventStartDate >= start) &&
+        (!endDate || eventStartDate <= end)
+      );
+    });
+  
+    // Cập nhật sự kiện đã lọc
+    setFilteredEvents(filteredByDate);
+  }, [applyFilter, startDate, endDate, events]); // Theo dõi thay đổi của applyFilter, startDate, endDate và events
+
+  const handleApplyFilters = () => {
+    setApplyFilter(true); // Đánh dấu là bấm nút Apply
+  };
+  
+
 
   const clearFilters = () => {
     setFilter("");
-    setCurrentPage(1);
     navigate("/event-list");
   };
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Lọc danh mục dựa trên giá trị của ô input
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const [locationQuery, setLocationQuery] = useState("");
+
+  // Lọc danh sách thành phố dựa trên giá trị input
+  const filteredCities = cities.filter((city) =>
+    city.toLowerCase().includes(locationQuery.toLowerCase())
+  );
+
 
   return (
-    <div className="w-full lg:py-10 py-4 border pb-[199px] mt-36">
-      <div className="lg:container lg:mx-auto lg:w-[1315px] mb:w-full grid lg:grid-cols-[304px_978px] mb:grid-cols-[100%] *:w-full justify-between">
-        <div className="lg:block hidden py-3 mt-0.5">
-          <span className="lg:text-xl tracking-[-0.4px] ml-8">Filters</span>
-          <section className="flex flex-col pt-[47px] pb-4 ml-8">
+    <div className="lg:mx-10 mt-36">
+      <div className="flex flex-col lg:flex-row">
+        {/* <!-- Sidebar --> */}
+        <div className="w-full lg:w-1/4 p-4 bg-white rounded-[30px]  mb-4 lg:mb-0 border">
+          <h2 className="text-4xl font-semibold mb-4">Bộ lọc</h2>
+          <div className="mb-9 ">
             <div
-              className="cursor-pointer text-base tracking-[1px]"
+              className="flex justify-between lg:text-2xl font-medium mb-1 hover:text-[#007BFF] cursor-pointer"
               onClick={toggleCategory}
             >
-              DANH MỤC
-              {/* Show or hide category submenu */}
-              {isCategoryOpen && (
-                <ul className="mt-2 ml-4">
-                  {categories.map((category) => (
-                    <li
-                      key={category.id}
-                      onClick={() => handleCategoryClick(category.id)}
-                    >
-                      <Link to={``} className="text-[#9D9EA2]">
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </section>
-
-          <section className="flex flex-col pb-4 ml-8">
-            <div
-              className="cursor-pointer mt-2 text-base tracking-[1px]"
-              onClick={toggleLocation}
-            >
-              ĐỊA ĐIỂM
-              {/* Show or hide location submenu */}
-              {isLocationOpen && (
-                <ul className="mt-2 ml-4">
-                  {cities.map((city) =>(
-                    <li className="">
-                    <button onClick={() => handleLocationChange(city)} className=" text-[#9D9EA2] ">
-                      {city}
-                    </button>
-                  </li>
-                  ))}
-                  
-                </ul>
-              )}
-            </div>
-          </section>
-
-          <section className="flex flex-col pr-7 pb-6 border-b">
-            <span className="text-[#717378] text-xs tracking-[1px] ml-8">
-              THỜI GIAN
-            </span>
-            <div className="flex justify-between *:px-2.5 my-3 *:py-1 *:bg-[#F4F4F4] *:rounded-[100px] *:text-xs">
-              <input
-                type="date"
-                className=" px-4 py-2 border border-gray-300 rounded-lg w-32"
-                placeholder="Từ ngày"
-              />
-              <div>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  className="size-5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
-                  />
-                </svg>
-              </div>
-              <input
-                type="date"
-                className=" px-4 py-2 border border-gray-300 rounded-lg w-32"
-                placeholder="Đến ngày"
-              />
-            </div>
-            <button className="w-[103px] mt-6 h-[40px] rounded-[1000px] bg-[#007BFF] text-white">
-              Apply
-            </button>
-          </section>
-
-          <section className="flex flex-col py-6">
-            <span className="text-base tracking-[1px] ml-8">HÌNH THỨC</span>
-            <ul className="*:gap-y-3 *:gap-x-3.5 *:tracking-[1px] pt-1 pb-1.5 *:flex *:items-center *:my-[9px] border-b ml-10">
-              <li className="">
-                <Link to={""} className=" text-[#9D9EA2]">
-                  Online
-                </Link>
-              </li>
-              <li>
-                <Link to={""} className="text-[#9D9EA2]">
-                  Offline
-                </Link>
-              </li>
-            </ul>
-          </section>
-
-          <button onClick={clearFilters} className="bg-[#F3FBF4] rounded-[100px] text-[14px] leading-[21px] text-[#007BFF] mt-3 h-10 px-8 ml-20">
-            Clear Filters
-          </button>
-        </div>
-
-        <div className="w-full flex flex-col mb:items-center lg:items-start">
-          <div className="mb:w-[342px] lg:w-full flex  items-center lg:pb-6 mb:pb-4">
-            <strong className="lg:text-2xl mb:text-base font-normal ml-3">
-              Danh sách sự kiện
-            </strong>
-            <div className="flex gap-x-[10px] ml-28">
-              <div className="relative lg:hidden group w-[78px] flex place-items-center gap-x-2 h-[34px] border rounded-[100px] px-3 cursor-pointer border-gray-300 text-gray-700 text-xs tracking-[-0.5px]">
-                Filter{" "}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
+              Danh mục
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="size-5"
+              >
+                <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  className="lucide lucide-chevron-down group-hover:rotate-180 duration-300"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-                <ul className="absolute hidden group-hover:block top-full bg-white shadow-xl p-3 *:mb-3 *:mx-2 *:whitespace-nowrap left-0 columns-1 *:duration-300">
-                  <li
-                    className="hover:text-[#007BFF] cursor-pointer"
-                    onClick={toggleCategory}
-                  >
-                    Danh mục
-                    {isCategoryOpen && (
-                      <ul className="pl-4 mt-2">
-                        <li className="">
-                          <Link to={""}>Danh mục con 1</Link>
-                        </li>
-                        <li className="">
-                          <Link to={""}>Danh mục con 1</Link>
-                        </li>
-                      </ul>
-                    )}
-                  </li>
-                  <li
-                    className="hover:text-[#007BFF] cursor-pointer"
-                    onClick={toggleLocation}
-                  >
-                    Địa điểm
-                    {isLocationOpen && (
-                      <ul className="pl-4 mt-2">
-                        <li className="">
-                          <Link to={""}>Hà Nội</Link>
-                        </li>
-                        <li className="">
-                          <Link to={""}>Đà Nẵng</Link>
-                        </li>
-                      </ul>
-                    )}
-                  </li>
-                </ul>
-              </div>
+                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                />
+              </svg>
             </div>
+            {isCategoryOpen && (
+              <>
+                {/* Ô input */}
+                <input
+                  type="text"
+                  className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Tìm kiếm danh mục..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+
+                {/* Danh sách danh mục chỉ hiển thị khi ô input không rỗng */}
+                {searchQuery.trim() !== "" && (
+                  <ul className="ml-2 text-gray-400 lg:text-base">
+                    {filteredCategories.map((category) => (
+                      <li
+                        key={category.id}
+                        className="cursor-pointer hover:text-[#007BFF]"
+                        onClick={() => handleCategoryClick(category.id)}
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                    {filteredCategories.length === 0 && (
+                      <li className="text-gray-500">Không tìm thấy danh mục</li>
+                    )}
+                  </ul>
+                )}
+              </>
+            )}
           </div>
 
-          <div className="lg:w-[1000px] mb:w-[342px] lg:mt-9 lg:pb-8 mb:pb-6 mb:mt-6">
-            <div className="w-full p-4 space-y-6">
-              {/* Event Card 1 */}
-              {filteredEvents.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row h-auto md:h-[250px]"
-                >
-                  <div className="w-full md:w-1/3 ">
-                    <Link to={`/event-detail/${item.id}`}><img
-                      src={item.thumbnail}
+          <div className="mb-9 ">
+            <div
+              className="flex justify-between lg:text-2xl font-medium mb-1 hover:text-[#007BFF] cursor-pointer"
+              onClick={toggleLocation}
+            >
+              Địa điểm tổ chức
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="size-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                />
+              </svg>
+            </div>
+            {isLocationOpen && (
+              <>
+                {/* Ô input */}
+                <input
+                  type="text"
+                  className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Tìm kiếm địa điểm..."
+                  value={locationQuery}
+                  onChange={(e) => setLocationQuery(e.target.value)}
+                />
+
+                {/* Danh sách địa điểm chỉ hiển thị khi input không rỗng */}
+                {locationQuery.trim() !== "" && (
+                  <ul className="ml-2 text-gray-400 lg:text-base">
+                    {filteredCities.map((city, index) => (
+                      <li
+                        key={index}
+                        className="cursor-pointer hover:text-[#007BFF]"
+                        onClick={() => handleLocationChange(city)}
+                      >
+                        {city}
+                      </li>
+                    ))}
+                    {filteredCities.length === 0 && (
+                      <li className="text-gray-500">Không tìm thấy địa điểm</li>
+                    )}
+                  </ul>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Bộ lọc ngày */}
+          <div className="mb-9">
+            <label className="flex flex-col space-y-2">
+              <span className="text-lg">Từ ngày:</span>
+              <input
+                type="date"
+                className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                }}
+              />
+            </label>
+            <label className="flex flex-col space-y-2 mt-4">
+              <span className="text-lg">Đến ngày:</span>
+              <input
+                type="date"
+                className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                }}
+              />
+            </label>
+            <button onClick={handleApplyFilters}  className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]">
+              Apply
+            </button>
+            <button
+              className="mt-4 ml-2 px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
+              onClick={clearFilters}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+        {/* <!-- Main Content --> */}
+        <div className="w-full lg:w-3/4 p-4">
+          <div className=" mb-4 ">
+            <div className="flex justify-between space-x-2  items-center">
+              <h2 className="text-3xl font-semibold">Danh sách sự kiện</h2>
+            </div>
+          </div>
+          <div className="border-b-[1px] border-gray-300 mb-4"></div>
+          {/* <!-- Items --> */}
+          <div className="space-y-4 ">
+            {filteredEvents.map((item) => (
+              <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
+                <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
+                  <Link to={`/event-detail/${item.id}`}>
+                    <img
                       alt={item.name}
-                      className=" rounded-[20px]"
-                    /></Link>
-                  </div>
-                  <div className="w-full md:w-2/3 mt-4 md:mt-0 md:ml-4">
-                    <h2 className="text-xl font-bold"><Link to={`/event-detail/${item.id}`}>{item.name}</Link></h2>
-                    <p className="text-gray-600 mt-2">
-                      Thời gian: {item.start_time} <br />
-                      Địa điểm: {item.location}
-                    </p>
-                    <p
-                      className={`text-gray-600 mt-4 ${
-                        showFullDescription ? "" : "line-clamp-1"
-                      }`}
-                    >
-                      Mô tả: {item.description}
-                    </p>
-                    {!showFullDescription && (
-                      <Link to={`/event-detail/${item.id}`} className="text-blue-500 mt-2">
+                      className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
+                      src={item.thumbnail}
+                    />
+                  </Link>
+                </div>
+                <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
+                  <div className="mt-2 lg:flex">
+                    <div className="flex flex-col justify-between lg:w-2/3">
+                      <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer">
+                        <Link to={`/event-detail/${item.id}`}>{item.name}</Link>
+                      </h3>
+                      <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <i className="fas fa-clock mr-2"></i>
+                        Thời gian bắt đầu: {item.start_time}
+                      </div>
+                      <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <i className="fas fa-clock mr-2"></i>
+                        Thời gian kết thúc: {item.end_time}
+                      </div>
+                      <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <i className="fas fa-map-marker-alt mr-2"></i>
+                        Địa điểm: {item.location}
+                      </div>
+                      <div
+                        className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
+                      >
+                        Mô tả: {item.description}
+                      </div>
+
+                      <Link
+                        to={`/event-detail/${item.id}`}
+                        className="text-blue-500 "
+                      >
                         Xem thêm
                       </Link>
-                    )}
+                    </div>
+
+                    <div className="lg:ml-5 lg:mt-28">
+                      <button  className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
+                        <Link to={`/event-detail/${item.id}`}>Xem chi tiết</Link>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              ))}
-              <div className="flex items-center justify-center mt-4 space-x-2">
-                <button
-                  onClick={() => handlePageChange("prev")}
-                  disabled={currentPage === 1}
-                  className="px-2 py-1 border border-gray-600 rounded-l-md text-gray-700 hover:bg-gray-300 disabled:opacity-50"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    className="size-5"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"
-                    />
-                  </svg>
-                </button>
-                <span className="px-2 py-1 border border-gray-600 text-gray-700 rounded-lg">
-                  {currentPage} / {totalPages}
-                </span>
-                <button
-                  onClick={() => handlePageChange("next")}
-                  disabled={currentPage === totalPages}
-                  className="px-2 py-1 border border-gray-600 rounded-r-md text-gray-700 hover:bg-gray-300 disabled:opacity-50"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    className="size-5"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
-                    />
-                  </svg>
-                </button>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

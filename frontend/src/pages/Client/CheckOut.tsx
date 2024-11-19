@@ -1,7 +1,6 @@
-
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const CheckOut = () => {
   const location = useLocation();
@@ -19,7 +18,32 @@ const CheckOut = () => {
     address: "",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("paypal"); // Default is PayPal
+  const [paymentMethod, setPaymentMethod] = useState("paypal"); 
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      axios
+        .get("http://192.168.2.145:8000/api/v1/user/profile", { headers })
+        .then((response) => {
+          const userData = response.data.user;
+          setUserInfo({
+            name: userData.name || "",
+            email: userData.email || "",
+            phone: userData.phone || "",
+            address: userData.address || "", 
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching user data:", error);
+        });
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,22 +63,25 @@ const CheckOut = () => {
     // Prepare the data to send to backend
     const paymentData = {
       ticket_id: ticketId,
-      payment_method: paymentMethod,  // Payment method (paypal)
+      payment_method: paymentMethod, // Payment method (paypal)
       name: userInfo.name,
       email: userInfo.email,
       phone: userInfo.phone,
       address: userInfo.address,
-      discount_code: "",  // Add logic to get voucher code if needed
+      discount_code: "", // Add logic to get voucher code if needed
     };
 
     try {
-      const response = await fetch("http://192.168.2.112:8000/api/v1/clients/payment/process", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(paymentData),
-      });
+      const response = await fetch(
+        "http://192.168.2.145:8000/api/v1/clients/payment/process",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(paymentData),
+        }
+      );
 
       const data = await response.json();
 
@@ -72,7 +99,6 @@ const CheckOut = () => {
 
   return (
     <div className="mt-36 mx-4">
-      {/* <!--router page --> */}
       <div className="w-full lg:py-7 py-4 bg-[#F4F4F4] grid place-items-center -mt-[1px]">
         <div className="flex items-center gap-x-4 text-sm lg:text-base">
           <div className="flex items-center gap-x-2">
@@ -95,9 +121,11 @@ const CheckOut = () => {
         </div>
       </div>
 
-      {/* <!-- main --> */}
-      <form onSubmit={handleSubmit}  className="mx-auto lg:w-[1170px] mb:w-[342px] grid lg:grid-cols-[686px_420px] grid-cols-[100%] lg:gap-x-16 lg:mt-8 mt-6 gap-y-10">
-        {/* <!-- left --> */}
+      <form
+        onSubmit={handleSubmit}
+        className="mx-auto lg:w-[1170px] mb:w-[342px] grid lg:grid-cols-[686px_420px] grid-cols-[100%] lg:gap-x-16 lg:mt-8 mt-6 gap-y-10"
+      >
+        {/* Left Section */}
         <div>
           <section className="flex justify-between border-b lg:pb-6 pb-6">
             <strong className="font-medium text-xl text-[#060709] tracking-[-0.3px]">
@@ -106,9 +134,8 @@ const CheckOut = () => {
             <span className="text-[#9D9EA2]">(3)</span>
           </section>
 
-          {/* <!-- form --> */}
           <div className="lg:mt-[33px] mt-[22px] w-full flex flex-col lg:gap-y-[23px] gap-y-[18px]">
-            {/* <!-- name --> */}
+            {/* Name */}
             <div className="flex flex-col gap-y-2 *:rounded-lg border-b pb-4">
               <span className="text-xs uppercase text-[#46494F] tracking-[0.9px]">
                 Họ và tên *
@@ -123,9 +150,8 @@ const CheckOut = () => {
               />
             </div>
 
-            {/* <!-- phone --> */}
+            {/* Phone and Email */}
             <div className="lg:flex items-center grid grid-cols-[47%_47%] gap-x-5 *:w-full lg:-mt-0.5">
-              {/* <!-- phone --> */}
               <div className="flex flex-col gap-y-2">
                 <label
                   htmlFor="phone"
@@ -143,7 +169,6 @@ const CheckOut = () => {
                   onChange={handleInputChange}
                 />
               </div>
-              {/* <!-- email --> */}
               <div className="flex flex-col gap-y-2">
                 <label
                   htmlFor="email"
@@ -159,12 +184,11 @@ const CheckOut = () => {
                   name="email"
                   value={userInfo.email}
                   onChange={handleInputChange}
-
                 />
               </div>
             </div>
 
-            {/* < address --> */}
+            {/* Address */}
             <div className="flex flex-col gap-y-2 *:rounded-lg border-b pb-4">
               <span className="text-xs uppercase text-[#46494F] tracking-[0.9px]">
                 Địa chỉ
@@ -174,34 +198,39 @@ const CheckOut = () => {
                 className="h-12 border px-4 text-sm"
                 placeholder="Vui lòng nhập địa chỉ"
                 name="address"
-                value={userInfo.address}
+                value={userInfo.address || ""} // Ensure address is handled correctly
                 onChange={handleInputChange}
               />
             </div>
 
-            {/* Phương thức thanh toán */}
+            {/* Payment Method */}
             <div className="mb-2">
               <h2 className="mb-2">Chọn phương thức thanh toán</h2>
               <div className="border border-gray-300 rounded p-2">
                 <div className="flex items-center">
-                  <input className="mr-2" type="radio" name="paymentMethod" value="paypal" 
-                    checked={paymentMethod === 'paypal'}
-                    onChange={handlePaymentMethodChange}   />
+                  <input
+                    className="mr-2"
+                    type="radio"
+                    name="paymentMethod"
+                    value="paypal"
+                    checked={paymentMethod === "paypal"}
+                    onChange={handlePaymentMethodChange}
+                  />
                   <img
-                    alt="MoMo logo"
+                    alt="PayPal logo"
                     className="mr-2"
                     height="40"
                     src="../../../public/images/logo_paypal.png"
                     width="40"
                   />
-                  <label>Thanh toán bằng paypal</label>
+                  <label>Thanh toán bằng PayPal</label>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* <!-- right --> */}
+        {/* Right Section */}
         <div>
           <div className="border rounded-2xl flex flex-col gap-y-5 lg:p-6 px-5 py-[22px]">
             <div className="flex flex-col gap-y-[17px] border-b pb-5">
@@ -210,16 +239,16 @@ const CheckOut = () => {
                 <p>{totalPrice} VDN</p>
               </section>
               <section className="flex justify-between text-sm">
-                <span className="text-[#9D9EA2]">Tên đơn hàng </span>
+                <span className="text-[#9D9EA2]">Tên đơn hàng</span>
                 <p>Vé {ticketType}</p>
               </section>
             </div>
-            {/* <!-- voucher --> */}
+
             <div className="border-b flex flex-col gap-y-3">
               <label className="text-sm text-[#9D9EA2]">Áp dụng voucher</label>
               <div className="lg:flex items-center grid grid-cols-[50%_45%] justify-between gap-x-3 *:h-12">
                 <input
-                  type="text "
+                  type="text"
                   placeholder="Coupon code"
                   className="pl-[22px] py-2 rounded-lg border"
                 />

@@ -2,12 +2,12 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { TicketsCT } from '../../../Contexts/TicketContext';
 import { useForm } from 'react-hook-form';
-import { Tickets } from '../../../interfaces/Ticket';
-import { getEvents } from '../../../api_service/event';
+import { Tickets, TicketType } from '../../../interfaces/Ticket';
 import { getTicketsId } from '../../../api_service/ServiceTicket';
+import { EventCT } from '../../../Contexts/ClientEventContext';
 
 const EditTicket = () => {
-  const { onEdit} = useContext(TicketsCT); 
+  const { onEdit,tickets} = useContext(TicketsCT); 
   const {
     register,
     handleSubmit,
@@ -27,26 +27,9 @@ const EditTicket = () => {
     })();
   },[])
 
-  const [list, setList] = useState<{ id: number; name: string }[]>([]); // Danh sách sự kiện
+const {events} = useContext(EventCT)
+const [ticketTypesList] = useState(Object.values(TicketType));
 
-  // Gọi API để lấy danh sách sự kiện từ backend
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await getEvents();
-        // Kiểm tra xem dữ liệu có trường 'data' và là mảng không
-        if (response && Array.isArray(response.data)) {
-          setList(response.data); // Cập nhật danh sách sự kiện từ API
-        } else {
-          console.error('Dữ liệu trả về không phải là mảng:', response);
-          setList([]); // Đặt list về mảng rỗng nếu không phải mảng
-        }
-      } catch (error) {
-        console.error('Lỗi khi tải dữ liệu sự kiện:', error);
-      }
-    };
-    fetchEvents();
-  }, []);
   return (
 <div>
       <form
@@ -55,21 +38,46 @@ const EditTicket = () => {
       >
         <h2 className="text-2xl font-bold text-center mb-5">Cập nhật vé</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="ticket-code" className="block text-sm font-medium text-gray-700">
-              Mã vé
+                    {/* Trường sự kiện */}
+                    <div>
+            <label htmlFor="event" className="block text-sm font-medium text-gray-700">
+              Sự kiện
             </label>
-            <input
-              type="text"
-              id="ticket-code"
+            <select
+              id="event"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("id", { required: true })}
-            />
-            {errors.id && (
-              <span className="text-red-500">Mã vé không được bỏ trống</span>
-            )}
+              {...register("event_id", { required: true })}
+            >
+              <option value="">Chọn sự kiện</option>
+              {events.map((event) => (
+                <option key={event.id} value={event.id}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+            {errors.event_id && <span className="text-red-500">Vui lòng chọn sự kiện</span>}
           </div>
 
+          {/* Trường loại vé */}
+          <div>
+            <label htmlFor="ticket-type" className="block text-sm font-medium text-gray-700">
+              Loại vé
+            </label>
+            <select
+              id="ticket-type"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              {...register("ticket_type", { required: true })}
+            >
+              <option value="">Chọn loại vé</option>
+              {ticketTypesList.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            {errors.ticket_type && <span className="text-red-500">Vui lòng chọn loại vé</span>}
+          </div>
+          {/* Trường giá vé */}
           <div>
             <label htmlFor="ticket-price" className="block text-sm font-medium text-gray-700">
               Giá vé
@@ -83,6 +91,21 @@ const EditTicket = () => {
             {errors.price && <span className="text-red-500">Giá không hợp lệ</span>}
           </div>
 
+          {/* Trường vị trí */}
+          <div>
+            <label htmlFor="seat_location" className="block text-sm font-medium text-gray-700">
+              Vị trí
+            </label>
+            <input
+              type="text"
+              id="seat_location"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              {...register("seat_location", { required: true })}
+            />
+            {errors.seat_location && <span className="text-red-500">Vị trí không hợp lệ</span>}
+          </div>
+
+          {/* Trường số lượng vé */}
           <div>
             <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
               Số lượng vé
@@ -96,56 +119,9 @@ const EditTicket = () => {
             {errors.quantity && <span className="text-red-500">Số lượng không hợp lệ</span>}
           </div>
 
-          <div>
-            <label htmlFor="available_quantity" className="block text-sm font-medium text-gray-700">
-              Số lượng vé có sẵn
-            </label>
-            <input
-              type="number"
-              id="available_quantity"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("available_quantity", { required: true, min: 1 })}
-            />
-            {errors.available_quantity && (
-              <span className="text-red-500">Số lượng có sẵn không hợp lệ</span>
-            )}
-          </div>
 
-          <div>
-            <label htmlFor="event" className="block text-sm font-medium text-gray-700">
-              Sự kiện
-            </label>
-            <select
-              id="event"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("event_id", { required: true })}
-            >
-              <option value="">Chọn sự kiện</option>
-              {list.map((event) => (
-                <option key={event.id} value={event.id}>
-                  {event.name}
-                </option>
-              ))}
-            </select>
-            {errors.event_id && <span className="text-red-500">Vui lòng chọn sự kiện</span>}
-          </div>
 
-          <div>
-            <label htmlFor="ticket-type" className="block text-sm font-medium text-gray-700">
-              Loại vé
-            </label>
-            <select
-              id="ticket_type"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("ticket_type", { required: true })}
-            >
-              <option value="VIP">VIP</option>
-              <option value="Standard">Standard</option>
-              <option value="Economy">Economy</option>
-            </select>
-            {errors.ticket_type && <span className="text-red-500">Vui lòng chọn loại vé</span>}
-          </div>
-
+          {/* Trường ngày bắt đầu */}
           <div>
             <label htmlFor="sale_start" className="block text-sm font-medium text-gray-700">
               Ngày bắt đầu
@@ -159,6 +135,7 @@ const EditTicket = () => {
             {errors.sale_start && <span className="text-red-500">Ngày bắt đầu không hợp lệ</span>}
           </div>
 
+          {/* Trường ngày kết thúc */}
           <div>
             <label htmlFor="sale_end" className="block text-sm font-medium text-gray-700">
               Ngày kết thúc
@@ -172,6 +149,7 @@ const EditTicket = () => {
             {errors.sale_end && <span className="text-red-500">Ngày kết thúc không hợp lệ</span>}
           </div>
 
+          {/* Trường mô tả */}
           <div className="sm:col-span-2">
             <label htmlFor="description" className="block text-sm font-medium text-gray-700">
               Mô tả
@@ -184,6 +162,7 @@ const EditTicket = () => {
               placeholder="Mô tả của bạn ....."
             ></textarea>
           </div>
+
         </div>
 
         <div className="mt-6 flex justify-start space-x-4">

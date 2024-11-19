@@ -5,7 +5,6 @@ import Client from "./pages/Client/Client";
 import Home from "./pages/Client/Home";
 import LayoutAdmin from "./layouts/LayoutAdmin";
 import ListTicket from "./pages/Admin/Tickets/ListTicket";
-import ListUserBuyTicket from "./pages/Admin/Tickets/ListUserBuyTicket";
 import AddTicket from "./pages/Admin/Tickets/AddTicket";
 import EditTicket from "./pages/Admin/Tickets/EditTicket";
 import Auth from "./pages/Auth/Auth";
@@ -59,7 +58,6 @@ function App() {
       element: <LayoutAdmin />,
       children: [
         { path: "ticket-list", element: <ListTicket /> },
-        { path: "ticket-list-user", element: <ListUserBuyTicket /> },
         { path: "add-ticket", element: <AddTicket /> },
         { path: "edit-ticket/:id", element: <EditTicket /> },
         { path: "event-list", element: <ListEvent /> },

@@ -11,7 +11,6 @@ use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
 use App\Http\Controllers\V1\EventTrackingController;
 use App\Http\Controllers\V1\FeedbackController;
-use App\Http\Controllers\V1\StatisticsController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
@@ -146,8 +145,6 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}', [ClientEventController::class, 'show'])->name('client.event.show');
             Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
             Route::get('category/{categoryId}', [ClientEventController::class, 'getEventsByCategory']); // Bài viết theo danh mục
-            Route::post('filter', [ClientEventController::class, 'filter']);
-            Route::post('search', [ClientEventController::class, 'search']);
         });
 
         Route::prefix('home')->group(function () {
