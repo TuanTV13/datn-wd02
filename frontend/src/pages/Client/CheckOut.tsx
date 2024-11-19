@@ -8,7 +8,7 @@ const CheckOut = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const ticketType = searchParams.get("ticketType");
-  const totalPrice = parseFloat(searchParams.get("totalPrice") || "0");
+  const initialTotalPrice = parseFloat(searchParams.get("totalPrice") || "0");
   const ticketId = searchParams.get("ticketId");
 
   const [userInfo, setUserInfo] = useState({
@@ -19,86 +19,129 @@ const CheckOut = () => {
   });
 
   const [paymentMethod, setPaymentMethod] = useState("paypal"); 
-
+  const [voucherCode, setVoucherCode] = useState("");
+  const [totalPrice, setTotalPrice] = useState(initialTotalPrice);
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-
       axios
-        .get("http://192.168.2.145:8000/api/v1/user/profile", { headers })
+        .get("http://127.0.0.1:8000/api/v1/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
         .then((response) => {
           const userData = response.data.user;
           setUserInfo({
             name: userData.name || "",
             email: userData.email || "",
             phone: userData.phone || "",
-            address: userData.address || "", 
+            address: userData.address || "",
           });
         })
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
-        });
+        .catch((error) => console.error("Error fetching user data:", error));
     }
   }, []);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setUserInfo((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   };
+  const [isProcessing, setIsProcessing] = useState(false); 
 
-  const handlePaymentMethodChange = (e) => {
+  const handleVoucherApply = async () => {
+    const token = localStorage.getItem("access_token");
+    const userId = localStorage.getItem("user_id"); // Lấy user_id từ localStorage
+    if (!voucherCode) {
+      alert("Vui lòng nhập mã voucher!");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/v1/vouchers/apply",
+        {
+          event_id: ticketId,
+          user_id: userId, 
+          code: voucherCode,
+          totalAmount: totalPrice,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setTotalPrice(response.data.data.total_price);
+        alert("Mã giảm giá áp dụng thành công!");
+      } else {
+        alert(response.data.message || "Mã giảm giá không hợp lệ.");
+      }
+    } catch (error) {
+      console.error("Error applying voucher:", error);
+      alert("Có lỗi xảy ra khi áp dụng mã giảm giá.");
+    }
+  };
+
+  const handlePaymentMethodChange = (e: any) => {
     setPaymentMethod(e.target.value);
   };
 
-  const handleSubmit = async (e) => {
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Prepare the data to send to backend
+    setIsProcessing(true); // Bắt đầu xử lý
     const paymentData = {
       ticket_id: ticketId,
-      payment_method: paymentMethod, // Payment method (paypal)
+      payment_method: paymentMethod,
       name: userInfo.name,
       email: userInfo.email,
       phone: userInfo.phone,
       address: userInfo.address,
-      discount_code: "", // Add logic to get voucher code if needed
+      discount_code: voucherCode || null,
     };
 
     try {
-      const response = await fetch(
-        "http://192.168.2.145:8000/api/v1/clients/payment/process",
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/v1/clients/payment/process",
+        paymentData,
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(paymentData),
+          headers: { "Content-Type": "application/json" },
         }
       );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Redirect to PayPal payment URL
-        window.location.href = data.payment_url;
+      console.log(response)
+      if (response.data.success) {
+        setTimeout(() => {
+          setIsProcessing(false); // Kết thúc xử lý
+          window.location.href = response.data.payment_url; // Chuyển tới PayPal
+        }, 2000); // Giả sử thời gian xử lý là 2 giây (bạn có thể thay đổi theo yêu cầu)
       } else {
-        alert(data.message || "Thanh toán không thành công.");
+        setIsProcessing(false); // Kết thúc xử lý
+        alert(response.data.message || "Thanh toán không thành công.");
       }
     } catch (error) {
       console.error("Error during payment process:", error);
+      setIsProcessing(false); // Kết thúc xử lý
       alert("Có lỗi xảy ra trong quá trình thanh toán.");
     }
   };
-
   return (
     <div className="mt-36 mx-4">
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <p className="text-lg font-medium">Đang xử lý thanh toán, vui lòng chờ...</p>
+            <div className="mt-4 loader"></div>
+          </div>
+        </div>
+      )}
       <div className="w-full lg:py-7 py-4 bg-[#F4F4F4] grid place-items-center -mt-[1px]">
         <div className="flex items-center gap-x-4 text-sm lg:text-base">
           <div className="flex items-center gap-x-2">
@@ -251,8 +294,10 @@ const CheckOut = () => {
                   type="text"
                   placeholder="Coupon code"
                   className="pl-[22px] py-2 rounded-lg border"
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value)}
                 />
-                <button className="text-[#007BFF] font-medium bg-[#F3FBF4] border text-sm rounded-[100px] px-3 py-2">
+                <button type="button" onClick={handleVoucherApply} className="text-[#007BFF] font-medium bg-[#F3FBF4] border text-sm rounded-[100px] px-3 py-2">
                   Áp dụng
                 </button>
               </div>

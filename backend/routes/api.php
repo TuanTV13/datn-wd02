@@ -11,6 +11,7 @@ use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
 use App\Http\Controllers\V1\EventTrackingController;
 use App\Http\Controllers\V1\FeedbackController;
+use App\Http\Controllers\V1\StatisticsController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
@@ -68,6 +69,8 @@ Route::prefix('v1')->group(function () {
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
         Route::get('/check-event-ip', [EventController::class, 'checkEventIP']); // Thông báo hi chưa có ip checkin cục bộ
         Route::post('{eventId}/add-ip', [EventController::class, 'addIp']);
+        Route::get('statistics/top-revenue-events', [StatisticsController::class, 'topRevenueEvents']); // Thống kê trong khoảng thời gian chọn
+        Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng
     });
 
     Route::get('users', [UserController::class, 'index']);
@@ -109,6 +112,7 @@ Route::prefix('v1')->group(function () {
         Route::put('{id}/failed', [TransactionController::class, 'failed']);
     });
 
+    Route::post('/apply-discount', [PaymentController::class, 'applyDiscount']);
     Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
@@ -121,13 +125,15 @@ Route::prefix('v1')->group(function () {
 
     Route::get('feedbacks', [FeedbackController::class, 'index']);
     Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {
-        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData']);  // Lấy dữ liệu đổ ra form đánh giá
+        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá
         Route::get('{id}/show', [FeedbackController::class, 'show']);
+        Route::post('reply', [FeedbackController::class, 'reply']);
         Route::post('submit', [FeedbackController::class, 'submit']);
         Route::delete('{id}/delete', [FeedbackController::class, 'delete']);
     });
 
     Route::prefix('statistics')->middleware('check.permission:view-statistics')->group(function () {
+        Route::get('events/province', [StatisticsController::class, 'getStatisticsByProvince']);
     });
 
     Route::prefix('clients')->group(function () {
@@ -139,6 +145,8 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}', [ClientEventController::class, 'show'])->name('client.event.show');
             Route::put('{eventId}/checkin', [ClientEventController::class, 'checkIn']);
             Route::get('category/{categoryId}', [ClientEventController::class, 'getEventsByCategory']); // Bài viết theo danh mục
+            Route::post('filter', [ClientEventController::class, 'filter']);
+            Route::post('search', [ClientEventController::class, 'search']);
         });
 
         Route::prefix('home')->group(function () {
@@ -159,8 +167,30 @@ Route::prefix('v1')->group(function () {
         Route::get('{id}/transaction-history', [HistoryController::class, 'getTransactionHistory'])->middleware('check.permission:view-transaction-history');
     });
 
-    Route::prefix('statistics')->group(function () {
+    Route::get('/statistics/category', [StatisticsController::class, 'getStatisticsByCategory']);
 
+
+    Route::prefix('statistics')->group(function () {
+        // Route để lấy danh sách các sự kiện có doanh thu cao nhất trong khoảng thời gian
+        Route::get('/top-revenue', [StatisticsController::class, 'topRevenueEvents']);
+
+        // Route để lấy thống kê số sự kiện hoàn thành trong khoảng thời gian
+        Route::get('/event-statistics', [StatisticsController::class, 'getEventStatistics']);
+
+        // Route để lấy thống kê sự kiện theo thể loại (chỉ sự kiện đã được xác nhận)
+        Route::get('/statistics-by-category', [StatisticsController::class, 'getStatisticsByEventType']);
+
+        // Route để lấy thống kê sự kiện theo tỉnh/thành phố (chỉ sự kiện đã được xác nhận)
+        Route::get('/statistics-by-province', [StatisticsController::class, 'getStatisticsByProvince']);
+
+        // Route để lấy danh sách các sự kiện có số lượng người tham gia cao nhất trong khoảng thời gian
+        Route::get('/top-participants', [StatisticsController::class, 'topParticipantsEvents']);
+
+        // Route để lấy thống kê số sự kiện đã xác nhận và bị hủy bỏ trong khoảng thời gian
+        Route::get('/event-status-statistics', [StatisticsController::class, 'getEventStatusStatistics']);
+
+        // Route để lấy doanh thu và số lượng người tham gia của các sự kiện trong khoảng thời gian
+        Route::get('/event-revenue-participants', [StatisticsController::class, 'getEventRevenueAndParticipants']);
     });
 
 });
