@@ -31,10 +31,21 @@ class EventController extends Controller
         $clientIp = $request->ip();
 
         $isAllowed = false;
-        foreach ($allowedIpRanges as $range) {
-            if (str_starts_with($clientIp, $range)) {
-                $isAllowed = true;
-                break;
+        if ($allowedIpRanges && count($allowedIpRanges) > 0) {
+            $isAllowed = false;
+            foreach ($allowedIpRanges as $range) {
+                // Kiểm tra IP của người dùng có nằm trong dải IP được phép không
+                if (str_starts_with($clientIp, $range)) {
+                    $isAllowed = true;
+                    break;
+                }
+            }
+    
+            // Nếu IP không nằm trong dải IP cho phép, từ chối check-in
+            if (!$isAllowed) {
+                return response()->json([
+                    'error' => 'Yêu cầu chỉ được thực hiện từ mạng nội bộ.'
+                ], 403);
             }
         }
 
@@ -253,5 +264,25 @@ class EventController extends Controller
                 'to' => $events->lastItem(),
             ]
         ], 200);
+    }
+
+    public function getByConfirmed()
+    {
+        $events = $this->eventRepository->getByConfirmed();
+        foreach ($events as $event) {
+            if ($event->speakers) {
+                $speakers = json_decode($event->speakers, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $event->speakers = null;
+                } else {
+                    $event->speakers = $speakers;
+                }
+            } else {
+                $event->speakers = null;
+            }
+        }
+        return response()->json([
+            'data' => $events
+        ]);
     }
 }
