@@ -10,6 +10,8 @@ import {
   restoreTicket,
   verifyTicket,
 } from "../api_service/ServiceTicket";
+import { getEvents } from "../api_service/event";
+import { Events } from "../interfaces/Event";
 
 type Props = {
   children: React.ReactNode;
@@ -32,10 +34,11 @@ const TicketsContext = ({ children }: Props) => {
 
   useEffect(() => {
     (async () => {
-        const data = await getAllTickets()
-        setTickets(data)
-    })()
+      const data = await getAllTickets();
+      setTickets(data);
+    })();
   }, []);
+
 
   const onDel = async (id: number) => {
     if (confirm("Bạn có muốn xóa không?")) {
@@ -56,8 +59,9 @@ const TicketsContext = ({ children }: Props) => {
       setTickets([...tickets, newTicket]);
       toast.success("Thêm thành công");
       navigate("/admin/ticket-list");
+      window.location.reload();
     } catch (error) {
-      console.error("Error adding ticket:", error);
+      console.log("Error adding ticket:", error);
       toast.error("Lỗi khi thêm vé");
     }
   };
@@ -66,7 +70,9 @@ const TicketsContext = ({ children }: Props) => {
     try {
       const updatedTicket = await editTicket(ticket);
       setTickets(
-        tickets.map((item) => (item.id === updatedTicket.id ? updatedTicket : item))
+        tickets.map((item) =>
+          item.id === updatedTicket.id ? updatedTicket : item
+        )
       );
       toast.success("Sửa thành công");
       navigate("/admin/ticket-list");

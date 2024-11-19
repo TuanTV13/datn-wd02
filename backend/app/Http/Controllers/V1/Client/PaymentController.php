@@ -83,17 +83,25 @@ class PaymentController extends Controller
         try {
 
             // Kiểm tra có đăng nhập hay không, Nếu có lấy thông tin người dùng đăng nhập, ngược lại đăng kí mới và lấy thông tin đó
-            $user = Auth::check() ? Auth::user() : $this->userRepository->create($request->validate([
-                'name' => 'required',
-                'email' => 'required|email',
-                'phone' => 'required'
-            ]));
+            if (Auth::check()) {
+                // Nếu người dùng đã đăng nhập, lấy thông tin người dùng hiện tại
+                $user = Auth::user();
+            } else {
+                // Nếu người dùng chưa đăng nhập, tạo mới người dùng từ dữ liệu trong request
+                $validatedData = $request->validate([
+                    'name' => 'required',
+                    'email' => 'required|email',
+                    'phone' => 'required'
+                ]);
+                $user = $this->userRepository->create($validatedData);
+            }
 
             $request->validate([
                 'payment_method' => 'required|string|in:cash,paypal',
                 'discount_code' => 'nullable|string'
             ]);
-            
+
+
             // Mã vé
             $ticketCode = strtoupper(uniqid('TICKET-'));
 
@@ -122,7 +130,7 @@ class PaymentController extends Controller
                     return response()->json(['error' => $voucherResponse->getData()->message], 400);
                 }
 
-                $totalAmount = $voucherResponse->getData()->data->total_price; // Giá tiền sau khi sử dụng mã giảm giá 
+                $totalAmount = $voucherResponse->getData()->data->total_price; // Giá tiền sau khi sử dụng mã giảm giá
             }
 
             // Dữ liệu giao dịch

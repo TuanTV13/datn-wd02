@@ -5,7 +5,6 @@ import Client from "./pages/Client/Client";
 import Home from "./pages/Client/Home";
 import LayoutAdmin from "./layouts/LayoutAdmin";
 import ListTicket from "./pages/Admin/Tickets/ListTicket";
-import ListUserBuyTicket from "./pages/Admin/Tickets/ListUserBuyTicket";
 import AddTicket from "./pages/Admin/Tickets/AddTicket";
 import EditTicket from "./pages/Admin/Tickets/EditTicket";
 import Auth from "./pages/Auth/Auth";
@@ -24,7 +23,7 @@ import CheckOut from "./pages/Client/CheckOut";
 import EventDetail from "./pages/Client/EventDetail";
 import EventHistory from "./pages/Client/EventHistory";
 import PaymentHistory from "./pages/Client/PaymentHistory";
-import VerifyEmailPage from './components/Auth/VerifyEmailPage';
+import VerifyEmailPage from "./components/Auth/VerifyEmailPage";
 import CategoryEvent from "./pages/Client/CategoryEven";
 import UserProfileEdit from "./pages/Client/UserProfileEdit";
 import UserChangePassword from "./pages/Client/UserChangePassword";
@@ -33,6 +32,7 @@ import AddDiscountCode from "./pages/Admin/Voucher/AddDiscountCode";
 import DiscountCodeList from "./pages/Admin/Voucher/DiscountCodeList";
 import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
 import Order from "./pages/Client/Order";
+import SearchEvent from "./pages/Client/SearchEvent";
 
 function App() {
   const route = useRoutes([
@@ -52,6 +52,7 @@ function App() {
         { path: "profile", element: <UserProfile /> },
         { path: "profile/edit", element: <UserProfileEdit /> },
         { path: "change-password", element: <UserChangePassword /> },
+        { path: "search", element: <SearchEvent /> },
       ],
     },
     {
@@ -59,7 +60,6 @@ function App() {
       element: <LayoutAdmin />,
       children: [
         { path: "ticket-list", element: <ListTicket /> },
-        { path: "ticket-list-user", element: <ListUserBuyTicket /> },
         { path: "add-ticket", element: <AddTicket /> },
         { path: "edit-ticket/:id", element: <EditTicket /> },
         { path: "event-list", element: <ListEvent /> },

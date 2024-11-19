@@ -4,7 +4,7 @@ import { TicketsCT } from "../../../Contexts/TicketContext";
 import { Tickets } from "../../../interfaces/Ticket";
 
 const ListTicket = () => {
-  const { tickets, onDel} = useContext(TicketsCT);
+  const { tickets, onDel } = useContext(TicketsCT);
   return (
     <div>
       <div className="bg-white rounded-lg shadow">
@@ -63,12 +63,20 @@ const ListTicket = () => {
                 <tr key={item.id}>
                   <td className="p-4 border border-gray-300">{index + 1}</td>
                   <td className="p-4 border border-gray-300">{item.id}</td>
-                  <td className="p-4 border border-gray-300">{item.event?.name}</td>
+                  <td className="p-4 border border-gray-300">
+                    {item.event?.name}
+                  </td>
                   <td className="p-4 border border-gray-300"></td>
-                  <td className="p-4 border border-gray-300">{item.statuses?.name}</td>
+                  <td className="p-4 border border-gray-300">
+                    {item.statuses?.name}
+                  </td>
                   <td className="p-4 border border-gray-300">{item.price}</td>
-                  <td className="p-4 border border-gray-300">{item.sale_start}</td>
-                  <td className="p-4 border border-gray-300">{item.sale_end}</td>
+                  <td className="p-4 border border-gray-300">
+                    {item.sale_start}
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {item.sale_end}
+                  </td>
                   <td className="p-4 border border-gray-300">
                     <div className="flex flex-col items-center space-y-1">
                       <Link
@@ -95,7 +103,10 @@ const ListTicket = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={9} className="p-4 border border-gray-300 text-center">
+                <td
+                  colSpan={9}
+                  className="p-4 border border-gray-300 text-center"
+                >
                   Không có vé nào.
                 </td>
               </tr>

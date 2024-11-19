@@ -9,7 +9,6 @@ use App\Http\Services\CheckEventIPService;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -254,8 +253,8 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Khôi phục sự kiện thành công'
         ], 200);
-        
     }
+
     public function checkEventIP(): JsonResponse
     {
         $result = $this->checkEventIPService->checkEventsWithoutIP();
@@ -266,10 +265,4 @@ class EventController extends Controller
             'events' => $result['events'] ?? []
         ]);
     }
-    
-  
-      
-    }
-    
-
-
+}

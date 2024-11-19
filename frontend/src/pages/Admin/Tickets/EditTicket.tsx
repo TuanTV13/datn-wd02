@@ -1,31 +1,31 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { TicketsCT } from '../../../Contexts/TicketContext';
-import { useForm } from 'react-hook-form';
-import { Tickets } from '../../../interfaces/Ticket';
-import { getEvents } from '../../../api_service/event';
-import { getTicketsId } from '../../../api_service/ServiceTicket';
+import React, { useContext, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { TicketsCT } from "../../../Contexts/TicketContext";
+import { useForm } from "react-hook-form";
+import { Tickets } from "../../../interfaces/Ticket";
+import { getEvents } from "../../../api_service/event";
+import { getTicketsId } from "../../../api_service/ServiceTicket";
 
 const EditTicket = () => {
-  const { onEdit} = useContext(TicketsCT); 
+  const { onEdit } = useContext(TicketsCT);
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm<Tickets>();
   const { id } = useParams();
   const [ticket, setTicket] = useState<Tickets | null>(null);
   const onSubmit = (data: Tickets) => {
-    onEdit({...data, id}); 
+    onEdit({ ...data, id });
   };
   useEffect(() => {
     (async () => {
       const data = await getTicketsId(`${id}`);
       setTicket(data);
-      reset(data)
+      reset(data);
     })();
-  },[])
+  }, []);
 
   const [list, setList] = useState<{ id: number; name: string }[]>([]); // Danh sách sự kiện
 
@@ -38,17 +38,17 @@ const EditTicket = () => {
         if (response && Array.isArray(response.data)) {
           setList(response.data); // Cập nhật danh sách sự kiện từ API
         } else {
-          console.error('Dữ liệu trả về không phải là mảng:', response);
+          console.error("Dữ liệu trả về không phải là mảng:", response);
           setList([]); // Đặt list về mảng rỗng nếu không phải mảng
         }
       } catch (error) {
-        console.error('Lỗi khi tải dữ liệu sự kiện:', error);
+        console.error("Lỗi khi tải dữ liệu sự kiện:", error);
       }
     };
     fetchEvents();
   }, []);
   return (
-<div>
+    <div>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="max-w mx-auto p-6 bg-white shadow-md rounded-lg"
@@ -56,7 +56,10 @@ const EditTicket = () => {
         <h2 className="text-2xl font-bold text-center mb-5">Cập nhật vé</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="ticket-code" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="ticket-code"
+              className="block text-sm font-medium text-gray-700"
+            >
               Mã vé
             </label>
             <input
@@ -71,7 +74,10 @@ const EditTicket = () => {
           </div>
 
           <div>
-            <label htmlFor="ticket-price" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="ticket-price"
+              className="block text-sm font-medium text-gray-700"
+            >
               Giá vé
             </label>
             <input
@@ -80,11 +86,16 @@ const EditTicket = () => {
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               {...register("price", { required: true, min: 0 })}
             />
-            {errors.price && <span className="text-red-500">Giá không hợp lệ</span>}
+            {errors.price && (
+              <span className="text-red-500">Giá không hợp lệ</span>
+            )}
           </div>
 
           <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="quantity"
+              className="block text-sm font-medium text-gray-700"
+            >
               Số lượng vé
             </label>
             <input
@@ -93,11 +104,16 @@ const EditTicket = () => {
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               {...register("quantity", { required: true, min: 1 })}
             />
-            {errors.quantity && <span className="text-red-500">Số lượng không hợp lệ</span>}
+            {errors.quantity && (
+              <span className="text-red-500">Số lượng không hợp lệ</span>
+            )}
           </div>
 
           <div>
-            <label htmlFor="available_quantity" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="available_quantity"
+              className="block text-sm font-medium text-gray-700"
+            >
               Số lượng vé có sẵn
             </label>
             <input
@@ -112,7 +128,10 @@ const EditTicket = () => {
           </div>
 
           <div>
-            <label htmlFor="event" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="event"
+              className="block text-sm font-medium text-gray-700"
+            >
               Sự kiện
             </label>
             <select
@@ -127,11 +146,16 @@ const EditTicket = () => {
                 </option>
               ))}
             </select>
-            {errors.event_id && <span className="text-red-500">Vui lòng chọn sự kiện</span>}
+            {errors.event_id && (
+              <span className="text-red-500">Vui lòng chọn sự kiện</span>
+            )}
           </div>
 
           <div>
-            <label htmlFor="ticket-type" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="ticket-type"
+              className="block text-sm font-medium text-gray-700"
+            >
               Loại vé
             </label>
             <select
@@ -143,11 +167,16 @@ const EditTicket = () => {
               <option value="Standard">Standard</option>
               <option value="Economy">Economy</option>
             </select>
-            {errors.ticket_type && <span className="text-red-500">Vui lòng chọn loại vé</span>}
+            {errors.ticket_type && (
+              <span className="text-red-500">Vui lòng chọn loại vé</span>
+            )}
           </div>
 
           <div>
-            <label htmlFor="sale_start" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="sale_start"
+              className="block text-sm font-medium text-gray-700"
+            >
               Ngày bắt đầu
             </label>
             <input
@@ -156,11 +185,16 @@ const EditTicket = () => {
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               {...register("sale_start", { required: true })}
             />
-            {errors.sale_start && <span className="text-red-500">Ngày bắt đầu không hợp lệ</span>}
+            {errors.sale_start && (
+              <span className="text-red-500">Ngày bắt đầu không hợp lệ</span>
+            )}
           </div>
 
           <div>
-            <label htmlFor="sale_end" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="sale_end"
+              className="block text-sm font-medium text-gray-700"
+            >
               Ngày kết thúc
             </label>
             <input
@@ -169,11 +203,16 @@ const EditTicket = () => {
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               {...register("sale_end", { required: true })}
             />
-            {errors.sale_end && <span className="text-red-500">Ngày kết thúc không hợp lệ</span>}
+            {errors.sale_end && (
+              <span className="text-red-500">Ngày kết thúc không hợp lệ</span>
+            )}
           </div>
 
           <div className="sm:col-span-2">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700"
+            >
               Mô tả
             </label>
             <textarea
@@ -202,7 +241,7 @@ const EditTicket = () => {
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default EditTicket
+export default EditTicket;

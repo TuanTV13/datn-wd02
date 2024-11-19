@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const AddUser = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    birthday: '',
-    gender: 'Nam', // Mặc định là Nam
-    status: 'Đang hoạt động', // Mặc định là Đang hoạt động
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    birthday: "",
+    gender: "Nam", // Mặc định là Nam
+    status: "Đang hoạt động", // Mặc định là Đang hoạt động
   });
 
   const handleChange = (e) => {
@@ -22,16 +22,16 @@ const AddUser = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Gọi API để thêm người dùng mới
-    console.log('Thêm người dùng:', formData);
+    console.log("Thêm người dùng:", formData);
     // Reset form sau khi thêm thành công
     setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      birthday: '',
-      gender: 'Nam',
-      status: 'Đang hoạt động',
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      birthday: "",
+      gender: "Nam",
+      status: "Đang hoạt động",
     });
   };
 
@@ -118,8 +118,11 @@ const AddUser = () => {
           </select>
         </div>
         <div className="mt-6 flex justify-end space-x-4">
-          <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-           Thêm người dùng
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Thêm người dùng
           </button>
         </div>
       </form>

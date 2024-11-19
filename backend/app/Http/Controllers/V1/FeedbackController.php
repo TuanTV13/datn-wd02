@@ -27,7 +27,7 @@ class FeedbackController extends Controller
     public function index()
     {
         $feedbacks = $this->feedbackRepository->getAll();
-        
+
         return response()->json([
             'message' => 'Danh sách phản hồi',
             'data'    => $feedbacks,
@@ -49,7 +49,7 @@ class FeedbackController extends Controller
         if (!$user) {
             return response()->json(['message' => 'Người dùng không tồn tại.'], 404);
         }
-        
+
         // return response()->json([
         //     'message' => 'Form đánh giá',
         //     'data'    => [
@@ -99,30 +99,32 @@ class FeedbackController extends Controller
             'message' => 'Trả lời phản hồi',
             'data'    => $feedback,
         ], 200);
-    } 
+    }
 
     public function submit(Request $request)
     {
         DB::beginTransaction();
         try {
-            $data = $request->validate([
-                'event_id' => 'required|exists:events,id',
-                'user_id' => 'required|exists:users,id',
-                'rating' => 'required|numeric',
-                'feedback' => 'nullable|string',
-                'suggestions' => 'nullable|string',
-            ], 
-            [
-                'event_id.required' => 'Sự kiện không được để trống.',
-                'event_id.exists' => 'Sự kiện không tồn tại.',
-                'user_id.required' => 'Người dùng không được để trống.',
-                'user_id.exists' => 'Người dùng không tồn tại.',
-                'rating.required' => 'Đánh giá không được để trống.',
-                'rating.numeric' => 'Đánh giá phải là số.',
-                'feedback.string' => 'Phản hồi phải là chuỗi.',
-                'suggestions.string' => 'Góp ý phải là chuỗi.',
-            ]);
-    
+            $data = $request->validate(
+                [
+                    'event_id' => 'required|exists:events,id',
+                    'user_id' => 'required|exists:users,id',
+                    'rating' => 'required|numeric',
+                    'feedback' => 'nullable|string',
+                    'suggestions' => 'nullable|string',
+                ],
+                [
+                    'event_id.required' => 'Sự kiện không được để trống.',
+                    'event_id.exists' => 'Sự kiện không tồn tại.',
+                    'user_id.required' => 'Người dùng không được để trống.',
+                    'user_id.exists' => 'Người dùng không tồn tại.',
+                    'rating.required' => 'Đánh giá không được để trống.',
+                    'rating.numeric' => 'Đánh giá phải là số.',
+                    'feedback.string' => 'Phản hồi phải là chuỗi.',
+                    'suggestions.string' => 'Góp ý phải là chuỗi.',
+                ]
+            );
+
             $event = $this->eventRepository->find($data['event_id']);
             $user = $this->userRepository->find($data['user_id']);
 
@@ -136,26 +138,24 @@ class FeedbackController extends Controller
             if (!$event->users()->where('user_id', $user->id)->wherePivot('checked_in', 1)->exists()) {
                 return response()->json(['message' => 'Người dùng chưa tham gia sự kiện này.'], 403);
             }
-    
+
             if ($event->feedbacks()->where('user_id', $user->id)->count() >= 2) {
                 return response()->json(['message' => 'Người dùng đã đạt tối đa số lần gửi phản hồi cho sự kiện này.'], 422);
             }
 
             $this->feedbackRepository->create($data);
-    
+
             DB::commit();
-    
+
             return response()->json(['message' => 'Đánh giá đã được gửi thành công.'], 201);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-    
+
             Log::error('Có lỗi xảy ra khi gửi đánh giá: ' . $e->getMessage());
-    
             return response()->json(['message' => 'Đã có lỗi xảy ra khi gửi đánh giá.'], 500);
         }
     }
-    
+
 
     public function delete($feedback)
     {

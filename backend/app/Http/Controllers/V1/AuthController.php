@@ -266,8 +266,8 @@ class AuthController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            'address' => 'nllable|string|max:255',
-            'image' => 'nullable|string|max:2048',
+            'address' => 'required|string|max:255',
+            'image' => 'required|string|max:2048',
         ]);
 
         $user = $this->userRepository->find($id);
@@ -282,7 +282,7 @@ class AuthController extends Controller
 
         $data = $request->validate([
             'password' => 'required|string',
-            'new_password' => 'required|string|confirmed'
+            'new_password' => 'required|string'
         ]);
 
         $user = $this->userRepository->find($id);

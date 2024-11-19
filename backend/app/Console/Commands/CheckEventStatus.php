@@ -7,6 +7,7 @@ use App\Events\EventUpcoming;
 use App\Models\Event;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class CheckEventStatus extends Command
 {
@@ -43,12 +44,7 @@ class CheckEventStatus extends Command
                 $event->update(['status' => 'checkin']);
                 $users = $event->users()->select('users.id', 'users.name', 'users.email')->distinct()->get();
                 
-                if ($users->count() > 0) {
-                    event(new EventUpcoming($users, $event));
-                    $this->info("Đã cập nhật trạng thái của sự kiện {$event->id} thành checkin và gửi thông báo.");
-                } else {
-                    $this->info("Sự kiện {$event->id} không có người đăng ký, không gửi thông báo.");
-                }
+                event(new EventUpcoming($users, $event));
                 $this->info("Đã cập nhật trạng thái của sự kiện {$event->id} thành checkin.");
             }
             
