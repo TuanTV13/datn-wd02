@@ -48,7 +48,7 @@ const CheckOut = () => {
     };
 
     try {
-      const response = await fetch("http://192.168.2.145:8000/api/v1/clients/payment/process", {
+      const response = await fetch("http://192.168.2.112:8000/api/v1/clients/payment/process", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

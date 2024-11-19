@@ -9,7 +9,7 @@ const EventDetail = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [similarEvents, setSimilarEvents] = useState([]);
   useEffect(() => {
-    axios.get(`http://192.168.2.145:8000/api/v1/clients/events/${id}`)
+    axios.get(`http://192.168.2.112:8000/api/v1/clients/events/${id}`)
 
       .then((response) => {
         setEvent(response.data.data);

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for your API
-const API_URL = 'http://192.168.2.145:8000/api/v1'; // Replace with your actual API URL
+const API_URL = 'http://192.168.2.112:8000/api/v1'; // Replace with your actual API URL
 
 // Function to handle user login
 export const login = async (email, password) => {
