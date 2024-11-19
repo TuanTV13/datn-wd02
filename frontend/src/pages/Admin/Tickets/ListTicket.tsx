@@ -40,6 +40,7 @@ const ListTicket = () => {
               <th className="p-4 border border-gray-300">Mã vé</th>
               <th className="p-4 border border-gray-300">Tên sự kiện</th>
               <th className="p-4 border border-gray-300">Loại vé</th>
+              <th className="p-4 border border-gray-300">Số lượng</th>
               <th className="p-4 border border-gray-300">Trạng thái</th>
               <th className="p-4 border border-gray-300">Giá</th>
               <th className="p-4 border border-gray-300">
@@ -63,6 +64,7 @@ const ListTicket = () => {
                   <td className="p-4 border border-gray-300">
                     {item.ticket_type}
                   </td>
+                  <td className="p-4 border border-gray-300">{item.quantity}</td>
                   <td className="p-4 border border-gray-300">{item.status}</td>
                   <td className="p-4 border border-gray-300">{item.price}</td>
                   <td className="p-4 border border-gray-300">

@@ -38,15 +38,15 @@ export const addTicket = async (ticketData: Tickets) => {
 };
 
 // Cập nhật thông tin vé
-export const editTicket = async (id: Tickets) => {
+export const editTicket = async (ticket: Tickets) => {
   const token = localStorage.getItem("access_token");
   const headers = {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
   try {
-    const { data } = await api.put(`/tickets/${id}/update`, id, { headers });
-    console.log(data);
+    const { data } = await api.put(`/tickets/${ticket.id}/update`, ticket, { headers });
+    console.log(data.data);
     return data.data;
   } catch (error) {
     console.error("Error editing ticket:", error);

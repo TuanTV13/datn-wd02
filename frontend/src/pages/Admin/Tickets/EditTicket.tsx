@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { Tickets, TicketType } from '../../../interfaces/Ticket';
 import { getTicketsId } from '../../../api_service/ServiceTicket';
 import { EventCT } from '../../../Contexts/ClientEventContext';
-
+import dayjs from "dayjs";
 const EditTicket = () => {
   const { onEdit,tickets} = useContext(TicketsCT); 
   const {
@@ -16,9 +16,7 @@ const EditTicket = () => {
   } = useForm<Tickets>();
   const { id } = useParams();
   const [ticket, setTicket] = useState<Tickets | null>(null);
-  const onSubmit = (data: Tickets) => {
-    onEdit({...data, id}); 
-  };
+
   useEffect(() => {
     (async () => {
       const data = await getTicketsId(`${id}`);
@@ -29,6 +27,37 @@ const EditTicket = () => {
 
 const {events} = useContext(EventCT)
 const [ticketTypesList] = useState(Object.values(TicketType));
+ // Lấy thông tin ticket khi component được render
+ useEffect(() => {
+  (async () => {
+    const data = await getTicketsId(`${id}`);
+    if (data) {
+      // Định dạng ngày trước khi gán vào form
+      const formattedData = {
+        ...data,
+        sale_start: dayjs(data.sale_start).format("YYYY-MM-DD"),
+        sale_end: dayjs(data.sale_end).format("YYYY-MM-DD"),
+      };
+      setTicket(formattedData);
+      reset(formattedData);
+    }
+  })();
+}, [id, reset]);
+
+// Xử lý cập nhật ticket
+const onSubmit = (data: Tickets) => {
+  // Định dạng lại ngày giờ cho MySQL
+  const formattedSaleStart = new Date(data.sale_start).toISOString().slice(0, 19).replace('T', ' ');
+  const formattedSaleEnd = new Date(data.sale_end).toISOString().slice(0, 19).replace('T', ' ');
+
+  // Gọi onEdit với ngày giờ đã định dạng
+  onEdit({
+    ...data,
+    sale_start: formattedSaleStart,
+    sale_end: formattedSaleEnd,
+    id,
+  });
+};
 
   return (
 <div>
