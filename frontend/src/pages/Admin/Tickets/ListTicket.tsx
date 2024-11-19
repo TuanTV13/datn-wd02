@@ -78,7 +78,7 @@ const ListTicket = () => {
                     {item.sale_end}
                   </td>
                   <td className="p-4 border border-gray-300">
-                    <div className="flex items-center space-y-1 justify-between p-3">
+                    <div className="flex items-center space-y-1 justify-between p-2">
                       <Link to={`/admin/edit-ticket/${item.id}`}>
                         <svg
                           className="w-[20px] h-[20px] fill-[#007BFF]"

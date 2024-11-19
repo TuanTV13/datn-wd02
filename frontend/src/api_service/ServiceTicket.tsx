@@ -49,6 +49,7 @@ export const editTicket = async (id: Tickets) => {
       };
     try {
         const {data} = await api.put(`/tickets/${id}/update`, id, {headers});
+        console.log(data)
         return data.data
     } catch (error) {
         console.error("Error editing ticket:", error);

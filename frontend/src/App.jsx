@@ -32,6 +32,7 @@ import AddDiscountCode from "./pages/Admin/Voucher/AddDiscountCode";
 import DiscountCodeList from "./pages/Admin/Voucher/DiscountCodeList";
 import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
 import Order from "./pages/Client/Order";
+import SearchEvent from "./pages/Client/SearchEvent";
 
 function App() {
   const route = useRoutes([
@@ -51,6 +52,7 @@ function App() {
         { path: "profile", element: <UserProfile /> },
         { path: "profile/edit", element: <UserProfileEdit /> },
         { path: "change-password", element: <UserChangePassword /> },
+        { path: "search", element: <SearchEvent /> },
       ],
     },
     {

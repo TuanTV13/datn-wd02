@@ -8,97 +8,156 @@ const CheckOut = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const ticketType = searchParams.get("ticketType");
-  const totalPrice = parseFloat(searchParams.get("totalPrice") || "0");
+  const initialTotalPrice = parseFloat(searchParams.get("totalPrice") || "0");
   const ticketId = searchParams.get("ticketId");
 
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
     phone: "",
-    address: "",
   });
 
   const [paymentMethod, setPaymentMethod] = useState("paypal"); 
+  const [voucherCode, setVoucherCode] = useState("");
+  const [totalPrice, setTotalPrice] = useState(initialTotalPrice);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-
+      setIsLoggedIn(true); // Đánh dấu người dùng đã đăng nhập
       axios
-        .get("http://192.168.2.145:8000/api/v1/user/profile", { headers })
+        .get("http://127.0.0.1:8000/api/v1/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
         .then((response) => {
           const userData = response.data.user;
           setUserInfo({
             name: userData.name || "",
             email: userData.email || "",
             phone: userData.phone || "",
-            address: userData.address || "", 
           });
         })
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
-        });
+        .catch((error) => console.error("Error fetching user data:", error));
     }
   }, []);
+  
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setUserInfo((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   };
+  const [isProcessing, setIsProcessing] = useState(false); 
 
-  const handlePaymentMethodChange = (e) => {
-    setPaymentMethod(e.target.value);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Prepare the data to send to backend
-    const paymentData = {
-      ticket_id: ticketId,
-      payment_method: paymentMethod, // Payment method (paypal)
-      name: userInfo.name,
-      email: userInfo.email,
-      phone: userInfo.phone,
-      address: userInfo.address,
-      discount_code: "", // Add logic to get voucher code if needed
-    };
+  const handleVoucherApply = async () => {
+    const token = localStorage.getItem("access_token");
+    const userID = localStorage.getItem("user_id");
+    if (!voucherCode) {
+      alert("Vui lòng nhập mã voucher!");
+      return;
+    }
 
     try {
-      const response = await fetch(
-        "http://192.168.2.145:8000/api/v1/clients/payment/process",
+      const response = await axios.post(
+        `http://127.0.0.1:8000/api/v1/vouchers/apply/${totalPrice}`,
         {
-          method: "POST",
+          event_id: ticketId,
+          user_id:userID, 
+          code: voucherCode,
+          totalAmount: totalPrice,
+        },
+        {
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(paymentData),
         }
       );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // Redirect to PayPal payment URL
-        window.location.href = data.payment_url;
+      if (response.data.success) {
+        setTotalPrice(response.data.data.total_price);
+        alert("Mã giảm giá áp dụng thành công!");
       } else {
-        alert(data.message || "Thanh toán không thành công.");
+        alert(response.data.message || "Mã giảm giá không hợp lệ.");
       }
     } catch (error) {
-      console.error("Error during payment process:", error);
-      alert("Có lỗi xảy ra trong quá trình thanh toán.");
+      console.error("Error applying voucher:", error);
+      alert("Có lỗi xảy ra khi áp dụng mã giảm giá.");
     }
   };
 
+  const handlePaymentMethodChange = (e: any) => {
+    setPaymentMethod(e.target.value);
+  };
+
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true); // Bắt đầu xử lý
+  
+    // Kiểm tra xem người dùng đã đăng nhập hay chưa
+    const token = localStorage.getItem("access_token");
+    
+  
+    // Dữ liệu thanh toán bao gồm thông tin người dùng và voucher
+    const paymentData = {
+      ticket_id: ticketId,
+      payment_method: paymentMethod,
+      name: userInfo.name,
+      email: userInfo.email,
+      phone: userInfo.phone,
+      discount_code: voucherCode || null,
+    };
+  
+    // Nếu người dùng chưa đăng nhập, yêu cầu nhập thông tin
+    if (!token) {
+      alert("Vui lòng  nhập trước khi thanh toán.");
+      setIsProcessing(false);
+      return;
+    }
+  
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/v1/clients/payment/process",
+        paymentData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      console.log(response);
+      if (response.data.success) {
+        setTimeout(() => {
+          setIsProcessing(false); // Kết thúc xử lý
+          window.location.href = response.data.payment_url; // Chuyển tới PayPal
+        }, 2000); // Giả sử thời gian xử lý là 2 giây (bạn có thể thay đổi theo yêu cầu)
+      } else {
+        setIsProcessing(false); // Kết thúc xử lý
+        alert(response.data.message || "Thanh toán không thành công.");
+      }
+    } catch (error) {
+      console.error("Error during payment process:", error);
+      setIsProcessing(false); // Kết thúc xử lý
+      alert("Có lỗi xảy ra trong quá trình thanh toán.");
+    }
+  };
+  
+  
   return (
     <div className="mt-36 mx-4">
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <p className="text-lg font-medium">Đang xử lý thanh toán, vui lòng chờ...</p>
+            <div className="mt-4 loader"></div>
+          </div>
+        </div>
+      )}
       <div className="w-full lg:py-7 py-4 bg-[#F4F4F4] grid place-items-center -mt-[1px]">
         <div className="flex items-center gap-x-4 text-sm lg:text-base">
           <div className="flex items-center gap-x-2">
@@ -188,21 +247,6 @@ const CheckOut = () => {
               </div>
             </div>
 
-            {/* Address */}
-            <div className="flex flex-col gap-y-2 *:rounded-lg border-b pb-4">
-              <span className="text-xs uppercase text-[#46494F] tracking-[0.9px]">
-                Địa chỉ
-              </span>
-              <input
-                type="text"
-                className="h-12 border px-4 text-sm"
-                placeholder="Vui lòng nhập địa chỉ"
-                name="address"
-                value={userInfo.address || ""} // Ensure address is handled correctly
-                onChange={handleInputChange}
-              />
-            </div>
-
             {/* Payment Method */}
             <div className="mb-2">
               <h2 className="mb-2">Chọn phương thức thanh toán</h2>
@@ -234,13 +278,18 @@ const CheckOut = () => {
         <div>
           <div className="border rounded-2xl flex flex-col gap-y-5 lg:p-6 px-5 py-[22px]">
             <div className="flex flex-col gap-y-[17px] border-b pb-5">
-              <section className="flex justify-between text-sm">
-                <span className="text-[#9D9EA2]">Tổng cộng</span>
-                <p>{totalPrice} VDN</p>
-              </section>
+              
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Tên đơn hàng</span>
                 <p>Vé {ticketType}</p>
+              </section>
+              <section className="flex justify-between text-sm">
+                <span className="text-[#9D9EA2]">Giá vé</span>
+                <p>{initialTotalPrice}</p>
+              </section>
+              <section className="flex justify-between text-sm">
+                <span className="text-[#9D9EA2]">Tổng cộng</span>
+                <p>{totalPrice} VDN</p>
               </section>
             </div>
 
@@ -251,8 +300,10 @@ const CheckOut = () => {
                   type="text"
                   placeholder="Coupon code"
                   className="pl-[22px] py-2 rounded-lg border"
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value)}
                 />
-                <button className="text-[#007BFF] font-medium bg-[#F3FBF4] border text-sm rounded-[100px] px-3 py-2">
+                <button type="button" onClick={handleVoucherApply} className="text-[#007BFF] font-medium bg-[#F3FBF4] border text-sm rounded-[100px] px-3 py-2">
                   Áp dụng
                 </button>
               </div>
