@@ -67,4 +67,10 @@ class UserRepository
         $userTrashed = $this->user->withTrashed()->find($id);
         return $userTrashed->restore();
     }
+
+    public function forceDelete($id)
+    {
+        $userTrashed = $this->user->withTrashed()->find($id);
+        return $userTrashed->forceDelete();
+    }
 }

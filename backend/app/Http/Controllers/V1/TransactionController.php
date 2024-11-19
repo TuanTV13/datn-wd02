@@ -4,11 +4,12 @@ namespace App\Http\Controllers\V1;
 
 use App\Events\TransactionVerified;
 use App\Http\Controllers\Controller;
+use App\Models\Transaction;
 use App\Repositories\TransactionRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TransactionController extends Controller
 {
@@ -19,12 +20,14 @@ class TransactionController extends Controller
         $this->transactionRepository = $transactionRepository;
     }
 
+    // Lấy danh sách giao dịch
     public function index(Request $request)
     {
         $transactions = $this->transactionRepository->getAllTransactions();
         return response()->json($transactions, 200);
     }
 
+    // Lấy thông tin giao dịch theo ID
     public function show($id)
     {
         $transaction = $this->transactionRepository->findTransactionById($id);
@@ -36,6 +39,7 @@ class TransactionController extends Controller
         return response()->json($transaction, 200);
     }
 
+    // Xác nhận giao dịch
     public function verified($id)
     {
         DB::beginTransaction();
@@ -59,13 +63,12 @@ class TransactionController extends Controller
             return response()->json(['message' => 'Xác nhận giao dịch thành công'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("message" . $e->getMessage());
-            // Xử lý ngoại lệ và trả về thông báo lỗi
+            Log::error("message: " . $e->getMessage());
             return response()->json(['message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 
-
+    // Hủy giao dịch
     public function failed($id)
     {
         $transaction = $this->transactionRepository->findTransactionById($id);
@@ -79,7 +82,6 @@ class TransactionController extends Controller
         }
 
         $transaction->status = 'failed';
-
         $transaction->save();
 
         return response()->json(['message' => 'Hủy giao dịch thành công'], 200);

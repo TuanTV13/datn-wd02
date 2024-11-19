@@ -14,7 +14,6 @@ class Ticket extends Model
         'event_id',
         'status',
         'ticket_type',
-        'status',
         'price',
         'quantity',
         'available_quantity',

@@ -56,6 +56,15 @@ class UserController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        $user = $this->userRepository->find($id);
+
+        return response()->json([
+            'data' => $user
+        ]);
+    }
+
     public function destroy(string $id)
     {
         try {
@@ -102,6 +111,23 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Khôi phục người dùng thành công!'
+        ], 200);
+    }
+
+    public function forceDelete(string $id)
+    {
+        $user = $this->userRepository->findTrashed($id);
+
+        if (!$user) {
+            return response()->json([
+                'error' => 'Người dùng không tồn tại!'
+            ], 404);
+        }
+
+        $this->userRepository->forceDelete($id);
+
+        return response()->json([
+            'message' => 'Xóa vĩnh viễn người dùng thành công!'
         ], 200);
     }
 }
