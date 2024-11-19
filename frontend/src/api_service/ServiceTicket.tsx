@@ -1,6 +1,5 @@
 import { Tickets } from "../interfaces/Ticket";
 import api from "./api";
-import { message } from "antd";
 
 // Lấy danh sách tất cả tickets
 export const getAllTickets = async () => {
@@ -99,20 +98,18 @@ export const verifyTicket = async (id: number) => {
   }
 };
 
-export const getTicketData = async (eventId: number, ticketType: string) => {
+export const getTicketData = async (eventId: number, ticketType: string)=> {
   const token = localStorage.getItem("access_token");
   const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
   try {
-    const { data } = await api.get(`/tickets/${eventId}/${ticketType}`, {
-      headers,
-    });
-    console.log(data);
-    return data;
+      const {data} = await api.get(`/tickets/${eventId}/${ticketType}`,{headers});
+      console.log(data)
+      return data
   } catch (error) {
-    console.error("Error verifying ticket:", error);
-    throw error;
+      console.error("Error verifying ticket:", error);
+      throw error;
   }
 };
