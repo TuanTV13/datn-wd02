@@ -34,9 +34,9 @@ const TicketsContext = ({ children }: Props) => {
 
   useEffect(() => {
     (async () => {
-        const data = await getAllTickets()
-        setTickets(data)
-    })()
+      const data = await getAllTickets();
+      setTickets(data);
+    })();
   }, []);
 
 
@@ -70,7 +70,9 @@ const TicketsContext = ({ children }: Props) => {
     try {
       const updatedTicket = await editTicket(ticket);
       setTickets(
-        tickets.map((item) => (item.id === updatedTicket.id ? updatedTicket : item))
+        tickets.map((item) =>
+          item.id === updatedTicket.id ? updatedTicket : item
+        )
       );
       toast.success("Sửa thành công");
       navigate("/admin/ticket-list");

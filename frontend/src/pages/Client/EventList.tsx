@@ -36,24 +36,24 @@ const EventListing = () => {
   };
   const [startDate, setStartDate] = useState(""); // Ngày bắt đầu
   const [endDate, setEndDate] = useState(""); // Ngày kết thúc
- // Lọc sự kiện theo thành phố và khoảng thời gian
-//  const filteredEvents = events.filter((event) => {
-//   const eventStartDate = new Date(event.start_time); // Ngày bắt đầu của sự kiện
+  // Lọc sự kiện theo thành phố và khoảng thời gian
+  //  const filteredEvents = events.filter((event) => {
+  //   const eventStartDate = new Date(event.start_time); // Ngày bắt đầu của sự kiện
 
-//   // Kiểm tra nếu có bộ lọc thành phố
-//   const isLocationMatch = filter
-//     ? event.location.toLowerCase() === filter.toLowerCase()
-//     : true;
+  //   // Kiểm tra nếu có bộ lọc thành phố
+  //   const isLocationMatch = filter
+  //     ? event.location.toLowerCase() === filter.toLowerCase()
+  //     : true;
 
-//   // Kiểm tra nếu ngày bắt đầu sự kiện nằm trong khoảng thời gian
-//   const isDateMatch =
-//     (!startDate || eventStartDate >= new Date(startDate)) &&
-//     (!endDate || eventStartDate <= new Date(endDate));
+  //   // Kiểm tra nếu ngày bắt đầu sự kiện nằm trong khoảng thời gian
+  //   const isDateMatch =
+  //     (!startDate || eventStartDate >= new Date(startDate)) &&
+  //     (!endDate || eventStartDate <= new Date(endDate));
 
-//   return isLocationMatch && isDateMatch;
-// });
-const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
-const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
+  //   return isLocationMatch && isDateMatch;
+  // });
+  const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
+  const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
 
   // Lọc sự kiện theo thành phố ngay khi người dùng nhập
   useEffect(() => {
@@ -69,19 +69,19 @@ const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đ�
   // Hàm áp dụng bộ lọc ngày
   useEffect(() => {
     if (!applyFilter) return; // Nếu chưa bấm nút Apply thì không lọc
-  
+
     // Lọc sự kiện khi startDate hoặc endDate thay đổi
     const filteredByDate = events.filter((event) => {
       const eventStartDate = new Date(event.start_time); // Ngày bắt đầu của sự kiện
       const start = new Date(startDate); // Ngày bắt đầu lọc
       const end = new Date(endDate); // Ngày kết thúc lọc
-  
+
       return (
         (!startDate || eventStartDate >= start) &&
         (!endDate || eventStartDate <= end)
       );
     });
-  
+
     // Cập nhật sự kiện đã lọc
     setFilteredEvents(filteredByDate);
   }, [applyFilter, startDate, endDate, events]); // Theo dõi thay đổi của applyFilter, startDate, endDate và events
@@ -89,8 +89,6 @@ const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đ�
   const handleApplyFilters = () => {
     setApplyFilter(true); // Đánh dấu là bấm nút Apply
   };
-  
-
 
   const clearFilters = () => {
     window.location.reload();
@@ -109,7 +107,6 @@ const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đ�
   const filteredCities = cities.filter((city) =>
     city.toLowerCase().includes(locationQuery.toLowerCase())
   );
-
 
   return (
     <div className="lg:mx-10 mt-36">
@@ -247,7 +244,10 @@ const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đ�
                 }}
               />
             </label>
-            <button onClick={handleApplyFilters}  className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]">
+            <button
+              onClick={handleApplyFilters}
+              className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]"
+            >
               Apply
             </button>
             <button
@@ -312,8 +312,10 @@ const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đ�
                     </div>
 
                     <div className="lg:ml-5 lg:mt-28">
-                      <button  className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
-                        <Link to={`/event-detail/${item.id}`}>Xem chi tiết</Link>
+                      <button className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
+                        <Link to={`/event-detail/${item.id}`}>
+                          Xem chi tiết
+                        </Link>
                       </button>
                     </div>
                   </div>

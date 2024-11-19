@@ -23,8 +23,7 @@ class VoucherController extends Controller
         $this->voucherRepository = $voucherRepository;
     }
 
-    private function jsonResponse($success, $message, $data = [], $status = 200)
-    {
+    private function jsonResponse($success, $message, $data = [], $status = 200) {
         $response = [
             'success' => $success,
             'message' => $message,
@@ -51,7 +50,7 @@ class VoucherController extends Controller
     public function create(StoreVoucherRequest $request)
     {
         DB::beginTransaction();
-
+        
         $data = $request->validated();
 
         try {
@@ -76,7 +75,7 @@ class VoucherController extends Controller
     public function update(UpdateVoucherRequest $request, $id)
     {
         DB::beginTransaction();
-
+        
         $data = $request->validated();
 
         try {
@@ -89,6 +88,7 @@ class VoucherController extends Controller
             DB::commit();
 
             return $this->jsonResponse(true, 'Cập nhật mã giảm giá thành công.', $voucher);
+
         } catch (Exception $e) {
             DB::rollback();
 
@@ -114,6 +114,7 @@ class VoucherController extends Controller
             $this->voucherRepository->delete($voucher->id);
 
             return $this->jsonResponse(true, 'Xóa mã giảm giá thành công.');
+
         } catch (Exception $e) {
             Log::error('Error:' . $e->getMessage());
 
@@ -122,7 +123,7 @@ class VoucherController extends Controller
     }
 
     public function trashed()
-    {
+    { 
         try {
             $vouchersTrashed = $this->voucherRepository->trashed();
 
@@ -138,7 +139,7 @@ class VoucherController extends Controller
         }
     }
 
-    public function restore($id)
+    public function restore($id) 
     {
         try {
             $voucher = $this->voucherRepository->findTrashed($id);
@@ -160,28 +161,27 @@ class VoucherController extends Controller
     public function apply(Request $request, $totalAmount)
     {
         $request->validate([
-            'event_id' => ['required', 'integer'],
+            'event_id' => ['required', 'integer'], 
             'user_id' => ['required', 'integer'],
             'code' => ['required', 'string'],
         ]);
 
         try {
             $voucher = $this->voucherRepository->findByCode($request->code);
-
+            
             if (!$voucher) {
                 return $this->jsonResponse(false, 'Mã giảm giá không hợp lệ.', [], 404);
             }
-
+            
             if ($validateResponse = $this->validateVoucher($voucher, $request->event_id)) {
                 return $validateResponse;
             }
 
             $totalPrice = $this->calculateDiscountPrice($voucher, $totalAmount);
-
+            
             if ($applyResponse = $this->applyVoucherForUser($voucher, $request->user_id)) {
                 return $applyResponse;
             }
-            Log::info('Total Amount received: ', ['totalAmount' => $totalAmount]);
 
             return $this->jsonResponse(true, 'Áp dụng mã giảm giá thành công.', [
                 'total_price' => $totalPrice,
@@ -219,15 +219,12 @@ class VoucherController extends Controller
 
     private function calculateDiscountPrice($voucher, $totalPrice)
     {
-        // dd($totalPrice);
+        // $totalPrice = 1000000; // Đang fix cứng khi chưa có thông tin về tổng giá trị đơn hàng
+
         return max(
-            $voucher->discount_type === 'percent'
-                ? $totalPrice * ((100 - $voucher->discount_value) / 100)
-                : $totalPrice - $voucher->discount_value,
-            0
+            $voucher->discount_type === 'percent' ? $totalPrice * ((100 - $voucher->discount_value) / 100) : $totalPrice - $voucher->discount_value, 0
         );
     }
-
 
     private function applyVoucherForUser($voucher, $userId)
     {
@@ -246,8 +243,8 @@ class VoucherController extends Controller
         }
 
         $discountValue = $voucher->discount_value;
-        $discountType = $voucher->discount_type;
-        $usedAt = now();
+        $discountType = $voucher->discount_type; 
+        $usedAt = now(); 
 
         if ($existVoucher) {
             if ($existVoucher->pivot->used_count == $voucher->used_limit) {
