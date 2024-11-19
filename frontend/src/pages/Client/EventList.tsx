@@ -91,7 +91,7 @@ const EventListing = () => {
   };
 
   const clearFilters = () => {
-    setFilter("");
+    window.location.reload();
     navigate("/event-list");
   };
   const [searchQuery, setSearchQuery] = useState("");

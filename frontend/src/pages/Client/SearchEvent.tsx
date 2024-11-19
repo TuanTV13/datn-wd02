@@ -8,7 +8,7 @@ const SearchEvent = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const { categories, fetchEventsByCategory } = useContext(CategoryCT);
-  const { events } = useContext(EventCT);
+  const { events, setEvents } = useContext(EventCT);
 
   // Function to toggle category menu
   const toggleCategory = () => {
@@ -99,12 +99,12 @@ useEffect(() => {
     (async () => {
       try {
         const keyword = search.get("keyword") || ""
-        const { data } = await api.get(`products?name_like=${keyword}`)
-        setProducts(data)
+        const { data } = await api.get(`/events?name_like=${keyword}`)
+        setEvents(data)
         setKeywords(keyword)
         setError(null)
       } catch (err) {
-        setError("Không thể lấy dữ liệu sản phẩm")
+        setError("Không thể tìm thấy sự kiện")
         console.error(err)
       }
     })()
@@ -260,7 +260,8 @@ useEffect(() => {
         <div className="w-full lg:w-3/4 p-4">
           <div className=" mb-4 ">
             <div className="flex justify-between space-x-2  items-center">
-              <h2 className="text-3xl font-semibold">Danh sách sự kiện</h2>
+              <h2 className="text-3xl font-semibold">Kết quả tìm kiếm liên quan đến "{keywords}"</h2>
+              {error && <p className="error">{error}</p>}
             </div>
           </div>
           <div className="border-b-[1px] border-gray-300 mb-4"></div>

@@ -24,7 +24,6 @@ interface TypeTickets {
   onRestore: (id: number) => void;
   onVerify: (id: number) => void;
   tickets: Tickets[];
-  listUserBuyTicket: Events[];
 }
 
 export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
@@ -32,7 +31,6 @@ export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
 const TicketsContext = ({ children }: Props) => {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<Tickets[]>([]);
-  const [listUserBuyTicket, setListUserBuyTicket] = useState<Events[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -41,12 +39,6 @@ const TicketsContext = ({ children }: Props) => {
     })();
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const data = await getEvents();
-      setListUserBuyTicket(data);
-    })();
-  }, []);
 
   const onDel = async (id: number) => {
     if (confirm("Bạn có muốn xóa không?")) {
@@ -123,7 +115,6 @@ const TicketsContext = ({ children }: Props) => {
         onRestore,
         onVerify,
         tickets,
-        listUserBuyTicket,
       }}
     >
       {children}
