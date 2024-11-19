@@ -65,7 +65,7 @@ function App() {
         { path: "event-list", element: <ListEvent /> },
         { path: "add-event", element: <AddEvent /> },
         { path: "update-event/", element: <UpdateEvent /> },
-        { path: "detail-event/", element: <DetailEvents /> },
+        { path: "detail-event/:id", element: <DetailEvents /> },
         { path: "user-list", element: <ListUser /> },
         { path: "add-user", element: <AddUser /> },
         { path: "client-list", element: <ListClient /> },
