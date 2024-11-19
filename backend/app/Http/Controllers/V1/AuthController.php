@@ -132,6 +132,7 @@ class AuthController extends Controller
         $token = JWTAuth::fromUser($user);
 
         return response()->json([
+            "user" => $user,
             'access_token' => $token,
             'refresh_token' => $this->generateRefreshToken($user->id),
         ], 200);

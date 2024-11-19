@@ -15,13 +15,18 @@ class TicketRepository
 
     public function getAll()
     {
-        return $this->ticket->with('event')->get();
+        return $this->ticket->with(['event'])->get();
     }
 
     public function find($id)
     {
-        return $this->ticket->with('event')->find($id);
+        return $ticket = $this->ticket->with(['users' => function ($query) {
+            $query->distinct();
+        }])
+            ->withCount(['users as users_count'])
+            ->find($id);
     }
+
 
     public function findByEvent($eventId)
     {

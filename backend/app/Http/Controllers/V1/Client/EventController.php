@@ -49,12 +49,6 @@ class EventController extends Controller
             }
         }
 
-        if (!$isAllowed) {
-            return response()->json([
-                'error' => 'Yêu cầu chỉ được thực hiện từ mạng nội bộ.'
-            ], 403);
-        }
-
         $request->validate([
             'ticket_code' => 'required|string|max:100',
         ]);

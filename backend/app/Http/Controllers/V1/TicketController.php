@@ -261,9 +261,14 @@ class TicketController extends Controller
 
     public function show($id)
     {
-        $ticket = $this->ticketRepository->find($id);
-        return response()->json([
-            'data' => $ticket
-        ]);
+        $ticketData = $this->ticketRepository->find($id);
+
+        if ($ticketData) {
+            return response()->json([
+                'data' => $ticketData
+            ]);
+        }
+
+        return response()->json(['message' => 'Ticket not found'], 404);
     }
 }
