@@ -103,50 +103,51 @@ const CheckOut = () => {
   
     // Kiểm tra xem người dùng đã đăng nhập hay chưa
     const token = localStorage.getItem("access_token");
-    
   
-    // Dữ liệu thanh toán bao gồm thông tin người dùng và voucher
-    const paymentData = {
-      ticket_id: ticketId,
-      payment_method: paymentMethod,
-      name: userInfo.name,
-      email: userInfo.email,
-      phone: userInfo.phone,
-      discount_code: voucherCode || null,
-    };
+    // Nếu người dùng đã đăng nhập, không cần yêu cầu nhập lại thông tin
+    if (token) {
+      // Lấy thông tin người dùng từ state (đã được set khi người dùng đăng nhập)
+      const paymentData = {
+        ticket_id: ticketId,
+        payment_method: paymentMethod,
+        name: userInfo.name, // Nếu đã đăng nhập, lấy tên từ API trả về
+        email: userInfo.email, // Lấy email từ API trả về
+        phone: userInfo.phone, // Lấy số điện thoại từ API trả về
+        discount_code: voucherCode || null,
+      };
   
-    // Nếu người dùng chưa đăng nhập, yêu cầu nhập thông tin
-    if (!token) {
-      alert("Vui lòng  nhập trước khi thanh toán.");
-      setIsProcessing(false);
-      return;
-    }
-  
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/v1/clients/payment/process",
-        paymentData,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      console.log(response);
-      if (response.data.success) {
-        setTimeout(() => {
+      try {
+        const response = await axios.post(
+          "http://127.0.0.1:8000/api/v1/clients/payment/process",
+          paymentData,
+          {
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response)
+        if (response.data.success) {
+          setTimeout(() => {
+            setIsProcessing(false); // Kết thúc xử lý
+            window.location.href = response.data.payment_url; // Chuyển tới PayPal
+          }, 2000); // Giả sử thời gian xử lý là 2 giây
+        } else {
           setIsProcessing(false); // Kết thúc xử lý
-          window.location.href = response.data.payment_url; // Chuyển tới PayPal
-        }, 2000); // Giả sử thời gian xử lý là 2 giây (bạn có thể thay đổi theo yêu cầu)
-      } else {
+          alert(response.data.message || "Thanh toán không thành công.");
+        }
+      } catch (error) {
+        console.error("Error during payment process:", error);
         setIsProcessing(false); // Kết thúc xử lý
-        alert(response.data.message || "Thanh toán không thành công.");
+        alert("Có lỗi xảy ra trong quá trình thanh toán.");
       }
-    } catch (error) {
-      console.error("Error during payment process:", error);
-      setIsProcessing(false); // Kết thúc xử lý
-      alert("Có lỗi xảy ra trong quá trình thanh toán.");
+    } else {
+      // Nếu người dùng chưa đăng nhập, yêu cầu nhập thông tin
+      alert("Vui lòng đăng nhập trước khi thanh toán.");
+      setIsProcessing(false);
     }
   };
-  
   
   return (
     <div className="mt-36 mx-4">
