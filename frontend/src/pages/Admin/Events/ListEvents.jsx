@@ -34,7 +34,7 @@ const EventList = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://192.168.2.145:8000/api/v1/categories/');
+        const response = await axios.get('http://192.168.2.112:8000/api/v1/categories/');
         if (response && response.data && Array.isArray(response.data.data)) {
           setCategories(response.data.data);
         }
@@ -74,19 +74,20 @@ const EventList = () => {
   // Hàm lấy màu sắc cho trạng thái sự kiện
   const getStatusColor = (statusId) => {
     switch (statusId) {
-      case 1:
-        return 'bg-green-500'; // Đang diễn ra
       case 'confirmed':
-        return 'bg-blue-500'; // Đã xác nhận
-      case 'pending':
-        return 'bg-yellow-500'; // Chờ duyệt
+        return { text: 'Đang chuẩn bị', color: 'bg-yellow-500' };
+      case 'checkin':
+        return { text: 'Đang check-in', color: 'bg-green-500' };
+      case 'ongoing':
+        return { text: 'Đang diễn ra', color: 'bg-blue-500' };
+      case 'completed':
+        return { text: 'Đã kết thúc', color: 'bg-gray-500' };
       case 'canceled':
-        return 'bg-red-500'; // Đã hủy
+        return { text: 'Đã hủy', color: 'bg-red-500' };
       default:
-        return 'bg-gray-300'; // Trạng thái khác
+        return { text: 'Trạng thái không xác định', color: 'bg-gray-300' };
     }
   };
-
   return (
     <div>
       <div className="bg-white rounded-lg shadow p-6">
@@ -128,7 +129,7 @@ const EventList = () => {
   dropdownRender={(menu) => (
     <div>
       {/* Chỉ hiển thị tối đa 3 danh mục, còn lại sẽ có thanh cuộn */}
-      <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+      <div style={{ maxHeight: 100, overflowY: 'auto' }}>
         {menu}
       </div>
     </div>
@@ -144,73 +145,73 @@ const EventList = () => {
           {Array.isArray(filteredEvents) && filteredEvents.length > 0 ? (
             filteredEvents.map((event) => (
               <div
-                key={event.id}
-                className="relative flex flex-col bg-white p-6 rounded-md shadow-lg cursor-pointer border-2 border-gray-50 hover:border-black transition-colors duration-300 w-80 h-[400px] mx-auto"
+              key={event.id}
+              className="relative flex flex-col bg-white p-6 rounded-md shadow-lg cursor-pointer border-2 border-gray-50 hover:border-black transition-colors duration-300 w-80 h-[400px] mx-auto"
+            >
+              {/* Trạng thái sự kiện */}
+              <div
+                className={`absolute top-2 left-2 ${getStatusColor(event.status).color} text-white px-3 py-1 text-sm rounded-br-md z-10`}
               >
-                {/* Trạng thái sự kiện */}
-                <div
-                  className={`absolute top-2 left-2 ${getStatusColor(event.status)} text-white px-3 py-1 text-sm rounded-br-md z-10`}
-                >
-                  {event.status === 'pending'
-                    ? 'Chờ duyệt'
-                    : event.status === 'confirmed'
-                    ? 'Đã xác nhận'
-                    : event.status === 'ongoing'
-                    ? 'Đang diễn ra'
-                    : event.status === 'canceled'
-                    ? 'Đã hủy'
-                    : 'Trạng thái không xác định'}
-                </div>
-
-                {/* Icons sửa và xóa */}
-                <div className="icons absolute top-2 right-2 p-2 text-right z-10">
-                  <Link to={`/admin/update-event/${event.id}`}>
-                    <i className="fas fa-pencil-alt mx-3 text-gray-600"></i>
-                  </Link>
-                  <i
-                    className="fas fa-trash-alt text-red-600 cursor-pointer"
-                    onClick={() => onDelete(event.id)}
-                  ></i>
-                </div>
-
-                {/* Ảnh sự kiện thumbnail */}
-                <img
-                  src={event.thumbnail}
-                  className="w-full h-[150px] rounded-lg shadow-lg object-cover mt-4"
-                  alt={event.name}
-                />
-
-                <h2 className="text-xl font-semibold mb-2">{event.name}</h2>
-                <p className="text-gray-600 mb-2">Loại hình: {event.event_type === 'online' ? 'Trực tuyến' : 'Trực tiếp'}</p>
-                <p className="text-green-500 mb-2">
-                  {event.status === 'ongoing'
-                    ? `Đang diễn ra từ ${new Date(event.start_time).toLocaleDateString()}`
-                    : event.status === 'confirmed'
-                    ? `Sẽ diễn ra vào ${new Date(event.start_time).toLocaleDateString()}`
-                    : 'Sự kiện đã kết thúc'}
-                </p>
-                {event.event_type === 'online' && (
-                  <a
-                    href={event.link_online}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline mb-2 block"
-                  >
-                    Tham gia Zoom
-                  </a>
-                )}
-
-                <div className="flex-grow"></div> {/* Đẩy nút xuống dưới */}
-
-                {/* Nút "Xem chi tiết" */}
-                <div className="flex justify-center mt-auto">
-                  <Link to={`/detail/${event.id}`}>
-                    <button className="btn btn-info bg-blue-500 text-white px-4 py-2 rounded-lg">
-                      Xem chi tiết
-                    </button>
-                  </Link>
-                </div>
+                {getStatusColor(event.status).text}
               </div>
+            
+              {/* Icons sửa và xóa */}
+              <div className="icons absolute top-2 right-2 p-2 text-right z-10">
+                <Link to={`/admin/update-event/${event.id}`}>
+                  <i className="fas fa-pencil-alt mx-3 text-gray-600"></i>
+                </Link>
+                <i
+                  className="fas fa-trash-alt text-red-600 cursor-pointer"
+                  onClick={() => onDelete(event.id)}
+                ></i>
+              </div>
+            
+              {/* Ảnh sự kiện thumbnail */}
+              <img
+                src={event.thumbnail}
+                className="w-full h-[150px] rounded-lg shadow-lg object-cover mt-4"
+                alt={event.name}
+              />
+            
+              {/* Tên sự kiện với chiều rộng cố định và văn bản không bị tràn */}
+              <h2 className="text-xl font-semibold mb-2 truncate max-w-full">{event.name}</h2>
+            
+              {/* Loại hình sự kiện */}
+              <p className="text-gray-600 mb-2">Loại hình: {event.event_type === 'online' ? 'Trực tuyến' : 'Trực tiếp'}</p>
+            
+              {/* Thời gian sự kiện */}
+              <p className="text-green-500 mb-2">
+  {event.status === 'ongoing'
+    ? `Đang diễn ra từ ${new Date(event.start_time).toLocaleDateString()}`
+    : event.status === 'confirmed'
+    ? `Sẽ diễn ra vào ${new Date(event.start_time).toLocaleDateString()}`
+    : `Sự kiện đã kết thúc vào ${new Date(event.end_time).toLocaleDateString()}`}
+</p>
+
+              {/* Liên kết Zoom */}
+              {event.event_type === 'online' && (
+                <a
+                  href={event.link_online}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline mb-2 block"
+                >
+                  Tham gia Online
+                </a>
+              )}
+            
+              <div className="flex-grow"></div> {/* Đẩy nút xuống dưới */}
+            
+              {/* Nút "Xem chi tiết" */}
+              <div className="flex justify-center mt-auto">
+                <Link to={`/detail/${event.id}`}>
+                  <button className="btn btn-info bg-blue-500 text-white px-4 py-2 rounded-lg">
+                    Xem chi tiết
+                  </button>
+                </Link>
+              </div>
+            </div>
+            
             ))
           ) : (
             <div className="text-center">Không có sự kiện nào</div>
