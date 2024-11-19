@@ -1,8 +1,8 @@
 export interface Tickets {
     id?: number | string
     event_id: number
-    status_id	: number
-    ticket_type?: "VIP" | "Thường" | "Mời";
+    status	:string
+    ticket_type: TicketType;
     name:   string
     price: number
     quantity: number
@@ -14,10 +14,9 @@ export interface Tickets {
     event?: {
         id: number
         name: string
-      };
-    statuses?: {
-      id: number
-      name: string
-      type: string
-    }
+      }
+}
+export enum TicketType {
+  VIP = "VIP",
+  Group = "Thường"
 }
