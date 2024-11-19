@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-// import { addEvent, fetchCategories } from '../../../api_service/event';
+import { addEvent, fetchCategories } from '../../../api_service/event';
 import { fetchProvinces, fetchDistricts, fetchWards } from '../../../api_service/location';
 const AddEvent = () => {
   const [formData, setFormData] = useState({
@@ -19,7 +19,8 @@ const AddEvent = () => {
 
   const [categories, setCategories] = useState([]);
   const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
+  const [formDataProvince, setFormDataProvince] = useState({ province_id: "", district_id: "" });
+  const [districts, setDistricts] = useState([]); // Danh sách huyện
   const [wards, setWards] = useState([]);
 
   useEffect(() => {
@@ -39,26 +40,45 @@ const AddEvent = () => {
       setCategories([]);  // Đảm bảo mảng rỗng khi có lỗi
     });
 
-    fetchProvinces().then((data) => {
-      if (Array.isArray(data)) {
-        setProvinces(data);
+    fetchProvinces()
+    .then((data) => {
+      console.log(data); // Log toàn bộ dữ liệu trả về
+      if (Array.isArray(data.data.data)) {
+        setProvinces(data.data.data); // Lưu danh sách tỉnh vào state
       } else {
-        console.error('Dữ liệu trả về không phải là mảng:', data);
-        setProvinces([]); // Gán giá trị mặc định là mảng rỗng nếu dữ liệu không phải mảng
+        console.error("Dữ liệu trả về không phải là mảng:", data);
       }
+    })
+    .catch((error) => {
+      console.error("Error fetching provinces:", error);
     });
+  
+
   }, []);
-
-  const handleProvinceChange = async (provinceId) => {
-    setFormData({ ...formData, province_id: provinceId, district_id: '', ward_id: '' });
-    const districtsData = await fetchDistricts(provinceId);
-    setDistricts(districtsData);
+  const handleProvinceChange = (provinceCode) => {
+    setFormDataProvince({ ...formDataProvince, province_id: provinceCode, district_id: "" }); // Cập nhật mã tỉnh và reset huyện
+    fetchDistricts(provinceCode)
+      .then((data) => {
+        if (Array.isArray(data.data.data)) {
+          setDistricts(data.data.data); // Lưu danh sách huyện vào state
+        } else {
+          console.error("Dữ liệu trả về không phải là mảng:", data);
+        }
+      })
+      .catch((error) => console.error(error));
   };
-
-  const handleDistrictChange = async (districtId) => {
-    setFormData({ ...formData, district_id: districtId, ward_id: '' });
-    const wardsData = await fetchWards(districtId);
-    setWards(wardsData);
+  
+  const handleDistrictChange = (districtCode) => {
+    setFormDataProvince({ ...formDataProvince, district_id: districtCode }); // Cập nhật mã huyện
+    fetchWards(districtCode)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setWards(data); // Lưu danh sách xã vào state
+        } else {
+          console.error("Dữ liệu trả về không phải là mảng:", data);
+        }
+      })
+      .catch((error) => console.error(error));
   };
 
   const handleSubmit = (e) => {
@@ -119,18 +139,21 @@ const AddEvent = () => {
       <div>
         <label htmlFor="province_id">Tỉnh:</label>
         <select
-          id="province_id"
-          value={formData.province_id}
-          onChange={(e) => handleProvinceChange(e.target.value)}
-          required
-        >
-          <option value="">Chọn tỉnh</option>
-          {provinces.map((province) => (
-            <option key={province.id} value={province.id}>
-              {province.name}
-            </option>
-          ))}
-        </select>
+        id="province_id"
+        value={formDataProvince.province_id}
+        onChange={(e) => handleProvinceChange(e.target.value)}
+        required
+      >
+        <option value="">Chọn tỉnh</option>
+        {provinces.map((province) => (
+          <option key={province._id} value={province.code}> 
+            {province.name} {/* Hiển thị tên tỉnh */}
+          </option>
+        ))}
+      </select>
+
+      {/* Hiển thị mã tỉnh được chọn */}
+      
       </div>
 
       {/* Quận/Huyện */}

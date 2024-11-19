@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Base URL for your API
-const API_URL = "http://127.0.0.1:8000/api/v1"; // Replace with your actual API URL
+const API_URL = 'http://10.24.16.19:8000/api/v1'; // Replace with your actual API URL
 export const getEvents = async () => {
   try {
     const response = await axios.get(`${API_URL}/events`);
@@ -39,21 +39,30 @@ const addEvent = async (eventData) => {
 };
 export { addEvent };
 
-export const getEvent = async (eventId) => {
+ export const getEvent = async (eventId) => {
+   try {
+     const response = await axios.get(`${BASE_URL}/events/${eventId}`);
+     return response.data;
+   } catch (error) {
+     throw new Error('Lỗi khi lấy sự kiện: ' + error.message);
+   }
+ };
+ 
+ // Các hàm khác
+ export const updateEvent = async (eventId, formData) => {
+   try {
+     const response = await axios.put(`${BASE_URL}/events/${eventId}`, formData);
+     return response.data;
+   } catch (error) {
+     throw new Error('Lỗi khi cập nhật sự kiện: ' + error.message);
+   }
+ };
+ export const fetchCategories = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/events/${eventId}`);
-    return response.data;
+      const response = await axios.get(`${API_URL}/categories`);
+      return response.data; // Trả về dữ liệu danh mục
   } catch (error) {
-    throw new Error("Lỗi khi lấy sự kiện: " + error.message);
-  }
-};
-
-// Các hàm khác
-export const updateEvent = async (eventId, formData) => {
-  try {
-    const response = await axios.put(`${BASE_URL}/events/${eventId}`, formData);
-    return response.data;
-  } catch (error) {
-    throw new Error("Lỗi khi cập nhật sự kiện: " + error.message);
+      console.error('Error fetching categories:', error);
+      throw error; // Ném lỗi để xử lý ở nơi sử dụng
   }
 };
