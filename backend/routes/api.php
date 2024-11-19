@@ -11,6 +11,7 @@ use App\Http\Controllers\V1\Client\PaymentController;
 use App\Http\Controllers\V1\EventController;
 use App\Http\Controllers\V1\EventTrackingController;
 use App\Http\Controllers\V1\FeedbackController;
+use App\Http\Controllers\V1\StatisticsController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
@@ -112,7 +113,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Route::post('/apply-discount', [PaymentController::class, 'applyDiscount']);
-    Route::post('apply', [VoucherController::class, 'apply']);
+    Route::post('vouchers/apply/{totalAmount}', [VoucherController::class, 'apply']);
     Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
