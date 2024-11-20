@@ -1,5 +1,14 @@
-import React, { useState } from "react";
-import { Table, Button, Input, Select, Row, Col, Card } from "antd";
+import React, { useEffect, useState } from "react";
+import {
+  Table,
+  Button,
+  Input,
+  Select,
+  Row,
+  Col,
+  Card,
+  notification,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import "./hehe.css";
 import {
@@ -11,6 +20,8 @@ import {
   LockOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import * as XLSX from "xlsx";
+import axiosInstance from "../../../axios";
 
 const { Option } = Select;
 
@@ -19,12 +30,18 @@ const DiscountCodeList = () => {
   const [filterValue, setFilterValue] = useState(5);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-
+  const [reload, setReload] = useState(false);
+  const [listVoucher, setListVoucher] = useState([]);
+  useEffect(() => {
+    axiosInstance.get("/vouchers").then((res) => {
+      setListVoucher(res.data.data);
+    });
+  }, [reload]);
   const columns = [
     {
       title: "STT",
-      dataIndex: "stt",
-      key: "stt",
+      dataIndex: "id",
+      key: "id",
     },
     {
       title: "Mã giảm giá",
@@ -38,23 +55,26 @@ const DiscountCodeList = () => {
     },
     {
       title: "Giá trị của voucher",
-      dataIndex: "value",
-      key: "value",
+      dataIndex: "discount_value",
+      key: "discount_value",
     },
     {
       title: "Số lượng mã voucher",
-      dataIndex: "quantity",
-      key: "quantity",
+      dataIndex: "issue_quantity",
+      key: "issue_quantity",
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      render: (text, row) => (
+        <div>{text === "published" ? "Hoạt động" : "Hết hạn"}</div>
+      ),
     },
     {
       title: "Ngày hết hạn",
-      dataIndex: "expiryDate",
-      key: "expiryDate",
+      dataIndex: "end_time",
+      key: "end_time",
     },
     {
       title: "Thao tác",
@@ -63,20 +83,20 @@ const DiscountCodeList = () => {
         <Select
           defaultValue="Chọn thao tác"
           style={{ width: 120 }}
-          onChange={(value) => handleAction(value, record.key)}
+          onChange={(value) => handleAction(value, record)}
         >
-          <Option value="view">
+          {/* <Option value="view">
             <EyeOutlined /> Xem
-          </Option>
-          <Option value="export">
+          </Option> */}
+          {/* <Option value="export">
             <FileExcelOutlined /> Xuất excel
-          </Option>
+          </Option> */}
           <Option value="edit">
             <EditOutlined /> Sửa
           </Option>
-          <Option value="lock">
+          {/* <Option value="lock">
             <LockOutlined /> Khóa
-          </Option>
+          </Option> */}
           <Option value="delete">
             <DeleteOutlined style={{ color: "red" }} /> Xóa
           </Option>
@@ -85,38 +105,38 @@ const DiscountCodeList = () => {
     },
   ];
 
-  const dataSource = [
-    {
-      key: "1",
-      stt: 1,
-      code: "DISCOUNT50",
-      eventName: "Giảm giá 50%",
-      value: "50% off",
-      quantity: 100,
-      status: "Hoạt động",
-      expiryDate: "2024-12-31",
-    },
-    {
-      key: "2",
-      stt: 2,
-      code: "WELCOME10",
-      eventName: "Chào mừng",
-      value: "10% off",
-      quantity: 50,
-      status: "Hết hạn",
-      expiryDate: "2023-10-01",
-    },
-    {
-      key: "3",
-      stt: 3,
-      code: "SUMMER20",
-      eventName: "Mùa hè",
-      value: "20% off",
-      quantity: 75,
-      status: "Hoạt động",
-      expiryDate: "2024-08-30",
-    },
-  ];
+  // const dataSource = [
+  //   {
+  //     key: "1",
+  //     stt: 1,
+  //     code: "DISCOUNT50",
+  //     eventName: "Giảm giá 50%",
+  //     value: "50% off",
+  //     quantity: 100,
+  //     status: "Hoạt động",
+  //     expiryDate: "2024-12-31",
+  //   },
+  //   {
+  //     key: "2",
+  //     stt: 2,
+  //     code: "WELCOME10",
+  //     eventName: "Chào mừng",
+  //     value: "10% off",
+  //     quantity: 50,
+  //     status: "Hết hạn",
+  //     expiryDate: "2023-10-01",
+  //   },
+  //   {
+  //     key: "3",
+  //     stt: 3,
+  //     code: "SUMMER20",
+  //     eventName: "Mùa hè",
+  //     value: "20% off",
+  //     quantity: 75,
+  //     status: "Hoạt động",
+  //     expiryDate: "2024-08-30",
+  //   },
+  // ];
 
   const handleAddNew = () => {
     navigate("/admin/discount-code");
@@ -144,6 +164,16 @@ const DiscountCodeList = () => {
     }
   };
 
+  const handleExportPDFAndExcel = () => {
+    console.log("Xuất PDF và Excel");
+
+    const ws = XLSX.utils.json_to_sheet(listVoucher);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Vouchers");
+
+    XLSX.writeFile(wb, "Vouchers_List.xlsx");
+  };
+
   const handleView = (key) => {
     console.log("Xem mã giảm giá có key: ", key);
   };
@@ -153,7 +183,7 @@ const DiscountCodeList = () => {
   };
 
   const handleEdit = (key) => {
-    console.log("Sửa mã giảm giá có key: ", key);
+    navigate("/admin/expiring-voucher", { state: { item: key } });
   };
 
   const handleLock = (key) => {
@@ -161,7 +191,28 @@ const DiscountCodeList = () => {
   };
 
   const handleDelete = (key) => {
-    console.log("Xóa mã giảm giá có key: ", key);
+    axiosInstance
+      .delete(`/vouchers/${key.id}/delete`, {
+        headers: {
+          Authorization:
+            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL3YxL2xvZ2luIiwiaWF0IjoxNzMxNjQ0MzIwLCJleHAiOjQ4Mzg3NjQ0MzIwLCJuYmYiOjE3MzE2NDQzMjAsImp0aSI6Ik9Eb3IwWjZWeUoyTDIxUksiLCJzdWIiOiI2IiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.-xRi4wH0bh3ysiTH9pMWmWaYgGoKiiYpfTkfx2J_D18",
+        },
+      })
+      .then((res) => {
+        notification.success({
+          message: "Xoá mã giảm giá thành công",
+          description: `Mã giảm giá "${key.code}" đã được Xoá.`,
+        });
+        setReload(!reload);
+      })
+      .catch((error) => {
+        if (error?.response?.status === 401) navigate("/auth");
+
+        notification.error({
+          message: "Xoá thất bại",
+          description: "Đã xảy ra lỗi khi xoá mã giảm giá.",
+        });
+      });
   };
 
   const handleSearch = () => {
@@ -181,6 +232,7 @@ const DiscountCodeList = () => {
                 icon={<FilePdfOutlined />}
                 size="large"
                 style={{ marginRight: 10 }}
+                onClick={handleExportPDFAndExcel}
               >
                 Xuất PDF
               </Button>
@@ -247,7 +299,7 @@ const DiscountCodeList = () => {
       <Row gutter={16}>
         <Col span={24}>
           <Table
-            dataSource={dataSource}
+            dataSource={listVoucher}
             columns={columns}
             pagination={{ pageSize: filterValue }}
             className="custom-table"

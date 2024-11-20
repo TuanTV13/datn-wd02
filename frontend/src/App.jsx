@@ -5,6 +5,7 @@ import Client from "./pages/Client/Client";
 import Home from "./pages/Client/Home";
 import LayoutAdmin from "./layouts/LayoutAdmin";
 import ListTicket from "./pages/Admin/Tickets/ListTicket";
+import ListUserBuyTicket from "./pages/Admin/Tickets/ListUserBuyTicket";
 import AddTicket from "./pages/Admin/Tickets/AddTicket";
 import EditTicket from "./pages/Admin/Tickets/EditTicket";
 import Auth from "./pages/Auth/Auth";
@@ -12,8 +13,6 @@ import ListEvent from "./pages/Admin/Events/ListEvents";
 import AddEvent from "./pages/Admin/Events/AddEvent";
 import UpdateEvent from "./pages/Admin/Events/UpdateEvent";
 import DetailEvents from "./pages/Admin/Events/DetailEvent";
-import ListClient from "./pages/Admin/Client/ListClient";
-import AddClient from "./pages/Admin/Client/AddClient";
 
 import ListUser from "./pages/Admin/User/ListUser";
 import AddUser from "./pages/Admin/User/AddUser";
@@ -32,7 +31,8 @@ import AddDiscountCode from "./pages/Admin/Voucher/AddDiscountCode";
 import DiscountCodeList from "./pages/Admin/Voucher/DiscountCodeList";
 import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
 import Order from "./pages/Client/Order";
-import SearchEvent from "./pages/Client/SearchEvent";
+import RatingList from "./pages/Admin/Rating/RatingList";
+import AddRating from "./pages/Admin/Rating/AddRating";
 
 function App() {
   const route = useRoutes([
@@ -52,7 +52,6 @@ function App() {
         { path: "profile", element: <UserProfile /> },
         { path: "profile/edit", element: <UserProfileEdit /> },
         { path: "change-password", element: <UserChangePassword /> },
-        { path: "search", element: <SearchEvent /> },
       ],
     },
     {
@@ -60,19 +59,20 @@ function App() {
       element: <LayoutAdmin />,
       children: [
         { path: "ticket-list", element: <ListTicket /> },
+        { path: "ticket-list-user", element: <ListUserBuyTicket /> },
         { path: "add-ticket", element: <AddTicket /> },
         { path: "edit-ticket/:id", element: <EditTicket /> },
         { path: "event-list", element: <ListEvent /> },
         { path: "add-event", element: <AddEvent /> },
         { path: "update-event/", element: <UpdateEvent /> },
-        { path: "detail-event/:id", element: <DetailEvents /> },
+        { path: "detail-event/", element: <DetailEvents /> },
         { path: "user-list", element: <ListUser /> },
         { path: "add-user", element: <AddUser /> },
-        { path: "client-list", element: <ListClient /> },
-        { path: "add-client", element: <AddClient /> },
         { path: "discount-code-list", element: <DiscountCodeList /> },
         { path: "discount-code", element: <AddDiscountCode /> },
-        { path: "expiring-vouchers", element: <ExpiringVoucherForm /> },
+        { path: "expiring-voucher", element: <ExpiringVoucherForm /> },
+        { path: "rating-list", element: <RatingList /> },
+        { path: "add-rating", element: <AddRating /> },
       ],
     },
     {

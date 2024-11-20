@@ -87,29 +87,6 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
               ],
             },
             {
-              key: "7",
-              icon: (
-                <Tooltip title={!collapsed ? "" : "Quản lý khách hàng"}>
-                  <LuUsers />
-                </Tooltip>
-              ),
-              label: "Quản lý khách hàng",
-              children: [
-                {
-                  key: "7.1",
-                  label: (
-                    <Link to="/admin/client-list">Danh sách khách hàng</Link>
-                  ),
-                },
-                {
-                  key: "7.2",
-                  label: (
-                    <Link to="/admin/add-client">Thêm mới khách hàng</Link>
-                  ),
-                },
-              ],
-            },
-            {
               key: "3",
               icon: (
                 <Tooltip title={!collapsed ? "" : "Quản lý sự kiện"}>
@@ -170,14 +147,14 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
                     <Link to="/admin/discount-code">Thêm mới mã giảm giá</Link>
                   ),
                 },
-                {
-                  key: "5.3",
-                  label: (
-                    <Link to="/admin/expiring-vouchers">
-                      Cập nhật voucher sắp hết hạn
-                    </Link>
-                  ),
-                },
+                // {
+                //   key: "5.3",
+                //   label: (
+                //     <Link to="/admin/expiring-voucher">
+                //       Cập Nhật Mã Hết Hạn
+                //     </Link>
+                //   ),
+                // },
               ],
             },
             {
@@ -188,13 +165,16 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
                 </Tooltip>
               ),
               label: (
-                <span className="relative">
-                  <Badge count={5} offset={[10, 0]}>
-                    <span className="whitespace-nowrap">
-                      Danh sách đánh giá
-                    </span>
-                  </Badge>
-                </span>
+                <Link to="/admin/rating-list">
+                  {" "}
+                  <span className="relative">
+                    <Badge count={5} offset={[10, 0]}>
+                      <span className="whitespace-nowrap">
+                        Danh sách đánh giá
+                      </span>
+                    </Badge>
+                  </span>
+                </Link>
               ),
             },
           ]}

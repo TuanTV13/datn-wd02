@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { Input, Button, Select, DatePicker, notification } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
+import axios from "axios";
+import api from "../../../api_service/api";
+import axiosInstance from "../../../axios";
 
 const { Option } = Select;
 
@@ -11,12 +14,16 @@ const AddDiscountCode = () => {
 
   const [formData, setFormData] = useState({
     code: "",
-    status: "",
-    expiryDate: "",
+    status: "published",
+    startDate: "",
+    endDate: "",
+    discountType: "",
+    discountValue: "",
+    minOrderValue: 1,
+    maxOrderValue: 1,
     usageCount: "",
     description: "",
-    discountType: "",
-    startDate: "",
+    issueQuantity: 1,
   });
 
   const handleChange = (e) => {
@@ -34,18 +41,48 @@ const AddDiscountCode = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    setTimeout(() => {
+    // Chuyển đổi ngày theo định dạng yyyy-mm-dd
+    const startTime = formData.startDate;
+    const endTime = formData.endDate;
+
+    const requestData = {
+      creator_id: 3,
+      event_id: 2,
+      code: formData.code,
+      discount_type: formData.discountType,
+      discount_value: formData.discountValue,
+      min_order_value: formData.minOrderValue,
+      max_order_value: formData.maxOrderValue,
+      issue_quantity: formData.issueQuantity,
+      start_time: startTime,
+      end_time: endTime,
+      used_limit: 1,
+      status: formData.status,
+    };
+
+    try {
+      const response = await axiosInstance.post(
+        "/vouchers/create",
+        requestData,
+        {}
+      );
       notification.success({
         message: "Thêm mã giảm giá thành công",
         description: `Mã giảm giá "${formData.code}" đã được thêm.`,
       });
       setLoading(false);
-      navigate("/admin/discount-code");
-    }, 1500);
+      navigate("/admin/discount-code-list");
+    } catch (error) {
+      setLoading(false);
+      notification.error({
+        message: "Lỗi",
+        description: "Có lỗi xảy ra khi thêm mã giảm giá.",
+      });
+    }
   };
 
   return (
@@ -69,6 +106,7 @@ const AddDiscountCode = () => {
             <input
               type="text"
               id="code"
+              required
               value={formData.code}
               onChange={handleChange}
               placeholder="Nhập mã giảm giá"
@@ -85,83 +123,14 @@ const AddDiscountCode = () => {
             </label>
             <select
               id="status"
+              required
               value={formData.status}
               onChange={(e) => handleSelectChange(e.target.value, "status")}
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option>Chọn trạng thái</option>
-              <option value="active">Hoạt động</option>
-              <option value="expired">Hết hạn</option>
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="expiryDate"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Ngày hết hạn
-            </label>
-            <input
-              type="date"
-              id="expiryDate"
-              value={formData.expiryDate}
-              onChange={handleChange}
-              placeholder="dd/mm/yyyy"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="usageCount"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Số lần sử dụng
-            </label>
-            <input
-              type="number"
-              id="usageCount"
-              value={formData.usageCount}
-              onChange={handleChange}
-              placeholder="Nhập số lần sử dụng"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div className="sm:col-span-2">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Mô tả
-            </label>
-            <textarea
-              id="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={3}
-              placeholder="Mô tả mã giảm giá..."
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            ></textarea>
-          </div>
-          <div>
-            <label
-              htmlFor="discountType"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Loại mã giảm giá
-            </label>
-            <select
-              id="discountType"
-              value={formData.discountType}
-              onChange={(e) =>
-                handleSelectChange(e.target.value, "discountType")
-              }
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option>Chọn loại mã giảm giá</option>
-              <option value="percentage">Theo phần trăm</option>
-              <option value="amount">Theo số tiền</option>
+              <option value="published">Hoạt động</option>
+              <option value="draft">Hết hạn</option>
             </select>
           </div>
 
@@ -175,9 +144,115 @@ const AddDiscountCode = () => {
             <input
               type="date"
               id="startDate"
+              required
               value={formData.startDate}
               onChange={handleChange}
-              placeholder="dd/mm/yyyy"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="endDate"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Ngày kết thúc
+            </label>
+            <input
+              type="date"
+              id="endDate"
+              required
+              value={formData.endDate}
+              onChange={handleChange}
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="discountType"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Loại mã giảm giá
+            </label>
+            <select
+              id="discountType"
+              value={formData.discountType}
+              required
+              onChange={(e) =>
+                handleSelectChange(e.target.value, "discountType")
+              }
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option>Chọn loại mã giảm giá</option>
+              <option value="fixed">Số tiền</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="discountValue"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Giá trị giảm giá
+            </label>
+            <input
+              type="number"
+              id="discountValue"
+              value={formData.discountValue}
+              required
+              onChange={handleChange}
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="minOrderValue"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Giá trị đơn hàng tối thiểu
+            </label>
+            <input
+              type="number"
+              id="minOrderValue"
+              value={formData.minOrderValue}
+              required
+              onChange={handleChange}
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="maxOrderValue"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Giá trị đơn hàng tối đa
+            </label>
+            <input
+              type="number"
+              id="maxOrderValue"
+              value={formData.maxOrderValue}
+              required
+              onChange={handleChange}
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="issueQuantity"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Số lượng phát hành
+            </label>
+            <input
+              type="number"
+              id="issueQuantity"
+              value={formData.issueQuantity}
+              required
+              onChange={handleChange}
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
