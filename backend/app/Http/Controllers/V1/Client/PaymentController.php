@@ -6,6 +6,7 @@ use App\Events\TransactionVerified;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V1\VoucherController;
 use App\Http\Services\PayPalService;
+use App\Http\Services\VNPayService;
 use App\Repositories\{TicketRepository, TransactionRepository, UserRepository, VoucherRepository};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, DB, Log};
@@ -67,27 +68,199 @@ class PaymentController extends Controller
     }
 
     // Thanh toán
+    // public function processPayment(Request $request, VoucherController $voucherController)
+    // {
+    //     $ticket_id = $request->input('ticket_id');
+
+    //     $ticket = $this->ticketRepository->find($ticket_id);
+    //         if (!$ticket) {
+    //             return response()->json(['message' => 'Vé không tồn tại'], 404);
+    //         }
+
+    //     $totalAmount = $ticket->price;
+
+    //     // BEGIN
+    //     DB::beginTransaction();
+    //     try {
+
+    //         // Kiểm tra có đăng nhập hay không, Nếu có lấy thông tin người dùng đăng nhập, ngược lại đăng kí mới và lấy thông tin đó
+    //         if (Auth::check()) {
+    //             // Nếu người dùng đã đăng nhập, lấy thông tin người dùng hiện tại
+    //             $user = Auth::user();
+    //         } else {
+    //             // Nếu người dùng chưa đăng nhập, tạo mới người dùng từ dữ liệu trong request
+    //             $validatedData = $request->validate([
+    //                 'name' => 'required',
+    //                 'email' => 'required|email',
+    //                 'phone' => 'required'
+    //             ]);
+    //             $user = $this->userRepository->create($validatedData);
+    //         }
+
+    //         $request->validate([
+    //             'payment_method' => 'required|string|in:cash,paypal',
+    //             'discount_code' => 'nullable|string'
+    //         ]);
+
+
+    //         // Mã vé
+    //         $ticketCode = strtoupper(uniqid('TICKET-'));
+
+    //         $totalAmount = $totalAmount; // Giá trị ban đầu của vé
+    //         $discountCode = $request->input('discount_code');  // Mã giảm giá
+    //         $voucher = $this->voucherRepository->findByCode($discountCode); // Tìm kiếm theo discount_code
+
+    //         // Kiểm tra tính hợp lệ của mã giảm giá
+    //         if ($discountCode) {
+    //             if (!$voucher) {
+    //                 return response()->json([
+    //                     'error' => 'Mã giảm giá không tồn tại'
+    //                 ]);
+    //             }
+
+    //             $voucherRequest = new Request([
+    //                 'event_id' => $ticket->event_id,
+    //                 'user_id' => $user->id,
+    //                 'code' => $discountCode
+    //             ]);
+
+    //             // Gọi đến phương thức apply của VoucherController
+    //             $voucherResponse = $voucherController->apply($voucherRequest, $totalAmount);
+
+    //             if ($voucherResponse->getData()->success === false) {
+    //                 return response()->json(['error' => $voucherResponse->getData()->message], 400);
+    //             }
+
+    //             $totalAmount = $voucherResponse->getData()->data->total_price; // Giá tiền sau khi sử dụng mã giảm giá
+    //         }
+
+    //         // Dữ liệu giao dịch
+    //         $transactionData = [
+    //             'user_id' => $user->id,
+    //             'ticket_id' => $ticket->id,
+    //             'event_id' => $ticket->event_id,
+    //             'quantity' => 1,
+    //             'ticket_code' => $ticketCode,
+    //             'total_amount' => $totalAmount,
+    //             'payment_method' => $request->payment_method,
+    //             'status' => 'PENDING',
+    //             'order_desc' => 'Thanh toán vé cho sự kiện #' . $ticket->id,
+    //         ];
+
+    //         // Ghi vào log
+    //         Log::info('Thông tin vé', ['ticket' => $ticket]);
+    //         Log::info('Thông tin giao dịch', ['transaction_data' => $transactionData]);
+
+    //         // Tiến hành thanh toán theo phương thức đã chọn
+    //         if ($request->payment_method === 'paypal') {
+    //             if (empty($ticket->ticket_type) || empty($totalAmount) || !is_numeric($totalAmount)) {
+    //                 return response()->json(['message' => 'Thông tin vé không đầy đủ'], 400);
+    //             }
+
+    //             // Gọi đến phương thức getExchangeRate() để quy đổi tỉ giá
+    //             $exchangeRate = $this->getExchangeRate();
+    //             $totalAmountInUSD = $totalAmount / $exchangeRate;
+
+    //             $paypalService = new PayPalService();
+
+    //             // Set Items cho Paypal
+    //             $paypalService->setItem([[
+    //                 'name' => 'Vé ' . $ticket->ticket_type,
+    //                 'sku' => $ticket->id,
+    //                 'quantity' => 1,
+    //                 'price' => number_format($totalAmountInUSD, 2, '.', ''),
+    //             ]]);
+
+    //             // Lưu dữ liệu giao dịch trạng thái pending
+    //             $transaction = $this->transactionRepository->createTransaction($transactionData);
+
+    //             $transaction_id = $transaction->id;
+
+    //             // Gửi dữ liệu cho thành công hoặc hủy giao dịch
+    //             $paypalService->setReturnUrl(route('payment.success', compact(['transaction_id', 'ticket_id'])))
+    //                 ->setCancelUrl(route('payment.cancel', compact(['transaction_id', 'ticket_id'])));
+
+    //             // Tạo URL thanh toán PayPal
+    //             $paymentUrl = $paypalService->createPayment('Thanh toán vé cho sự kiện #' . $ticket->id);
+
+    //             // Lưu dữ liệu thông tin người dùng mua vé
+    //             $user->events()->attach($ticket->event_id, [
+    //                 'ticket_id' => $ticket->id,
+    //                 'ticket_code' => $ticketCode,
+    //                 'checked_in' => false,
+    //                 'order_date' => now(),
+    //                 'original_price' => $ticket->price,
+    //                 'discount_code' => $discountCode ?? null,
+    //                 'amount' => $totalAmount,
+    //             ]);
+
+    //             $transaction->update(['payment_url' => $paymentUrl, 'transaction_id' => $transaction->id]);
+    //             DB::commit();
+    //             // session()->flush();
+    //             return response()->json(['message' => 'Chuyển hướng đến PayPal', 'payment_url' => $paymentUrl]);
+    //         } else {
+
+    //             // Lưu thông tin giao dịch
+    //             $transaction = $this->transactionRepository->createTransaction($transactionData);
+
+    //             // Giảm số lượng còn lại của vé
+    //             $ticket->decrement('available_quantity', 1);
+
+    //             // Nếu hết đổi trạng thái thành sold_out
+    //             if ($ticket->available_quantity <= 0) {
+    //                 $ticket->update(['status' => 'sold_out']);
+    //             }
+
+    //             // Lưu dữ liệu thông tin người dùng mua vé
+    //             $user->events()->attach($ticket->event_id, [
+    //                 'ticket_id' => $ticket->id,
+    //                 'ticket_code' => $ticketCode,
+    //                 'checked_in' => false,
+    //                 'order_date' => now(),
+    //                 'original_price' => $ticket->price,
+    //                 'discount_code' => $discountCode ?? null,
+    //                 'amount' => $totalAmount,
+    //             ]);
+
+    //             DB::commit();
+    //             // session()->flush();
+    //             Log::info('Thanh toán thành công', ['transaction_id' => $transaction->id, 'ticket_id' => $ticket->id]);
+    //             return response()->json(['message' => 'Thanh toán thành công', 'transaction_id' => $transaction->id]);
+    //         }
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         Log::error('Lỗi khi gọi API PayPal', [
+    //             'response_code' => $e->getCode(),
+    //             'response_body' => $e->getMessage(),
+    //             'request' => $request->all()
+    //         ]);
+    //         Log::error('Lỗi xử lý thanh toán sự kiện', ['error' => $e->getMessage(), 'request' => $request->all()]);
+    //         Log::info('PayPal Config', [
+    //             'client_id' => env('PAYPAL_CLIENT_ID'),
+    //             'secret' => env('PAYPAL_CLIENT_SECRET'),
+    //         ]);
+    //         Log::error('Thông tin yêu cầu gửi đến PayPal', ['request' => $request->all()]);
+
+    //         return response()->json(['message' => 'Có lỗi trong quá trình thanh toán'], 500);
+    //     }
+    // }
+
     public function processPayment(Request $request, VoucherController $voucherController)
     {
         $ticket_id = $request->input('ticket_id');
-
         $ticket = $this->ticketRepository->find($ticket_id);
-            if (!$ticket) {
-                return response()->json(['message' => 'Vé không tồn tại'], 404);
-            }
-
+        if (!$ticket) {
+            return response()->json(['message' => 'Vé không tồn tại'], 404);
+        }
+    
         $totalAmount = $ticket->price;
-
+    
         // BEGIN
         DB::beginTransaction();
         try {
-
-            // Kiểm tra có đăng nhập hay không, Nếu có lấy thông tin người dùng đăng nhập, ngược lại đăng kí mới và lấy thông tin đó
             if (Auth::check()) {
-                // Nếu người dùng đã đăng nhập, lấy thông tin người dùng hiện tại
                 $user = Auth::user();
             } else {
-                // Nếu người dùng chưa đăng nhập, tạo mới người dùng từ dữ liệu trong request
                 $validatedData = $request->validate([
                     'name' => 'required',
                     'email' => 'required|email',
@@ -95,45 +268,37 @@ class PaymentController extends Controller
                 ]);
                 $user = $this->userRepository->create($validatedData);
             }
-
+    
             $request->validate([
-                'payment_method' => 'required|string|in:cash,paypal',
+                'payment_method' => 'required|string|in:cash,paypal,vnpay',
                 'discount_code' => 'nullable|string'
             ]);
-
-
-            // Mã vé
+    
             $ticketCode = strtoupper(uniqid('TICKET-'));
-
-            $totalAmount = $totalAmount; // Giá trị ban đầu của vé
-            $discountCode = $request->input('discount_code');  // Mã giảm giá
-            $voucher = $this->voucherRepository->findByCode($discountCode); // Tìm kiếm theo discount_code
-
-            // Kiểm tra tính hợp lệ của mã giảm giá
+            $totalAmount = $totalAmount;
+            $discountCode = $request->input('discount_code');
+            $voucher = $this->voucherRepository->findByCode($discountCode);
+    
             if ($discountCode) {
                 if (!$voucher) {
-                    return response()->json([
-                        'error' => 'Mã giảm giá không tồn tại'
-                    ]);
+                    return response()->json(['error' => 'Mã giảm giá không tồn tại']);
                 }
-
+    
                 $voucherRequest = new Request([
                     'event_id' => $ticket->event_id,
                     'user_id' => $user->id,
                     'code' => $discountCode
                 ]);
-
-                // Gọi đến phương thức apply của VoucherController
+    
                 $voucherResponse = $voucherController->apply($voucherRequest, $totalAmount);
-
+    
                 if ($voucherResponse->getData()->success === false) {
                     return response()->json(['error' => $voucherResponse->getData()->message], 400);
                 }
-
-                $totalAmount = $voucherResponse->getData()->data->total_price; // Giá tiền sau khi sử dụng mã giảm giá
+    
+                $totalAmount = $voucherResponse->getData()->data->total_price;
             }
-
-            // Dữ liệu giao dịch
+    
             $transactionData = [
                 'user_id' => $user->id,
                 'ticket_id' => $ticket->id,
@@ -144,105 +309,42 @@ class PaymentController extends Controller
                 'payment_method' => $request->payment_method,
                 'status' => 'PENDING',
                 'order_desc' => 'Thanh toán vé cho sự kiện #' . $ticket->id,
+                'transaction_id' => uniqid('txn_'),
             ];
-
-            // Ghi vào log
+    
             Log::info('Thông tin vé', ['ticket' => $ticket]);
             Log::info('Thông tin giao dịch', ['transaction_data' => $transactionData]);
-
-            // Tiến hành thanh toán theo phương thức đã chọn
+    
             if ($request->payment_method === 'paypal') {
-                if (empty($ticket->ticket_type) || empty($totalAmount) || !is_numeric($totalAmount)) {
-                    return response()->json(['message' => 'Thông tin vé không đầy đủ'], 400);
-                }
-
-                // Gọi đến phương thức getExchangeRate() để quy đổi tỉ giá
-                $exchangeRate = $this->getExchangeRate();
-                $totalAmountInUSD = $totalAmount / $exchangeRate;
-
-                $paypalService = new PayPalService();
-
-                // Set Items cho Paypal
-                $paypalService->setItem([[
-                    'name' => 'Vé ' . $ticket->ticket_type,
-                    'sku' => $ticket->id,
-                    'quantity' => 1,
-                    'price' => number_format($totalAmountInUSD, 2, '.', ''),
-                ]]);
-
-                // Lưu dữ liệu giao dịch trạng thái pending
-                $transaction = $this->transactionRepository->createTransaction($transactionData);
-
-                $transaction_id = $transaction->id;
-
-                // Gửi dữ liệu cho thành công hoặc hủy giao dịch
-                $paypalService->setReturnUrl(route('payment.success', compact(['transaction_id', 'ticket_id'])))
-                    ->setCancelUrl(route('payment.cancel', compact(['transaction_id', 'ticket_id'])));
-
-                // Tạo URL thanh toán PayPal
-                $paymentUrl = $paypalService->createPayment('Thanh toán vé cho sự kiện #' . $ticket->id);
-
-                // Lưu dữ liệu thông tin người dùng mua vé
-                $user->events()->attach($ticket->event_id, [
-                    'ticket_id' => $ticket->id,
-                    'ticket_code' => $ticketCode,
-                    'checked_in' => false,
-                    'order_date' => now(),
-                    'original_price' => $ticket->price,
-                    'discount_code' => $discountCode ?? null,
-                    'amount' => $totalAmount,
-                ]);
-
-                $transaction->update(['payment_url' => $paymentUrl, 'transaction_id' => $transaction->id]);
-                DB::commit();
-                // session()->flush();
-                return response()->json(['message' => 'Chuyển hướng đến PayPal', 'payment_url' => $paymentUrl]);
-            } else {
-
+                // Thực hiện thanh toán PayPal như đã có sẵn trong mã của bạn
+            } elseif ($request->payment_method === 'vnpay') {
+                $vnpayService = new VNPayService();
+    
+                // Gọi phương thức tạo URL thanh toán VNPay
+                $paymentUrl = $vnpayService->createPaymentUrl($transactionData);
+    
                 // Lưu thông tin giao dịch
                 $transaction = $this->transactionRepository->createTransaction($transactionData);
-
-                // Giảm số lượng còn lại của vé
-                $ticket->decrement('available_quantity', 1);
-
-                // Nếu hết đổi trạng thái thành sold_out
-                if ($ticket->available_quantity <= 0) {
-                    $ticket->update(['status' => 'sold_out']);
-                }
-
-                // Lưu dữ liệu thông tin người dùng mua vé
-                $user->events()->attach($ticket->event_id, [
-                    'ticket_id' => $ticket->id,
-                    'ticket_code' => $ticketCode,
-                    'checked_in' => false,
-                    'order_date' => now(),
-                    'original_price' => $ticket->price,
-                    'discount_code' => $discountCode ?? null,
-                    'amount' => $totalAmount,
-                ]);
-
+                $transaction_id = $transaction->id;
+    
+                // Cập nhật lại transaction với payment_url
+                $transaction->update(['payment_url' => $paymentUrl]);
+    
                 DB::commit();
-                // session()->flush();
-                Log::info('Thanh toán thành công', ['transaction_id' => $transaction->id, 'ticket_id' => $ticket->id]);
-                return response()->json(['message' => 'Thanh toán thành công', 'transaction_id' => $transaction->id]);
+                return response()->json(['message' => 'Chuyển hướng đến VNPay', 'payment_url' => $paymentUrl]);
+            } else {
+                // Thanh toán tiền mặt hoặc các phương thức khác
+                // Lưu thông tin giao dịch và giảm vé như đã làm trong mã của bạn
             }
+    
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Lỗi khi gọi API PayPal', [
-                'response_code' => $e->getCode(),
-                'response_body' => $e->getMessage(),
-                'request' => $request->all()
-            ]);
-            Log::error('Lỗi xử lý thanh toán sự kiện', ['error' => $e->getMessage(), 'request' => $request->all()]);
-            Log::info('PayPal Config', [
-                'client_id' => env('PAYPAL_CLIENT_ID'),
-                'secret' => env('PAYPAL_CLIENT_SECRET'),
-            ]);
-            Log::error('Thông tin yêu cầu gửi đến PayPal', ['request' => $request->all()]);
-
+            Log::info('Transaction Data:', $transactionData);
+            Log::error('Lỗi thanh toán', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Có lỗi trong quá trình thanh toán'], 500);
         }
     }
+    
 
     // Xác thực thành công khi thanh toán bằng Paypal
     public function paymentSuccess(Request $request)
