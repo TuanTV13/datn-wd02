@@ -153,11 +153,11 @@ const TicketsContext = ({ children }: Props) => {
   const onEdit = async (ticket: Tickets) => {
     try {
       // Kiểm tra lỗi logic
-      const validationErrors = validateTicket(ticket);
-      if (validationErrors.length > 0) {
-        validationErrors.forEach((error) => toast.error(error));
-        return; // Dừng tiếp tục nếu có lỗi
-      }
+      // const validationErrors = validacd b  teTicket(ticket);
+      // if (validationErrors.length > 0) {
+      //   validationErrors.forEach((error) => toast.error(error));
+      //   return; // Dừng tiếp tục nếu có lỗi
+      // }
       const updatedTicket = await editTicket(ticket);
       setTickets(
         tickets.map((item) =>
