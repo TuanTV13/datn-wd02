@@ -7,13 +7,9 @@ import {
   deleteTicket,
   editTicket,
   getAllTickets,
-  getAllTicketsDelete,
   restoreTicket,
   verifyTicket,
 } from "../api_service/ServiceTicket";
-import { getEvents } from "../api_service/event";
-import { Events } from "../interfaces/Event";
-import api from "../api_service/api";
 
 type Props = {
   children: React.ReactNode;
@@ -26,7 +22,6 @@ interface TypeTickets {
   onRestore: (id: number) => void;
   onVerify: (id: number) => void;
   tickets: Tickets[];
-  ticketDelete: Tickets[]
 }
 
 export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
@@ -34,7 +29,6 @@ export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
 const TicketsContext = ({ children }: Props) => {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<Tickets[]>([]);
-  const [ticketDelete, setTicketDelete] = useState<Tickets[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -43,13 +37,6 @@ const TicketsContext = ({ children }: Props) => {
     })();
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const data = await getAllTicketsDelete();
-      setTicketDelete(data);
-    })();
-  }, []);
-  
 
   const onDel = async (id: number) => {
     if (confirm("Bạn có muốn xóa không?")) {
@@ -118,12 +105,12 @@ const TicketsContext = ({ children }: Props) => {
   
   const onAdd = async (ticket: Tickets) => {
     try {
-      // // Chỉ validate dữ liệu local
-      // const validationErrors = await validateTicketCreation(ticket);
-      // if (validationErrors.length > 0) {
-      //   validationErrors.forEach((error) => toast.error(error));
-      //   return;
-      // }
+      // Chỉ validate dữ liệu local
+      const validationErrors = await validateTicketCreation(ticket);
+      if (validationErrors.length > 0) {
+        validationErrors.forEach((error) => toast.error(error));
+        return;
+      }
   
       // Gửi thẳng lên backend
       const newTicket = await addTicket(ticket);
@@ -190,6 +177,8 @@ const TicketsContext = ({ children }: Props) => {
       const restoredTicket = await restoreTicket(id);
       setTickets([...tickets, restoredTicket]);
       toast.success("Khôi phục thành công");
+      navigate("/admin/ticket-list");
+      window.location.reload();
     } catch (error) {
       console.error("Error restoring ticket:", error);
       toast.error("Lỗi khi khôi phục vé");
@@ -218,7 +207,6 @@ const TicketsContext = ({ children }: Props) => {
         onRestore,
         onVerify,
         tickets,
-        ticketDelete
       }}
     >
       {children}

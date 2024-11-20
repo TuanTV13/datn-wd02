@@ -10,20 +10,8 @@ export const getAllTickets = async () => {
     console.log(error);
   }
 };
-// Lấy danh sách tickets bị khóa
-export const getAllTicketsDelete = async () => {
-  const token = localStorage.getItem("access_token");
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
-  try {
-    const { data } = await api.get(`/tickets/block`,{headers});
-    return data.data;
-  } catch (error) {
-    console.log(error);
-  }
-};
+
+
 // Lấy danh tickets id
 export const getTicketsId = async (id: string) => {
   try {
