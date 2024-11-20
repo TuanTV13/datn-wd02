@@ -54,6 +54,7 @@ function App() {
         { path: "profile", element: <UserProfile /> },
         { path: "profile/edit", element: <UserProfileEdit /> },
         { path: "change-password", element: <UserChangePassword /> },
+        { path: "search", element: <SearchEvent /> },
       ],
     },
     {
