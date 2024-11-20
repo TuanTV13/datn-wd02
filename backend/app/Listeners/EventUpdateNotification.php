@@ -25,7 +25,8 @@ class EventUpdateNotification implements ShouldQueue
     //  */
 
     public function handle(EventUpdate $event): void
-    {
+{
+    try {
         // Lấy thông tin sự kiện
         $eventData = $event->event;
 
@@ -54,5 +55,10 @@ class EventUpdateNotification implements ShouldQueue
                 Log::warning('User not found for UserEvent ID: ' . $userEvent->id);
             }
         }
+    } catch (\Exception $e) {
+        // Ghi lỗi vào log
+        Log::error('EventUpdateNotification failed: ' . $e->getMessage());
     }
+}
+
 }

@@ -31,23 +31,36 @@ const EventDetail = () => {
       });
   };
   const handleCheckInSubmit = () => {
-    const ticketCode = document.getElementById("ticketCode").value; // Lấy mã vé người dùng nhập
-    if (ticketCode) {
-      axios.put(`http://192.168.2.112:8000/api/v1/clients/events/${event.id}/checkin`, { code: ticketCode })
-        .then((response) => {
-          console.log('Check-in thành công:', response.data);
-          // Có thể hiển thị thông báo thành công hoặc làm gì đó sau khi check-in thành công
-          setCheckInPopup(false); // Đóng popup sau khi check-in
-        })
-        .catch((error) => {
-          console.error('Lỗi khi check-in:', error);
-          // Có thể hiển thị thông báo lỗi
-        });
-    } else {
-      // Hiển thị lỗi nếu mã vé không được nhập
-      console.log('Vui lòng nhập mã vé');
+    const ticketCode = document.getElementById("ticket_code").value; // Lấy mã vé người dùng nhập
+    
+    if (!ticketCode) {
+      // Hiển thị thông báo lỗi nếu mã vé không được nhập
+      alert('Vui lòng nhập mã vé');
+      return; // Dừng lại và không gửi yêu cầu API
     }
+  
+    // Tạo đối tượng dữ liệu để gửi lên API
+    const requestData = {
+      ticket_code: ticketCode
+    };
+  
+    axios.put(`http://192.168.2.112:8000/api/v1/clients/events/${event.id}/checkin`, requestData)
+      .then((response) => {
+        console.log('Check-in thành công:', response.data);
+        alert('Check-in thành công');
+        setCheckInPopup(false); // Đóng popup sau khi check-in thành công
+      })
+      .catch((error) => {
+        console.error('Lỗi khi check-in:', error);
+        if (error.response && error.response.data) {
+          alert(`Lỗi: ${error.response.data.message || 'Không thể thực hiện check-in'}`);
+        } else {
+          alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        }
+      });
   };
+  
+  
   
   const handleCheckIn = () => {
     setCheckInPopup(true);
@@ -162,10 +175,10 @@ const EventDetail = () => {
                 {checkInMode === 'code' && (
                   <div>
                     <input
-                      id="ticketCode"
+                      id="ticket_code"
                       type="text"
                       placeholder="Nhập mã vé"
-                      className="w-full p-2 border rounded mb-4"
+                      className="w-full p-2 border rounded mb-4 text-black"
                     />
                     <button
                       onClick={handleCheckInSubmit}
@@ -206,12 +219,22 @@ const EventDetail = () => {
                 Thời gian kết thúc: {new Date(event.end_time).toLocaleString()}
               </p>
               <br />
-              <button
-                onClick={() => setShowPopup(true)}
-                className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
-              >
-                Mua vé
-              </button>
+              {event.status !== 'checkin' && (
+  <button
+    onClick={() => setShowPopup(true)}
+    className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
+  >
+    Mua vé
+  </button>
+)}
+{event.status === 'checkin' && (
+            <button
+              onClick={handleCheckIn}
+              className="w-[150px] h-[50px] bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md mt-4"
+            >
+              Check-in
+            </button>
+          )}
             </>
           )}
           <div className="mt-4 text-center">
@@ -226,14 +249,7 @@ const EventDetail = () => {
               {statusInfo.text}
             </div>
           )}
-          {event.status === 'checkin' && (
-            <button
-              onClick={handleCheckIn}
-              className="w-[150px] h-[50px] bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md mt-4"
-            >
-              Check-in
-            </button>
-          )}
+          
         </div>
       </div>
 

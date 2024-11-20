@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Base URL for your API
-const API_URL = 'http://10.24.16.19:8000/api/v1'; // Replace with your actual API URL
+const API_URL = 'http://192.168.2.112:8000/api/v1'; // Replace with your actual API URL
 export const getEvents = async () => {
   try {
     const response = await axios.get(`${API_URL}/events`);

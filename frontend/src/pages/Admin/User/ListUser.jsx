@@ -13,7 +13,7 @@ const ListUser = () => {
   // Fetch dữ liệu người dùng
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://192.168.2.145:8000/api/v1/users");
+      const response = await axios.get("http://192.168.2.112:8000/api/v1/users");
       const allUsers = response.data.users;
   
       const activeUsers = allUsers.filter((user) => user.deleted_at === null);
@@ -46,7 +46,7 @@ const ListUser = () => {
   // Xóa người dùng
 const handleDeleteUser = async (id) => {
   try {
-    await axios.delete(`http://192.168.2.145:8000/api/v1/users/${id}`);
+    await axios.delete(`http://192.168.2.112:8000/api/v1/users/${id}`);
     fetchUsers();
   } catch (error) {
     console.error("Lỗi khi xóa người dùng:", error);
@@ -56,7 +56,7 @@ const handleDeleteUser = async (id) => {
 // Khôi phục người dùng
 const handleRestoreUser = async (id) => {
   try {
-    await axios.put(`http://192.168.2.145:8000/api/v1/users/restore/${id}`);
+    await axios.put(`http://192.168.2.112:8000/api/v1/users/restore/${id}`);
     fetchUsers();
   } catch (error) {
     console.error("Lỗi khi khôi phục người dùng:", error);
