@@ -24,7 +24,7 @@ class UpdateEventRequest extends FormRequest
         $event = $this->route('event');
 
         return [
-            'ward' => 'required|string',
+            // 'ward' => 'required|string',
             'location' => 'required|string|max:255',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',

@@ -1,10 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Form, Input, Button, notification } from "antd";
 import "tailwindcss/tailwind.css";
+import axiosInstance from "../../axios";
+import { useNavigate } from "react-router-dom";
 
 const UserChangePassword = () => {
   const [form] = Form.useForm();
+  const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
+  // Gọi API GET để lấy thông tin người dùng và lưu id
+  useEffect(() => {
+    axiosInstance
+      .get("/user", {})
+      .then((response) => {
+        setUserId(response.data.user.id);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+        setLoading(false);
+      });
+  }, []);
+
+  // Hàm xử lý đổi mật khẩu
   const handleSubmit = (values) => {
     if (values.confirm_password !== values.new_password) {
       notification.error({
@@ -12,10 +33,38 @@ const UserChangePassword = () => {
       });
       return;
     }
-    notification.success({
-      message: "Đổi mật khẩu thành công",
-    });
+
+    if (!userId) {
+      notification.error({
+        message: "Không tìm thấy thông tin người dùng",
+      });
+      return;
+    }
+
+    // Gọi API để thay đổi mật khẩu
+    axiosInstance
+      .put(`/user/change-password/${userId}`, {
+        password: values.password,
+        new_password: values.new_password,
+      })
+      .then((response) => {
+        notification.success({
+          message: "Đổi mật khẩu thành công",
+        });
+      })
+      .catch((error) => {
+        console.error("Error changing password:", error);
+        if (error?.response?.status === 401) navigate("/auth");
+
+        notification.error({
+          message: "Có lỗi xảy ra khi đổi mật khẩu",
+        });
+      });
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="w-full lg:py-12 py-6 mt-36 flex justify-center">
@@ -31,7 +80,7 @@ const UserChangePassword = () => {
         >
           <Form.Item
             label="Mật khẩu cũ"
-            name="old_password"
+            name="password"
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu cũ" }]}
           >
             <Input.Password
