@@ -76,7 +76,7 @@ Route::prefix('v1')->group(function () {
         Route::post('{eventId}/add-ip', [EventController::class, 'addIp']);
         Route::get('/check-event-ip', [EventController::class, 'checkEventIP']); // Thông báo hi chưa có ip checkin cục bộ
         Route::get('statistics/top-revenue-events', [StatisticsController::class, 'topRevenueEvents']); // Thống kê trong khoảng thời gian chọn
-        Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng 
+        Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng
 
     });
 
@@ -128,12 +128,12 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [VoucherController::class, 'delete']);
         Route::get('trashed', [VoucherController::class, 'trashed']);
         Route::post('{id}/restore', [VoucherController::class, 'restore']);
-        
+
     });
 
     Route::get('feedbacks', [FeedbackController::class, 'index']);
     Route::prefix('feedbacks')->middleware(['check.jwt', 'check.permission:manage-reviews'])->group(function () {
-        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá  
+        Route::get('{event}/evaluation/{user}', [FeedbackController::class, 'getFeedbackFormData'])->middleware('signed');  // Lấy dữ liệu đổ ra form đánh giá
         Route::get('{id}/show', [FeedbackController::class, 'show']);
         Route::post('reply', [FeedbackController::class, 'reply']);
         Route::post('submit', [FeedbackController::class, 'submit']);

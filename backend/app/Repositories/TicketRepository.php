@@ -40,7 +40,9 @@ class TicketRepository
 
     public function trashed()
     {
-        $ticketsTrahed = $this->ticket->onlyTrashed()->orderBy('deleted_at', 'desc')->get();
+        $ticketsTrahed = $this->ticket
+        ->with('event')
+        ->onlyTrashed()->orderBy('deleted_at', 'desc')->get();
 
         return $ticketsTrahed;
     }

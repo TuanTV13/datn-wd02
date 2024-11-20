@@ -1,7 +1,7 @@
 export interface Tickets {
   id?: number | string;
   event_id: number;
-  status: string;
+  status: StatusType;
   ticket_type: TicketType;
   name: string;
   price: number;
@@ -14,9 +14,14 @@ export interface Tickets {
   event?: {
     id: number;
     name: string;
+  start_time: string;
   };
 }
 export enum TicketType {
   VIP = "VIP",
   Group = "Thường",
+}
+export enum StatusType {
+  Pending = "pending",
+  Confirmed = "confirmed",
 }
