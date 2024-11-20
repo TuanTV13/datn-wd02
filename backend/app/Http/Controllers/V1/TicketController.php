@@ -40,13 +40,21 @@ class TicketController extends Controller
         return null;
     }
 
-    public function getByBlock()
+    public function getBlockById($id)
     {
-        $tickets = $this->ticketRepository->findTrashed();
+        $tickets = $this->ticketRepository->findTrashed($id);
         return response()->json([
             'data' => $tickets
         ]);
     }
+
+    public function getAll() {
+        $data = $this->ticketRepository->trashed();
+    
+        return response()->json($data);
+    }
+    
+    
 
     public function findTicketDataByEventAndType($eventId = null, $ticketTypeId = null)
     {

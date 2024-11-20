@@ -70,6 +70,11 @@ class EventRepository
         return $this->event->onlyTrashed()->find($id);
     }
 
+    public function trashed()
+    {
+        return $this->event->onlyTrashed()->get();   
+    }
+
     public function create(array $data)
     {
         return $this->event->create($data);

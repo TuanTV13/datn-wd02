@@ -33,9 +33,16 @@ class TicketRepository
         return $this->ticket->where('event_id', $eventId)->get();
     }
 
-    public function findTrashed()
+    public function findTrashed($id)
     {
-        return $this->ticket->onlyTrashed()->get();
+        return $this->ticket->onlyTrashed()->find($id);
+    }
+
+    public function trashed()
+    {
+        $ticketsTrahed = $this->ticket->onlyTrashed()->orderBy('deleted_at', 'desc')->get();
+
+        return $ticketsTrahed;
     }
 
     public function findByEventAndType($eventId, $ticketTypeId)

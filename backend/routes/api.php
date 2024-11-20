@@ -67,6 +67,7 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('events')->middleware(['check.jwt', 'check.permission:manage-events'])->group(function () {
         Route::post('create', [EventController::class, 'create']);
+        Route::post('trashed', [EventController::class, 'trashed']);
         Route::get('{event}/show', [EventController::class, 'show']);
         Route::put('{event}/update', [EventController::class, 'update']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
@@ -85,7 +86,7 @@ Route::prefix('v1')->group(function () {
         Route::get('{id}', [UserController::class, 'show']);
         Route::post('create', [UserController::class, 'create']);
         Route::delete('{id}/delete', [UserController::class, 'destroy']);
-        Route::get('trashed', [UserController::class, 'trashed']); // khóa
+        Route::post('trashed', [UserController::class, 'trashed']); // khóa
         Route::post('{id}/restore', [UserController::class, 'restore']); // mở khóa
         Route::delete('{id}/force-delete', [UserController::class, 'forceDelete']); // xóa
     });
@@ -101,7 +102,8 @@ Route::prefix('v1')->group(function () {
     Route::get('tickets', [TicketController::class, 'index']);
     Route::prefix('tickets')->group(function () {
         Route::get('{id}', [TicketController::class, 'show']); // chi tiết vé
-        Route::get('block', [TicketController::class, 'getByBlock']); // danh sách vé bị khóa
+        Route::post('/block', [TicketController::class, 'getAll']);
+        Route::get('block/{id}', [TicketController::class, 'getBlockById']); // danh sách vé bị khóa
         Route::post('create', [TicketController::class, 'create']);
         Route::put('{id}/update', [TicketController::class, 'update']);
         Route::delete('{id}/delete', [TicketController::class, 'delete']);
@@ -118,6 +120,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::post('/apply-discount', [PaymentController::class, 'applyDiscount']);
+    Route::post('vouchers/apply/{totalPrice}', [VoucherController::class, 'apply']);
     Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);
@@ -125,7 +128,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [VoucherController::class, 'delete']);
         Route::get('trashed', [VoucherController::class, 'trashed']);
         Route::post('{id}/restore', [VoucherController::class, 'restore']);
-        Route::post('apply', [VoucherController::class, 'apply']);
+        
     });
 
     Route::get('feedbacks', [FeedbackController::class, 'index']);

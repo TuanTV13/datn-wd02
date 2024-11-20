@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Events\EventUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
@@ -178,11 +179,11 @@ class EventController extends Controller
             ], 404);
         }
 
-        if ($event->status != "pending") {
-            return response()->json([
-                'message' => 'Sự kiện đã được xác nhận không thể cập nhật'
-            ], 403);
-        }
+        // if ($event->status != "pending") {
+        //     return response()->json([
+        //         'message' => 'Sự kiện đã được xác nhận không thể cập nhật'
+        //     ], 403);
+        // }
 
         $data = $request->validated();
 
@@ -202,6 +203,7 @@ class EventController extends Controller
         try {
             // Cập nhật sự kiện
             $event->update($data);
+            event(new EventUpdate($event));
 
             return response()->json([
                 'message' => 'Cập nhật sự kiện thành công, vui lòng kiểm tra lại',
@@ -226,11 +228,11 @@ class EventController extends Controller
             ], 404);
         }
 
-        if ($event->status_id != "PENDING") {
-            return response()->json([
-                'message' => 'Sự kiện đã được xác nhận không thể hủy'
-            ], 403);
-        }
+        // if ($event->status_id != "PENDING") {
+        //     return response()->json([
+        //         'message' => 'Sự kiện đã được xác nhận không thể hủy'
+        //     ], 403);
+        // }
 
         $event->delete();
 
@@ -287,5 +289,12 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Thêm địa chỉ IP thành công.'
         ], 201);
+    }
+
+    public function trashed()
+    {
+        $data = $this->eventRepository->trashed();
+
+        return response()->json($data);
     }
 }

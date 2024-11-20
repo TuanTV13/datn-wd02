@@ -27,7 +27,7 @@ class EventController extends Controller
     public function checkIn(Request $request, $eventId)
     {
         $allowedIpRanges = $this->eventRepository->getIp($eventId);
-        // dd($subnets);
+        // dd($allowedIpRanges);
         $clientIp = $request->ip();
 
         $isAllowed = false;
