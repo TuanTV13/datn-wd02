@@ -130,8 +130,10 @@ class AuthController extends Controller
 
         $user = Auth::user();
         $token = JWTAuth::fromUser($user);
+        // $user = JWTAuth::authenticate($token);
 
         return response()->json([
+            'user' => $user,
             'access_token' => $token,
             'refresh_token' => $this->generateRefreshToken($user->id),
         ], 200);
@@ -266,8 +268,8 @@ class AuthController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            'address' => 'required|string|max:255',
-            'image' => 'required|string|max:2048',
+            'address' => 'nllable|string|max:255',
+            'image' => 'nullable|string|max:2048',
         ]);
 
         $user = $this->userRepository->find($id);
@@ -282,7 +284,7 @@ class AuthController extends Controller
 
         $data = $request->validate([
             'password' => 'required|string',
-            'new_password' => 'required|string'
+            'new_password' => 'required|string|confirmed'
         ]);
 
         $user = $this->userRepository->find($id);

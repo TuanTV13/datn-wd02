@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { PaymentHistoryService } from '../../api_service/PaymentService';
 
 const PaymentHistory = () => {
   const eventData = Array.from({ length: 30 }, (_, index) => ({
@@ -18,7 +19,7 @@ const PaymentHistory = () => {
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = eventData.slice(indexOfFirstEvent, indexOfLastEvent);
 
-  const handlePageChange = (direction) => {
+  const handlePageChange = (direction: any) => {
     setCurrentPage((prevPage) => {
       if (direction === "next" && prevPage < totalPages) {
         return prevPage + 1;
@@ -28,6 +29,14 @@ const PaymentHistory = () => {
       return prevPage;
     });
   };
+  const [paymentHistory, setPaymentHistory] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const data = await PaymentHistoryService();
+      setPaymentHistory(data);
+    })();
+  }, []);
 
   return (
     <div className="mt-36">

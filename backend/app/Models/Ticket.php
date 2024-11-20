@@ -32,4 +32,9 @@ class Ticket extends Model
     {
         return $this->hasMany(Transaction::class);
     }
-}
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'event_users')->withPivot('ticket_id', 'user_id');
+    }
+}    

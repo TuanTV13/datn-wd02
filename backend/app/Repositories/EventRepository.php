@@ -62,12 +62,19 @@ class EventRepository
 
     public function findByCategory($categoryId)
     {
-        return $this->event->where('category_id', $categoryId)->get();
+        return $this->event
+        ->with('category')
+        ->where('category_id', $categoryId)->get();
     }
 
     public function findTrashed($id)
     {
         return $this->event->onlyTrashed()->find($id);
+    }
+
+    public function trashed()
+    {
+        return $this->event->onlyTrashed()->get();
     }
 
     public function create(array $data)

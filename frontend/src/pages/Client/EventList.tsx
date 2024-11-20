@@ -36,22 +36,7 @@ const EventListing = () => {
   };
   const [startDate, setStartDate] = useState(""); // Ngày bắt đầu
   const [endDate, setEndDate] = useState(""); // Ngày kết thúc
-  // Lọc sự kiện theo thành phố và khoảng thời gian
-  //  const filteredEvents = events.filter((event) => {
-  //   const eventStartDate = new Date(event.start_time); // Ngày bắt đầu của sự kiện
 
-  //   // Kiểm tra nếu có bộ lọc thành phố
-  //   const isLocationMatch = filter
-  //     ? event.location.toLowerCase() === filter.toLowerCase()
-  //     : true;
-
-  //   // Kiểm tra nếu ngày bắt đầu sự kiện nằm trong khoảng thời gian
-  //   const isDateMatch =
-  //     (!startDate || eventStartDate >= new Date(startDate)) &&
-  //     (!endDate || eventStartDate <= new Date(endDate));
-
-  //   return isLocationMatch && isDateMatch;
-  // });
   const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
   const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
 
