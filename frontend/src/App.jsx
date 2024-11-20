@@ -33,6 +33,7 @@ import DiscountCodeList from "./pages/Admin/Voucher/DiscountCodeList";
 import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
 import Order from "./pages/Client/Order";
 import SearchEvent from "./pages/Client/SearchEvent";
+import ListTicketDelete from "./pages/Admin/Tickets/ListTicketDelete";
 
 function App() {
   const route = useRoutes([
@@ -62,6 +63,7 @@ function App() {
         { path: "ticket-list", element: <ListTicket /> },
         { path: "add-ticket", element: <AddTicket /> },
         { path: "edit-ticket/:id", element: <EditTicket /> },
+        { path: "list-ticket-delete", element: <ListTicketDelete /> },
         { path: "event-list", element: <ListEvent /> },
         { path: "add-event", element: <AddEvent /> },
         { path: "update-event/", element: <UpdateEvent /> },

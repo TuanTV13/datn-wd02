@@ -12,7 +12,7 @@ const EventDetail = () => {
   const [similarEvents, setSimilarEvents] = useState([]);
   const [checkInMode, setCheckInMode] = useState('code'); // 'code' hoặc 'qr'
   useEffect(() => {
-    axios.get(`http://192.168.2.112:8000/api/v1/clients/events/${id}`)
+    axios.get(`http://127.0.0.1:8000/api/v1/clients/events/${id}`)
       .then((response) => {
         setEvent(response.data.data);
       })

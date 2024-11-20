@@ -26,7 +26,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
 
     try {
       const response = await login(data.email, data.password);
-
+      console.log(response)
       if (response.access_token) {
         setErrorMessage("Đăng nhập thành công!");
         setShowErrorModal(true);
@@ -34,7 +34,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
         // Lưu token vào localStorage (nếu cần thiết)
         localStorage.setItem("access_token", response.access_token);
         localStorage.setItem("refresh_token", response.refresh_token);
-        localStorage.setItem("user_id", response.user.id);
+        // localStorage.setItem("user_id", response.user.id);
 
         // Xử lý rememberMe
         if (rememberMe) {

@@ -18,7 +18,7 @@ const PaymentHistory = () => {
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = eventData.slice(indexOfFirstEvent, indexOfLastEvent);
 
-  const handlePageChange = (direction) => {
+  const handlePageChange = (direction: any) => {
     setCurrentPage((prevPage) => {
       if (direction === "next" && prevPage < totalPages) {
         return prevPage + 1;

@@ -10,6 +10,20 @@ export const getAllTickets = async () => {
     console.log(error);
   }
 };
+// Lấy danh sách tickets bị khóa
+export const getAllTicketsDelete = async () => {
+  const token = localStorage.getItem("access_token");
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+  try {
+    const { data } = await api.get(`/tickets/block`,{headers});
+    return data.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
 // Lấy danh tickets id
 export const getTicketsId = async (id: string) => {
   try {
@@ -29,7 +43,7 @@ export const addTicket = async (ticketData: Tickets) => {
   };
   try {
     const { data } = await api.post(`/tickets/create`, ticketData, { headers });
-    console.log(data.message);
+    console.log(data);
     return data.data;
   } catch (error) {
     console.error("Error adding ticket:", error);
@@ -89,8 +103,13 @@ export const restoreTicket = async (id: number) => {
 
 // Xác minh vé
 export const verifyTicket = async (id: number) => {
+  const token = localStorage.getItem("access_token");
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
   try {
-    const { data } = await api.put(`/tickets/${id}/verified`);
+    const { data } = await api.put(`/tickets/${id}/verified`,{headers});
     return data.data;
   } catch (error) {
     console.error("Error verifying ticket:", error);
