@@ -1,19 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Button, Card, Descriptions, Image } from "antd";
 import "tailwindcss/tailwind.css";
+import axiosInstance from "../../axios";
+import { useNavigate } from "react-router-dom";
 
 const UserProfile = () => {
-  const user = {
-    province_id: "Province 1",
-    district_id: "District 1",
-    ward_id: "Ward 1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "123-456-7890",
-    address: "123 Main St, City, Country",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcazeHuAcZDzv4_61fPLT-S00XnaKXch2YWQ&s",
-  };
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Gọi API lấy dữ liệu người dùng
+    axiosInstance
+      .get("/user", {})
+      .then((response) => {
+        // Lưu thông tin người dùng vào state
+        setUser(response.data.user);
+        setLoading(false);
+      })
+      .catch((error) => {
+        if (error?.response?.status === 401) navigate("/auth");
+
+        console.error("Error fetching user data:", error);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="w-full lg:py-10 py-4 border pb-[199px] mt-36">
@@ -23,27 +39,20 @@ const UserProfile = () => {
             <Descriptions.Item label="Tên">{user.name}</Descriptions.Item>
             <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
             <Descriptions.Item label="Số điện thoại">
-              {user.phone}
+              {user.phone || "Chưa cập nhật"}
             </Descriptions.Item>
             <Descriptions.Item label="Địa chỉ">
-              {user.address}
+              {user.address || "Chưa cập nhật"}
             </Descriptions.Item>
-            <Descriptions.Item label="Tỉnh">
-              {user.province_id}
-            </Descriptions.Item>
-            <Descriptions.Item
-              label="Huyện
-"
-            >
-              {user.district_id}
-            </Descriptions.Item>
-            <Descriptions.Item label="Phường">{user.ward_id}</Descriptions.Item>
             <Descriptions.Item label="Ảnh đại diện">
-              <Image width={150} src={user.image} />
+              {user.image ? (
+                <Image width={150} src={user.image} />
+              ) : (
+                "Chưa cập nhật"
+              )}
             </Descriptions.Item>
           </Descriptions>
           <a href="/profile/edit">
-            {" "}
             <div className="flex justify-end mt-4">
               <Button type="primary">Sửa</Button>
             </div>
