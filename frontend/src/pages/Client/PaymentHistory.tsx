@@ -1,25 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import { PaymentHistoryService } from '../../api_service/PaymentService';
+import React, { useEffect, useState } from "react";
+import { Transaction } from "../../interfaces/Transaction";
+import api from "../../api_service/api";
 
-const PaymentHistory = () => {
-  const eventData = Array.from({ length: 30 }, (_, index) => ({
-    id: index + 1,
-    name: `Sự kiện ${String.fromCharCode(65 + (index % 26))}`,
-    time: `10:00 - 12:00 (${index + 1}/01/2024)`,
-    price: `10000`,
-    payment: "Paypal",
-    status: Math.random() > 0.5 ? "Thành công" : "Thất bại",
-  }));
-
+const PaymentHistory = ({ userId }: { userId: number }) => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const eventsPerPage = 6;
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(eventData.length / eventsPerPage);
 
+  useEffect(() => {
+    const fetchTransactionHistory = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        const userId = localStorage.getItem("user_id");
+        const response = await api.get(`/clients/${userId}/transaction-history`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        console.log(response.data.data)
+        setTransactions(response.data.data); // Dữ liệu giao dịch
+      } catch (err) {
+        console.error("Error fetching transaction history:", err);
+      }
+    };
+
+    fetchTransactionHistory();
+  }, [userId]);
+  const totalPages = Math.ceil(transactions.length / eventsPerPage);
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = eventData.slice(indexOfFirstEvent, indexOfLastEvent);
+  const currentEvents = transactions.slice(indexOfFirstEvent, indexOfLastEvent);
 
-  const handlePageChange = (direction: any) => {
+  const handlePageChange = (direction) => {
     setCurrentPage((prevPage) => {
       if (direction === "next" && prevPage < totalPages) {
         return prevPage + 1;
@@ -29,14 +42,6 @@ const PaymentHistory = () => {
       return prevPage;
     });
   };
-  const [paymentHistory, setPaymentHistory] = useState([]);
-
-  useEffect(() => {
-    (async () => {
-      const data = await PaymentHistoryService();
-      setPaymentHistory(data);
-    })();
-  }, []);
 
   return (
     <div className="mt-36">
@@ -47,33 +52,37 @@ const PaymentHistory = () => {
             <thead>
               <tr className="bg-gray-200 text-gray-700">
                 <th className="border border-gray-400 p-2 text-center">STT</th>
-                <th className="border border-gray-400 p-2 text-center">Tên sự kiện</th>
-                <th className="border border-gray-400 p-2 text-center">Thời gian</th>
-                <th className="border border-gray-400 p-2 text-center">Số tiền</th>
-                <th className="border border-gray-400 p-2 text-center">Phương thức thanh toán</th>
-                <th className="border border-gray-400 p-2 text-center">Trạng thái</th>
+                <th className="border border-gray-400 p-2 text-center">
+                  Tên sự kiện
+                </th>
+                <th className="border border-gray-400 p-2 text-center">
+                  Tổng tiền
+                </th>
+                <th className="border border-gray-400 p-2 text-center">
+                  Phương thức thanh toán
+                </th>
+                <th className="border border-gray-400 p-2 text-center">
+                  Trạng thái
+                </th>
               </tr>
             </thead>
             <tbody>
               {currentEvents.map((event, index) => (
-                <tr key={event.id}>
+                <tr>
                   <td className="border border-gray-400 p-2 text-center">
                     {indexOfFirstEvent + index + 1}
                   </td>
-                  <td className="border border-gray-400 p-2 text-center">{event.name}</td>
-                  <td className="border border-gray-400 p-2 text-center">{event.time}</td>
-                  <td className="border border-gray-400 p-2 text-center">{event.price}</td>
                   <td className="border border-gray-400 p-2 text-center">
-                    {event.payment}
+                    {event.event_name}
                   </td>
                   <td className="border border-gray-400 p-2 text-center">
-                    <span
-                      className={`px-2 py-1 text-white rounded-[100px] w-24 inline-block text-center ${
-                        event.status === "Thành công" ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    >
-                      {event.status}
-                    </span>
+                    {event.total_amount}
+                  </td>
+                  <td className="border border-gray-400 p-2 text-center">
+                    {event.payment_method}
+                  </td>
+                  <td className="border border-gray-400 p-2 text-center">
+                    {event.status}
                   </td>
                 </tr>
               ))}

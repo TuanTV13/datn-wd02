@@ -68,13 +68,10 @@ function App() {
         { path: "list-ticket-delete", element: <ListTicketDelete /> },
         { path: "event-list", element: <ListEvent /> },
         { path: "add-event", element: <AddEvent /> },
-<<<<<<< HEAD
         { path: "update-event/:id", element: <UpdateEvent /> },
         { path: "detail-event/:id", element: <DetailEvents /> },
-=======
         { path: "update-event/", element: <UpdateEvent /> },
         { path: "detail-event/", element: <DetailEvents /> },
->>>>>>> c83e55b3d8a79ba4ba86d399279bf79112b28484
         { path: "user-list", element: <ListUser /> },
         { path: "add-user", element: <AddUser /> },
         { path: "discount-code-list", element: <DiscountCodeList /> },

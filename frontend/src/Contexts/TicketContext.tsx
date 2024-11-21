@@ -37,14 +37,13 @@ const TicketsContext = ({ children }: Props) => {
     })();
   }, []);
 
-
   const onDel = async (id: number) => {
     if (confirm("Bạn có muốn xóa không?")) {
       try {
         await deleteTicket(id);
         setTickets(tickets.filter((item) => item.id !== id && id));
         toast.success("Xóa thành công");
-      navigate("/admin/list-ticket-delete");
+        navigate("/admin/list-ticket-delete");
       } catch (error) {
         console.error("Error deleting ticket:", error);
         toast.error("Lỗi khi xóa vé");
@@ -81,7 +80,7 @@ const TicketsContext = ({ children }: Props) => {
     //     errors.push("Không thể kiểm tra sự kiện.");
     //   }
     // }
-  
+
     // Kiểm tra ngày kết thúc bán vé hợp lệ
     // if (ticket.sale_end) {
     //   try {
@@ -99,10 +98,10 @@ const TicketsContext = ({ children }: Props) => {
     //     errors.push("Lỗi khi kiểm tra thời gian bán vé.");
     //   }
     // }
-  
+
     return errors;
   };
-  
+
   const onAdd = async (ticket: Tickets) => {
     try {
       // Chỉ validate dữ liệu local
@@ -111,7 +110,7 @@ const TicketsContext = ({ children }: Props) => {
         validationErrors.forEach((error) => toast.error(error));
         return;
       }
-  
+
       // Gửi thẳng lên backend
       const newTicket = await addTicket(ticket);
       setTickets([...tickets, newTicket]);
@@ -128,36 +127,33 @@ const TicketsContext = ({ children }: Props) => {
   const validateTicket = (ticket: Tickets) => {
     const errors: string[] = [];
 
-    // Kiểm tra xem sự kiện có tồn tại hay không
     if (!ticket.event) {
       errors.push("Sự kiện không tồn tại.");
-      return errors; // Không tiếp tục kiểm tra nếu không có sự kiện
+      return errors;
     }
 
-    // Kiểm tra nếu ngày bắt đầu sự kiện (`start_time`) tồn tại
     if (!ticket.event.start_time) {
       errors.push("Ngày bắt đầu sự kiện không tồn tại hoặc không hợp lệ.");
     } else {
-      // Chuyển đổi ngày kết thúc bán vé và ngày bắt đầu sự kiện sang kiểu `Date`
       const saleEndDate = new Date(ticket.sale_end);
       const eventStartDate = new Date(ticket.event.start_time);
 
-      // Kiểm tra nếu ngày kết thúc bán vé sau ngày bắt đầu sự kiện
       if (saleEndDate >= eventStartDate) {
         errors.push("Ngày kết thúc bán vé phải trước ngày bắt đầu sự kiện.");
       }
     }
-    // Trả về danh sách lỗi (nếu có)
+
     return errors;
   };
+
   const onEdit = async (ticket: Tickets) => {
     try {
-      // Kiểm tra lỗi logic
-      const validationErrors = validateTicket(ticket);
-      if (validationErrors.length > 0) {
-        validationErrors.forEach((error) => toast.error(error));
-        return; // Dừng tiếp tục nếu có lỗi
-      }
+      // const validationErrors = validateTicket(ticket);
+      // if (validationErrors.length > 0) {
+      //     validationErrors.forEach((error) => toast.error(error));
+      //     return;
+      // }
+
       const updatedTicket = await editTicket(ticket);
       setTickets(
         tickets.map((item) =>
@@ -166,6 +162,7 @@ const TicketsContext = ({ children }: Props) => {
       );
       toast.success("Sửa thành công");
       navigate("/admin/ticket-list");
+      window.location.reload();
     } catch (error) {
       console.error("Error editing ticket:", error);
       toast.error("Lỗi khi sửa vé");
@@ -184,7 +181,7 @@ const TicketsContext = ({ children }: Props) => {
       toast.error("Lỗi khi khôi phục vé");
     }
   };
-// Xác nhận vé
+  // Xác nhận vé
   const onVerify = async (id: number) => {
     try {
       const verifiedTicket = await verifyTicket(id);
