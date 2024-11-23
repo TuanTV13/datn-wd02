@@ -57,14 +57,37 @@ class EventRepository
 
     public function find($id)
     {
-        return $this->event->with('tickets')->find($id);
+        return $this->event->find($id);
+    }
+
+    public function findDetail($id)
+    {
+        $event = $this->event->with(['tickets', 'users'])->find($id);
+
+        $totalTickets = $event->users->count();
+
+        $vipTickets = $event->users->where('pivot.ticket_type', 'VIP')->count();
+
+        $normalTickets = $event->users->where('pivot.ticket_type', 'Thường')->count();
+
+        $vipPercentage = $totalTickets > 0 ? ($vipTickets / $totalTickets) * 100 : 0;
+        $normalPercentage = $totalTickets > 0 ? ($normalTickets / $totalTickets) * 100 : 0;
+
+        return [
+            'event' => $event,
+            'totalTickets' => $totalTickets,
+            'vipTickets' => $vipTickets,
+            'normalTickets' => $normalTickets,
+            'vipPercentage' => $vipPercentage,
+            'normalPercentage' => $normalPercentage
+        ];
     }
 
     public function findByCategory($categoryId)
     {
         return $this->event
-        ->with('category')
-        ->where('category_id', $categoryId)->get();
+            ->with('category')
+            ->where('category_id', $categoryId)->get();
     }
 
     public function findTrashed($id)

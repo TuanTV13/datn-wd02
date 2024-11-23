@@ -186,6 +186,7 @@ class PaymentController extends Controller
                 // Lưu dữ liệu thông tin người dùng mua vé
                 $user->events()->attach($ticket->event_id, [
                     'ticket_id' => $ticket->id,
+                    'ticket_type' => $ticket->ticket_type,
                     'ticket_code' => $ticketCode,
                     'checked_in' => false,
                     'order_date' => now(),
@@ -355,10 +356,6 @@ class PaymentController extends Controller
     //         return response()->json(['message' => 'Có lỗi trong quá trình thanh toán'], 500);
     //     }
     // }
-    
-
-
-
 
     // Xác thực thành công khi thanh toán bằng Paypal
     public function paymentSuccess(Request $request)
