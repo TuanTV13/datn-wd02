@@ -98,7 +98,7 @@ class PaymentController extends Controller
             }
 
             $request->validate([
-                'payment_method' => 'required|string|in:cash,paypal',
+                'payment_method' => 'required|string|in:cash,paypal,vnpay',
                 'discount_code' => 'nullable|string'
             ]);
 
@@ -198,6 +198,24 @@ class PaymentController extends Controller
                 DB::commit();
                 // session()->flush();
                 return response()->json(['message' => 'Chuyển hướng đến PayPal', 'payment_url' => $paymentUrl]);
+            } elseif ($request->payment_method === 'vnpay') {
+                $transaction = $this->transactionRepository->createTransaction($transactionData);
+
+                $user->events()->attach($ticket->event_id, [
+                    'ticket_id' => $ticket->id,
+                    'ticket_code' => $ticketCode,
+                    'checked_in' => false,
+                    'order_date' => now(),
+                    'original_price' => $ticket->price,
+                    'discount_code' => $discountCode ?? null,
+                    'amount' => $totalAmount,
+                ]);
+                DB::commit();
+
+                $vnpayService = new VNPayService();
+    
+                // Gọi trực tiếp phương thức create trong VNPayService để tạo URL thanh toán
+                return $vnpayService->create($request);
             } else {
 
                 // Lưu thông tin giao dịch
