@@ -3,119 +3,315 @@ import { CategoryCT } from "../../Contexts/CategoryContext";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 const CategoryEven = () => {
-  const [showAll, setShowAll] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
 
-  const toggleShowAll = () => {
-    setShowAll(!showAll);
+  const { categories, fetchEventsByCategory ,events} = useContext(CategoryCT);
+  // const { events } = useContext(EventCT);
+
+  // Function to toggle category menu
+  const toggleCategory = () => {
+    setIsCategoryOpen(!isCategoryOpen);
   };
-  const { fetchEventsByCategory, events, loading, categories } =
-    useContext(CategoryCT);
+
+  // Function to toggle location menu
+  const toggleLocation = () => {
+    setIsLocationOpen(!isLocationOpen);
+  };
+  const [filter, setFilter] = useState("");
+
+  const navigate = useNavigate();
+  const handleCategoryClick = async (categoryId: number | string) => {
+    await fetchEventsByCategory(categoryId); // Fetch events by category
+    navigate(`/event-category/${categoryId}`); // Navigate to the category page
+  };
+
+  const cities = [...new Set(events.map((event) => event.location))];
+
+  // Hàm xử lý thay đổi thành phố
+  const handleLocationChange = (city: string) => {
+    setFilter(city); // Cập nhật filter theo thành phố đã chọn
+  };
+  const [startDate, setStartDate] = useState(""); // Ngày bắt đầu
+  const [endDate, setEndDate] = useState(""); // Ngày kết thúc
+
+  const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
+  const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
+
+  // Lọc sự kiện theo thành phố ngay khi người dùng nhập
+  useEffect(() => {
+    const filteredByCity = filter
+      ? events.filter((event) =>
+          event.location.toLowerCase().includes(filter.toLowerCase())
+        )
+      : events;
+
+    setFilteredEvents(filteredByCity);
+  }, [filter, events]);
+
+  // Hàm áp dụng bộ lọc ngày
+  useEffect(() => {
+    if (!applyFilter) return; // Nếu chưa bấm nút Apply thì không lọc
+
+    // Lọc sự kiện khi startDate hoặc endDate thay đổi
+    const filteredByDate = events.filter((event) => {
+      const eventStartDate = new Date(event.start_time); // Ngày bắt đầu của sự kiện
+      const start = new Date(startDate); // Ngày bắt đầu lọc
+      const end = new Date(endDate); // Ngày kết thúc lọc
+
+      return (
+        (!startDate || eventStartDate >= start) &&
+        (!endDate || eventStartDate <= end)
+      );
+    });
+
+    // Cập nhật sự kiện đã lọc
+    setFilteredEvents(filteredByDate);
+  }, [applyFilter, startDate, endDate, events]); // Theo dõi thay đổi của applyFilter, startDate, endDate và events
+
+  const handleApplyFilters = () => {
+    setApplyFilter(true); // Đánh dấu là bấm nút Apply
+  };
+
+  const clearFilters = () => {
+    window.location.reload();
+    navigate("/event-list");
+  };
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Lọc danh mục dựa trên giá trị của ô input
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const [locationQuery, setLocationQuery] = useState("");
+
+  // Lọc danh sách thành phố dựa trên giá trị input
+  const filteredCities = cities.filter((city) =>
+    city.toLowerCase().includes(locationQuery.toLowerCase())
+  );
+
   const { id } = useParams<{ id: string }>();
   useEffect(() => {
     fetchEventsByCategory(id!);
   }, []);
 
-  if (loading) {
-    return <div>Đang tải sự kiện...</div>;
-  }
   return (
-    <div className="mt-36">
-      <div className="flex justify-between border-b-2 border-gray-300">
-        <div className="flex">
-          <Link to={`/event-list`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
-              />
-            </svg>
-          </Link>
-          <h1 className="text-3xl font-bold lg:ml-4  lg:mr-36 pb-2">
-            Danh mục sự kiện
-          </h1>
-        </div>
-      </div>
-
-      <div className="lg:w-[1200px] mx-auto sm:w-[95vw] mb:w-[342px] flex flex-col lg:mt-[10px] lg:pt-4 mb:pt-[39px]">
-        <p className="lg:text-[25px] mb:text-[28px] lg:leading-[30px] mb:leading-[40px]">
-          Danh mục {events.length > 0 && events[0]?.category?.name}
-        </p>
-
-        <div className="grid lg:pt-8 lg:pb-[15px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-6">
-          {events.slice(0, showAll ? events.length : 4).map((event) => (
+    <div className="lg:mx-10 mt-36">
+      <div className="flex flex-col lg:flex-row">
+        {/* <!-- Sidebar --> */}
+        <div className="w-full lg:w-1/4 p-4 bg-white rounded-[30px]  mb-4 lg:mb-0 border">
+          <h2 className="text-4xl font-semibold mb-4">Bộ lọc</h2>
+          <div className="mb-9 ">
             <div
-              key={event.id}
-              className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3"
+              className="flex justify-between lg:text-2xl font-medium mb-1 hover:text-[#007BFF] cursor-pointer"
+              onClick={toggleCategory}
             >
-              <div className="w-full h-[120px] bg-gray-200 mb-2">
-                <Link to={`/event-detail/${event.id}`}><img
-                  src={event.thumbnail}
-                  alt={event.name}
-                  className="w-full h-full object-cover rounded-lg"
-                /></Link>                
-              </div>
-              <div className="text-xs text-gray-700 mb-2">
-                <p>{event.location}</p>
-                <p><Link to={`/event-detail/${event.id}`}>{event.name}</Link></p>
-                <p className="text-gray-500 pt-4">Vào cổng tự do</p>
-              </div>
-              <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
-                <div className="flex items-center space-x-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M8 7V3m8 4V3m-9 4h10M5 7v14h14V7M5 11h14"
-                    />
-                  </svg>
-                  <span>{event.start_time}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
-                    />
-                  </svg>
-                  <span>{event.max_attendees}</span>
-                </div>
-              </div>
+              Danh mục
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="size-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                />
+              </svg>
             </div>
-          ))}
-        </div>
+            {isCategoryOpen && (
+              <>
+                {/* Ô input */}
+                <input
+                  type="text"
+                  className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Tìm kiếm danh mục..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
 
-        <div className="flex justify-center mt-2">
-          <button
-            onClick={toggleShowAll}
-            className="p-2 bg-blue-500 text-white rounded-lg w-40"
-          >
-            {showAll ? "Ẩn bớt" : "Xem thêm..."}
-          </button>
+                {/* Danh sách danh mục chỉ hiển thị khi ô input không rỗng */}
+                {searchQuery.trim() !== "" && (
+                  <ul className="ml-2 text-gray-400 lg:text-base">
+                    {filteredCategories.map((category) => (
+                      <li
+                        key={category.id}
+                        className="cursor-pointer hover:text-[#007BFF]"
+                        onClick={() => handleCategoryClick(category.id)}
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                    {filteredCategories.length === 0 && (
+                      <li className="text-gray-500">Không tìm thấy danh mục</li>
+                    )}
+                  </ul>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="mb-9 ">
+            <div
+              className="flex justify-between lg:text-2xl font-medium mb-1 hover:text-[#007BFF] cursor-pointer"
+              onClick={toggleLocation}
+            >
+              Địa điểm tổ chức
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="size-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                />
+              </svg>
+            </div>
+            {isLocationOpen && (
+              <>
+                {/* Ô input */}
+                <input
+                  type="text"
+                  className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Tìm kiếm địa điểm..."
+                  value={locationQuery}
+                  onChange={(e) => setLocationQuery(e.target.value)}
+                />
+
+                {/* Danh sách địa điểm chỉ hiển thị khi input không rỗng */}
+                {locationQuery.trim() !== "" && (
+                  <ul className="ml-2 text-gray-400 lg:text-base">
+                    {filteredCities.map((city, index) => (
+                      <li
+                        key={index}
+                        className="cursor-pointer hover:text-[#007BFF]"
+                        onClick={() => handleLocationChange(city)}
+                      >
+                        {city}
+                      </li>
+                    ))}
+                    {filteredCities.length === 0 && (
+                      <li className="text-gray-500">Không tìm thấy địa điểm</li>
+                    )}
+                  </ul>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Bộ lọc ngày */}
+          <div className="mb-9">
+            <label className="flex flex-col space-y-2">
+              <span className="text-lg">Từ ngày:</span>
+              <input
+                type="date"
+                className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                }}
+              />
+            </label>
+            <label className="flex flex-col space-y-2 mt-4">
+              <span className="text-lg">Đến ngày:</span>
+              <input
+                type="date"
+                className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                }}
+              />
+            </label>
+            <button
+              onClick={handleApplyFilters}
+              className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]"
+            >
+              Apply
+            </button>
+            <button
+              className="mt-4 ml-2 px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
+              onClick={clearFilters}
+            >
+              Clear
+            </button>
+          </div>
         </div>
-        <div className="w-full border-t border-gray-300 mt-4"></div>
+        {/* <!-- Main Content --> */}
+        <div className="w-full lg:w-3/4 p-4">
+          <div className=" mb-4 ">
+            <div className="flex justify-between space-x-2  items-center">
+              <h2 className="text-3xl font-semibold">Danh mục: {events.length > 0 && events[0]?.category?.name}</h2>
+            </div>
+          </div>
+          <div className="border-b-[1px] border-gray-300 mb-4"></div>
+          {/* <!-- Items --> */}
+          <div className="space-y-4 ">
+            {filteredEvents.map((item) => (
+              <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
+                <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
+                  <Link to={`/event-detail/${item.id}`}>
+                    <img
+                      alt={item.name}
+                      className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
+                      src={item.thumbnail}
+                    />
+                  </Link>
+                </div>
+                <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
+                  <div className="mt-2 lg:flex">
+                    <div className="flex flex-col justify-between lg:w-2/3">
+                      <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer">
+                        <Link to={`/event-detail/${item.id}`}>{item.name}</Link>
+                      </h3>
+                      <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <i className="fas fa-clock mr-2"></i>
+                        Thời gian bắt đầu: {item.start_time}
+                      </div>
+                      <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <i className="fas fa-clock mr-2"></i>
+                        Thời gian kết thúc: {item.end_time}
+                      </div>
+                      <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <i className="fas fa-map-marker-alt mr-2"></i>
+                        Địa điểm: {item.location}
+                      </div>
+                      <div
+                        className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
+                      >
+                        Mô tả: {item.description}
+                      </div>
+
+                      <Link
+                        to={`/event-detail/${item.id}`}
+                        className="text-blue-500 "
+                      >
+                        Xem thêm
+                      </Link>
+                    </div>
+
+                    <div className="lg:ml-5 lg:mt-28">
+                      <button className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
+                        <Link to={`/event-detail/${item.id}`}>
+                          Xem chi tiết
+                        </Link>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -163,7 +163,7 @@ class EventController extends Controller
         }
 
         if ($request->has('location')) {
-            $query->where('location', 'like', '%' . $request->input('location') . '%');
+            $query->where('province', 'like', '%' . $request->input('location') . '%');
         }
 
         $startTime = Carbon::parse($request->input('start_time'))->startOfDay();

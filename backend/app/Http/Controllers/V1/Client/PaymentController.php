@@ -394,7 +394,7 @@ class PaymentController extends Controller
         $transaction->update(['status' => 'COMPLETED']);
         event(new TransactionVerified($transaction));
 
-        return response()->json(['message' => 'Bạn đã thanh toán thành công 1 đơn hàng!']);
+        return redirect('http://localhost:5173/payment-history');
     }
 
     // Xử lý giao dịch khi bị hủy thanh toán

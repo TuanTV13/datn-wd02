@@ -33,6 +33,8 @@ import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
 import Order from "./pages/Client/Order";
 import RatingList from "./pages/Admin/Rating/RatingList";
 import AddRating from "./pages/Admin/Rating/AddRating";
+import SearchEvent from "./pages/Client/SearchEvent";
+import ListTicketDelete from "./pages/Admin/Tickets/ListTicketDelete";
 
 function App() {
   const route = useRoutes([
@@ -43,7 +45,7 @@ function App() {
         { path: "", element: <Home /> },
         { path: "event-list", element: <EventListing /> },
         { path: "event-detail/:id", element: <EventDetail /> },
-        { path: "event-category/:id", element: <CategoryEvent /> },
+        { path: "event-category/:eventId", element: <CategoryEvent /> },
         { path: "cart", element: <Cart /> },
         { path: "checkout", element: <CheckOut /> },
         { path: "order", element: <Order /> },
@@ -52,6 +54,7 @@ function App() {
         { path: "profile", element: <UserProfile /> },
         { path: "profile/edit", element: <UserProfileEdit /> },
         { path: "change-password", element: <UserChangePassword /> },
+        { path: "search", element: <SearchEvent /> },
       ],
     },
     {
@@ -62,10 +65,11 @@ function App() {
         { path: "ticket-list-user", element: <ListUserBuyTicket /> },
         { path: "add-ticket", element: <AddTicket /> },
         { path: "edit-ticket/:id", element: <EditTicket /> },
+        { path: "list-ticket-delete", element: <ListTicketDelete /> },
         { path: "event-list", element: <ListEvent /> },
         { path: "add-event", element: <AddEvent /> },
-        { path: "update-event/", element: <UpdateEvent /> },
-        { path: "detail-event/", element: <DetailEvents /> },
+        { path: "update-event/:id", element: <UpdateEvent /> },
+        { path: "detail-event/:id", element: <DetailEvents /> },
         { path: "user-list", element: <ListUser /> },
         { path: "add-user", element: <AddUser /> },
         { path: "discount-code-list", element: <DiscountCodeList /> },
