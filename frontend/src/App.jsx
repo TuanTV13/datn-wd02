@@ -45,7 +45,7 @@ function App() {
         { path: "", element: <Home /> },
         { path: "event-list", element: <EventListing /> },
         { path: "event-detail/:id", element: <EventDetail /> },
-        { path: "event-category/:eventId", element: <CategoryEvent /> },
+        { path: "event-category/:id", element: <CategoryEvent /> },
         { path: "cart", element: <Cart /> },
         { path: "checkout", element: <CheckOut /> },
         { path: "order", element: <Order /> },
@@ -60,8 +60,7 @@ function App() {
     {
       path: "admin",
       element: <LayoutAdmin />,
-      children: [
-        { path: "ticket-list", element: <ListTicket /> },
+      children: [{ path: "ticket-list", element: <ListTicket /> },
         { path: "ticket-list-user", element: <ListUserBuyTicket /> },
         { path: "add-ticket", element: <AddTicket /> },
         { path: "edit-ticket/:id", element: <EditTicket /> },

@@ -96,13 +96,15 @@ const Header = () => {
   }, [isMobileMenuOpen]);
 
   // Search
-  const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
-  const onSubmit = (data: any) => {
-    const { searchKeywords } = data;
-    navigate(`/search?keyword=${searchKeywords}`);
-  };
+  const [searchTerm, setSearchTerm] = useState('');
 
+  const handleSearch = (e: any) => {
+    e.preventDefault();
+    if (searchTerm.trim() !== '') {
+      navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
+    }
+  };
   // Check đăng nhập
 
   useEffect(() => {
@@ -152,14 +154,15 @@ const Header = () => {
           {/* Desktop Search Bar */}
           <div className="hidden lg:block h-[40px]">
             <form
-              onSubmit={handleSubmit(onSubmit)}
+              onSubmit={handleSearch}
               className="w-[456px] flex h-[40px] justify-between"
             >
               <input
                 type="text"
                 className="border rounded-full w-[400px] px-6"
                 placeholder="Search"
-                {...register("searchKeywords")}
+                value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button className="rounded-full bg-[#6C757D] w-[40px]">
                 <svg
@@ -182,7 +185,7 @@ const Header = () => {
 
           <div className="flex gap-x-4 items-center">
             {!isAuthenticated ? (
-              <Link to={"auth"}>
+              <Link to={"/auth"}>
                 <span className="text-sm flex items-center">Đăng nhập</span>
               </Link>
             ) : (
@@ -269,37 +272,6 @@ const Header = () => {
             </li>
             <li className="relative">
               <Link to={`/event-list`}>Sự kiện</Link>
-              {/* {openMenu === "suKien" && (
-                <ul className="absolute bg-gray-100 shadow-lg mt-2 rounded-lg p-2 w-[230px]">
-                  <li className="flex hover:bg-gray-300">
-                    <Link
-                      to={`/event-category`}
-                      className="block px-4 py-2"
-                      onClick={closeMenu} // Đóng menu khi chọn mục
-                    >
-                      Danh mục sự kiện
-                    </Link>
-                  </li>
-                  <li className="flex hover:bg-gray-300">
-                    <Link
-                      to={``}
-                      className="block px-4 py-2"
-                      onClick={closeMenu} // Đóng menu khi chọn mục
-                    >
-                      Địa điểm tổ chức sự kiện
-                    </Link>
-                  </li>
-                  <li className="flex hover:bg-gray-300">
-                    <Link
-                      to={``}
-                      className="block px-4 py-2"
-                      onClick={closeMenu} // Đóng menu khi chọn mục
-                    >
-                      Lịch sử sự kiện
-                    </Link>
-                  </li>
-                </ul>
-              )} */}
             </li>
 
             <li>
