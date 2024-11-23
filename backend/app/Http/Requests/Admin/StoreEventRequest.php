@@ -50,7 +50,7 @@ class StoreEventRequest extends FormRequest
                 },
             ],
 
-            'speakers_info' => 'nullable|string',
+            'speakers' => 'nullable|string',
 
         ];
     }
