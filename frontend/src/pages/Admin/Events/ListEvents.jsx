@@ -204,7 +204,7 @@ const EventList = () => {
             
               {/* Nút "Xem chi tiết" */}
               <div className="flex justify-center mt-auto">
-                <Link to={`/detail/${event.id}`}>
+                <Link to={`/admin/detail-event/${event.id}`}>
                   <button className="btn btn-info bg-blue-500 text-white px-4 py-2 rounded-lg">
                     Xem chi tiết
                   </button>

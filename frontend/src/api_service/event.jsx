@@ -1,7 +1,6 @@
 import axios from "axios";
+import API_URL from "./api_url"
 
-// Base URL for your API
-const API_URL = 'http://127.0.0.1:8000/api/v1'; // Replace with your actual API URL
 export const getEvents = async () => {
   try {
     const response = await axios.get(`${API_URL}/events`);
@@ -71,15 +70,7 @@ export const updateEvent = async (id, eventData) => {
    }
  };
  
- // Các hàm khác
-//  export const updateEvent = async (eventId, formData) => {
-//    try {
-//      const response = await axios.put(`${BASE_URL}/events/${eventId}`, formData);
-//      return response.data;
-//    } catch (error) {
-//      throw new Error('Lỗi khi cập nhật sự kiện: ' + error.message);
-//    }
-//  };
+
  export const fetchCategories = async () => {
   try {
       const response = await axios.get(`${API_URL}/categories`);
