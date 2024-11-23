@@ -18,8 +18,9 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
             "Content-Type": "application/json",
           },
         });
-        console.log(response.data.data)
         setTransactions(response.data.data);
+        console.log(response)
+
       } catch (err) {
         console.log("hh",err);
       }

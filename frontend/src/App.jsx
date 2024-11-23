@@ -60,8 +60,7 @@ function App() {
     {
       path: "admin",
       element: <LayoutAdmin />,
-      children: [
-        { path: "ticket-list", element: <ListTicket /> },
+      children: [{ path: "ticket-list", element: <ListTicket /> },
         { path: "ticket-list-user", element: <ListUserBuyTicket /> },
         { path: "add-ticket", element: <AddTicket /> },
         { path: "edit-ticket/:id", element: <EditTicket /> },
@@ -70,8 +69,6 @@ function App() {
         { path: "add-event", element: <AddEvent /> },
         { path: "update-event/:id", element: <UpdateEvent /> },
         { path: "detail-event/:id", element: <DetailEvents /> },
-        { path: "update-event/", element: <UpdateEvent /> },
-        { path: "detail-event/", element: <DetailEvents /> },
         { path: "user-list", element: <ListUser /> },
         { path: "add-user", element: <AddUser /> },
         { path: "discount-code-list", element: <DiscountCodeList /> },
