@@ -294,6 +294,43 @@ class EventRepository
                     throw new \Exception("Lỗi khi lấy thống kê sự kiện: " . $e->getMessage());
                 }
             }
+
+          public function getTotalRevenue($startDate, $endDate)
+        {
+            return DB::table('transactions')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->sum('total_amount');
+        }
+
+
+
+
+       public function getCompletedEventIds($startDate, $endDate)
+{
+    return DB::table('events')
+        ->whereBetween('start_time', [$startDate, $endDate])
+        ->where('status', 'completed') // Only completed events
+        ->pluck('id'); // Get the event IDs
+}
+
+        
+        public function getTotalRevenueByEventIds($eventIds)
+        {
+            return DB::table('transactions')
+                ->whereIn('event_id', $eventIds)  // Chỉ tính doanh thu cho các sự kiện đã hoàn thành
+                ->sum('total_amount'); // Tổng doanh thu từ các giao dịch
+        }
+// Trong EventRepository.php
+        public function getCompletedEventCountByDateRange($startDate, $endDate)
+        {
+            return Event::whereBetween('start_time', [$startDate, $endDate])  // Lọc sự kiện trong khoảng thời gian
+                        ->where('status', 'completed')  // Chỉ lấy sự kiện có trạng thái 'completed'
+                        ->whereNull('deleted_at')  // Đảm bảo không lấy sự kiện đã bị xóa (nếu có)
+                        ->count();  // Đếm số lượng sự kiện
+        }
+
+          
+
         }
         
 

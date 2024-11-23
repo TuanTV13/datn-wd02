@@ -110,21 +110,25 @@ public function getTransactionHistory(Request $request)
 
 
    // Lấy thông tin giao dịch theo ID
-public function showTransaction($id)
-{
-    $transaction = Transaction::with('event') // Load related event
-        ->select('id', 'event_id', 'total_amount', 'payment_method', 'status', 'created_at') // Select only necessary columns
-        ->findOrFail($id); // Find transaction by ID, or fail if not found
+ 
+   public function showTransaction($id)
+   {
+       $transaction = Transaction::where('id', $id)->with('event') // Load related event
+       ->select('id', 'event_id', 'total_amount', 'payment_method', 'status', 'created_at') // Chỉ lấy các cột cần thiết   
+       ->first(); // Lấy bản ghi đầu tiên hoặc null
 
-    return response()->json([
-        'id' => $transaction->id,
-        'event_name' => $transaction->event->name, // Only event name
-        'transaction_time' => $transaction->created_at, // Format the created_at as transaction time
-        'total_amount' => $transaction->total_amount,
-        'payment_method' => $transaction->payment_method,
-        'status' => $transaction->status,
-    ]);
-}
+           if (!$transaction) {
+            return response()->json(['message' => 'Giao dịch không tồn tại'], 404);
+        }
+       return response()->json([
+           'id' => $transaction->id,
+           'event_name' => $transaction->event->name, // Only event name
+           'transaction_time' => $transaction->created_at, // Format the created_at as transaction time
+           'total_amount' => $transaction->total_amount,
+           'payment_method' => $transaction->payment_method,
+           'status' => $transaction->status,
+       ]);
+   }
 
 }
 
