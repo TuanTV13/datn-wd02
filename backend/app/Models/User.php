@@ -97,4 +97,8 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->belongsToMany(Ticket::class, 'event_users')->withPivot('ticket_id', 'user_id');
     } 
 
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

@@ -13,8 +13,9 @@ class VNPayService
         session(['url_prev' => url()->previous()]);
         
         // Các thông tin cần thiết cho VNPay
-        $vnp_TmnCode = env('VNPAY_TMN_CODE');
-        $vnp_HashSecret = env('VNPAY_HASH_SECRET');
+        $vnp_TmnCode = config('vnpay.tmn_code');
+        $vnp_HashSecret = config('vnpay.hash_secret');
+        
         $vnp_Url = "http://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl = "http://localhost:8000/return-vnpay";
         $vnp_TxnRef = date("YmdHis");
@@ -23,6 +24,7 @@ class VNPayService
         $vnp_Amount = $request->input('amount') * 100;  // VNPay yêu cầu số tiền tính bằng đồng
         $vnp_Locale = 'vn';
         $vnp_IpAddr = request()->ip();
+        $vnp_BankCode = "QR";
 
         // Dữ liệu đầu vào cho VNPay
         $inputData = [
@@ -38,14 +40,9 @@ class VNPayService
             "vnp_OrderType" => $vnp_OrderType,
             "vnp_ReturnUrl" => $vnp_Returnurl,
             "vnp_TxnRef" => $vnp_TxnRef,
+            "vnp_BankCode" => $vnp_BankCode,
         ];
-
-        // Nếu có mã ngân hàng, thêm vào dữ liệu
-        $vnp_BankCode = $request->input('vnp_BankCode');
-        if ($vnp_BankCode) {
-            $inputData['vnp_BankCode'] = $vnp_BankCode;
-        }
-
+     
         // Sắp xếp các tham số theo thứ tự từ A đến Z
         ksort($inputData);
         
@@ -66,12 +63,15 @@ class VNPayService
         // Tạo URL thanh toán
         $vnp_Url = $vnp_Url . "?" . $query;
         if (isset($vnp_HashSecret)) {
-            $vnpSecureHash = hash('sha256', $vnp_HashSecret . $hashdata);
-            $vnp_Url .= 'vnp_SecureHashType=SHA256&vnp_SecureHash=' . $vnpSecureHash;
+            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);//  
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
 
         // Chuyển hướng người dùng đến VNPay
-        return redirect($vnp_Url);
+        return response()->json([
+            'status' => 'success',
+            'data' => $vnp_Url
+        ]);
     }
 
     public function return(Request $request)
