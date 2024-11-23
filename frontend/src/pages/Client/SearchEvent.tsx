@@ -30,32 +30,75 @@ const SearchEvent = () => {
   };
 
   const navigate = useNavigate();
-  const handleCategoryClick = async (categoryId: number | string) => {
-    await fetchEventsByCategory(categoryId); // Fetch events by category
-    navigate(`/event-category/${categoryId}`); // Navigate to the category page
+  const handleCategoryClick = async (id: number | string) => {
+    await fetchEventsByCategory(id);
+    navigate(`/event-category/${id}`);
   };
+  const [filter, setFilter] = useState("");
+  const cities = [...new Set(events.map((event) => event.location))];
+  const [searchParams, setSearchParams] = useSearchParams();
+  const handleLocationChange = (city: string) => {
+    setFilter(city);
+    setSearchParams({ location: city });
+  };
+  useEffect(() => {
+    const locationFromURL = searchParams.get("location"); // Lấy giá trị từ URL
+    if (locationFromURL) {
+      setFilter(locationFromURL); // Cập nhật bộ lọc
+    }
+  }, [searchParams]);
+
+  const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
+  const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
+
+  // Lọc sự kiện theo thành phố ngay khi người dùng nhập
+  useEffect(() => {
+    const filteredByCity = filter
+      ? events.filter((event) =>
+          event.location.toLowerCase().includes(filter.toLowerCase())
+        )
+      : events;
+
+    setFilteredEvents(filteredByCity);
+  }, [filter, events]);
+
+  const handleApplyFilters = () => {
+    setApplyFilter(true); // Đánh dấu là bấm nút Apply
+  };
+
+  const clearFilters = () => {
+    window.location.reload();
+    navigate("/event-list");
+  };
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Lọc danh mục dựa trên giá trị của ô input
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const [locationQuery, setLocationQuery] = useState("");
+
+  // Lọc danh sách thành phố dựa trên giá trị input
+  const filteredCities = cities.filter((city) =>
+    city.toLowerCase().includes(locationQuery.toLowerCase())
+  );
 
   // Search
   const query = useQuery();
   const searchTerm = query.get("query") || "";
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (searchTerm) {
-      setLoading(true); // Hiển thị loading trước khi gọi API
       api
         .post("/clients/events/search", { name: searchTerm }) // Gửi request với từ khóa
         .then((response) => {
-          console.log(response.data);
-          setEvents(response.data.data.data || []); // Cập nhật danh sách sự kiện
-          setLoading(false); // Tắt loading
+          setEvents(response.data.data.data ); 
         })
         .catch((err) => {
-          setError(
+          console.log(
             err.response?.data?.message || "Đã xảy ra lỗi khi tìm kiếm sự kiện"
-          ); // Hiển thị lỗi từ API hoặc lỗi mặc định
-          setLoading(false); // Tắt loading
+          ); 
         });
     }
   }, [searchTerm]);
@@ -94,11 +137,19 @@ const SearchEvent = () => {
                   className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Tìm kiếm danh mục..."
                 />
-
                 <ul className="ml-2 text-gray-400 lg:text-base">
-                  <li className="cursor-pointer hover:text-[#007BFF]">
-                    Danh mục 1
-                  </li>
+                {filteredCategories.map((category) => (
+                      <li
+                        key={category.id}
+                        className="cursor-pointer hover:text-[#007BFF]"
+                        onClick={() => handleCategoryClick(category.id)}
+                      >
+                        {category.name}
+                      </li>
+                    ))}
+                    {filteredCategories.length === 0 && (
+                      <li className="text-gray-500">Không tìm thấy danh mục</li>
+                    )}
                 </ul>
               </>
             )}
@@ -125,20 +176,36 @@ const SearchEvent = () => {
                 />
               </svg>
             </div>
-            {isLocationOpen && (
+            {isCategoryOpen && (
               <>
                 {/* Ô input */}
                 <input
                   type="text"
                   className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Tìm kiếm địa điểm..."
+                  placeholder="Tìm kiếm danh mục..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                <ul
+  className="ml-2 text-gray-400 lg:text-base overflow-y-auto"
+  style={{ maxHeight: "150px" }}
+>
+  {filteredCities.map((city, index) => (
+    <li
+      key={index}
+      className={`cursor-pointer hover:text-[#007BFF] ${
+        city === filter ? "text-blue-500 font-bold" : ""
+      }`}
+      onClick={() => handleLocationChange(city)}
+    >
+      {city}
+    </li>
+  ))}
+  {filteredCities.length === 0 && (
+    <li className="text-gray-500">Không tìm thấy địa điểm</li>
+  )}
+</ul>
 
-                <ul className="ml-2 text-gray-400 lg:text-base">
-                  <li className="cursor-pointer hover:text-[#007BFF]">
-                    Hà nội
-                  </li>
-                </ul>
               </>
             )}
           </div>
@@ -174,7 +241,6 @@ const SearchEvent = () => {
               <h2 className="text-3xl font-semibold">
                 Kết quả tìm kiếm liên quan đến "{searchTerm}"
               </h2>
-              {error && <p className="error">{error}</p>}
             </div>
           </div>
           <div className="border-b-[1px] border-gray-300 mb-4"></div>
@@ -182,7 +248,7 @@ const SearchEvent = () => {
           <div className="space-y-4 ">
             {events.length > 0 ? (
               events.map((item) => (
-                <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
+                <div key={item.id} className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
                   <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
                     <Link to={`/event-detail/${item.id}`}>
                       <img

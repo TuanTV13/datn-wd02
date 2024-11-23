@@ -40,7 +40,7 @@ class EventController extends Controller
                     break;
                 }
             }
-    
+
             // Nếu IP không nằm trong dải IP cho phép, từ chối check-in
             if (!$isAllowed) {
                 return response()->json([
@@ -203,6 +203,7 @@ class EventController extends Controller
                 $event->speakers = null;
             }
         }
+        // Log::info('data' . $request->all());
 
         return response()->json([
             'data' => $events,
@@ -246,7 +247,7 @@ class EventController extends Controller
                 $event->speakers = null;
             }
         }
-    
+
         return response()->json([
             'data' => $events,
             'pagination' => [

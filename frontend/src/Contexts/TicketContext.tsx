@@ -10,6 +10,7 @@ import {
   restoreTicket,
   verifyTicket,
 } from "../api_service/ServiceTicket";
+import api from "../api_service/api";
 
 type Props = {
   children: React.ReactNode;
@@ -82,22 +83,22 @@ const TicketsContext = ({ children }: Props) => {
     // }
 
     // Kiểm tra ngày kết thúc bán vé hợp lệ
-    // if (ticket.sale_end) {
-    //   try {
-    //     const token = localStorage.getItem("access_token");
-    //     const headers = {
-    //       Authorization: `Bearer ${token}`,
-    //       "Content-Type": "application/json",
-    //     };
-    //     const eventResponse = await api.get(`/events/${ticket.event_id}/show`,{headers});
-    //     const event = eventResponse.data;
-    //     if (new Date(ticket.sale_end) > new Date(event.start_time)) {
-    //       errors.push("Ngày kết thúc bán vé không thể sau ngày diễn ra sự kiện.");
-    //     }
-    //   } catch (error: any) {
-    //     errors.push("Lỗi khi kiểm tra thời gian bán vé.");
-    //   }
-    // }
+    if (ticket.sale_end) {
+      try {
+        const token = localStorage.getItem("access_token");
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
+        const eventResponse = await api.get(`/events/${ticket.event_id}/show`,{headers});
+        const event = eventResponse.data;
+        if (new Date(ticket.sale_end) > new Date(event.start_time)) {
+          errors.push("Ngày kết thúc bán vé không thể sau ngày diễn ra sự kiện.");
+        }
+      } catch (error: any) {
+        errors.push("Lỗi khi kiểm tra thời gian bán vé.");
+      }
+    }
 
     return errors;
   };
@@ -119,41 +120,13 @@ const TicketsContext = ({ children }: Props) => {
       window.location.reload();
     } catch (error) {
       console.log("Error adding ticket:", error);
-      toast.error("Lỗi khi thêm vé");
+      toast.error("Vé đã có vui lòng kiểm tra lại");
     }
   };
 
   // Cập nhật ve
-  const validateTicket = (ticket: Tickets) => {
-    const errors: string[] = [];
-
-    if (!ticket.event) {
-      errors.push("Sự kiện không tồn tại.");
-      return errors;
-    }
-
-    if (!ticket.event.start_time) {
-      errors.push("Ngày bắt đầu sự kiện không tồn tại hoặc không hợp lệ.");
-    } else {
-      const saleEndDate = new Date(ticket.sale_end);
-      const eventStartDate = new Date(ticket.event.start_time);
-
-      if (saleEndDate >= eventStartDate) {
-        errors.push("Ngày kết thúc bán vé phải trước ngày bắt đầu sự kiện.");
-      }
-    }
-
-    return errors;
-  };
-
   const onEdit = async (ticket: Tickets) => {
     try {
-      // const validationErrors = validateTicket(ticket);
-      // if (validationErrors.length > 0) {
-      //     validationErrors.forEach((error) => toast.error(error));
-      //     return;
-      // }
-
       const updatedTicket = await editTicket(ticket);
       setTickets(
         tickets.map((item) =>

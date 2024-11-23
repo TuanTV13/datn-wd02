@@ -19,9 +19,9 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
           },
         });
         console.log(response.data.data)
-        setTransactions(response.data.data); // Dữ liệu giao dịch
+        setTransactions(response.data.data);
       } catch (err) {
-        console.error("Error fetching transaction history:", err);
+        console.log("hh",err);
       }
     };
 

@@ -45,7 +45,7 @@ function App() {
         { path: "", element: <Home /> },
         { path: "event-list", element: <EventListing /> },
         { path: "event-detail/:id", element: <EventDetail /> },
-        { path: "event-category/:eventId", element: <CategoryEvent /> },
+        { path: "event-category/:id", element: <CategoryEvent /> },
         { path: "cart", element: <Cart /> },
         { path: "checkout", element: <CheckOut /> },
         { path: "order", element: <Order /> },
