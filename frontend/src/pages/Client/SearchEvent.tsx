@@ -1,8 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { EventCT } from "../../Contexts/ClientEventContext";
 import { CategoryCT } from "../../Contexts/CategoryContext";
 import api from "../../api_service/api";
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
 
 const SearchEvent = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -20,25 +29,27 @@ const SearchEvent = () => {
     setIsLocationOpen(!isLocationOpen);
   };
 
-  const [filter, setFilter] = useState("");
-
   const navigate = useNavigate();
-  const handleCategoryClick = async (categoryId: number | string) => {
-    await fetchEventsByCategory(categoryId); // Fetch events by category
-    navigate(`/event-category/${categoryId}`); // Navigate to the category page
+  const handleCategoryClick = async (id: number | string) => {
+    await fetchEventsByCategory(id);
+    navigate(`/event-category/${id}`);
   };
-
+  const [filter, setFilter] = useState("");
   const cities = [...new Set(events.map((event) => event.location))];
-
-  // Hàm xử lý thay đổi thành phố
+  const [searchParams, setSearchParams] = useSearchParams();
   const handleLocationChange = (city: string) => {
-    setFilter(city); // Cập nhật filter theo thành phố đã chọn
+    setFilter(city);
+    setSearchParams({ location: city });
   };
-  const [startDate, setStartDate] = useState(""); // Ngày bắt đầu
-  const [endDate, setEndDate] = useState(""); // Ngày kết thúc
+  useEffect(() => {
+    const locationFromURL = searchParams.get("location"); // Lấy giá trị từ URL
+    if (locationFromURL) {
+      setFilter(locationFromURL); // Cập nhật bộ lọc
+    }
+  }, [searchParams]);
 
-const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
-const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
+  const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
+  const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
 
   // Lọc sự kiện theo thành phố ngay khi người dùng nhập
   useEffect(() => {
@@ -51,32 +62,12 @@ const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đ�
     setFilteredEvents(filteredByCity);
   }, [filter, events]);
 
-  // Hàm áp dụng bộ lọc ngày
-  useEffect(() => {
-    if (!applyFilter) return; // Nếu chưa bấm nút Apply thì không lọc
-  
-    // Lọc sự kiện khi startDate hoặc endDate thay đổi
-    const filteredByDate = events.filter((event) => {
-      const eventStartDate = new Date(event.start_time); // Ngày bắt đầu của sự kiện
-      const start = new Date(startDate); // Ngày bắt đầu lọc
-      const end = new Date(endDate); // Ngày kết thúc lọc
-  
-      return (
-        (!startDate || eventStartDate >= start) &&
-        (!endDate || eventStartDate <= end)
-      );
-    });
-  
-    // Cập nhật sự kiện đã lọc
-    setFilteredEvents(filteredByDate);
-  }, [applyFilter, startDate, endDate, events]); // Theo dõi thay đổi của applyFilter, startDate, endDate và events
-
   const handleApplyFilters = () => {
     setApplyFilter(true); // Đánh dấu là bấm nút Apply
   };
 
   const clearFilters = () => {
-    setFilter("");
+    window.location.reload();
     navigate("/event-list");
   };
   const [searchQuery, setSearchQuery] = useState("");
@@ -85,30 +76,32 @@ const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đ�
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   const [locationQuery, setLocationQuery] = useState("");
+
   // Lọc danh sách thành phố dựa trên giá trị input
   const filteredCities = cities.filter((city) =>
     city.toLowerCase().includes(locationQuery.toLowerCase())
   );
 
-// Search
-const [search] = useSearchParams()
-const [keywords, setKeywords] = useState<string>("")
-const [error, setError] = useState<string | null>(null)
-useEffect(() => {
-    (async () => {
-      try {
-        const keyword = search.get("keyword") || ""
-        const { data } = await api.get(`/events?name_like=${keyword}`)
-        setEvents(data)
-        setKeywords(keyword)
-        setError(null)
-      } catch (err) {
-        setError("Không thể tìm thấy sự kiện")
-        console.error(err)
-      }
-    })()
-  }, [search])
+  // Search
+  const query = useQuery();
+  const searchTerm = query.get("query") || "";
+
+  useEffect(() => {
+    if (searchTerm) {
+      api
+        .post("/clients/events/search", { name: searchTerm }) // Gửi request với từ khóa
+        .then((response) => {
+          setEvents(response.data.data.data ); 
+        })
+        .catch((err) => {
+          console.log(
+            err.response?.data?.message || "Đã xảy ra lỗi khi tìm kiếm sự kiện"
+          ); 
+        });
+    }
+  }, [searchTerm]);
   return (
     <div className="lg:mx-10 mt-36">
       <div className="flex flex-col lg:flex-row">
@@ -143,14 +136,9 @@ useEffect(() => {
                   type="text"
                   className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Tìm kiếm danh mục..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-
-                {/* Danh sách danh mục chỉ hiển thị khi ô input không rỗng */}
-                {searchQuery.trim() !== "" && (
-                  <ul className="ml-2 text-gray-400 lg:text-base">
-                    {filteredCategories.map((category) => (
+                <ul className="ml-2 text-gray-400 lg:text-base">
+                {filteredCategories.map((category) => (
                       <li
                         key={category.id}
                         className="cursor-pointer hover:text-[#007BFF]"
@@ -162,8 +150,7 @@ useEffect(() => {
                     {filteredCategories.length === 0 && (
                       <li className="text-gray-500">Không tìm thấy danh mục</li>
                     )}
-                  </ul>
-                )}
+                </ul>
               </>
             )}
           </div>
@@ -189,34 +176,36 @@ useEffect(() => {
                 />
               </svg>
             </div>
-            {isLocationOpen && (
+            {isCategoryOpen && (
               <>
                 {/* Ô input */}
                 <input
                   type="text"
                   className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Tìm kiếm địa điểm..."
-                  value={locationQuery}
-                  onChange={(e) => setLocationQuery(e.target.value)}
+                  placeholder="Tìm kiếm danh mục..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                <ul
+  className="ml-2 text-gray-400 lg:text-base overflow-y-auto"
+  style={{ maxHeight: "150px" }}
+>
+  {filteredCities.map((city, index) => (
+    <li
+      key={index}
+      className={`cursor-pointer hover:text-[#007BFF] ${
+        city === filter ? "text-blue-500 font-bold" : ""
+      }`}
+      onClick={() => handleLocationChange(city)}
+    >
+      {city}
+    </li>
+  ))}
+  {filteredCities.length === 0 && (
+    <li className="text-gray-500">Không tìm thấy địa điểm</li>
+  )}
+</ul>
 
-                {/* Danh sách địa điểm chỉ hiển thị khi input không rỗng */}
-                {locationQuery.trim() !== "" && (
-                  <ul className="ml-2 text-gray-400 lg:text-base">
-                    {filteredCities.map((city, index) => (
-                      <li
-                        key={index}
-                        className="cursor-pointer hover:text-[#007BFF]"
-                        onClick={() => handleLocationChange(city)}
-                      >
-                        {city}
-                      </li>
-                    ))}
-                    {filteredCities.length === 0 && (
-                      <li className="text-gray-500">Không tìm thấy địa điểm</li>
-                    )}
-                  </ul>
-                )}
               </>
             )}
           </div>
@@ -228,10 +217,6 @@ useEffect(() => {
               <input
                 type="date"
                 className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={startDate}
-                onChange={(e) => {
-                  setStartDate(e.target.value);
-                }}
               />
             </label>
             <label className="flex flex-col space-y-2 mt-4">
@@ -239,19 +224,12 @@ useEffect(() => {
               <input
                 type="date"
                 className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={endDate}
-                onChange={(e) => {
-                  setEndDate(e.target.value);
-                }}
               />
             </label>
-            <button onClick={handleApplyFilters}  className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]">
+            <button className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]">
               Apply
             </button>
-            <button
-              className="mt-4 ml-2 px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
-              onClick={clearFilters}
-            >
+            <button className="mt-4 ml-2 px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500">
               Clear
             </button>
           </div>
@@ -260,65 +238,74 @@ useEffect(() => {
         <div className="w-full lg:w-3/4 p-4">
           <div className=" mb-4 ">
             <div className="flex justify-between space-x-2  items-center">
-              <h2 className="text-3xl font-semibold">Kết quả tìm kiếm liên quan đến "{keywords}"</h2>
-              {error && <p className="error">{error}</p>}
+              <h2 className="text-3xl font-semibold">
+                Kết quả tìm kiếm liên quan đến "{searchTerm}"
+              </h2>
             </div>
           </div>
           <div className="border-b-[1px] border-gray-300 mb-4"></div>
           {/* <!-- Items --> */}
           <div className="space-y-4 ">
-            {filteredEvents.map((item) => (
-              <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
-                <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
-                  <Link to={`/event-detail/${item.id}`}>
-                    <img
-                      alt={item.name}
-                      className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
-                      src={item.thumbnail}
-                    />
-                  </Link>
-                </div>
-                <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
-                  <div className="mt-2 lg:flex">
-                    <div className="flex flex-col justify-between lg:w-2/3">
-                      <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer">
-                        <Link to={`/event-detail/${item.id}`}>{item.name}</Link>
-                      </h3>
-                      <div className="flex items-center text-gray-600 mb-2 mt-1">
-                        <i className="fas fa-clock mr-2"></i>
-                        Thời gian bắt đầu: {item.start_time}
-                      </div>
-                      <div className="flex items-center text-gray-600 mb-2 mt-1">
-                        <i className="fas fa-clock mr-2"></i>
-                        Thời gian kết thúc: {item.end_time}
-                      </div>
-                      <div className="flex items-center text-gray-600 mb-2 mt-1">
-                        <i className="fas fa-map-marker-alt mr-2"></i>
-                        Địa điểm: {item.location}
-                      </div>
-                      <div
-                        className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
-                      >
-                        Mô tả: {item.description}
+            {events.length > 0 ? (
+              events.map((item) => (
+                <div key={item.id} className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
+                  <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
+                    <Link to={`/event-detail/${item.id}`}>
+                      <img
+                        alt={item.name}
+                        className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
+                        src={item.thumbnail}
+                      />
+                    </Link>
+                  </div>
+                  <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
+                    <div className="mt-2 lg:flex">
+                      <div className="flex flex-col justify-between lg:w-2/3">
+                        <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer">
+                          <Link to={`/event-detail/${item.id}`}>
+                            {item.name}
+                          </Link>
+                        </h3>
+                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                          <i className="fas fa-clock mr-2"></i>
+                          Thời gian bắt đầu: {item.start_time}
+                        </div>
+                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                          <i className="fas fa-clock mr-2"></i>
+                          Thời gian kết thúc: {item.end_time}
+                        </div>
+                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                          <i className="fas fa-map-marker-alt mr-2"></i>
+                          Địa điểm: {item.location}
+                        </div>
+                        <div
+                          className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
+                        >
+                          Mô tả: {item.description}
+                        </div>
+
+                        <Link
+                          to={`/event-detail/${item.id}`}
+                          className="text-blue-500 "
+                        >
+                          Xem thêm
+                        </Link>
                       </div>
 
-                      <Link
-                        to={`/event-detail/${item.id}`}
-                        className="text-blue-500 "
-                      >
-                        Xem thêm
-                      </Link>
-                    </div>
-
-                    <div className="lg:ml-5 lg:mt-28">
-                      <button  className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
-                        <Link to={`/event-detail/${item.id}`}>Xem chi tiết</Link>
-                      </button>
+                      <div className="lg:ml-5 lg:mt-28">
+                        <button className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
+                          <Link to={`/event-detail/${item.id}`}>
+                            Xem chi tiết
+                          </Link>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p>Không tìm thấy sự kiện nào phù hợp.</p>
+            )}
           </div>
         </div>
       </div>

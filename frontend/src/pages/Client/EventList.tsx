@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { EventCT } from "../../Contexts/ClientEventContext";
 import { CategoryCT } from "../../Contexts/CategoryContext";
+import api from "../../api_service/api";
 
 const EventListing = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -23,23 +24,28 @@ const EventListing = () => {
   const [filter, setFilter] = useState("");
 
   const navigate = useNavigate();
-  const handleCategoryClick = async (categoryId: number | string) => {
-    await fetchEventsByCategory(categoryId); // Fetch events by category
-    navigate(`/event-category/${categoryId}`); // Navigate to the category page
+  const handleCategoryClick = async (id: number | string) => {
+    await fetchEventsByCategory(id); // Fetch events by category
+    navigate(`/event-category/${id}`); // Navigate to the category page
   };
 
   const cities = [...new Set(events.map((event) => event.location))];
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Hàm xử lý thay đổi thành phố
   const handleLocationChange = (city: string) => {
-    setFilter(city); // Cập nhật filter theo thành phố đã chọn
+    setFilter(city);
+    setSearchParams({ location: city });
   };
-  const [startDate, setStartDate] = useState(""); // Ngày bắt đầu
-  const [endDate, setEndDate] = useState(""); // Ngày kết thúc
+  useEffect(() => {
+    const locationFromURL = searchParams.get("location"); // Lấy giá trị từ URL
+    if (locationFromURL) {
+      setFilter(locationFromURL); // Cập nhật bộ lọc
+    }
+  }, [searchParams]);
 
   const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
   const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
-
+  const location = useLocation();
   // Lọc sự kiện theo thành phố ngay khi người dùng nhập
   useEffect(() => {
     const filteredByCity = filter
@@ -50,30 +56,29 @@ const EventListing = () => {
 
     setFilteredEvents(filteredByCity);
   }, [filter, events]);
-
-  // Hàm áp dụng bộ lọc ngày
-  useEffect(() => {
-    if (!applyFilter) return; // Nếu chưa bấm nút Apply thì không lọc
-
-    // Lọc sự kiện khi startDate hoặc endDate thay đổi
-    const filteredByDate = events.filter((event) => {
-      const eventStartDate = new Date(event.start_time); // Ngày bắt đầu của sự kiện
-      const start = new Date(startDate); // Ngày bắt đầu lọc
-      const end = new Date(endDate); // Ngày kết thúc lọc
-
-      return (
-        (!startDate || eventStartDate >= start) &&
-        (!endDate || eventStartDate <= end)
-      );
-    });
-
-    // Cập nhật sự kiện đã lọc
-    setFilteredEvents(filteredByDate);
-  }, [applyFilter, startDate, endDate, events]); // Theo dõi thay đổi của applyFilter, startDate, endDate và events
-
-  const handleApplyFilters = () => {
-    setApplyFilter(true); // Đánh dấu là bấm nút Apply
-  };
+  const [start_time, setStart_time] = useState(""); // Ngày bắt đầu
+  const [end_time, setEnd_time] = useState(""); // Ngày kết thúc
+    // Hàm gọi API để lọc theo ngày
+    const fetchEventsByDate = async () => {
+      try {
+        const response = await api.post("/clients/events/filter", {
+          start_time,
+          end_time
+        });
+        console.log("Response data:", response.data);
+        setFilteredEvents(response.data.data.data); 
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+    
+    const handleApplyFilters = () => {
+      if (start_time && end_time) {
+        fetchEventsByDate(); // Gọi API khi bấm Apply
+      } else {
+        alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!");
+      }
+    };
 
   const clearFilters = () => {
     window.location.reload();
@@ -130,24 +135,23 @@ const EventListing = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-
-                {/* Danh sách danh mục chỉ hiển thị khi ô input không rỗng */}
-                {searchQuery.trim() !== "" && (
-                  <ul className="ml-2 text-gray-400 lg:text-base">
-                    {filteredCategories.map((category) => (
-                      <li
-                        key={category.id}
-                        className="cursor-pointer hover:text-[#007BFF]"
-                        onClick={() => handleCategoryClick(category.id)}
-                      >
-                        {category.name}
-                      </li>
-                    ))}
-                    {filteredCategories.length === 0 && (
-                      <li className="text-gray-500">Không tìm thấy danh mục</li>
-                    )}
-                  </ul>
-                )}
+                <ul
+                  className="ml-2 text-gray-400 lg:text-base overflow-y-auto"
+                  style={{ maxHeight: "150px" }} // Giới hạn chiều cao
+                >
+                  {filteredCategories.map((category) => (
+                    <li
+                      key={category.id}
+                      className="cursor-pointer hover:text-[#007BFF]"
+                      onClick={() => handleCategoryClick(category.id)}
+                    >
+                      {category.name}
+                    </li>
+                  ))}
+                  {filteredCategories.length === 0 && (
+                    <li className="text-gray-500">Không tìm thấy danh mục</li>
+                  )}
+                </ul>
               </>
             )}
           </div>
@@ -183,24 +187,25 @@ const EventListing = () => {
                   value={locationQuery}
                   onChange={(e) => setLocationQuery(e.target.value)}
                 />
-
-                {/* Danh sách địa điểm chỉ hiển thị khi input không rỗng */}
-                {locationQuery.trim() !== "" && (
-                  <ul className="ml-2 text-gray-400 lg:text-base">
-                    {filteredCities.map((city, index) => (
-                      <li
-                        key={index}
-                        className="cursor-pointer hover:text-[#007BFF]"
-                        onClick={() => handleLocationChange(city)}
-                      >
-                        {city}
-                      </li>
-                    ))}
-                    {filteredCities.length === 0 && (
-                      <li className="text-gray-500">Không tìm thấy địa điểm</li>
-                    )}
-                  </ul>
-                )}
+                <ul
+                  className="ml-2 text-gray-400 lg:text-base overflow-y-auto"
+                  style={{ maxHeight: "150px" }}
+                >
+                  {filteredCities.map((city, index) => (
+                    <li
+                      key={index}
+                      className={`cursor-pointer hover:text-[#007BFF] ${
+                        city === filter ? "text-blue-500 font-bold" : ""
+                      }`}
+                      onClick={() => handleLocationChange(city)}
+                    >
+                      {city}
+                    </li>
+                  ))}
+                  {filteredCities.length === 0 && (
+                    <li className="text-gray-500">Không tìm thấy địa điểm</li>
+                  )}
+                </ul>
               </>
             )}
           </div>
@@ -211,22 +216,20 @@ const EventListing = () => {
               <span className="text-lg">Từ ngày:</span>
               <input
                 type="date"
+                id="start_time"
+                value={start_time}
+                onChange={(e) => setStart_time(e.target.value)}
                 className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={startDate}
-                onChange={(e) => {
-                  setStartDate(e.target.value);
-                }}
               />
             </label>
             <label className="flex flex-col space-y-2 mt-4">
               <span className="text-lg">Đến ngày:</span>
               <input
                 type="date"
+                id="end_time"
+                value={end_time}
+                onChange={(e) => setEnd_time(e.target.value)}
                 className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={endDate}
-                onChange={(e) => {
-                  setEndDate(e.target.value);
-                }}
               />
             </label>
             <button

@@ -70,10 +70,10 @@ const TicketsContext = ({ children }: Props) => {
     // try {
     //   const token = localStorage.getItem("access_token");
     //   const headers = {
-    //     Authorization: `Bearer ${token}`,
+    //     Authorization: Bearer ${token},
     //     "Content-Type": "application/json",
     //   };
-    //   const eventResponse = await api.get(`/events/${ticket.event_id}/show`,{headers});
+    //   const eventResponse = await api.get(/events/${ticket.event_id}/show,{headers});
     // } catch (error: any) {
     //   if (error.response && error.response.status === 404) {
     //     errors.push("Sự kiện không tồn tại.");
@@ -87,10 +87,10 @@ const TicketsContext = ({ children }: Props) => {
     //   try {
     //     const token = localStorage.getItem("access_token");
     //     const headers = {
-    //       Authorization: `Bearer ${token}`,
+    //       Authorization: Bearer ${token},
     //       "Content-Type": "application/json",
     //     };
-    //     const eventResponse = await api.get(`/events/${ticket.event_id}/show`,{headers});
+    //     const eventResponse = await api.get(/events/${ticket.event_id}/show,{headers});
     //     const event = eventResponse.data;
     //     if (new Date(ticket.sale_end) > new Date(event.start_time)) {
     //       errors.push("Ngày kết thúc bán vé không thể sau ngày diễn ra sự kiện.");
@@ -134,11 +134,11 @@ const TicketsContext = ({ children }: Props) => {
       return errors; // Không tiếp tục kiểm tra nếu không có sự kiện
     }
 
-    // Kiểm tra nếu ngày bắt đầu sự kiện (`start_time`) tồn tại
+    // Kiểm tra nếu ngày bắt đầu sự kiện (start_time) tồn tại
     if (!ticket.event.start_time) {
       errors.push("Ngày bắt đầu sự kiện không tồn tại hoặc không hợp lệ.");
     } else {
-      // Chuyển đổi ngày kết thúc bán vé và ngày bắt đầu sự kiện sang kiểu `Date`
+      // Chuyển đổi ngày kết thúc bán vé và ngày bắt đầu sự kiện sang kiểu Date
       const saleEndDate = new Date(ticket.sale_end);
       const eventStartDate = new Date(ticket.event.start_time);
 
