@@ -435,6 +435,9 @@ public function getEventCountTotalAmountAndPercentageByProvince()
         }
 
 
+        
+
+
     }
     
     
