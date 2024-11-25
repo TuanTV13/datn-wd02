@@ -39,4 +39,5 @@ class CheckEventIPCommand extends Command
         
         $this->info('Đã gửi job kiểm tra địa chỉ IP cho các sự kiện.');
     }
+    
 }
