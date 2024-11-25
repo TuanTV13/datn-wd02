@@ -12,6 +12,7 @@ interface EventContextType {
   loading: boolean;
   fetchEventById: (id: number) => Promise<void>;
   checkInToEvent: (eventId: number) => Promise<any>;
+  setEvents: React.Dispatch<React.SetStateAction<Events[]>>;
 }
 
 export const EventCT = createContext<EventContextType>({} as EventContextType);
@@ -64,6 +65,7 @@ const EventContexts = ({ children }: Props) => {
         loading,
         fetchEventById,
         checkInToEvent,
+        setEvents,
       }}
     >
       {children}

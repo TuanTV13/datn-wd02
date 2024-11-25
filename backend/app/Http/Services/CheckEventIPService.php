@@ -15,15 +15,17 @@ class CheckEventIPService
 
         $events = Event::where('start_time', '<=', $twoDaysLater)->with('subnets')->get();
         // dd($events);
-        foreach ($events as $event) {
-            $ipCheckin = $event->subnets();
+        if (empty($ipCheckin)) {
+            // Duyệt qua tất cả sự kiện để kiểm tra xem có subnets hay không
+            foreach ($events as $event) {
+                // Kiểm tra sự kiện có subnets hay không
+                if ($event->subnets->isEmpty()) {
+                    // Thêm sự kiện không có IP vào mảng
+                    $eventsWithoutIP[] = $event->name;
+                }
 
-            // dd($ipCheckin);
-            if (empty($ipCheckin)) {
-                $eventsWithoutIP[] = $event->name;
             }
 
-            // dd($eventsWithoutIP);
         }
 
         if ($eventsWithoutIP) {

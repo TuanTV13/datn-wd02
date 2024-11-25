@@ -6,6 +6,7 @@ use App\Enums\EventStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreTicketRequest;
 use App\Http\Requests\Admin\UpdateTicketRequest;
+use App\Models\Ticket;
 use App\Repositories\EventRepository;
 use App\Repositories\TicketRepository;
 use Exception;
@@ -36,6 +37,42 @@ class TicketController extends Controller
             ], 400);
         }
 
+        return null;
+    }
+
+    public function getBlockById($id)
+    {
+        $tickets = $this->ticketRepository->findTrashed($id);
+        return response()->json([
+            'data' => $tickets
+        ]);
+    }
+
+    public function getAll() {
+        $data = $this->ticketRepository->trashed();
+    
+        return response()->json($data);
+    }
+    
+    
+
+    public function findTicketDataByEventAndType($eventId = null, $ticketTypeId = null)
+    {
+        // Tìm vé theo event_id và ticket_type
+        $model = new Ticket();
+        $ticket = $model->where('event_id', $eventId)
+            ->where('ticket_type', $ticketTypeId)
+            ->first();
+        if ($ticket) {
+            // Trả về vé cùng với các dữ liệu cần thiết
+            return [
+                'sale_start' => $ticket->sale_start,
+                'sale_end' => $ticket->sale_end,
+                'price' => $ticket->price,
+                'seat_location' => $ticket->seat_location
+            ];
+        }
+        // Trả về null nếu không tìm thấy vé
         return null;
     }
 
@@ -139,11 +176,11 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status != 'pending') {
-            return response()->json([
-                'message' => 'Không thể cập nhật vé trong trạng thái này'
-            ], 403);
-        }
+        // if ($ticket->status != 'pending') {
+        //     return response()->json([
+        //         'message' => 'Không thể cập nhật vé trong trạng thái này'
+        //     ], 403);
+        // }
 
         $event = $this->eventRepository->find($ticket->event_id);
         if (!$event) {
@@ -157,6 +194,11 @@ class TicketController extends Controller
         }
 
         try {
+
+            $ticket = $this->ticketRepository->update($id, $data);
+            $ticket->quantity += $data['quantity'];
+            $ticket->available_quantity += $data['quantity'];
+            $ticket->save();
 
             $ticket = $this->ticketRepository->update($id, $data);
 
@@ -187,17 +229,17 @@ class TicketController extends Controller
             ], 404);
         }
 
-        if ($ticket->status_id != 'pending') {
-            return response()->json([
-                'message' => 'Không thể xóa vé trong trạng thái này'
-            ], 403);
-        }
+        // if ($ticket->status_id != 'pending') {
+        //     return response()->json([
+        //         'message' => 'Không thể xóa vé trong trạng thái này'
+        //     ], 403);
+        // }
 
         try {
             $ticket->delete();
 
             return response()->json([
-                'message' => 'Vé đã được xóa'
+                'message' => 'Vé đã được khóa'
             ], 201);
         } catch (Exception $e) {
             Log::error("errors" . $e->getMessage());
@@ -223,5 +265,18 @@ class TicketController extends Controller
         return response()->json([
             'message' => 'Khôi phục vé thành công'
         ], 200);
+    }
+
+    public function show($id)
+    {
+        $ticketData = $this->ticketRepository->find($id);
+
+        if ($ticketData) {
+            return response()->json([
+                'data' => $ticketData
+            ]);
+        }
+
+        return response()->json(['message' => 'Ticket not found'], 404);
     }
 }
