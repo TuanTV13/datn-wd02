@@ -11,11 +11,11 @@ class VNPayService
     {
         session(['cost_id' => $request->id]);
         session(['url_prev' => url()->previous()]);
-        
+
         // Các thông tin cần thiết cho VNPay
         $vnp_TmnCode = config('vnpay.tmn_code');
         $vnp_HashSecret = config('vnpay.hash_secret');
-        
+
         $vnp_Url = "http://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl = "http://localhost:8000/return-vnpay";
         $vnp_TxnRef = date("YmdHis");
@@ -42,10 +42,10 @@ class VNPayService
             "vnp_TxnRef" => $vnp_TxnRef,
             "vnp_BankCode" => $vnp_BankCode,
         ];
-     
+
         // Sắp xếp các tham số theo thứ tự từ A đến Z
         ksort($inputData);
-        
+
         // Tạo chuỗi để băm (Secure Hash)
         $query = "";
         $i = 0;
@@ -63,14 +63,14 @@ class VNPayService
         // Tạo URL thanh toán
         $vnp_Url = $vnp_Url . "?" . $query;
         if (isset($vnp_HashSecret)) {
-            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);//  
+            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);//
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
 
         // Chuyển hướng người dùng đến VNPay
         return response()->json([
             'status' => 'success',
-            'data' => $vnp_Url
+            'payment_url' => $vnp_Url
         ]);
     }
 

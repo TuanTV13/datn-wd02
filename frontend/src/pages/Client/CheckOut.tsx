@@ -17,7 +17,7 @@ const CheckOut = () => {
     phone: "",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("paypal");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [voucherCode, setVoucherCode] = useState("");
   const [totalPrice, setTotalPrice] = useState(initialTotalPrice);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
@@ -95,94 +95,94 @@ const CheckOut = () => {
     setPaymentMethod(e.target.value);
   };
 
-const handleSubmit = async (e :any) => {
-  e.preventDefault();
-  setIsProcessing(true); // Bắt đầu xử lý
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsProcessing(true); // Bắt đầu xử lý
 
-  const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("access_token");
 
-  if (token) {
-    // Dữ liệu thanh toán gửi đến backend
-    const paymentData = {
-      ticket_id: ticketId,
-      payment_method: paymentMethod,
-      name: userInfo.name,
-      email: userInfo.email,
-      phone: userInfo.phone,
-      discount_code: voucherCode || null,
-    };
-  try {
-    const response = await fetch("http://127.0.0.1:8000/api/v1/clients/payment/process", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(paymentData),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      // Redirect to PayPal payment URL
-      window.location.href = data.payment_url;
-    } else {
-      alert(data.message || "Thanh toán không thành công.");
-    }
-  } catch (error) {
-    console.error("Error during payment process:", error);
-    alert("Có lỗi xảy ra trong quá trình thanh toán.");
-  } 
-} else {
-    // Nếu chưa đăng nhập, yêu cầu người dùng nhập thông tin
-    const userDetails = {
-      name: e.target.name.value,
-      email: e.target.email.value,
-      phone: e.target.phone.value,
-    };
-  
-    // Kiểm tra xem người dùng đã nhập đủ thông tin chưa
-    if (!userDetails.name || !userDetails.email || !userDetails.phone) {
-      alert("Vui lòng điền đầy đủ các trường yêu cầu.");
-      setIsProcessing(false);
-      return;
-    }
-    // Lưu thông tin người dùng để sử dụng sau
-    setUserInfo(userDetails); // Giả sử bạn có state để lưu thông tin người dùng
-  
-    // Chuẩn bị dữ liệu thanh toán với thông tin người dùng nhập
-    const paymentData = {
-      ticket_id: ticketId,
-      payment_method: paymentMethod,
-      name: userDetails.name,
-      email: userDetails.email,
-      phone: userDetails.phone,
-      discount_code: voucherCode || null,
-    };
-    try {
-      const response = await fetch("http://127.0.0.1:8000/api/v1/clients/payment/process", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(paymentData),
-      });
-      console.log(response)
-      const data = await response.json();
-      if (response.ok) {
-        // Điều hướng tới URL thanh toán của PayPal
-        window.location.href = data.payment_url;
-      } else {
-        alert(data.message || "Thanh toán không thành công.");
+    if (token) {
+      // Dữ liệu thanh toán gửi đến backend
+      const paymentData = {
+        ticket_id: ticketId,
+        payment_method: paymentMethod,
+        name: userInfo.name,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        discount_code: voucherCode || null,
+        amount: totalPrice,
+      };
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/v1/clients/payment/process",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(paymentData),
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          window.location.href = data.payment_url;
+        } else {
+          alert(data.message || "Thanh toán không thành công.");
+        }
+      } catch (error) {
+        console.error("Error during payment process:", error);
+        alert("Có lỗi xảy ra trong quá trình thanh toán.");
       }
-    } catch (error) {
-      console.error("Lỗi trong quá trình thanh toán:", error);
-      alert("Có lỗi xảy ra trong quá trình thanh toán.");
+    } else {
+      // Nếu chưa đăng nhập, yêu cầu người dùng nhập thông tin
+      const userDetails = {
+        name: e.target.name.value,
+        email: e.target.email.value,
+        phone: e.target.phone.value,
+      };
+
+      // Kiểm tra xem người dùng đã nhập đủ thông tin chưa
+      if (!userDetails.name || !userDetails.email || !userDetails.phone) {
+        alert("Vui lòng điền đầy đủ các trường yêu cầu.");
+        setIsProcessing(false);
+        return;
+      }
+      // Lưu thông tin người dùng để sử dụng sau
+      setUserInfo(userDetails); // Giả sử bạn có state để lưu thông tin người dùng
+
+      // Chuẩn bị dữ liệu thanh toán với thông tin người dùng nhập
+      const paymentData = {
+        ticket_id: ticketId,
+        payment_method: paymentMethod,
+        name: userDetails.name,
+        email: userDetails.email,
+        phone: userDetails.phone,
+        discount_code: voucherCode || null,
+      };
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/v1/clients/payment/process",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(paymentData),
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          window.location.href = data.payment_url;
+        } else {
+          alert(data.message || "Thanh toán không thành công.");
+        }
+      } catch (error) {
+        console.error("Lỗi trong quá trình thanh toán:", error);
+        alert("Có lỗi xảy ra trong quá trình thanh toán.");
+      }
     }
-
-}
-
-}
+  };
 
   return (
     <div className="mt-36 mx-4">
@@ -289,7 +289,8 @@ const handleSubmit = async (e :any) => {
             <div className="mb-2">
               <h2 className="mb-2">Chọn phương thức thanh toán</h2>
               <div className="border border-gray-300 rounded p-2">
-                <div className="flex items-center">
+                {/* PayPal Payment Option */}
+                <label className="flex items-center cursor-pointer">
                   <input
                     className="mr-2"
                     type="radio"
@@ -305,8 +306,28 @@ const handleSubmit = async (e :any) => {
                     src="../../../public/images/logo_paypal.png"
                     width="40"
                   />
-                  <label>Thanh toán bằng PayPal</label>
-                </div>
+                  <span>Thanh toán bằng PayPal</span>
+                </label>
+
+                {/* VNPay Payment Option */}
+                <label className="flex items-center mt-3 cursor-pointer">
+                  <input
+                    className="mr-2"
+                    type="radio"
+                    name="paymentMethod"
+                    value="vnpay"
+                    checked={paymentMethod === "vnpay"}
+                    onChange={handlePaymentMethodChange}
+                  />
+                  <img
+                    alt="vnpay logo"
+                    className="mr-2"
+                    height="50"
+                    src="../../../public/images/vnpay-logo.jpg"
+                    width="50"
+                  />
+                  <span>Thanh toán bằng VNPay</span>
+                </label>
               </div>
             </div>
           </div>
@@ -350,7 +371,10 @@ const handleSubmit = async (e :any) => {
               </div>
             </div>
 
-            <button type="submit" className="bg-[#007BFF] px-10 h-14 rounded-[100px] text-white flex gap-x-4 place-items-center justify-center">
+            <button
+              type="submit"
+              className="bg-[#007BFF] px-10 h-14 rounded-[100px] text-white flex gap-x-4 place-items-center justify-center"
+            >
               <span>Đặt vé</span>|<span>{totalPrice} VDN</span>
             </button>
           </div>
