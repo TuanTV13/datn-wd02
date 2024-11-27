@@ -57,7 +57,7 @@ class EventRepository
 
     public function find($id)
     {
-        return $this->event->find($id);
+        return $this->event->with('tickets')->find($id);
     }
 
     public function findDetail($id)

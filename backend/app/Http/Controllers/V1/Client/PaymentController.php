@@ -204,6 +204,7 @@ class PaymentController extends Controller
 
                 $user->events()->attach($ticket->event_id, [
                     'ticket_id' => $ticket->id,
+                    'ticket_type' => $ticket->ticket_type,
                     'ticket_code' => $ticketCode,
                     'checked_in' => false,
                     'order_date' => now(),
