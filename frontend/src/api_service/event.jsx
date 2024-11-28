@@ -10,13 +10,30 @@ export const getEvents = async () => {
   }
 };
 export const deleteEvent = async (id) => {
+  const token = localStorage.getItem("access_token"); // Kiểm tra nếu token có tồn tại
+
+  if (!token) {
+    throw new Error("Token không tìm thấy");
+  }
+
+  // Tạo headers với token
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    // Chỉ thêm Content-Type nếu cần thiết
+  };
+
   try {
-    const response = await axios.delete(`${API_URL}/events/${id}`);
+    // Gọi axios.delete với URL đúng cách
+    const response = await axios.delete(`${API_URL}/events/${id}/delete`, {
+      headers
+    });
     return response.data;
   } catch (error) {
-    throw new Error("Lỗi khi xóa sự kiện");
+    // Xử lý lỗi trả về chi tiết từ backend nếu có
+    throw error.response ? error.response.data : error.message;
   }
 };
+
 const addEvent = async (eventData) => {
   // Lấy token từ localStorage (hoặc nơi bạn lưu token)
   const token = localStorage.getItem("access_token"); // Điều chỉnh theo cách bạn lưu token
