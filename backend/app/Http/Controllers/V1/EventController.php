@@ -103,6 +103,36 @@ class EventController extends Controller
             'message' => 'Sự kiện đã được xác nhận trước đó.'
         ], 400);
     }
+    public function changeStatus($id, Request $request)
+    {
+        // $status = $request->validate([
+        //     'status' => 'required'
+        // ]);
+
+        $event = $this->eventRepository->find($id);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Sự kiện không tồn tại.'
+            ], 404);
+        }
+
+        $event->update(['status' => $request->input('status')]);
+
+        // if ($event->status == 'pending') {
+        //     $event->status = 'confirmed';
+        //     $event->save();
+
+        //     return response()->json([
+        //         'message' => 'Xác nhận thành công',
+        //         'data' => $event
+        //     ], 200);
+        // }
+
+        return response()->json([
+            'message' => 'Thanh cong'
+        ], 200);
+    }
 
     public function create(StoreEventRequest $request)
     {
