@@ -212,9 +212,9 @@ class VoucherController extends Controller
             return $this->jsonResponse(false, 'Mã giảm giá đã hết hạn.', [], 400);
         }
 
-        if ($voucher->status == 'published' && Carbon::parse($voucher->start_time) > now()) {
-            return $this->jsonResponse(false, 'Mã giảm giá chưa được kích hoạt.', [], 400);
-        }
+        // if ($voucher->status == 'published' && Carbon::parse($voucher->start_time) > now()) {
+        //     return $this->jsonResponse(false, 'Mã giảm giá chưa được kích hoạt.', [], 400);
+        // }
     }
 
     private function calculateDiscountPrice($voucher, $totalPrice)

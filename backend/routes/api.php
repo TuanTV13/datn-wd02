@@ -197,3 +197,6 @@ Route::prefix('v1')->group(function () {
     });
     });
 });
+
+Route::post('/vnpay/return', [PaymentController::class, 'handleVNPayResponse']);
+

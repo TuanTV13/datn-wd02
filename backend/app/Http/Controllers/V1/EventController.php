@@ -51,9 +51,20 @@ class EventController extends Controller
 
     public function show($eventId)
     {
-        $event = $this->eventRepository->find($eventId);
-        $event->speakers = $event->speakers ? json_decode($event->speakers, true) : null;
-        $eventAttendees = $this->eventRepository->getEventAttendees($eventId);
+        $event = $this->eventRepository->findDetail($eventId);
+        $eventS = $this->eventRepository->find($eventId);
+        $speakers = $eventS->speakers = $eventS->speakers ? json_decode($eventS->speakers, true) : null;
+        // $eventAttendees = $this->eventRepository->getEventAttendees($eventId);
+
+        // if (is_array($event)) {
+        //     // Nếu $event là mảng
+        //     $speakers = isset($event['speakers']) ? json_decode($event['speakers'], true) : null;
+        // } else {
+        //     // Nếu $event là đối tượng
+        //     $speakers = $event->speakers ? json_decode($event->speakers, true) : null;
+        // }
+
+        $event['speakers'] = $speakers;
 
         if (!$event) {
             return response()->json([
@@ -64,7 +75,7 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Xem chi tiết sự kiện.',
             'data' => $event,
-            'users' => $eventAttendees
+            // 'users' => $eventAttendees
         ], 200);
     }
 
@@ -95,11 +106,14 @@ class EventController extends Controller
 
     public function create(StoreEventRequest $request)
     {
+        Log::info('Thông tin vé', ['data' => $request->all()]);
         DB::beginTransaction();
         try {
             $data = $request->validated();
 
-            if ($request->has('speakers') && is_array($request->speakers)) {
+            if ($request->has('speakers') && is_string($request->speakers)) {
+                $data['speakers'] = json_decode($request->speakers, true);
+            } elseif ($request->has('speakers') && is_array($request->speakers)) {
                 $data['speakers'] = json_encode($request->speakers);
             } else {
                 $data['speakers'] = null;
