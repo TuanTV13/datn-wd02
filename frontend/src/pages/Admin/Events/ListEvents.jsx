@@ -65,6 +65,7 @@ const EventList = () => {
         await deleteEvent(id);
         const updatedList = list.filter((event) => event.id !== id);
         setList(updatedList);
+        alert('Xoá sự kiện thành công!' )
       } catch (error) {
         console.error('Lỗi khi xóa sự kiện:', error);
       }

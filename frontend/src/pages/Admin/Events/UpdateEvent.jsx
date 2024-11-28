@@ -20,9 +20,9 @@ const UpdateEvent = () => {
   useEffect(() => {
     // Lấy thông tin sự kiện từ API
     axios
-      .get(`http://127.0.0.1:8000/api/v1/events/${id}/show`, { headers })
+      .get(`http://192.168.2.112:8000/api/v1/events/${id}/show`, { headers })
       .then((response) => {
-        const event = response.data.data;
+        const event = response.data.data.event;
        
         setFormData({
           start_time: event.start_time,
@@ -73,7 +73,7 @@ const UpdateEvent = () => {
  
    try {
      const result = await axios.put(
-       `http://127.0.0.1:8000/api/v1/events/${id}/update`,
+       `http://192.168.2.112:8000/api/v1/events/${id}/update`,
        formattedData, // Gửi dữ liệu dạng JSON
        { 
          headers: {
@@ -86,7 +86,7 @@ const UpdateEvent = () => {
      alert("Cập nhật sự kiện thành công!");
    } catch (error) {
      console.error("Lỗi khi cập nhật sự kiện:", error);
-     alert("Có lỗi xảy ra khi cập nhật sự kiện!");
+     alert(error.response.data.message);
    } finally {
      setLoading(false);
    }
