@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('check:event-status')->everyMinute();
         // $schedule->command('users:delete-unverified')->everyMinute();
         // $schedule->command('queue:run')->everyMinute();
+        $schedule->command('transactions:clear-pending')->everyMinute();
         $schedule->command('app:check-event-i-p-command')->everyMinute();
     }
 
@@ -28,4 +29,6 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+   
+
 }
