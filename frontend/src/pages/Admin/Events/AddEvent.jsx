@@ -1,6 +1,7 @@
-  import React, { useState, useEffect } from "react";
+  import { useState, useEffect } from "react";
   import { addEvent, fetchCategories } from "../../../api_service/event";
   import { fetchProvinces, fetchDistricts, fetchWards } from "../../../api_service/location";
+  import { ToastContainer, toast } from "react-toastify";
 
   const AddEvent = () => {
     const [formData, setFormData] = useState({
@@ -33,11 +34,17 @@
     useEffect(() => {
       fetchCategories()
         .then((response) => setCategories(response.data))
-        .catch((error) => console.error("Lỗi khi lấy danh mục:", error));
+        .catch((error) => {
+          console.error("Lỗi khi lấy danh mục:", error)
+          toast.error("Lỗi khi lấy danh mục. Vui lòng thử lại!");
+        });
 
       fetchProvinces()
         .then((response) => setProvinces(response.data.data))
-        .catch((error) => console.error("Lỗi khi lấy tỉnh:", error));
+        .catch((error) => {
+          console.error("Lỗi khi lấy tỉnh:", error)
+          toast.error("Lỗi khi lấy tỉnh. Vui lòng thử lại!");
+        });
     }, []);
 
     const handleProvinceChange = (provinceName) => {
@@ -45,7 +52,10 @@
       setFormData({ ...formData, province_name: provinceName, province_id: province.code, district_name: "", ward_name: "" });
       fetchDistricts(province.code)
         .then((response) => setDistricts(response.data.data))
-        .catch((error) => console.error("Lỗi khi lấy huyện:", error));
+        .catch((error) => {
+          console.error("Lỗi khi lấy huyện:", error)
+          toast.error("Lỗi khi lấy huyện. Vui lòng thử lại!");
+        });
     };
 
     const handleDistrictChange = (districtName) => {
@@ -53,7 +63,10 @@
       setFormData({ ...formData, district_name: districtName, district_id: district.code, ward_name: "" });
       fetchWards(district.code)
         .then((response) => setWards(response.data.data))
-        .catch((error) => console.error("Lỗi khi lấy xã:", error));
+        .catch((error) => {
+          console.error("Lỗi khi lấy xã:", error)
+          toast.error("Lỗi khi lấy xã. Vui lòng thử lại!");
+        });
     };
 
     const handleWardChange = (wardName) => {
@@ -82,6 +95,8 @@
         });
       } else {
         console.log("Hãy điền đầy đủ thông tin diễn giả!");
+        toast.error("Hãy điền đầy đủ thông tin diễn giả!");
+
       }
     };
     
@@ -116,8 +131,14 @@
     
       // Gửi request lên backend
       addEvent(dataToSubmit)
-        .then(() => console.log("Thêm sự kiện thành công!"))
-        .catch((error) => console.error("Lỗi khi thêm sự kiện:", error));
+        .then(() => {
+          console.log("Thêm sự kiện thành công!")
+          toast.success("Thêm sự kiện thành công!")
+        })
+        .catch((error) => {
+          console.error("Lỗi khi thêm sự kiện:", error)
+          toast.error("Thêm sự kiện thất bại. Vui lòng thử lại!");
+        });
     
       console.log(formData);
     };
@@ -362,7 +383,7 @@
     
       <button type="submit" className="btn btn-success">Lưu sự kiện</button>
     </form>
-    
+    <ToastContainer />
      </div>
     
     );
