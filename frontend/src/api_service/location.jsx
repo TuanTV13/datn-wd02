@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const API_URL = 'http://10.24.16.19:8000/api/v1';
+
 
 export const fetchProvinces = async () => {
   try {

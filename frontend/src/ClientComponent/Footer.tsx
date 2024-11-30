@@ -32,6 +32,7 @@ const Footer = () => {
                 <h3 className="text-lg">Phương thức thanh toán</h3>
                 <p className="grid grid-cols-3 md:grid-cols-5 gap-2">
                     <img src="../../public/images/logo_paypal.png" alt="Thanh toán 1" className="h-auto w-9" />
+                    <img src="../../public/images/vnpay-logo.jpg" alt="Thanh toán 2" className="h-auto w-10" />
                 </p>
             </div>
 

@@ -59,26 +59,30 @@ const ItemEven = () => {
               .map((event) => (
                 <div
                   key={event.id}
-                  className="border-transparent hover:border-[#007BFF] w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border  rounded-lg p-2 xm:mt-3 "
+                  className="border-transparent hover:border-[#007BFF] w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border  rounded-[10px] p-2 xm:mt-3 transition-all duration-300 hover:bg-gradient-to-r hover:from-[#c6e1fe] hover:to-[#F5F5F5]"
                 >
                   <Link
                     to={`/event-detail/${event.id}`}
-                    className=" bg-gray-200 mb-2 overflow-hidden"
+                    className=" mb-2 overflow-hidden"
                   >
                     <img
                       src={event.thumbnail || ""}
                       alt={event.name}
-                      className="h-[120px] w-full rounded-lg object-cover transition-all duration-300 hover:rounded-none hover:scale-100"
+                      className="h-[120px] w-full rounded-[10px] object-cover transition-all duration-300 hover:rounded-none hover:scale-100"
                     />
                   </Link>
-                  <div className="text-xs text-gray-700 mb-2 mt-2">
+                  <div className="text-xs text-gray-700 mb-2 mt-2 h-24">
                     <p>{event.location}</p>
-                    <p>
+                    <p className="mt-1">
                       <Link to={"/event-detail/" + event.id}>{event.name}</Link>
                     </p>
-                    <p className="text-gray-500 pt-4">Vào cổng tự do</p>
                   </div>
-                  <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
+                  <div className="text-xs mb-2">
+                    <p className="text-gray-500 hover:text-[#070707]">
+                      <Link to={"/event-detail/" + event.id}>Xem chi tiết</Link>
+                    </p>
+                  </div>
+                  <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-2">
                     <div className="flex items-center space-x-1">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +129,7 @@ const ItemEven = () => {
         <div className="flex justify-center mt-2">
           <button
             onClick={() => setShowUpcoming(!showUpcoming)}
-            className="p-2 bg-blue-500 text-white rounded-lg w-40"
+            className="p-2 text-[#007BFF] rounded-lg w-40 hover:bg-[#007BFF] border hover:text-white"
           >
             {showUpcoming ? "Ẩn bớt sự kiện" : "Xem tất cả sự kiện"}
           </button>
@@ -144,25 +148,29 @@ const ItemEven = () => {
             .map((event) => (
               <div
                 key={event.id}
-                className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-lg p-2 xm:mt-3 "
+                className="w-full h-auto mb-4 lg:w-[200px] lg:h-[270px] border border-gray-400 rounded-[10px] p-2 xm:mt-3 transition-all duration-300 hover:bg-gradient-to-r hover:from-[#c6e1fe] hover:to-[#F5F5F5]"
               >
-                <div className="w-full h-[120px] bg-gray-200 mb-2">
+                <div className="w-full h-[120px] mb-2">
                   <Link to={"/event-detail/" + event.id}>
                     <img
                       src={event.thumbnail || ""}
                       alt={event.name}
-                      className="h-full w-full rounded-lg object-cover transition-all duration-300 hover:rounded-none hover:scale-100"
+                      className="h-full w-full rounded-[10px] object-cover transition-all duration-300 hover:rounded-none hover:scale-100"
                     />
                   </Link>
                 </div>
-                <div className="text-xs text-gray-700 mb-2">
+                <div className="text-xs text-gray-700 mb-2 h-24">
                   <p className="pt-2">{event.location}</p>
-                  <p>
+                  <p className="mt-1">
                     <Link to={"/event-detail/" + event.id}>{event.name}</Link>
                   </p>
-                  <p className="text-gray-500 pt-3">Vào cổng tự do</p>
                 </div>
-                <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
+                <div className="text-xs mb-2">
+                  <p className="text-gray-500 hover:text-[#070707]">
+                    <Link to={"/event-detail/" + event.id}>Xem chi tiết</Link>
+                  </p>
+                </div>
+                <div className="flex lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-2">
                   <div className="flex items-center space-x-1">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +212,7 @@ const ItemEven = () => {
         <div className="flex justify-center mt-2">
           <button
             onClick={() => setShowFeatured(!showFeatured)}
-            className="p-2 bg-blue-500 text-white rounded-lg w-40"
+            className="p-2 text-[#007BFF] rounded-lg w-40 hover:bg-[#007BFF] border hover:text-white"
           >
             {showFeatured ? "Ẩn bớt sự kiện" : "Xem tất cả sự kiện"}
           </button>
@@ -222,7 +230,7 @@ const ItemEven = () => {
           {topRatedEvents?.map((event) => (
             <div
               key={event.id}
-              className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3"
+              className="w-full h-auto mb-4 lg:w-[250px] lg:h-[280px] border border-gray-400 rounded-lg p-2 xm:mt-3 transition-all duration-300 hover:bg-gradient-to-r hover:from-[#c6e1fe] hover:to-[#F5F5F5]"
             >
               <div className=" bg-gray-200 mb-2">
                 <img
@@ -231,14 +239,18 @@ const ItemEven = () => {
                   className="w-full h-[120px] rounded-lg object-cover transition-all duration-300 hover:rounded-none hover:scale-100"
                 />
               </div>
-              <div className="text-xs text-gray-700 mb-2">
+              <div className="text-xs text-gray-700 mb-2 h-24">
                 <p>{event.location}</p>
-                <p>
+                <p className="mt-1">
                   <Link to={"/event-detail/" + event.id}>{event.name}</Link>
                 </p>
-                <p className="text-gray-500 pt-3">Vào cổng tự do</p>
               </div>
-              <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-5">
+              <div className="text-xs mb-2">
+                <p className="text-gray-500 hover:text-[#070707]">
+                  <Link to={"/event-detail/" + event.id}>Xem chi tiết</Link>
+                </p>
+              </div>
+              <div className="flex  lg:flex-row justify-between items-center text-xs text-gray-600 border-t pt-2">
                 <div className="flex items-center space-x-1">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

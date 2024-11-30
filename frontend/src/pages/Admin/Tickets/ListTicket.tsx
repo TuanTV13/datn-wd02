@@ -38,7 +38,7 @@ const ListTicket = () => {
             <button className="bg-gray-200 px-4 py-2 rounded-[10px]">
               Bộ lọc
             </button>
-            <button className="bg-yellow-500 text-white px-4 py-2 rounded-[10px]">
+            <button className="bg-blue-500 text-white px-4 py-2 rounded-[10px]">
               Xuất PDF
             </button>
           </div>

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 
 const UpdateEvent = () => {
   const { id } = useParams(); // Lấy id từ URL
@@ -20,9 +21,9 @@ const UpdateEvent = () => {
   useEffect(() => {
     // Lấy thông tin sự kiện từ API
     axios
-      .get(`http://127.0.0.1:8000/api/v1/events/${id}/show`, { headers })
+      .get(`http://192.168.2.112:8000/api/v1/events/${id}/show`, { headers })
       .then((response) => {
-        const event = response.data.data;
+        const event = response.data.data.event;
        
         setFormData({
           start_time: event.start_time,
@@ -30,7 +31,10 @@ const UpdateEvent = () => {
           location: event.location,
         });
       })
-      .catch((error) => console.error("Lỗi khi lấy sự kiện:", error));
+      .catch((error) => {
+        console.error("Lỗi khi lấy sự kiện:", error)
+        toast.error("Lỗi khi lấy sự kiện. Vui lòng thử lại!");
+      });
   }, [id]);
 
   // Hàm định dạng lại thời gian
@@ -73,7 +77,7 @@ const UpdateEvent = () => {
  
    try {
      const result = await axios.put(
-       `http://127.0.0.1:8000/api/v1/events/${id}/update`,
+       `http://192.168.2.112:8000/api/v1/events/${id}/update`,
        formattedData, // Gửi dữ liệu dạng JSON
        { 
          headers: {
@@ -83,10 +87,10 @@ const UpdateEvent = () => {
        }
      );
      console.log("Cập nhật thành công:", result);
-     alert("Cập nhật sự kiện thành công!");
+     toast.success("Cập nhật sự kiện thành công!");
    } catch (error) {
      console.error("Lỗi khi cập nhật sự kiện:", error);
-     alert("Có lỗi xảy ra khi cập nhật sự kiện!");
+     toast.error(error.response.data.message);
    } finally {
      setLoading(false);
    }
@@ -142,6 +146,7 @@ const UpdateEvent = () => {
         {loading ? "Đang cập nhật..." : "Lưu sự kiện"}
       </button>
     </form>
+    <ToastContainer/>
     </div>
   );
 };
