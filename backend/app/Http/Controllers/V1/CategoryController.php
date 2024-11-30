@@ -37,15 +37,15 @@ class CategoryController extends Controller
             $category = $this->categoryRepository->create($data);
 
             return response()->json([
-                'message' => 'Thêm mới loại sự kiện thành công',
+                'message' => 'Thêm mới danh mục sự kiện thành công',
                 'data' => $category,
             ], 201);
         } catch (\Exception $e) {
 
-            Log::error("Lỗi khi thêm mới loại sự kiện:" . $e->getMessage());
+            Log::error("Lỗi khi thêm mới danh mục sự kiện:" . $e->getMessage());
 
             return response()->json([
-                'message' => 'Lỗi hệ thống khi thêm mới loại sự kiện',
+                'message' => 'Lỗi hệ thống khi thêm mới danh mục sự kiện',
             ], 500);
         }
     }
@@ -58,19 +58,19 @@ class CategoryController extends Controller
 
             if (!$category) {
                 return response()->json([
-                    'message' => 'Loại sự kiện không tồn tại',
+                    'message' => 'Danh mục sự kiện không tồn tại',
                 ], 404);
             }
 
             return response()->json([
-                'message' => 'Thông tin loại sự kiện',
+                'message' => 'Thông tin danh mục sự kiện',
                 'data' => $category,
             ], 200);
         } catch (\Exception $e) {
-            Log::error("Lỗi khi lấy thông tin loại sự kiện:" . $e->getMessage());
+            Log::error("Lỗi khi lấy thông tin danh mục sự kiện:" . $e->getMessage());
 
             return response()->json([
-                'message' => 'Lỗi hệ thống khi lấy thông tin loại sự kiện',
+                'message' => 'Lỗi hệ khi lấy thông tin danh mục sự kiện',
             ], 500);
         }
     }
@@ -80,12 +80,12 @@ class CategoryController extends Controller
         $data = $requets->validated();
 
         try {
-            //Tìm
+            //Tìm id của danh mục sự kiện
             $category = $this->categoryRepository->find($id);
 
             if (!$category) {
                 return response()->json([
-                    'message' => 'Loại sự kiện không tồn tại',
+                    'message' => 'Danh mục sự kiện không tồn tại',
                 ], 404);
             }
 
@@ -93,14 +93,14 @@ class CategoryController extends Controller
             $category = $this->categoryRepository->update($id, $data);
 
             return response()->json([
-                'message' => 'Cập nhật loại sự kiện thành công',
+                'message' => 'Cập nhật danh mục sự kiện thành công',
                 'data' => $category,
             ]);
         } catch (\Exception $e) {
-            Log::error("Lỗi khi cập nhật loại sự kiện:" . $e->getMessage());
+            Log::error("Lỗi khi cập nhật danh mục sự kiện:" . $e->getMessage());
 
             return response()->json([
-                'message' => 'Lỗi hệ thống khi cập nhật loại sự kiện',
+                'message' => 'Lỗi hệ thống khi cập nhật danh mục sự kiện',
             ], 500);
         }
     }
@@ -111,13 +111,13 @@ class CategoryController extends Controller
 
         if (!$category) {
             return response()->json([
-                'message' => 'Loại sự kiện không tồn tại',
+                'message' => 'Danh mục sự kiện không tồn tại',
             ], 404);
         }
 
         if ($category->events()->count() > 0) {
             return response()->json([
-                'message' => 'Không thể xóa loại sự kiện này vì nó có sự kiện liên quan.',
+                'message' => 'Không thể xóa danh mục sự kiện này vì nó có sự kiện liên quan.',
             ], 400);
         }
 
@@ -125,13 +125,13 @@ class CategoryController extends Controller
             $category->delete();
 
             return response()->json([
-                'message' => 'Xóa loại sự kiện thành công',
+                'message' => 'Xóa danh mục sự kiện thành công',
             ], 200);
         } catch (\Exception $e) {
-            Log::error("Lỗi khi xóa loại sự kiện: " . $e->getMessage());
+            Log::error("Lỗi khi xóa danh mục sự kiện: " . $e->getMessage());
 
             return response()->json([
-                'message' => 'Lỗi hệ thống khi xóa loại sự kiện',
+                'message' => 'Lỗi hệ thống khi xóa danh mục sự kiện',
             ], 500);
         }
     }
