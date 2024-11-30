@@ -34,7 +34,7 @@ const EventList = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://192.168.2.112:8000/api/v1/categories/');
+        const response = await axios.get('http://172.20.10.3:8000/api/v1/categories/');
         if (response && response.data && Array.isArray(response.data.data)) {
           setCategories(response.data.data);
         }
@@ -65,6 +65,7 @@ const EventList = () => {
         await deleteEvent(id);
         const updatedList = list.filter((event) => event.id !== id);
         setList(updatedList);
+        alert('Xoá sự kiện thành công!' )
       } catch (error) {
         console.error('Lỗi khi xóa sự kiện:', error);
       }

@@ -20,16 +20,7 @@ const EventDetail = () => {
         console.error("Lỗi khi gọi API:", error);
       });
   }, [id]);
-  const fetchSimilarEvents = (categoryId) => {
-    axios
-      .get(`http://127.0.0.1:8000/api/v1/clients/category/${categoryId}`)
-      .then((response) => {
-        setSimilarEvents(response.data.data.filter((e) => e.id !== id)); // Lọc bỏ sự kiện hiện tại
-      })
-      .catch((error) => {
-        console.error("Lỗi khi lấy sự kiện tương tự:", error);
-      });
-  };
+  
   const handleCheckInSubmit = () => {
     const ticketCode = document.getElementById("ticket_code").value; // Lấy mã vé người dùng nhập
 
