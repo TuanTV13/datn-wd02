@@ -8,6 +8,7 @@ import TicketsContext from './Contexts/TicketContext.tsx';
 import HomeContexts from './Contexts/HomeContext.tsx';
 import EventContexts from './Contexts/ClientEventContext.tsx';
 import CategoryContexts from './Contexts/CategoryContext.tsx';
+// import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 
 // Khởi tạo root chỉ một lần
 const container = document.getElementById('root');
@@ -21,7 +22,9 @@ root.render(
       <TicketsContext>
         <EventContexts>
           <CategoryContexts>
-          <App />
+            {/* <PayPalScriptProvider> */}
+            <App />
+            {/* </PayPalScriptProvider> */}
           </CategoryContexts>
         </EventContexts>
       </TicketsContext>

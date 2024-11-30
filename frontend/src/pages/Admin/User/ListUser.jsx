@@ -1,109 +1,175 @@
-import React, { useState } from 'react';
-import Modal from 'react-modal';
+import React, { useState, useEffect } from "react";
+import Modal from "react-modal";
+import * as XLSX from "xlsx";
+import axios from "axios";
+import axiosInstance from "../../../axios";
+import { useNavigate } from "react-router-dom";
 
-const ListUser = () => {
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false);
-  const [eventModalIsOpen, setEventModalIsOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [confirmDeleteUserId, setConfirmDeleteUserId] = useState(null);
-  const [showDeletedUsers, setShowDeletedUsers] = useState(false);
+const ListClient = () => {
+  const [modalIsOpen, setModalIsOpen] = useState(false); // Modal chi tiết người dùng
+  const [editModalIsOpen, setEditModalIsOpen] = useState(false); // Modal chỉnh sửa người dùng
+  const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false); // Modal xác nhận xóa
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [confirmDeleteClientId, setConfirmDeleteClientId] = useState(null);
+  const [showDeletedClients, setShowDeletedClients] = useState(false);
+  const [editFormData, setEditFormData] = useState(null); // Dữ liệu cho form chỉnh sửa
+  const navigate = useNavigate();
 
-  // Danh sách người dùng mẫu
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: 'Nguyễn Văn A',
-      email: 'nguyenvana@example.com',
-      phone: '0123456789',
-      status: 'Đang hoạt động',
-      address: 'Hà Nội',
-      birthday: '01/01/1990',
-      gender: 'Nam',
-      createdAt: '01/01/2023',
-      events: ['Sự kiện A', 'Sự kiện B'], // Thêm danh sách sự kiện
-    },
-    {
-      id: 2,
-      name: 'Trần Thị B',
-      email: 'tranthib@example.com',
-      phone: '0987654321',
-      status: 'Ngưng hoạt động',
-      address: 'Đà Nẵng',
-      birthday: '02/02/1992',
-      gender: 'Nữ',
-      createdAt: '05/05/2023',
-      events: ['Sự kiện C'], // Thêm danh sách sự kiện
-    },
-  ]);
+  const [clients, setClients] = useState([]); // Dữ liệu người dùng từ API
+  const [deletedClients, setDeletedClients] = useState([]);
 
-  const [deletedUsers, setDeletedUsers] = useState([]);
+  // Gọi API để lấy danh sách người dùng
+  useEffect(() => {
+    axios
+      .get("http://127.0.0.1:8000/api/v1/users")
+      .then((response) => {
+        const { users } = response.data;
+        const formattedClients = users.map((client) => ({
+          id: client.id,
+          name: client.name,
+          email: client.email,
+          phone: client.phone,
+          address: client.address || "Chưa có",
+          province_id: 1,
+          district_id: 1,
+          ward_id: 1,
+          image: client.image || "link_image_default.jpg",
+          email_verified_at: client.email_verified_at,
+          gender: "Chưa xác định",
+          status: client.deleted_at ? "Đã xóa" : "Đang hoạt động",
+        }));
+        setClients(formattedClients);
+      })
+      .catch((error) => {
+        if (error?.response?.status === 401) navigate("/auth");
 
-  const openModal = (user) => {
-    setSelectedUser(user);
+        console.error("Lỗi khi lấy dữ liệu từ API: ", error);
+      });
+  }, []);
+
+  const exportToExcel = () => {
+    const dataToExport = (showDeletedClients ? deletedClients : clients).map(
+      (client) => ({
+        ID: client.id,
+        Tên: client.name,
+        Email: client.email,
+        "Số điện thoại": client.phone,
+        "Địa chỉ": client.address,
+        "Tỉnh/Thành": client.province_id,
+        "Quận/Huyện": client.district_id,
+        "Phường/Xã": client.ward_id,
+        "Ngày xác thực email": client.email_verified_at,
+        "Giới tính": client.gender,
+        "Trạng thái": client.status,
+      })
+    );
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Clients");
+    XLSX.writeFile(workbook, "DanhSachKhachHang.xlsx");
+  };
+
+  const openModal = (client) => {
+    setSelectedClient(client);
     setModalIsOpen(true);
+  };
+
+  const openEditModal = (client) => {
+    setEditFormData(client); // Gán dữ liệu người dùng vào form
+    setEditModalIsOpen(true);
   };
 
   const closeModal = () => {
     setModalIsOpen(false);
-    setSelectedUser(null);
+    setSelectedClient(null);
   };
 
-  const openEventModal = (user) => {
-    setSelectedUser(user);
-    setEventModalIsOpen(true);
+  const closeEditModal = () => {
+    setEditModalIsOpen(false);
+    setEditFormData(null);
   };
 
-  const closeEventModal = () => {
-    setEventModalIsOpen(false);
-    setSelectedUser(null);
+  const toggleDeletedClients = () => {
+    setShowDeletedClients(!showDeletedClients);
   };
 
-  const toggleDeletedUsers = () => {
-    setShowDeletedUsers(!showDeletedUsers);
+  const handleDeleteClient = (clientId) => {
+    axiosInstance
+      .delete(`/users/${clientId}/delete`, {})
+      .then((response) => {
+        // Nếu xóa thành công, cập nhật lại danh sách người dùng
+        const clientToDelete = clients.find((client) => client.id === clientId);
+
+        setClients(clients.filter((client) => client.id !== clientId));
+        setDeletedClients([
+          ...deletedClients,
+          { ...clientToDelete, status: "Đã xóa" },
+        ]);
+
+        closeConfirmModal(); // Đóng modal xác nhận xóa
+      })
+      .catch((error) => {
+        if (error?.response?.status === 401) navigate("/auth");
+
+        console.error("Lỗi khi xóa người dùng: ", error);
+      });
   };
 
-  const handleDeleteUser = (userId) => {
-    const userToDelete = users.find(user => user.id === userId);
-    setUsers(users.filter(user => user.id !== userId));
-    setDeletedUsers([...deletedUsers, { ...userToDelete, status: 'Đã xóa' }]);
-    closeConfirmModal();
+  const handleRestoreClient = (clientId) => {
+    const clientToRestore = deletedClients.find(
+      (client) => client.id === clientId
+    );
+    setDeletedClients(
+      deletedClients.filter((client) => client.id !== clientId)
+    );
+    setClients([...clients, { ...clientToRestore, status: "Đang hoạt động" }]);
   };
 
-  const handleRestoreUser = (userId) => {
-    const userToRestore = deletedUsers.find(user => user.id === userId);
-    setDeletedUsers(deletedUsers.filter(user => user.id !== userId));
-    setUsers([...users, { ...userToRestore, status: 'Đang hoạt động' }]);
-  };
-
-  const openConfirmModal = (userId) => {
-    setConfirmDeleteUserId(userId);
+  const openConfirmModal = (clientId) => {
+    setConfirmDeleteClientId(clientId);
     setConfirmModalIsOpen(true);
   };
 
   const closeConfirmModal = () => {
-    setConfirmDeleteUserId(null);
+    setConfirmDeleteClientId(null);
     setConfirmModalIsOpen(false);
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData({
+      ...editFormData,
+      [name]: value,
+    });
+  };
+
+  const handleSaveEdit = () => {
+    setClients(
+      clients.map((client) =>
+        client.id === editFormData.id ? editFormData : client
+      )
+    );
+    closeEditModal();
   };
 
   return (
     <div>
-      <div className="bg-white rounded-lg shadow"> 
+      <div className="bg-white rounded-lg shadow">
         <h2 className="text-2xl font-bold text-center">Danh sách người dùng</h2>
         <div className="p-4 flex justify-between">
-          <button onClick={toggleDeletedUsers} className="bg-blue-500 text-white px-4 py-2 rounded-[10px]">
-            {showDeletedUsers ? 'Danh sách người dùng' : 'Người dùng đã xóa'}
+          <button
+            onClick={toggleDeletedClients}
+            className="bg-blue-500 text-white px-4 py-2 rounded-[10px]"
+          >
+            {showDeletedClients ? "Danh sách người dùng" : "người dùng đã xóa"}
           </button>
-          <div className="flex space-x-4 items-center">
-            <span>Hiển thị:</span>
-            <select className="border rounded px-2 py-1">
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-            </select>
-            <button className="bg-gray-200 px-4 py-2 rounded-[10px]">Bộ lọc</button>
-            <button className="bg-yellow-500 text-white px-4 py-2 rounded-[10px]">Xuất PDF</button>
-          </div>
+          <button
+            onClick={exportToExcel}
+            className="bg-green-500 text-white px-4 py-2 rounded-[10px]"
+          >
+            Xuất Excel
+          </button>
         </div>
 
         <table className="min-w-full table-auto border border-gray-700">
@@ -113,56 +179,64 @@ const ListUser = () => {
               <th className="p-4 border border-gray-300">Tên</th>
               <th className="p-4 border border-gray-300">Email</th>
               <th className="p-4 border border-gray-300">Số điện thoại</th>
+              <th className="p-4 border border-gray-300">Địa chỉ</th>
               <th className="p-4 border border-gray-300">Trạng thái</th>
               <th className="p-4 border border-gray-300">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 text-center">
-            {(showDeletedUsers ? deletedUsers : users).map((user, index) => (
-              <tr key={user.id}>
-                <td className="p-4 border border-gray-300">{index + 1}</td>
-                <td className="p-4 border border-gray-300">{user.name}</td>
-                <td className="p-4 border border-gray-300">{user.email}</td>
-                <td className="p-4 border border-gray-300">{user.phone}</td>
-                <td className="p-4 border border-gray-300">{user.status}</td>
-                <td className="p-4 border border-gray-300">
-                  <div className="flex flex-col items-center space-y-1">
-                    <button 
-                      className="bg-red-500 text-white w-full h-8 rounded-[10px]"
-                      onClick={() => openConfirmModal(user.id)}
-                    >
-                      Xóa
-                    </button>
-                    {showDeletedUsers && (
-                      <button 
-                        className="bg-green-500 text-white w-full h-8 rounded-[10px]"
-                        onClick={() => handleRestoreUser(user.id)}
+            {(showDeletedClients ? deletedClients : clients).map(
+              (client, index) => (
+                <tr key={client.id}>
+                  <td className="p-4 border border-gray-300">{index + 1}</td>
+                  <td className="p-4 border border-gray-300">{client.name}</td>
+                  <td className="p-4 border border-gray-300">{client.email}</td>
+                  <td className="p-4 border border-gray-300">{client.phone}</td>
+                  <td className="p-4 border border-gray-300">
+                    {client.address}
+                  </td>
+
+                  <td className="p-4 border border-gray-300">
+                    {client.status}
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    <div className="flex flex-col items-center space-y-1">
+                      {/* <button
+                        className="bg-yellow-500 text-white w-full h-8 rounded-[10px]"
+                        onClick={() => openEditModal(client)}
                       >
-                        Khôi phục
+                        Chỉnh sửa
+                      </button> */}
+                      <button
+                        className="bg-red-500 text-white w-full h-8 rounded-[10px]"
+                        onClick={() => openConfirmModal(client.id)}
+                      >
+                        Xóa
                       </button>
-                    )}
-                    <button 
-                      className="bg-yellow-500 text-white w-full h-8 rounded-[10px]"
-                      onClick={() => openModal(user)}
-                    >
-                      Chi tiết
-                    </button>
-                    <button 
-                      className="bg-blue-500 text-white w-full h-8 rounded-[10px]"
-                      onClick={() => openEventModal(user)} // Mở modal sự kiện
-                    >
-                      Xem Sự kiện
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      {showDeletedClients && (
+                        <button
+                          className="bg-green-500 text-white w-full h-8 rounded-[10px]"
+                          onClick={() => handleRestoreClient(client.id)}
+                        >
+                          Khôi phục
+                        </button>
+                      )}
+                      <button
+                        className="bg-blue-500 text-white w-full h-8 rounded-[10px]"
+                        onClick={() => openModal(client)}
+                      >
+                        Chi tiết
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Modal chi tiết người dùng */}
-      {selectedUser && (
+      {selectedClient && (
         <Modal
           isOpen={modalIsOpen}
           onRequestClose={closeModal}
@@ -173,24 +247,100 @@ const ListUser = () => {
           <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
             <h2 className="text-2xl font-bold mb-4">Chi tiết người dùng</h2>
             <div>
-              <p><strong>Tên:</strong> {selectedUser.name}</p>
-              <p><strong>Email:</strong> {selectedUser.email}</p>
-              <p><strong>Số điện thoại:</strong> {selectedUser.phone}</p>
-              <p><strong>Địa chỉ:</strong> {selectedUser.address}</p>
-              <p><strong>Ngày sinh:</strong> {selectedUser.birthday}</p>
-              <p><strong>Giới tính:</strong> {selectedUser.gender}</p>
-              <p><strong>Trạng thái:</strong> {selectedUser.status}</p>
-              <p><strong>Ngày tạo:</strong> {selectedUser.createdAt}</p>
+              <p>
+                <strong>Tên:</strong> {selectedClient.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedClient.email}
+              </p>
+              <p>
+                <strong>Số điện thoại:</strong> {selectedClient.phone}
+              </p>
+              <p>
+                <strong>Địa chỉ:</strong> {selectedClient.address}
+              </p>
+              <p>
+                <strong>Ảnh:</strong> {selectedClient.image}
+              </p>
+              <p>
+                <strong>Ngày xác thực email:</strong>{" "}
+                {selectedClient.email_verified_at}
+              </p>
+              <p>
+                <strong>Giới tính:</strong> {selectedClient.gender}
+              </p>
+              <p>
+                <strong>Trạng thái:</strong> {selectedClient.status}
+              </p>
             </div>
-            <button onClick={closeModal} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+            <button
+              onClick={closeModal}
+              className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
+            >
               Đóng
             </button>
           </div>
         </Modal>
       )}
 
+      {/* Modal chỉnh sửa người dùng */}
+      {editModalIsOpen && (
+        <Modal
+          isOpen={editModalIsOpen}
+          onRequestClose={closeEditModal}
+          ariaHideApp={false}
+          className="fixed inset-0 flex items-center justify-center z-50"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        >
+          <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
+            <h2 className="text-2xl font-bold mb-4">Chỉnh sửa người dùng</h2>
+            <form>
+              <label className="block text-gray-700">Tên</label>
+              <input
+                type="text"
+                name="name"
+                value={editFormData?.name || ""}
+                onChange={handleEditChange}
+                className="border rounded w-full px-3 py-2 mb-4"
+              />
+              <label className="block text-gray-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={editFormData?.email || ""}
+                onChange={handleEditChange}
+                className="border rounded w-full px-3 py-2 mb-4"
+              />
+              <label className="block text-gray-700">Số điện thoại</label>
+              <input
+                type="text"
+                name="phone"
+                value={editFormData?.phone || ""}
+                onChange={handleEditChange}
+                className="border rounded w-full px-3 py-2 mb-4"
+              />
+              <label className="block text-gray-700">Địa chỉ</label>
+              <input
+                type="text"
+                name="address"
+                value={editFormData?.address || ""}
+                onChange={handleEditChange}
+                className="border rounded w-full px-3 py-2 mb-4"
+              />
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+              >
+                Lưu
+              </button>
+            </form>
+          </div>
+        </Modal>
+      )}
+
       {/* Modal xác nhận xóa người dùng */}
-      {confirmDeleteUserId && (
+      {confirmDeleteClientId && (
         <Modal
           isOpen={confirmModalIsOpen}
           onRequestClose={closeConfirmModal}
@@ -198,44 +348,23 @@ const ListUser = () => {
           className="fixed inset-0 flex items-center justify-center z-50"
           overlayClassName="fixed inset-0 bg-black bg-opacity-50"
         >
-          <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
+          <div className="bg-white rounded-lg p-6 w-1/3 mx-auto">
             <h2 className="text-lg font-bold mb-4">Xác nhận xóa</h2>
             <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
-            <div className="flex justify-end mt-4">
-              <button onClick={closeConfirmModal} className="bg-gray-300 px-4 py-2 rounded mr-2">
-                Hủy
-              </button>
-              <button onClick={() => handleDeleteUser(confirmDeleteUserId)} className="bg-red-500 text-white px-4 py-2 rounded">
+            <div className="mt-4 flex justify-between">
+              <button
+                onClick={() => handleDeleteClient(confirmDeleteClientId)}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
                 Xóa
               </button>
+              <button
+                onClick={closeConfirmModal}
+                className="bg-gray-300 px-4 py-2 rounded"
+              >
+                Hủy
+              </button>
             </div>
-          </div>
-        </Modal>
-      )}
-
-      {/* Modal xem sự kiện */}
-      {selectedUser && (
-        <Modal
-          isOpen={eventModalIsOpen}
-          onRequestClose={closeEventModal}
-          ariaHideApp={false}
-          className="fixed inset-0 flex items-center justify-center z-50"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50"
-        >
-          <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
-            <h2 className="text-2xl font-bold mb-4">Sự kiện đã tham gia</h2>
-            <ul className="list-disc pl-6">
-              {selectedUser.events.length > 0 ? (
-                selectedUser.events.map((event, index) => (
-                  <li key={index}>{event}</li>
-                ))
-              ) : (
-                <li>Không có sự kiện nào.</li>
-              )}
-            </ul>
-            <button onClick={closeEventModal} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
-              Đóng
-            </button>
           </div>
         </Modal>
       )}
@@ -243,4 +372,4 @@ const ListUser = () => {
   );
 };
 
-export default ListUser;
+export default ListClient;

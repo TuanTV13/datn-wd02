@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Events\EventUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
@@ -10,6 +11,7 @@ use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -49,9 +51,20 @@ class EventController extends Controller
 
     public function show($eventId)
     {
-        $event = $this->eventRepository->find($eventId);
-        $event->speakers = $event->speakers ? json_decode($event->speakers, true) : null;
-        $eventAttendees = $this->eventRepository->getEventAttendees($eventId);
+        $event = $this->eventRepository->findDetail($eventId);
+        $eventS = $this->eventRepository->find($eventId);
+        $speakers = $eventS->speakers = $eventS->speakers ? json_decode($eventS->speakers, true) : null;
+        // $eventAttendees = $this->eventRepository->getEventAttendees($eventId);
+
+        // if (is_array($event)) {
+        //     // Nếu $event là mảng
+        //     $speakers = isset($event['speakers']) ? json_decode($event['speakers'], true) : null;
+        // } else {
+        //     // Nếu $event là đối tượng
+        //     $speakers = $event->speakers ? json_decode($event->speakers, true) : null;
+        // }
+
+        $event['speakers'] = $speakers;
 
         if (!$event) {
             return response()->json([
@@ -62,7 +75,7 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Xem chi tiết sự kiện.',
             'data' => $event,
-            'users' => $eventAttendees
+            // 'users' => $eventAttendees
         ], 200);
     }
 
@@ -93,11 +106,14 @@ class EventController extends Controller
 
     public function create(StoreEventRequest $request)
     {
+        Log::info('Thông tin vé', ['data' => $request->all()]);
         DB::beginTransaction();
         try {
             $data = $request->validated();
 
-            if ($request->has('speakers') && is_array($request->speakers)) {
+            if ($request->has('speakers') && is_string($request->speakers)) {
+                $data['speakers'] = json_decode($request->speakers, true);
+            } elseif ($request->has('speakers') && is_array($request->speakers)) {
                 $data['speakers'] = json_encode($request->speakers);
             } else {
                 $data['speakers'] = null;
@@ -177,11 +193,11 @@ class EventController extends Controller
             ], 404);
         }
 
-        if ($event->status != "pending") {
-            return response()->json([
-                'message' => 'Sự kiện đã được xác nhận không thể cập nhật'
-            ], 403);
-        }
+        // if ($event->status != "pending") {
+        //     return response()->json([
+        //         'message' => 'Sự kiện đã được xác nhận không thể cập nhật'
+        //     ], 403);
+        // }
 
         $data = $request->validated();
 
@@ -201,6 +217,7 @@ class EventController extends Controller
         try {
             // Cập nhật sự kiện
             $event->update($data);
+            event(new EventUpdate($event));
 
             return response()->json([
                 'message' => 'Cập nhật sự kiện thành công, vui lòng kiểm tra lại',
@@ -225,11 +242,11 @@ class EventController extends Controller
             ], 404);
         }
 
-        if ($event->status_id != "PENDING") {
-            return response()->json([
-                'message' => 'Sự kiện đã được xác nhận không thể hủy'
-            ], 403);
-        }
+        // if ($event->status_id != "PENDING") {
+        //     return response()->json([
+        //         'message' => 'Sự kiện đã được xác nhận không thể hủy'
+        //     ], 403);
+        // }
 
         $event->delete();
 
@@ -259,10 +276,39 @@ class EventController extends Controller
     {
         $result = $this->checkEventIPService->checkEventsWithoutIP();
 
+        Log::info('Kết quả kiểm tra sự kiện IP', $result);
+        
         return response()->json([
             'status' => $result['status'],
             'message' => $result['message'],
             'events' => $result['events'] ?? []
         ]);
+    }
+
+    public function addIp(Request $request, $eventId)
+    {
+        $request->validate([
+            'subnet' => 'required|string'
+        ]);
+        $event = $this->eventRepository->find($eventId);
+        if (!$event) {
+            return response()->json([
+                'error' => 'Sự kiện không tồn tại.'
+            ], 404);
+        }
+        $event->subnets()->create([
+            'subnet' => $request->input('subnet')
+        ]);
+
+        return response()->json([
+            'message' => 'Thêm địa chỉ IP thành công.'
+        ], 201);
+    }
+
+    public function trashed()
+    {
+        $data = $this->eventRepository->trashed();
+
+        return response()->json($data);
     }
 }

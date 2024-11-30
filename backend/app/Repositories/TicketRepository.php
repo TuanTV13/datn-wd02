@@ -15,13 +15,18 @@ class TicketRepository
 
     public function getAll()
     {
-        return $this->ticket->all();
+        return $this->ticket->with(['event'])->get();
     }
 
     public function find($id)
     {
-        return $this->ticket->with('event')->find($id);
+        return $ticket = $this->ticket->with(['users' => function ($query) {
+            $query->distinct();
+        }])
+            ->withCount(['users as users_count'])
+            ->find($id);
     }
+
 
     public function findByEvent($eventId)
     {
@@ -31,6 +36,15 @@ class TicketRepository
     public function findTrashed($id)
     {
         return $this->ticket->onlyTrashed()->find($id);
+    }
+
+    public function trashed()
+    {
+        $ticketsTrahed = $this->ticket
+        ->with('event')
+        ->onlyTrashed()->orderBy('deleted_at', 'desc')->get();
+
+        return $ticketsTrahed;
     }
 
     public function findByEventAndType($eventId, $ticketTypeId)

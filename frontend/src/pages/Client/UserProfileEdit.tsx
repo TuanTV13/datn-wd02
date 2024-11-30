@@ -1,15 +1,71 @@
-import React, { useState } from "react";
-import { Form, Input, Select, Button, Upload } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Form, Input, Button } from "antd";
 import "tailwindcss/tailwind.css";
+import axiosInstance from "../../axios";
+import { useNavigate } from "react-router-dom";
 
-const { Option } = Select;
 const UserProfileEdit = () => {
   const [form] = Form.useForm();
-  const [files, setFiles] = useState<any>([]);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  // Gọi API GET để lấy dữ liệu người dùng
+  useEffect(() => {
+    axios
+      .get("http://localhost:8000/api/v1/user", {
+        headers: {
+          Authorization:
+            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL3YxL2xvZ2luIiwiaWF0IjoxNzMxNjQ0MzIwLCJleHAiOjQ4Mzg3NjQ0MzIwLCJuYmYiOjE3MzE2NDQzMjAsImp0aSI6Ik9Eb3IwWjZWeUoyTDIxUksiLCJzdWIiOiI2IiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.-xRi4wH0bh3ysiTH9pMWmWaYgGoKiiYpfTkfx2J_D18",
+        },
+      })
+      .then((response) => {
+        // Lưu thông tin người dùng vào state
+        setUser(response.data.user);
+        setLoading(false);
+        // Điền thông tin vào form
+        form.setFieldsValue({
+          name: response.data.user.name,
+          email: response.data.user.email,
+          phone: response.data.user.phone,
+          address: response.data.user.address,
+          avatar: response.data.user.image,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+        setLoading(false);
+      });
+  }, [form]);
+
+  // Gọi API PUT để cập nhật thông tin người dùng
   const handleSubmit = (values) => {
-    console.log("Form values:", values);
+    const formData = {
+      name: values.name,
+      email: values.email,
+      phone: values.phone,
+      address: values.address,
+      image: values.avatar, // Lưu link ảnh từ form
+    };
+
+    axiosInstance
+      .put(`/user/update-profile/${user.id}`, formData)
+      .then((response) => {
+        navigate("/profile");
+        console.log("User updated successfully:", response.data);
+      })
+      .catch((error) => {
+        if (error?.response?.status === 401) navigate("/auth");
+
+        console.error("Error updating user data:", error);
+      });
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="w-full lg:py-10 py-4 border pb-[199px] mt-36">
       <div className="px-80 ">
@@ -59,55 +115,17 @@ const UserProfileEdit = () => {
           >
             <Input placeholder="Address" />
           </Form.Item>
-          <Form.Item
-            label="Tỉnh thành"
-            name="province_id"
-            rules={[{ required: true, message: "Please select a province" }]}
-          >
-            <Select placeholder="Select a province">
-              <Option value="1">Province 1</Option>
-              <Option value="2">Province 2</Option>
-            </Select>
-          </Form.Item>
 
           <Form.Item
-            label="Quận/huyện"
-            name="district_id"
-            rules={[{ required: true, message: "Please select a district" }]}
+            label="Link Ảnh Đại Diện"
+            name="avatar"
+            rules={[{ required: true, message: "Please enter the avatar URL" }]}
           >
-            <Select placeholder="Select a district">
-              <Option value="1">District 1</Option>
-              <Option value="2">District 2</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            label="Xã"
-            name="ward_id"
-            rules={[{ required: true, message: "Please select a ward" }]}
-          >
-            <Select placeholder="Select a ward">
-              <Option value="1">Ward 1</Option>
-              <Option value="2">Ward 2</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item label="Avatar">
-            <Upload
-              multiple
-              fileList={files}
-              beforeUpload={(file, fileList) => {
-                console.log(fileList);
-                setFiles(fileList);
-                return false;
-              }}
-            >
-              <Button icon={<UploadOutlined />}>Upload Image</Button>
-            </Upload>
+            <Input placeholder="Avatar URL" />
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-fit  ">
+            <Button type="primary" htmlType="submit" className="w-fit">
               Lưu
             </Button>
           </Form.Item>

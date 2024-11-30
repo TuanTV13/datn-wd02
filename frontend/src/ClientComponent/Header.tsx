@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Dropdown, MenuProps } from "antd";
+import { useForm } from "react-hook-form";
 
 const Header = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const menuRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const notificationRef = useRef(null);
@@ -22,8 +24,32 @@ const Header = () => {
     {
       key: "2",
       label: (
-        <a rel="noopener noreferrer" href="change-password">
+        <a rel="noopener noreferrer" href="/change-password">
           Đổi mật khẩu{" "}
+        </a>
+      ),
+    },
+    {
+      key: "3",
+      label: (
+        <a rel="noopener noreferrer" href="/event-history">
+          Lịch sử tham gia sự kiện{" "}
+        </a>
+      ),
+    },
+    {
+      key: "4",
+      label: (
+        <a rel="noopener noreferrer" href="/payment-history">
+          Lịch sử giao dịch{" "}
+        </a>
+      ),
+    },
+    {
+      key: "5",
+      label: (
+        <a rel="noopener noreferrer" onClick={() => handleLogout()} href="">
+          Đăng xuất{" "}
         </a>
       ),
     },
@@ -33,7 +59,7 @@ const Header = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleMenuToggle = (menu) => {
+  const handleMenuToggle = (menu: any) => {
     setOpenMenu(openMenu === menu ? null : menu);
   };
 
@@ -47,7 +73,7 @@ const Header = () => {
 
   // Close sub-menu if click happens outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: any) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         closeMenu();
       }
@@ -85,6 +111,31 @@ const Header = () => {
     };
   }, [isMobileMenuOpen]);
 
+  // Search
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (e: any) => {
+    e.preventDefault();
+    if (searchTerm.trim() !== '') {
+      navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
+    }
+  };
+  // Check đăng nhập
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      setIsAuthenticated(true); // User is logged in
+    } else {
+      setIsAuthenticated(false); // User is not logged in
+    }
+  }, []);
+  // Đăng xuất
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
   return (
     <header className="absolute top-0 left-0 w-full z-50">
       <div className="w-full flex justify-center items-center border-b bg-[#007BFF]">
@@ -118,11 +169,16 @@ const Header = () => {
 
           {/* Desktop Search Bar */}
           <div className="hidden lg:block h-[40px]">
-            <form className="w-[456px] flex h-[40px] justify-between">
+            <form
+              onSubmit={handleSearch}
+              className="w-[456px] flex h-[40px] justify-between"
+            >
               <input
                 type="text"
                 className="border rounded-full w-[400px] px-6"
                 placeholder="Search"
+                value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button className="rounded-full bg-[#6C757D] w-[40px]">
                 <svg
@@ -144,68 +200,56 @@ const Header = () => {
           </div>
 
           <div className="flex gap-x-4 items-center">
-            <Link to={"auth"}>
-              <span className="text-sm">Your Account</span>
-            </Link>{" "}
-            <Dropdown menu={{ items }}>
-              <Link to={""}>
-                <span className="text-sm">Your info</span>
+            {!isAuthenticated ? (
+              <Link to={"/auth"}>
+                <span className="text-sm flex items-center">Đăng nhập</span>
               </Link>
-            </Dropdown>
-            |
-            <Link to={`/cart`} className="relative h-[24px]">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-[24px]"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                />
-              </svg>
-              <span className="absolute bg-red-500 top-0 right-0 rounded-full w-[16px] h-[16px] text-xs text-white flex items-center justify-center">
-                2
-              </span>
-            </Link>
-            <div className="relative h-[24px] lg:ml-10" ref={notificationRef}>
-              <button onClick={toggleNotificationPopup}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="size-7"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"
-                  />
-                </svg>
-                <span className="absolute bg-red-500 top-0 right-0 rounded-full w-[16px] h-[16px] text-xs text-white flex items-center justify-center">
-                  2
-                </span>
-              </button>
-              {isNotificationOpen && (
-                <div className="absolute right-0 mt-2 w-[400px] bg-white shadow-lg rounded-lg p-4 z-10">
-                  <p className="text-sm font-medium">Bạn có 2 thông báo mới</p>
-                  <ul className="mt-2">
-                    <li className="py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                      Thông báo 1
-                    </li>
-                    <li className="py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                      Thông báo 2
-                    </li>
-                  </ul>
-                </div>
-              )}
-            </div>
+            ) : (
+              <Dropdown menu={{ items }}>
+                <Link to={""}>
+                  <span className="flex items-center mt-1">
+                    <svg
+                      className="w-[25px] h-[25px] fill-[#454444]"
+                      viewBox="0 0 448 512"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M304 128a80 80 0 1 0 -160 0 80 80 0 1 0 160 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM49.3 464H398.7c-8.9-63.3-63.3-112-129-112H178.3c-65.7 0-120.1 48.7-129 112zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3z"></path>
+                    </svg>
+                  </span>
+                </Link>
+              </Dropdown>
+            )}
+            {isAuthenticated && (
+              <div className="relative h-[24px] lg:ml-3  items-center" ref={notificationRef}>
+                <button onClick={toggleNotificationPopup} className="flex items-center">
+                  <svg
+                    className="w-[27px] h-[27px] fill-[#454444]"
+                    viewBox="0 0 448 512"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M224 0c-17.7 0-32 14.3-32 32V49.9C119.5 61.4 64 124.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-75.8-55.5-138.6-128-150.1V32c0-17.7-14.3-32-32-32zm0 96h8c57.4 0 104 46.6 104 104v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 328 112 281.3 112 233.4V200c0-57.4 46.6-104 104-104h8zm64 352H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"></path>
+                  </svg>
+                  <span className="absolute bg-red-500 top-0 right-0 rounded-full w-[16px] h-[16px] text-xs text-white flex items-center justify-center">
+                    2
+                  </span>
+                </button>
+                {isNotificationOpen && (
+                  <div className="absolute right-0 mt-2 w-[400px] bg-white shadow-lg rounded-lg p-4 z-10">
+                    <p className="text-sm font-medium">
+                      Bạn có 2 thông báo mới
+                    </p>
+                    <ul className="mt-2">
+                      <li className="py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                        Thông báo 1
+                      </li>
+                      <li className="py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                        Thông báo 2
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -240,41 +284,10 @@ const Header = () => {
         <div>
           <ul className="flex gap-x-8 h-[56px] items-center">
             <li>
-              <Link to={``}>Trang chủ</Link>
+              <Link to={`/`}>Trang chủ</Link>
             </li>
             <li className="relative">
-              <Link to={`event-list`}>Sự kiện</Link>
-              {/* {openMenu === "suKien" && (
-                <ul className="absolute bg-gray-100 shadow-lg mt-2 rounded-lg p-2 w-[230px]">
-                  <li className="flex hover:bg-gray-300">
-                    <Link
-                      to={`/event-category`}
-                      className="block px-4 py-2"
-                      onClick={closeMenu} // Đóng menu khi chọn mục
-                    >
-                      Danh mục sự kiện
-                    </Link>
-                  </li>
-                  <li className="flex hover:bg-gray-300">
-                    <Link
-                      to={``}
-                      className="block px-4 py-2"
-                      onClick={closeMenu} // Đóng menu khi chọn mục
-                    >
-                      Địa điểm tổ chức sự kiện
-                    </Link>
-                  </li>
-                  <li className="flex hover:bg-gray-300">
-                    <Link
-                      to={``}
-                      className="block px-4 py-2"
-                      onClick={closeMenu} // Đóng menu khi chọn mục
-                    >
-                      Lịch sử sự kiện
-                    </Link>
-                  </li>
-                </ul>
-              )} */}
+              <Link to={`/event-list`}>Sự kiện</Link>
             </li>
 
             <li>
