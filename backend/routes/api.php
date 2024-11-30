@@ -205,9 +205,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
     
     
-    
-    
-  
+
+
         });
   
     });
