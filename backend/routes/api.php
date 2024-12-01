@@ -94,8 +94,11 @@ Route::prefix('v1')->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
 
     Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-event-categories'])->group(function () {
+        // Thêm mới danh mục loại sự kiện
         Route::post('create', [CategoryController::class, 'create']);
+        // Cập nhật loại sự kiện
         Route::put('{id}/update', [CategoryController::class, 'update']);
+        // Xóa loại sự kiện
         Route::delete('{id}/delete', [CategoryController::class, 'delete']);
     });
 
@@ -128,7 +131,6 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [VoucherController::class, 'delete']);
         Route::get('trashed', [VoucherController::class, 'trashed']);
         Route::post('{id}/restore', [VoucherController::class, 'restore']);
-
     });
 
     Route::get('feedbacks', [FeedbackController::class, 'index']);
@@ -173,30 +175,29 @@ Route::prefix('v1')->group(function () {
         Route::get('/statistics/category', [StatisticsController::class, 'getStatisticsByCategory']);
 
 
-    Route::prefix('statistics')->group(function () {
-        // Route để lấy danh sách các sự kiện có doanh thu cao nhất trong khoảng thời gian
-        Route::get('/top-revenue', [StatisticsController::class, 'topRevenueEvents']);
+        Route::prefix('statistics')->group(function () {
+            // Route để lấy danh sách các sự kiện có doanh thu cao nhất trong khoảng thời gian
+            Route::get('/top-revenue', [StatisticsController::class, 'topRevenueEvents']);
 
-        // Route để lấy thống kê số sự kiện hoàn thành trong khoảng thời gian
-        Route::get('/event-statistics', [StatisticsController::class, 'getEventStatistics']);
+            // Route để lấy thống kê số sự kiện hoàn thành trong khoảng thời gian
+            Route::get('/event-statistics', [StatisticsController::class, 'getEventStatistics']);
 
-        // Route để lấy thống kê sự kiện theo thể loại (chỉ sự kiện đã được xác nhận)
-        Route::get('/statistics-by-category', [StatisticsController::class, 'getStatisticsByEventType']);
+            // Route để lấy thống kê sự kiện theo thể loại (chỉ sự kiện đã được xác nhận)
+            Route::get('/statistics-by-category', [StatisticsController::class, 'getStatisticsByEventType']);
 
-        // Route để lấy thống kê sự kiện theo tỉnh/thành phố (chỉ sự kiện đã được xác nhận)
-        Route::get('/statistics-by-province', [StatisticsController::class, 'getStatisticsByProvince']);
+            // Route để lấy thống kê sự kiện theo tỉnh/thành phố (chỉ sự kiện đã được xác nhận)
+            Route::get('/statistics-by-province', [StatisticsController::class, 'getStatisticsByProvince']);
 
-        // Route để lấy danh sách các sự kiện có số lượng người tham gia cao nhất trong khoảng thời gian
-        Route::get('/top-participants', [StatisticsController::class, 'topParticipantsEvents']);
+            // Route để lấy danh sách các sự kiện có số lượng người tham gia cao nhất trong khoảng thời gian
+            Route::get('/top-participants', [StatisticsController::class, 'topParticipantsEvents']);
 
-        // Route để lấy thống kê số sự kiện đã xác nhận và bị hủy bỏ trong khoảng thời gian
-        Route::get('/event-status-statistics', [StatisticsController::class, 'getEventStatusStatistics']);
+            // Route để lấy thống kê số sự kiện đã xác nhận và bị hủy bỏ trong khoảng thời gian
+            Route::get('/event-status-statistics', [StatisticsController::class, 'getEventStatusStatistics']);
 
-        // Route để lấy doanh thu và số lượng người tham gia của các sự kiện trong khoảng thời gian
-        Route::get('/event-revenue-participants', [StatisticsController::class, 'getEventRevenueAndParticipants']);
-    });
+            // Route để lấy doanh thu và số lượng người tham gia của các sự kiện trong khoảng thời gian
+            Route::get('/event-revenue-participants', [StatisticsController::class, 'getEventRevenueAndParticipants']);
+        });
     });
 });
 
 Route::post('/vnpay/return', [PaymentController::class, 'handleVNPayResponse']);
-
