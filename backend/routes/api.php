@@ -1,6 +1,6 @@
 <?php
 
-
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
@@ -217,4 +217,4 @@ Route::get('/return-momo', [PaymentController::class, 'paymentSuccess']);
 Route::post('/notify-momo', [PaymentController::class, 'notifyMomo']);
 
 
-
+Route::post('/upload-image', [ImageController::class, 'upload']);
