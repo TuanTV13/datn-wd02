@@ -227,15 +227,13 @@ const DiscountCodeList = () => {
           <div className="header">
             <h2 className="title">Danh sách mã giảm giá</h2>
             <div className="action-buttons">
-              <Button
-                type="primary"
-                icon={<FilePdfOutlined />}
-                size="large"
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded-[10px]"
                 style={{ marginRight: 10 }}
                 onClick={handleExportPDFAndExcel}
               >
-                Xuất PDF
-              </Button>
+                Xuất Excel
+              </button>
               <Button
                 type="default"
                 size="large"
