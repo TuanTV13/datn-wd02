@@ -134,11 +134,16 @@ class TicketController extends Controller
             $existingTicket = $this->ticketRepository->findByEventAndType($eventId, $ticketTypeId);
 
             if ($existingTicket) {
-                $existingTicket->quantity += $data['quantity'];
-                $existingTicket->available_quantity += $data['quantity'];
-                $existingTicket->save();
+                // $existingTicket->quantity += $data['quantity'];
+                // $existingTicket->available_quantity += $data['quantity'];
+                // $existingTicket->save();
 
-                $ticket = $existingTicket;
+                // $ticket = $existingTicket;
+
+                return response()->json([
+                    'message' => 'Vé đã có vui lòng kiểm tra lại',
+                    // 'data' => $ticket
+                ], 404);
             } else {
                 $ticket = $this->ticketRepository->create($data);
             }
@@ -170,11 +175,11 @@ class TicketController extends Controller
 
         // $status = EventStatus::PENDING;
 
-        if (!$ticket) {
-            return response()->json([
-                'message' => 'Vé không tồn tại'
-            ], 404);
-        }
+        // if (!$ticket) {
+        //     return response()->json([
+        //         'message' => 'Vé không tồn tại'
+        //     ], 404);
+        // }
 
         // if ($ticket->status != 'pending') {
         //     return response()->json([
@@ -183,11 +188,11 @@ class TicketController extends Controller
         // }
 
         $event = $this->eventRepository->find($ticket->event_id);
-        if (!$event) {
-            return response()->json([
-                'message' => 'Sự kiện không tồn tại'
-            ], 404);
-        }
+        // if (!$event) {
+        //     return response()->json([
+        //         'message' => 'Sự kiện không tồn tại'
+        //     ], 404);
+        // }
 
         if ($response = $this->checkSaleEndTime($data['sale_end'], $event->start_time)) {
             return $response;

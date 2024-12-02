@@ -26,28 +26,7 @@ const AddTicket = () => {
     null
   );
 
-  // Hàm gọi API để lấy dữ liệu vé
-  const fetchTicketData = async (eventId: number, ticketType: string) => {
-    try {
-      const data = await getTicketData(eventId, ticketType);
-      setTicketData(data); // Lưu dữ liệu từ API
 
-      // Nếu có dữ liệu trả về, điền các giá trị vào form
-      if (data) {
-        setValue("price", data.price || ""); // Điền giá vé vào form
-        setValue("quantity", data.quantity || 1); // Điền số lượng vào form
-        setValue("sale_start", formatDate(data.sale_start)); // Điền ngày bắt đầu
-        setValue("sale_end", formatDate(data.sale_end)); // Điền ngày kết thúc
-        setValue("seat_location", data.seat_location || "");
-      } else {
-        // Nếu không có dữ liệu trả về, reset form
-        reset();
-      }
-    } catch (error) {
-      console.log("Error fetching ticket data:", error);
-      reset(); // Nếu có lỗi trong việc gọi API, reset form
-    }
-  };
 
   // Hàm chuyển đổi định dạng ngày
   const formatDate = (dateStr: string) => {
@@ -58,12 +37,7 @@ const AddTicket = () => {
     return `${year}-${month}-${day}`; // Trả về định dạng yyyy-mm-dd
   };
 
-  // Gọi API khi sự kiện và loại vé thay đổi
-  useEffect(() => {
-    if (selectedEventId && selectedTicketType) {
-      fetchTicketData(selectedEventId, selectedTicketType);
-    }
-  }, [selectedEventId, selectedTicketType]); // Chỉ gọi lại khi thay đổi sự kiện hoặc loại vé
+  
 
   const onSubmit = (data: Tickets) => {
     onAdd(data); // Xử lý khi người dùng gửi form
@@ -89,7 +63,6 @@ const AddTicket = () => {
               id="event"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               {...register("event_id", { required: true })}
-              onChange={(e) => setSelectedEventId(Number(e.target.value))} // Cập nhật sự kiện đã chọn
             >
               <option value="">Chọn sự kiện</option>
               {events.map((event) => (
@@ -115,7 +88,6 @@ const AddTicket = () => {
               id="ticket-type"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               {...register("ticket_type", { required: true })}
-              onChange={(e) => setSelectedTicketType(e.target.value)} // Cập nhật loại vé đã chọn
             >
               <option value="">Chọn loại vé</option>
               {ticketTypesList.map((type) => (

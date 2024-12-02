@@ -1,7 +1,6 @@
 import axios from "axios";
+import API_URL from "./api_url"
 
-// Base URL for your API
-const API_URL = 'http://192.168.2.112:8000/api/v1'; // Replace with your actual API URL
 export const getEvents = async () => {
   try {
     const response = await axios.get(`${API_URL}/events`);
@@ -11,16 +10,33 @@ export const getEvents = async () => {
   }
 };
 export const deleteEvent = async (id) => {
+  const token = localStorage.getItem("access_token"); // Kiểm tra nếu token có tồn tại
+
+  if (!token) {
+    throw new Error("Token không tìm thấy");
+  }
+
+  // Tạo headers với token
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    // Chỉ thêm Content-Type nếu cần thiết
+  };
+
   try {
-    const response = await axios.delete(`${API_URL}/events/${id}`);
+    // Gọi axios.delete với URL đúng cách
+    const response = await axios.delete(`${API_URL}/events/${id}/delete`, {
+      headers
+    });
     return response.data;
   } catch (error) {
-    throw new Error("Lỗi khi xóa sự kiện");
+    // Xử lý lỗi trả về chi tiết từ backend nếu có
+    throw error.response ? error.response.data : error.message;
   }
 };
+
 const addEvent = async (eventData) => {
   // Lấy token từ localStorage (hoặc nơi bạn lưu token)
-  const token = localStorage.getItem("token"); // Điều chỉnh theo cách bạn lưu token
+  const token = localStorage.getItem("access_token"); // Điều chỉnh theo cách bạn lưu token
 
   // Tạo headers với token
   const headers = {
@@ -38,25 +54,40 @@ const addEvent = async (eventData) => {
   }
 };
 export { addEvent };
+export const updateEvent = async (id, eventData) => {
+  // Lấy token từ localStorage (hoặc nơi bạn lưu token)
+  const token = localStorage.getItem("access_token"); // Điều chỉnh theo cách bạn lưu token
 
- export const getEvent = async (eventId) => {
+  // Tạo headers với token
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "multipart/form-data", // Nếu bạn gửi FormData
+  };
+
+  try {
+    const response = await axios.put(
+      `${API_URL}/events/${id}/update`, // Đường dẫn API
+      eventData, // Dữ liệu gửi
+      { headers } // Headers
+    );
+    return response.data; // Trả về dữ liệu phản hồi
+  } catch (error) {
+    // Xử lý lỗi
+    throw error.response ? error.response.data : new Error("Lỗi khi cập nhật sự kiện");
+  }
+};
+
+
+ export const getEvent = async (id) => {
    try {
-     const response = await axios.get(`${BASE_URL}/events/${eventId}`);
+     const response = await axios.get(`${BASE_URL}/events/${id}`);
      return response.data;
    } catch (error) {
      throw new Error('Lỗi khi lấy sự kiện: ' + error.message);
    }
  };
  
- // Các hàm khác
- export const updateEvent = async (eventId, formData) => {
-   try {
-     const response = await axios.put(`${BASE_URL}/events/${eventId}`, formData);
-     return response.data;
-   } catch (error) {
-     throw new Error('Lỗi khi cập nhật sự kiện: ' + error.message);
-   }
- };
+
  export const fetchCategories = async () => {
   try {
       const response = await axios.get(`${API_URL}/categories`);
@@ -66,3 +97,4 @@ export { addEvent };
       throw error; // Ném lỗi để xử lý ở nơi sử dụng
   }
 };
+

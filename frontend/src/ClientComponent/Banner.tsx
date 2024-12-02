@@ -15,42 +15,45 @@ interface SlideType {
 }
 const Banner = () => {
   const {headerEvents} = useContext(HomeCT)
-  const slides: SlideType[] = [
-    {
-      type: "text",
-      content: (
-        <div className="lg:h-[600px] h-[300px] pl-16 flex flex-col md:flex-row items-center bg-gradient-to-r from-[#007BFF] to-[#F5F5F5] px-4 py-16"
-        style={{
-          backgroundImage: `url(${headerEvents[0]?.thumbnail})`, // Dùng ảnh làm background
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-        >
-          <div className="md:w-1/2">
-            <p className="text-[#007BFF] text-base tracking-[4px] mb-2">
-            {headerEvents[0]?.category_name || ""}
-            </p>
-            <h1 className="lg:text-[64px] md:text-5xl font-medium mb-4 text-white">
-              {headerEvents[0]?.name}
-            </h1>
-            {/* <div className="flex items-center mb-6">
-              <p className="mr-4">Get 25% off</p>
-              <span className="mx-2">|</span>
-              <p>Free Shipping</p>
-            </div> */}
-            <Link to={`/event-detail/${headerEvents[0]?.id}`} className="bg-[#6C757D] text-white py-2 px-6 rounded-full">
-              Chi tiết sự kiện
-            </Link>
-          </div>
-        </div>
-      ),
-    },
-    ...headerEvents?.map((event: Events) => ({
-      type: "image",
-      src: event.thumbnail,
-      alt: event.name,
-    })),
-  ];
+  const slides: SlideType[] = headerEvents?.map((event: Events) => ({
+    type: "text",
+    content: (
+      <div
+  className="lg:h-[600px] h-[300px] pl-16 flex flex-col md:flex-row items-center bg-gradient-to-r from-[#007BFF] to-[#F5F5F5] px-4 py-16 relative"
+  style={{
+    backgroundImage: `url(${event.thumbnail})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>
+  {/* Lớp phủ nền mờ */}
+  {/* <div className="absolute inset-0 bg-black/40"></div> */}
+
+  <div className="md:w-1/2 lg:ml-10 relative z-10">
+  <h1
+    className="lg:text-[40px] md:text-5xl font-medium mb-4 text-white bg-black/50 px-4 py-2 rounded-lg"
+    style={{
+      backgroundImage: "linear-gradient(90deg, #8E44AD, #1ABC9C, #E74C3C, #F1C40F, #3498DB)",
+      backgroundSize: "300% 300%",
+    }}
+  >
+    {event.name}
+  </h1>
+  <div className="flex justify-center md:justify-start lg:ml-5">
+    <Link
+      to={`/event-detail/${event.id}`}
+      className="bg-gradient-to-r from-[#0D6EFD] to-[#6610F2] text-white py-2 px-6 rounded-full hover:bg-gradient-to-r hover:from-[#6610F2] hover:to-[#0DCAF0] shadow-lg"
+    >
+      Chi tiết sự kiện
+    </Link>
+  </div>
+</div>
+
+</div>
+
+    ),
+  }));
+  
 
   return (
     <div className="w-full mt-36 mb-4">

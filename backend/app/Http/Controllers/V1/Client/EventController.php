@@ -9,8 +9,6 @@ use App\Repositories\TicketRepository;
 use App\Repositories\TransactionRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -40,7 +38,7 @@ class EventController extends Controller
                     break;
                 }
             }
-    
+
             // Nếu IP không nằm trong dải IP cho phép, từ chối check-in
             if (!$isAllowed) {
                 return response()->json([
@@ -165,7 +163,7 @@ class EventController extends Controller
         }
 
         if ($request->has('location')) {
-            $query->where('location', 'like', '%' . $request->input('location') . '%');
+            $query->where('province', 'like', '%' . $request->input('location') . '%');
         }
 
         $startTime = Carbon::parse($request->input('start_time'))->startOfDay();
@@ -203,6 +201,7 @@ class EventController extends Controller
                 $event->speakers = null;
             }
         }
+        // Log::info('data' . $request->all());
 
         return response()->json([
             'data' => $events,
@@ -246,7 +245,7 @@ class EventController extends Controller
                 $event->speakers = null;
             }
         }
-    
+
         return response()->json([
             'data' => $events,
             'pagination' => [

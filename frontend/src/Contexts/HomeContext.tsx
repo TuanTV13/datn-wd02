@@ -26,31 +26,48 @@ const HomeContexts = ({ children }: Props) => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchEvents = async () => {
-            setLoading(true);
-            setError(null);
+        (async () => {
+          try {
+            const data = await getHeaderEvents();
+            setHeaderEvents(data);
+          } catch (error) {
+            setHeaderEvents([])
+          }
+        })();
+      }, []);
 
+      useEffect(() => {
+        (async () => {
+          try {
+            const data = await getUpcomingEvents();
+          setUpcomingEvents(data);
+          } catch (error) {
+            setUpcomingEvents([])
+          }
+        })();
+      }, []);
+
+      useEffect(() => {
+        (async () => {
             try {
-                const headerData = await getHeaderEvents();
-                const upcomingData = await getUpcomingEvents();
-                const featuredData = await getFeaturedEvents();
-                const topRatedData = await getTopRatedEvents();
-
-                setHeaderEvents(headerData);
-                setUpcomingEvents(upcomingData);
-                setFeaturedEvents(featuredData);
-                setTopRatedEvents(topRatedData);
-            } catch (err) {
-                setError("Error loading events.");
-                console.error("Error loading events:", err);
-            } finally {
-                setLoading(false);
+              const data = await getFeaturedEvents();
+            setFeaturedEvents(data);
+            } catch (error) {
+              setFeaturedEvents([])
             }
-        };
+        })();
+      }, []);
 
-        fetchEvents();
-    }, []);
-
+      useEffect(() => {
+        (async () => {
+            try {
+              const data = await getTopRatedEvents();
+            setTopRatedEvents(data);
+            } catch (error) {
+              setTopRatedEvents([])
+            }
+        })();
+      }, []);
     return (
         <HomeCT.Provider value={{
             headerEvents,

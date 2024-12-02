@@ -12,7 +12,7 @@ const EventDetail = () => {
   const [similarEvents, setSimilarEvents] = useState([]);
   const [checkInMode, setCheckInMode] = useState('code'); // 'code' hoặc 'qr'
   useEffect(() => {
-    axios.get(`http://192.168.2.112:8000/api/v1/clients/events/${id}`)
+    axios.get(`http://127.0.0.1:8000/api/v1/clients/events/${id}`)
       .then((response) => {
         setEvent(response.data.data);
       })
@@ -20,31 +20,22 @@ const EventDetail = () => {
         console.error("Lỗi khi gọi API:", error);
       });
   }, [id]);
-  const fetchSimilarEvents = (categoryId) => {
-    axios
-      .get(`http://192.168.2.112:8000/api/v1/clients/category/${categoryId}`)
-      .then((response) => {
-        setSimilarEvents(response.data.data.filter((e) => e.id !== id)); // Lọc bỏ sự kiện hiện tại
-      })
-      .catch((error) => {
-        console.error("Lỗi khi lấy sự kiện tương tự:", error);
-      });
-  };
+  
   const handleCheckInSubmit = () => {
     const ticketCode = document.getElementById("ticket_code").value; // Lấy mã vé người dùng nhập
-    
+
     if (!ticketCode) {
       // Hiển thị thông báo lỗi nếu mã vé không được nhập
       alert('Vui lòng nhập mã vé');
       return; // Dừng lại và không gửi yêu cầu API
     }
-  
+
     // Tạo đối tượng dữ liệu để gửi lên API
     const requestData = {
       ticket_code: ticketCode
     };
-  
-    axios.put(`http://192.168.2.112:8000/api/v1/clients/events/${event.id}/checkin`, requestData)
+
+    axios.put(`http://127.0.0.1:8000/api/v1/clients/events/${event.id}/checkin`, requestData)
       .then((response) => {
         console.log('Check-in thành công:', response.data);
         alert('Check-in thành công');
@@ -59,9 +50,9 @@ const EventDetail = () => {
         }
       });
   };
-  
-  
-  
+
+
+
   const handleCheckIn = () => {
     setCheckInPopup(true);
     setCheckInMode('code'); // Mặc định vào chế độ nhập mã vé
@@ -110,7 +101,7 @@ const EventDetail = () => {
       setQrCodeData(data);
       console.log('Dữ liệu mã QR:', data);
       // Gửi dữ liệu mã QR để xử lý check-in
-      axios.put(`http://192.168.2.112:8000/api/v1/clients/events/${event.id}/checkin`, { code: data })
+      axios.put(`http://127.0.0.1:8000/api/v1/clients/events/${event.id}/checkin`, { code: data })
         .then((response) => {
           console.log('Check-in thành công:', response.data);
           setCheckInPopup(false); // Đóng popup sau khi check-in
@@ -150,9 +141,9 @@ const EventDetail = () => {
           >
             {event.name}
           </h1>
-          
 
-         
+
+
           {checkInPopup && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
               <div className="bg-white p-6 rounded-lg w-[400px]">
@@ -220,21 +211,21 @@ const EventDetail = () => {
               </p>
               <br />
               {event.status !== 'checkin' && (
-  <button
-    onClick={() => setShowPopup(true)}
-    className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
-  >
-    Mua vé
-  </button>
-)}
-{event.status === 'checkin' && (
-            <button
-              onClick={handleCheckIn}
-              className="w-[150px] h-[50px] bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md mt-4"
-            >
-              Check-in
-            </button>
-          )}
+                <button
+                  onClick={() => setShowPopup(true)}
+                  className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
+                >
+                  Mua vé
+                </button>
+              )}
+              {event.status === 'checkin' && (
+                <button
+                  onClick={handleCheckIn}
+                  className="w-[150px] h-[50px] bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md mt-4"
+                >
+                  Check-in
+                </button>
+              )}
             </>
           )}
           <div className="mt-4 text-center">
@@ -249,35 +240,35 @@ const EventDetail = () => {
               {statusInfo.text}
             </div>
           )}
-          
+
         </div>
       </div>
 
-           {/* Diễn giả */}
-           {event.speakers && event.speakers.length > 0 && (
-  <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
-    <h2 className="text-2xl font-bold mb-4 text-center">Diễn giả</h2>
-    <ul className="list-none">
-      {event.speakers.map((speaker, index) => (
-        <li key={index} className="flex flex-col items-center mb-8">
-          {speaker.image_url && (
-            <img
-              src={speaker.image_url}
-              alt={speaker.name}
-              className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 shadow-md mb-4"
-            />
-          )}
-          <p className="text-lg font-bold">{speaker.name}</p>
-          <p className="text-gray-600">Email: {speaker.email}</p>
-          <p className="text-gray-600">Số điện thoại: {speaker.phone}</p>
-          {speaker.profile && (
-            <p className="text-gray-500 text-sm italic mt-2">{speaker.profile}</p>
-          )}
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+      {/* Diễn giả */}
+      {event.speakers && event.speakers.length > 0 && (
+        <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold mb-4 text-center">Diễn giả</h2>
+          <ul className="list-none">
+            {event.speakers.map((speaker, index) => (
+              <li key={index} className="flex flex-col items-center mb-8">
+                {speaker.image_url && (
+                  <img
+                    src={speaker.image_url}
+                    alt={speaker.name}
+                    className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 shadow-md mb-4"
+                  />
+                )}
+                <p className="text-lg font-bold">{speaker.name}</p>
+                <p className="text-gray-600">Email: {speaker.email}</p>
+                <p className="text-gray-600">Số điện thoại: {speaker.phone}</p>
+                {speaker.profile && (
+                  <p className="text-gray-500 text-sm italic mt-2">{speaker.profile}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Mô tả sự kiện */}
       <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
@@ -328,11 +319,10 @@ const EventDetail = () => {
             {event.tickets.map((ticket) => (
               <div
                 key={ticket.id}
-                className={`border p-4 rounded-lg mb-4 cursor-pointer hover:bg-gray-100 ${
-                  selectedTicket?.id === ticket.id
+                className={`border p-4 rounded-lg mb-4 cursor-pointer hover:bg-gray-100 ${selectedTicket?.id === ticket.id
                     ? "bg-blue-100 border-blue-500"
                     : ""
-                }`}
+                  }`}
                 onClick={() => handleBuyTicketClick(ticket)}
               >
                 <h3 className="text-lg font-semibold">{ticket.ticket_type}</h3>
