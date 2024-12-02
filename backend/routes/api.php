@@ -19,8 +19,8 @@ use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
 use App\Http\Controllers\v1\VNPayController;
 use App\Http\Controllers\V1\VoucherController;
-use App\Http\Services\Payments\VNPayService;
 use App\Http\Services\Payments\ZaloPayService;
+use App\Http\Services\VNPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -218,3 +218,5 @@ Route::post('/notify-momo', [PaymentController::class, 'notifyMomo']);
 
 
 Route::post('/upload-image', [ImageController::class, 'upload']);
+
+
