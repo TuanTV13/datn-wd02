@@ -183,35 +183,35 @@ class EventController extends Controller
         }
     }
 
-    private function validateEventTiming($event, array $data)
-    {
-        $eventStartTime = \Carbon\Carbon::parse($event->start_time);
-        $newStartTime = \Carbon\Carbon::parse($data['start_time']);
-        $newEndTime = \Carbon\Carbon::parse($data['end_time']);
+    // private function validateEventTiming($event, array $data)
+    // {
+    //     $eventStartTime = \Carbon\Carbon::parse($event->start_time);
+    //     $newStartTime = \Carbon\Carbon::parse($data['start_time']);
+    //     $newEndTime = \Carbon\Carbon::parse($data['end_time']);
 
-        if (now()->diffInDays($eventStartTime) < 10) {
-            return [
-                'status' => false,
-                'message' => 'Không thể cập nhật thời gian sự kiện vì sự kiện còn dưới 10 ngày.'
-            ];
-        }
+    //     if (now()->diffInDays($eventStartTime) < 10) {
+    //         return [
+    //             'status' => false,
+    //             'message' => 'Không thể cập nhật thời gian sự kiện vì sự kiện còn dưới 10 ngày.'
+    //         ];
+    //     }
 
-        if ($newStartTime->lt(now()->addDays(10))) {
-            return [
-                'status' => false,
-                'message' => 'Thời gian bắt đầu mới phải sau ít nhất 10 ngày so với hiện tại.'
-            ];
-        }
+    //     if ($newStartTime->lt(now()->addDays(10))) {
+    //         return [
+    //             'status' => false,
+    //             'message' => 'Thời gian bắt đầu mới phải sau ít nhất 10 ngày so với hiện tại.'
+    //         ];
+    //     }
 
-        if ($newEndTime->lt($newStartTime->addHours(2))) {
-            return [
-                'status' => false,
-                'message' => 'Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 2 giờ.'
-            ];
-        }
+    //     if ($newEndTime->lt($newStartTime->addHours(2))) {
+    //         return [
+    //             'status' => false,
+    //             'message' => 'Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 2 giờ.'
+    //         ];
+    //     }
 
-        return ['status' => true];
-    }
+    //     return ['status' => true];
+    // }
 
     public function update($eventId, UpdateEventRequest $request)
     {
@@ -231,12 +231,12 @@ class EventController extends Controller
 
         $data = $request->validated();
 
-        $validationResult = $this->validateEventTiming($event, $data);
-        if (!$validationResult['status']) {
-            return response()->json([
-                'message' => $validationResult['message']
-            ], 400);
-        }
+        // $validationResult = $this->validateEventTiming($event, $data);
+        // if (!$validationResult['status']) {
+        //     return response()->json([
+        //         'message' => $validationResult['message']
+        //     ], 400);
+        // }
 
         $data['display_header'] ??= 0;
 

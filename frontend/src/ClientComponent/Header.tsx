@@ -32,6 +32,22 @@ const Header = () => {
     {
       key: "3",
       label: (
+        <a rel="noopener noreferrer" href="/event-history">
+          Lịch sử tham gia sự kiện{" "}
+        </a>
+      ),
+    },
+    {
+      key: "4",
+      label: (
+        <a rel="noopener noreferrer" href="/payment-history">
+          Lịch sử giao dịch{" "}
+        </a>
+      ),
+    },
+    {
+      key: "5",
+      label: (
         <a rel="noopener noreferrer" onClick={() => handleLogout()} href="">
           Đăng xuất{" "}
         </a>
@@ -43,7 +59,7 @@ const Header = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleMenuToggle = (menu) => {
+  const handleMenuToggle = (menu: any) => {
     setOpenMenu(openMenu === menu ? null : menu);
   };
 

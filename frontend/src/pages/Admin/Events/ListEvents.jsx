@@ -34,7 +34,7 @@ const EventList = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://172.20.10.3:8000/api/v1/categories/');
+        const response = await axios.get('http://127.0.0.1:8000/api/v1/categories/');
         if (response && response.data && Array.isArray(response.data.data)) {
           setCategories(response.data.data);
         }

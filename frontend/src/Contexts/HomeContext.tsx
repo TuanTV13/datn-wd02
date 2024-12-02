@@ -26,31 +26,32 @@ const HomeContexts = ({ children }: Props) => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchEvents = async () => {
-            setLoading(true);
-            setError(null);
+        (async () => {
+          const data = await getHeaderEvents();
+          setHeaderEvents(data);
+        })();
+      }, []);
 
-            try {
-                const headerData = await getHeaderEvents();
-                const upcomingData = await getUpcomingEvents();
-                const featuredData = await getFeaturedEvents();
-                const topRatedData = await getTopRatedEvents();
+      useEffect(() => {
+        (async () => {
+          const data = await getUpcomingEvents();
+          setUpcomingEvents(data);
+        })();
+      }, []);
 
-                setHeaderEvents(headerData);
-                setUpcomingEvents(upcomingData);
-                setFeaturedEvents(featuredData);
-                setTopRatedEvents(topRatedData);
-            } catch (err) {
-                setError("Error loading events.");
-                console.error("Error loading events:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
+      useEffect(() => {
+        (async () => {
+            const data = await getFeaturedEvents();
+            setFeaturedEvents(data);
+        })();
+      }, []);
 
-        fetchEvents();
-    }, []);
-
+      useEffect(() => {
+        (async () => {
+            const data = await getTopRatedEvents();
+            setTopRatedEvents(data);
+        })();
+      }, []);
     return (
         <HomeCT.Provider value={{
             headerEvents,

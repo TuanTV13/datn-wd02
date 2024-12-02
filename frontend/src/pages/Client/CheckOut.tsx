@@ -159,6 +159,7 @@ const CheckOut = () => {
         email: userDetails.email,
         phone: userDetails.phone,
         discount_code: voucherCode || null,
+        amount: totalPrice,
       };
       try {
         const response = await fetch(
