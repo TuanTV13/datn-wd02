@@ -33,6 +33,9 @@ import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
 import Order from "./pages/Client/Order";
 import RatingList from "./pages/Admin/Rating/RatingList";
 import AddRating from "./pages/Admin/Rating/AddRating";
+import SearchEvent from "./pages/Client/SearchEvent";
+import ListTicketDelete from "./pages/Admin/Tickets/ListTicketDelete";
+import Dashboard from "./pages/Admin/Dashboard/Dashboard";
 
 function App() {
   const route = useRoutes([
@@ -52,20 +55,23 @@ function App() {
         { path: "profile", element: <UserProfile /> },
         { path: "profile/edit", element: <UserProfileEdit /> },
         { path: "change-password", element: <UserChangePassword /> },
+        { path: "search", element: <SearchEvent /> },
       ],
     },
     {
       path: "admin",
       element: <LayoutAdmin />,
       children: [
+        { path: "", element: <Dashboard /> },
         { path: "ticket-list", element: <ListTicket /> },
         { path: "ticket-list-user", element: <ListUserBuyTicket /> },
         { path: "add-ticket", element: <AddTicket /> },
         { path: "edit-ticket/:id", element: <EditTicket /> },
+        { path: "list-ticket-delete", element: <ListTicketDelete /> },
         { path: "event-list", element: <ListEvent /> },
         { path: "add-event", element: <AddEvent /> },
-        { path: "update-event/", element: <UpdateEvent /> },
-        { path: "detail-event/", element: <DetailEvents /> },
+        { path: "update-event/:id", element: <UpdateEvent /> },
+        { path: "detail-event/:id", element: <DetailEvents /> },
         { path: "user-list", element: <ListUser /> },
         { path: "add-user", element: <AddUser /> },
         { path: "discount-code-list", element: <DiscountCodeList /> },
