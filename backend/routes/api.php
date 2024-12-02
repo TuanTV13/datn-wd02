@@ -57,10 +57,10 @@ Route::prefix('v1')->group(function () {
 
     Route::get('user/profile', [AuthController::class, 'me']);
 
-    // Route cập nhật thông tin tài khoản
+    // Route cập nhật thông tin tài khoản người dùng
     Route::put('user/update-profile/{id}', [AuthController::class, 'updateProfile']);
 
-    // Route thay đổi mật khẩu
+    // Route cập nhật mật khẩu
     Route::put('user/change-password/{id}', [AuthController::class, 'changePassword']);
 
     Route::get('events', [EventController::class, 'index']);
