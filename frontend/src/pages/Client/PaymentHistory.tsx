@@ -18,9 +18,8 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
             "Content-Type": "application/json",
           },
         });
-        setTransactions(response.data.data);
+        setTransactions(response.data.data || []);
         console.log(response)
-
       } catch (err) {
         console.log("hh",err);
       }
@@ -33,7 +32,7 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = transactions.slice(indexOfFirstEvent, indexOfLastEvent);
 
-  const handlePageChange = (direction) => {
+  const handlePageChange = (direction: any) => {
     setCurrentPage((prevPage) => {
       if (direction === "next" && prevPage < totalPages) {
         return prevPage + 1;
@@ -68,7 +67,8 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
               </tr>
             </thead>
             <tbody>
-              {currentEvents.map((event, index) => (
+            {currentEvents.length > 0 ? (
+              currentEvents.map((event, index) => (
                 <tr>
                   <td className="border border-gray-400 p-2 text-center">
                     {indexOfFirstEvent + index + 1}
@@ -86,7 +86,15 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
                     {event.status}
                   </td>
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr>
+              <td colSpan={6} className="border border-gray-400 p-2 text-center">
+                Không có thông tin giao dịch nào.
+              </td>
+            </tr>
+            )}
+              
             </tbody>
           </table>
         </div>

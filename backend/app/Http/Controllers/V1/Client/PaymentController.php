@@ -5,8 +5,11 @@ namespace App\Http\Controllers\V1\Client;
 use App\Events\TransactionVerified;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V1\VoucherController;
+use App\Http\Services\MoMoService;
 use App\Http\Services\PayPalService;
 use App\Http\Services\VNPayService;
+use App\Models\Ticket;
+use App\Models\Transaction;
 use App\Repositories\{TicketRepository, TransactionRepository, UserRepository, VoucherRepository};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, DB, Log};
@@ -202,6 +205,8 @@ class PaymentController extends Controller
             } elseif ($request->payment_method === 'vnpay') {
                 $transaction = $this->transactionRepository->createTransaction($transactionData);
 
+                $transaction_id = $transaction->id;
+              
                 $user->events()->attach($ticket->event_id, [
                     'ticket_id' => $ticket->id,
                     'ticket_type' => $ticket->ticket_type,
@@ -217,7 +222,7 @@ class PaymentController extends Controller
                 $vnpayService = new VNPayService();
     
                 // Gọi trực tiếp phương thức create trong VNPayService để tạo URL thanh toán
-                return $vnpayService->create($request);
+                return $vnpayService->create($request, $transaction_id);
             } else {
 
                 // Lưu thông tin giao dịch
@@ -265,121 +270,63 @@ class PaymentController extends Controller
         }
     }
 
-    // public function processPayment(Request $request, VoucherController $voucherController)
-    // {
-    //     $ticket_id = $request->input('ticket_id');
-    //     $ticket = $this->ticketRepository->find($ticket_id);
+    public function handleReturn(Request $request)
+    {
+        // Lấy các tham số từ query string
+        $responseCode = $request->input('vnp_ResponseCode');
+        $transaction_id = $request->input('transaction_id');
+        // dd($transaction_id);
+        // Ghi log để kiểm tra request trả về
+        Log::info('VNPay handleReturn called', ['request' => $request->all()]);
+        Log::info('Session data:', session()->all());
+
+        // Kiểm tra mã phản hồi (vnp_ResponseCode) có phải 00 không
+        if ($responseCode == '00') {
+            // dd($responseCode);
+            // Kiểm tra session có lưu transaction_id không
+            // $transactionId = session('transaction_id');
     
-    //     if (!$ticket) {
-    //         return response()->json(['message' => 'Vé không tồn tại'], 404);
-    //     }
+            // if (!$transaction_id) {
+            //     Log::error('Không tìm thấy transaction_id trong session.');
+            //     return response()->json(['message' => 'Không tìm thấy mã giao dịch'], 400);
+            // }
     
-    //     $totalAmount = $ticket->price;
+            // Tìm giao dịch theo ID
+            $transaction = Transaction::find($transaction_id);
+
+            if (!$transaction) {
+                Log::error('Không tìm thấy giao dịch với ID: ' . $transaction_id);
+                return response()->json(['message' => 'Giao dịch không tồn tại'], 404);
+            }
+            // dd($transaction->status);
+            if ($responseCode == "00" && $transaction->status == "pending") {
+                    $transaction->status = 'completed';
+                    $transaction->save();
+        
+                    // Giảm số lượng vé nếu cần
+                    $ticket = Ticket::find($transaction->ticket_id);
+                    if ($ticket) {
+                        $ticket->decrement('available_quantity', 1);
+                        if ($ticket->available_quantity <= 0) {
+                            $ticket->update(['status' => 'sold_out']);
+                        }
+                    }
+        
+                    // Gửi sự kiện xác thực giao dịch
+                    event(new TransactionVerified($transaction));
+        
+                    return response()->json(['message', 'Thanh toán thành công'], 200);
+            }
+        }
     
-    //     DB::beginTransaction();
-    //     try {
-    //         // Kiểm tra nếu người dùng đã đăng nhập
-    //         if (Auth::check()) {
-    //             $user = Auth::user();
-    //         } else {
-    //             // Nếu chưa đăng nhập, yêu cầu thông tin bắt buộc
-    //             $validatedData = $request->validate([
-    //                 'name' => 'required',
-    //                 'email' => 'required|email',
-    //                 'phone' => 'required'
-    //             ]);
-    //             $user = $this->userRepository->create($validatedData);
-    //         }
+        Log::info('VNPay giao dịch thất bại', ['response_code' => $responseCode]);
+        return redirect('/error-page')->with('error', 'Thanh toán thất bại.');
+    }
     
-    //         // Validate phương thức thanh toán và mã giảm giá
-    //         $request->validate([
-    //             'payment_method' => 'required|string|in:cash,paypal,vnpay',
-    //             'discount_code' => 'nullable|string'
-    //         ]);
-    
-    //         $ticketCode = strtoupper(uniqid('TICKET-'));
-    //         $discountCode = $request->input('discount_code');
-    //         $voucher = $this->voucherRepository->findByCode($discountCode);
-    
-    //         // Kiểm tra tính hợp lệ của mã giảm giá
-    //         if ($discountCode) {
-    //             if (!$voucher) {
-    //                 return response()->json(['error' => 'Mã giảm giá không tồn tại'], 400);
-    //             }
-    
-    //             // Áp dụng mã giảm giá
-    //             $voucherRequest = new Request([
-    //                 'event_id' => $ticket->event_id,
-    //                 'user_id' => $user->id,
-    //                 'code' => $discountCode
-    //             ]);
-    
-    //             $voucherResponse = $voucherController->apply($voucherRequest, $totalAmount);
-    
-    //             if ($voucherResponse->getData()->success === false) {
-    //                 return response()->json(['error' => $voucherResponse->getData()->message], 400);
-    //             }
-    
-    //             $totalAmount = $voucherResponse->getData()->data->total_price;
-    //         }
-    
-    //         // Dữ liệu giao dịch
-    //         $transactionData = [
-    //             'user_id' => $user->id,
-    //             'ticket_id' => $ticket->id,
-    //             'event_id' => $ticket->event_id,
-    //             'quantity' => 1,
-    //             'ticket_code' => $ticketCode,
-    //             'total_amount' => $totalAmount,
-    //             'payment_method' => $request->payment_method,
-    //             'status' => 'PENDING',
-    //             'order_desc' => 'Thanh toán vé cho sự kiện #' . $ticket->id,
-    //         ];
-    
-    //         Log::info('Thông tin vé', ['ticket' => $ticket]);
-    //         Log::info('Thông tin giao dịch', ['transaction_data' => $transactionData]);
-    
-    //         // Xử lý thanh toán với VNPay
-    //         if ($request->payment_method === 'vnpay') {
-    //             $vnpayService = new VNPayService();
-    
-    //             // Gọi trực tiếp phương thức create trong VNPayService để tạo URL thanh toán
-    //             return $vnpayService->create($request);
-    //         } else {
-    //             // Thanh toán qua tiền mặt hoặc phương thức khác
-    //             $transaction = $this->transactionRepository->createTransaction($transactionData);
-    //             $ticket->decrement('available_quantity', 1);
-    
-    //             // Kiểm tra trạng thái vé và cập nhật nếu hết vé
-    //             if ($ticket->available_quantity <= 0) {
-    //                 $ticket->update(['status' => 'sold_out']);
-    //             }
-    
-    //             // Thêm người dùng vào sự kiện đã mua vé
-    //             $user->events()->attach($ticket->event_id, [
-    //                 'ticket_id' => $ticket->id,
-    //                 'ticket_code' => $ticketCode,
-    //                 'checked_in' => false,
-    //                 'order_date' => now(),
-    //                 'original_price' => $ticket->price,
-    //                 'discount_code' => $discountCode ?? null,
-    //                 'amount' => $totalAmount,
-    //             ]);
-    
-    //             DB::commit();
-    //             return response()->json(['message' => 'Thanh toán thành công', 'transaction_id' => $transaction->id]);
-    //         }
-    //     } catch (Exception $e) {
-    //         DB::rollBack();
-    //         Log::error('Lỗi xử lý thanh toán', ['error' => $e->getMessage()]);
-    //         return response()->json(['message' => 'Có lỗi trong quá trình thanh toán'], 500);
-    //     }
-    // }
 
     // Xác thực thành công khi thanh toán bằng Paypal
     public function paymentSuccess(Request $request)
     {
-
         // Dữ liệu gửi đi theo route từ trên
         $transactionId = $request->query('transaction_id');
         $ticketId = $request->query('ticket_id');
@@ -431,4 +378,24 @@ class PaymentController extends Controller
         $transaction->update(['status' => 'FAILED']);
         return response()->json(['message' => 'Thanh toán đã bị hủy.']);
     }
+
+    public function notifyMomo(Request $request)
+    {
+        // Lấy dữ liệu từ thông báo của MoMo
+        $data = $request->all();
+
+        // Gọi dịch vụ MoMoService để xử lý logic
+        $momoService = new MoMoService();
+
+        // Kiểm tra chữ ký và xử lý dữ liệu
+        $response = $momoService->handleReturn($request);
+
+        // Log dữ liệu thông báo (nếu cần)
+        Log::info('MoMo Notify:', $data);
+
+        // Trả về phản hồi thành công cho MoMo
+        return response()->json(['status' => 'success']);
+    }  
 }
+
+

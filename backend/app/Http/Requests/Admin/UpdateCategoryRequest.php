@@ -31,10 +31,10 @@ class UpdateCategoryRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => 'Tên danh mục là bắt buộc.',
-            'name.string' => 'Tên danh mục phải là một chuỗi ký tự.',
-            'name.max' => 'Tên danh mục không được vượt quá 50 ký tự.',
-            'name.unique' => 'Tên danh mục này đã tồn tại.',
+            'name.required' => 'Tên danh mục sự kiện là bắt buộc.',
+            'name.string' => 'Tên danh mục phải sự kiện là một chuỗi ký tự.',
+            'name.max' => 'Tên danh mục sự kiện không được vượt quá 50 ký tự.',
+            'name.unique' => 'Tên danh mục sự kiện này đã tồn tại.',
         ];
     }
 }

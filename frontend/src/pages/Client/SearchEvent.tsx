@@ -8,6 +8,7 @@ import {
 import { EventCT } from "../../Contexts/ClientEventContext";
 import { CategoryCT } from "../../Contexts/CategoryContext";
 import api from "../../api_service/api";
+import { fetchEventsByProvince } from "../../api_service/ClientEvent";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -17,7 +18,7 @@ const SearchEvent = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const { categories, fetchEventsByCategory } = useContext(CategoryCT);
-  const { events, setEvents } = useContext(EventCT);
+  const { events,setEvents, provinces } = useContext(EventCT);
 
   // Function to toggle category menu
   const toggleCategory = () => {
@@ -34,41 +35,60 @@ const SearchEvent = () => {
     await fetchEventsByCategory(id);
     navigate(`/event-category/${id}`);
   };
-  const [filter, setFilter] = useState("");
-  const cities = [...new Set(events.map((event) => event.location))];
-  const [searchParams, setSearchParams] = useSearchParams();
-  const handleLocationChange = (city: string) => {
-    setFilter(city);
-    setSearchParams({ location: city });
-  };
-  useEffect(() => {
-    const locationFromURL = searchParams.get("location"); // Lấy giá trị từ URL
-    if (locationFromURL) {
-      setFilter(locationFromURL); // Cập nhật bộ lọc
-    }
-  }, [searchParams]);
 
-  const [applyFilter, setApplyFilter] = useState(false); // Trạng thái để kiểm tra khi bấm nút Apply
   const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
+  const location = useLocation();
+  const [start_time, setStart_time] = useState(""); // Ngày bắt đầu
+  const [end_time, setEnd_time] = useState(""); // Ngày kết thúc
 
-  // Lọc sự kiện theo thành phố ngay khi người dùng nhập
-  useEffect(() => {
-    const filteredByCity = filter
-      ? events.filter((event) =>
-          event.location.toLowerCase().includes(filter.toLowerCase())
-        )
-      : events;
-
-    setFilteredEvents(filteredByCity);
-  }, [filter, events]);
+  const fetchEventsByDate = async (startTime: string, endTime: string) => {
+    try {
+      console.log("Calling API with:", { startTime, endTime }); // Debug
+      const response = await api.post("/clients/events/filter", {
+        start_time: startTime,
+        end_time: endTime,
+      });
+      console.log("API Response:", response);
+      setFilteredEvents(response.data.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const handleApplyFilters = () => {
-    setApplyFilter(true); // Đánh dấu là bấm nút Apply
+    if (start_time && end_time) {
+      const params = new URLSearchParams(location.search);
+      params.delete("query");
+      params.delete("province");
+      params.set("start_time", start_time);
+      params.set("end_time", end_time);
+      navigate(`?${params.toString()}`);
+      fetchEventsByDate(start_time, end_time); // Lấy sự kiện theo khoảng thời gian đã chọn
+    } else {
+      alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!");
+    }
   };
+  // Lấy query params từ URL khi tải trang
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const startTime = params.get("start_time");
+    const endTime = params.get("end_time");
+    const province = params.get("province");
+    if (startTime && endTime) {
+      setStart_time(startTime);
+      setEnd_time(endTime);
+      fetchEventsByDate(startTime, endTime);
+    }
+    if (province) {
+      fetchEventsByProvince(province).then((data) => setFilteredEvents(data));
+    }
+  }, [location.search]);
 
   const clearFilters = () => {
-    window.location.reload();
     navigate("/event-list");
+    setStart_time("");
+    setEnd_time("");
+    setFilteredEvents(events);
   };
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -77,11 +97,26 @@ const SearchEvent = () => {
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const [locationQuery, setLocationQuery] = useState("");
+  const [selectedProvince, setSelectedProvince] = useState(null);
+  const handleProvinceClick = async (Inputlocation: any) => {
+    setSelectedProvince(Inputlocation);
+    const params = new URLSearchParams(location.search);
+    params.delete("query");
+    params.delete("start_time");
+    params.delete("end_time");
+    params.set("province", Inputlocation);
+    navigate(`?${params.toString()}`);
+    try {
+      const data = await fetchEventsByProvince(Inputlocation);
+      setFilteredEvents(data); // Cập nhật danh sách sự kiện
+    } catch (err) {
+      setFilteredEvents([]); // Xóa danh sách sự kiện cũ
+    }
+  };
+  const [Inputlocation, setLocation] = useState("");
 
-  // Lọc danh sách thành phố dựa trên giá trị input
-  const filteredCities = cities.filter((city) =>
-    city.toLowerCase().includes(locationQuery.toLowerCase())
+  const filteredProvince = provinces.filter((item) =>
+    item.name.toLowerCase().includes(Inputlocation.toLowerCase())
   );
 
   // Search
@@ -93,12 +128,12 @@ const SearchEvent = () => {
       api
         .post("/clients/events/search", { name: searchTerm }) // Gửi request với từ khóa
         .then((response) => {
-          setEvents(response.data.data.data ); 
+          setFilteredEvents(response.data.data.data);
         })
         .catch((err) => {
           console.log(
             err.response?.data?.message || "Đã xảy ra lỗi khi tìm kiếm sự kiện"
-          ); 
+          );
         });
     }
   }, [searchTerm]);
@@ -138,18 +173,18 @@ const SearchEvent = () => {
                   placeholder="Tìm kiếm danh mục..."
                 />
                 <ul className="ml-2 text-gray-400 lg:text-base">
-                {filteredCategories.map((category) => (
-                      <li
-                        key={category.id}
-                        className="cursor-pointer hover:text-[#007BFF]"
-                        onClick={() => handleCategoryClick(category.id)}
-                      >
-                        {category.name}
-                      </li>
-                    ))}
-                    {filteredCategories.length === 0 && (
-                      <li className="text-gray-500">Không tìm thấy danh mục</li>
-                    )}
+                  {filteredCategories.map((category) => (
+                    <li
+                      key={category.id}
+                      className="cursor-pointer hover:text-[#007BFF]"
+                      onClick={() => handleCategoryClick(category.id)}
+                    >
+                      {category.name}
+                    </li>
+                  ))}
+                  {filteredCategories.length === 0 && (
+                    <li className="text-gray-500">Không tìm thấy danh mục</li>
+                  )}
                 </ul>
               </>
             )}
@@ -160,7 +195,7 @@ const SearchEvent = () => {
               className="flex justify-between lg:text-2xl font-medium mb-1 hover:text-[#007BFF] cursor-pointer"
               onClick={toggleLocation}
             >
-              Địa điểm tổ chức
+              Địa điểm
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -176,36 +211,40 @@ const SearchEvent = () => {
                 />
               </svg>
             </div>
-            {isCategoryOpen && (
+            {isLocationOpen && (
               <>
                 {/* Ô input */}
                 <input
                   type="text"
+                  id="location"
                   className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Tìm kiếm danh mục..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Tìm kiếm địa điểm..."
+                  value={Inputlocation}
+                  onChange={(e) => setLocation(e.target.value)}
                 />
                 <ul
-  className="ml-2 text-gray-400 lg:text-base overflow-y-auto"
-  style={{ maxHeight: "150px" }}
->
-  {filteredCities.map((city, index) => (
-    <li
-      key={index}
-      className={`cursor-pointer hover:text-[#007BFF] ${
-        city === filter ? "text-blue-500 font-bold" : ""
-      }`}
-      onClick={() => handleLocationChange(city)}
-    >
-      {city}
-    </li>
-  ))}
-  {filteredCities.length === 0 && (
-    <li className="text-gray-500">Không tìm thấy địa điểm</li>
-  )}
-</ul>
-
+                  className="ml-2 text-gray-400 lg:text-base overflow-y-auto"
+                  style={{ maxHeight: "150px" }}
+                >
+                  {filteredProvince?.map((province) => (
+                    <li
+                      onClick={() => handleProvinceClick(province.name)}
+                      key={province.id}
+                      className={`cursor-pointer hover:text-[#007BFF] ${
+                        selectedProvince === province.name
+                          ? "text-blue-500 font-semibold"
+                          : ""
+                      }`}
+                    >
+                      {province.name}
+                    </li>
+                  ))}
+                  {filteredProvince.length === 0 && (
+                    <li className="text-gray-500">
+                      Không tìm thấy tỉnh/thành phố
+                    </li>
+                  )}
+                </ul>
               </>
             )}
           </div>
@@ -216,6 +255,9 @@ const SearchEvent = () => {
               <span className="text-lg">Từ ngày:</span>
               <input
                 type="date"
+                id="start_time"
+                value={start_time}
+                onChange={(e) => setStart_time(e.target.value)}
                 className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </label>
@@ -223,13 +265,22 @@ const SearchEvent = () => {
               <span className="text-lg">Đến ngày:</span>
               <input
                 type="date"
+                id="end_time"
+                value={end_time}
+                onChange={(e) => setEnd_time(e.target.value)}
                 className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </label>
-            <button className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]">
+            <button
+              onClick={handleApplyFilters}
+              className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]"
+            >
               Apply
             </button>
-            <button className="mt-4 ml-2 px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500">
+            <button
+              className="mt-4 ml-2 px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
+              onClick={clearFilters}
+            >
               Clear
             </button>
           </div>
@@ -246,9 +297,12 @@ const SearchEvent = () => {
           <div className="border-b-[1px] border-gray-300 mb-4"></div>
           {/* <!-- Items --> */}
           <div className="space-y-4 ">
-            {events.length > 0 ? (
-              events.map((item) => (
-                <div key={item.id} className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
+            {filteredEvents.length > 0 ? (
+              filteredEvents.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]"
+                >
                   <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
                     <Link to={`/event-detail/${item.id}`}>
                       <img

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 
 const UpdateEvent = () => {
   const { id } = useParams(); // Lấy id từ URL
@@ -30,7 +31,10 @@ const UpdateEvent = () => {
           location: event.location,
         });
       })
-      .catch((error) => console.error("Lỗi khi lấy sự kiện:", error));
+      .catch((error) => {
+        console.error("Lỗi khi lấy sự kiện:", error)
+        toast.error("Lỗi khi lấy sự kiện. Vui lòng thử lại!");
+      });
   }, [id]);
 
   // Hàm định dạng lại thời gian
@@ -83,10 +87,10 @@ const UpdateEvent = () => {
        }
      );
      console.log("Cập nhật thành công:", result);
-     alert("Cập nhật sự kiện thành công!");
+     toast.success("Cập nhật sự kiện thành công!");
    } catch (error) {
      console.error("Lỗi khi cập nhật sự kiện:", error);
-     alert(error.response.data.message);
+     toast.error(error.response.data.message);
    } finally {
      setLoading(false);
    }
@@ -142,6 +146,7 @@ const UpdateEvent = () => {
         {loading ? "Đang cập nhật..." : "Lưu sự kiện"}
       </button>
     </form>
+    <ToastContainer/>
     </div>
   );
 };

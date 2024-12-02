@@ -1,3 +1,4 @@
+import axios from "axios";
 import api from "./api";
 
 export const getAllEvents = async () => {
@@ -16,16 +17,6 @@ export const getEventById = async (id: number) => {
     return data.data;
   } catch (error) {
     console.error(`Error fetching event with ID ${id}:`, error);
-    throw error;
-  }
-};
-
-export const checkInEvent = async (eventId) => {
-  try {
-    const { data } = await api.put(`/clients/events/${eventId}/checkin`);
-    return data.data;
-  } catch (error) {
-    console.error(`Error checking in for event ID ${eventId}:`, error);
     throw error;
   }
 };
@@ -49,3 +40,26 @@ export const getAllCategory = async () => {
       console.log(error)
   }
 }
+
+export const GetAllProvinces = async () => {
+  try {
+    const {data} = await axios.get(`https://vn-public-apis.fpo.vn/provinces/getAll?limit=-1`);
+    return data.data.data;
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách các tỉnh:', error);
+    throw new Error('Không thể tải danh sách tỉnh/thành phố');
+  }
+};
+export const fetchEventsByProvince = async (province: string) => {
+  try {
+    console.log(province)
+      const {data} = await api.post("/clients/events/filter", {
+          location: province
+      });
+      console.log(data)
+      return data.data.data;
+  } catch (error) {
+      console.error("Error fetching events by province:");
+      throw error;
+  }
+};

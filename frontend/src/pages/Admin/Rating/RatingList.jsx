@@ -1,33 +1,20 @@
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Button,
-  Input,
-  Select,
-  Row,
-  Col,
-  Card,
-  notification,
-} from "antd";
+import { Table, Button, Input, Row, Col, Card, notification } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
   SearchOutlined,
   FilePdfOutlined,
-  EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
 import * as XLSX from "xlsx";
 import axiosInstance from "../../../axios";
 
-const { Option } = Select;
-
 const RatingList = () => {
   const navigate = useNavigate();
   const [filterValue, setFilterValue] = useState(5);
-  const [searchText, setSearchText] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [reload, setReload] = useState(false);
+  const [searchText, setSearchText] = useState(""); // Lưu giá trị tìm kiếm
   const [feedbackList, setFeedbackList] = useState([]); // Dữ liệu phản hồi
+  const [filteredData, setFilteredData] = useState([]); // Dữ liệu đã lọc
 
   // Gọi API để lấy dữ liệu phản hồi
   useEffect(() => {
@@ -35,17 +22,17 @@ const RatingList = () => {
       .get("http://localhost:8000/api/v1/feedbacks")
       .then((res) => {
         setFeedbackList(res.data.data); // Lưu dữ liệu phản hồi vào state
+        setFilteredData(res.data.data); // Lưu dữ liệu đã lọc
       })
       .catch((error) => {
-        if (error?.response?.status === 401) navigate("/auth");
-
         notification.error({
           message: "Lỗi khi lấy dữ liệu phản hồi",
           description: "Không thể lấy dữ liệu phản hồi từ API.",
         });
       });
-  }, [reload]);
+  }, []);
 
+  // Cột của bảng
   const columns = [
     {
       title: "STT",
@@ -93,66 +80,30 @@ const RatingList = () => {
       title: "Thao tác",
       key: "action",
       render: (_, record) => (
-        <Select
-          defaultValue="Chọn thao tác"
-          style={{ width: 120 }}
-          onChange={(value) => handleAction(value, record)}
+        <Button
+          type="link"
+          icon={<DeleteOutlined style={{ color: "red" }} />}
+          onClick={() => handleDelete(record)}
         >
-          <Option value="edit">
-            <EditOutlined /> Sửa
-          </Option>
-          <Option value="delete">
-            <DeleteOutlined style={{ color: "red" }} /> Xóa
-          </Option>
-        </Select>
+          Xóa
+        </Button>
       ),
     },
   ];
 
-  const handleAddNew = () => {
-    navigate("/admin/add-rating");
-  };
-
-  const handleAction = (action, key) => {
-    switch (action) {
-      case "edit":
-        handleEdit(key);
-        break;
-      case "delete":
-        handleDelete(key);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleExportPDFAndExcel = () => {
-    console.log("Xuất PDF và Excel");
-
-    const ws = XLSX.utils.json_to_sheet(feedbackList);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Feedbacks");
-
-    XLSX.writeFile(wb, "Feedbacks_List.xlsx");
-  };
-
-  const handleEdit = (key) => {
-    console.log("Sửa phản hồi có ID: ", key.id);
-  };
-
-  const handleDelete = (key) => {
+  // Hàm xóa phản hồi
+  const handleDelete = (record) => {
     axiosInstance
-      .delete(`/feedbacks/${key.id}/delete`)
-      .then((res) => {
+      .delete(`/feedbacks/${record.id}/delete`)
+      .then(() => {
         notification.success({
           message: "Xoá phản hồi thành công",
-          description: `Phản hồi với ID "${key.id}" đã được xoá.`,
+          description: `Phản hồi với ID "${record.id}" đã được xoá.`,
         });
-        setReload(!reload); // Tải lại dữ liệu
+        setFeedbackList(feedbackList.filter((item) => item.id !== record.id));
+        setFilteredData(filteredData.filter((item) => item.id !== record.id));
       })
       .catch((error) => {
-        if (error?.response?.status === 401) navigate("/auth");
-
         notification.error({
           message: "Xoá thất bại",
           description: "Đã xảy ra lỗi khi xoá phản hồi.",
@@ -160,9 +111,27 @@ const RatingList = () => {
       });
   };
 
+  // Hàm tìm kiếm dữ liệu
   const handleSearch = () => {
-    console.log("Search text: ", searchText);
-    console.log("Status: ", statusFilter);
+    if (searchText) {
+      const filtered = feedbackList.filter(
+        (feedback) =>
+          feedback.event_id.toString().includes(searchText) || // Tìm theo mã sự kiện
+          feedback.feedback.toLowerCase().includes(searchText.toLowerCase()) // Tìm theo phản hồi
+      );
+      setFilteredData(filtered); // Cập nhật dữ liệu đã lọc
+    } else {
+      setFilteredData(feedbackList); // Nếu không có tìm kiếm, hiển thị tất cả dữ liệu
+    }
+  };
+
+  // Hàm xuất Excel
+  const handleExportExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(filteredData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Feedbacks");
+
+    XLSX.writeFile(wb, "Feedbacks_List.xlsx");
   };
 
   return (
@@ -173,54 +142,39 @@ const RatingList = () => {
             <h2 className="title">Danh sách phản hồi</h2>
             <div className="action-buttons">
               <Button
-                type="primary"
-                icon={<FilePdfOutlined />}
-                size="large"
-                style={{ marginRight: 10 }}
-                onClick={handleExportPDFAndExcel}
-              >
-                Xuất PDF
-              </Button>
-              <Button
                 type="default"
                 size="large"
-                onClick={handleAddNew}
+                onClick={() => navigate("/admin/add-rating")} // Điều hướng tới trang thêm mới
                 style={{ marginRight: 10 }}
               >
                 Thêm mới
               </Button>
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded-[10px]"
+                onClick={handleExportExcel} // Xuất Excel
+              >
+                Xuất Excel
+              </button>
             </div>
           </div>
         </Col>
       </Row>
+
       <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={8}>
+        <Col span={12}>
           <Card style={{ padding: 10 }}>
             <Input
               prefix={<SearchOutlined />}
-              placeholder="Tìm kiếm phản hồi"
+              placeholder="Tìm kiếm theo mã sự kiện hoặc phản hồi"
               style={{ width: "100%", borderRadius: "8px" }}
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              onPressEnter={handleSearch}
+              onChange={(e) => setSearchText(e.target.value)} // Cập nhật giá trị tìm kiếm
+              onPressEnter={handleSearch} // Tìm kiếm khi nhấn Enter
             />
           </Card>
         </Col>
-        <Col span={8}>
-          <Card style={{ padding: 10 }}>
-            <Select
-              value={statusFilter}
-              onChange={(value) => setStatusFilter(value)}
-              placeholder="Trạng thái"
-              style={{ width: "100%", borderRadius: "8px" }}
-            >
-              <Option value="">Trạng Thái</Option>
-              <Option value="active">Hoạt động</Option>
-              <Option value="expired">Hết hạn</Option>
-            </Select>
-          </Card>
-        </Col>
-        <Col span={8}>
+
+        <Col span={12}>
           <Card style={{ padding: 10 }}>
             <Button
               type="primary"
@@ -233,7 +187,7 @@ const RatingList = () => {
                 borderColor: "#1890ff",
                 boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
               }}
-              onClick={handleSearch}
+              onClick={handleSearch} // Tìm kiếm khi nhấn nút
             >
               Tìm kiếm
             </Button>
@@ -244,14 +198,13 @@ const RatingList = () => {
       <Row gutter={16}>
         <Col span={24}>
           <Table
-            dataSource={feedbackList}
+            dataSource={filteredData} // Hiển thị dữ liệu đã lọc
             columns={columns}
             pagination={{ pageSize: filterValue }}
             className="custom-table"
             locale={{
               emptyText: (
                 <div className="empty-state">
-                  <img src="/path/to/empty-icon.png" alt="No data" />
                   <p>Không có dữ liệu hiển thị</p>
                 </div>
               ),
