@@ -27,7 +27,7 @@ const DetailEvents = () => {
 
       try {
         const response = await axios.get(
-          `http://192.168.2.112:8000/api/v1/events/${id}/show`,
+          `http://127.0.0.1:8000/api/v1/events/${id}/show`,
           { headers }
         );
         setEventDetails(response.data);
@@ -55,7 +55,7 @@ const DetailEvents = () => {
 
     try {
       await axios.put(
-        `http://192.168.2.112:8000/api/v1/events/changeStatus/${id}`,
+        `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
         { status: selectedStatus },
         { headers }
       );
@@ -64,7 +64,7 @@ const DetailEvents = () => {
       // Fetch lại dữ liệu sự kiện
       setLoading(true);
       const response = await axios.get(
-        `http://192.168.2.112:8000/api/v1/events/${id}/show`,
+        `http://127.0.0.1:8000/api/v1/events/${id}/show`,
         { headers }
       );
       setEventDetails(response.data);
