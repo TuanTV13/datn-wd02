@@ -12,6 +12,7 @@ interface CategoryContextType {
   events: Events[];
   loading: boolean
   fetchEventsByCategory: (id: number | string) => Promise<void>
+  setEvents: React.Dispatch<React.SetStateAction<Events[]>>;
 }
 
 export const CategoryCT = createContext<CategoryContextType>({} as CategoryContextType);
@@ -34,6 +35,7 @@ const CategoryContexts = ({ children }: Props) => {
     try {
       const eventData = await getEventsByCategory(id);
       setEvents(eventData);
+      console.log(eventData)
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
@@ -47,6 +49,7 @@ const CategoryContexts = ({ children }: Props) => {
         loading,
         events,
         fetchEventsByCategory,
+        setEvents
       }}
     >
       {children}

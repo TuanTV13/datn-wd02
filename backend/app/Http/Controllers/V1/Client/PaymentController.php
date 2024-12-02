@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Client;
 use App\Events\TransactionVerified;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V1\VoucherController;
+use App\Http\Services\MoMoService;
 use App\Http\Services\PayPalService;
 use App\Http\Services\VNPayService;
 use App\Repositories\{TicketRepository, TransactionRepository, UserRepository, VoucherRepository};
@@ -431,4 +432,25 @@ class PaymentController extends Controller
         $transaction->update(['status' => 'FAILED']);
         return response()->json(['message' => 'Thanh toán đã bị hủy.']);
     }
+
+    public function notifyMomo(Request $request)
+{
+    // Lấy dữ liệu từ thông báo của MoMo
+    $data = $request->all();
+
+    // Gọi dịch vụ MoMoService để xử lý logic
+    $momoService = new MoMoService();
+
+    // Kiểm tra chữ ký và xử lý dữ liệu
+    $response = $momoService->handleReturn($request);
+
+    // Log dữ liệu thông báo (nếu cần)
+    Log::info('MoMo Notify:', $data);
+
+    // Trả về phản hồi thành công cho MoMo
+    return response()->json(['status' => 'success']);
+}  
+
+
+
 }

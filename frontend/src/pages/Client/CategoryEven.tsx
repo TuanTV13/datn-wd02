@@ -15,8 +15,9 @@ const CategoryEven = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
 
-  const { categories, fetchEventsByCategory } = useContext(CategoryCT);
-  const { events, provinces } = useContext(EventCT);
+  const { categories, fetchEventsByCategory, events, setEvents } =
+    useContext(CategoryCT);
+  const { provinces } = useContext(EventCT);
 
   // Function to toggle category menu
   const toggleCategory = () => {
@@ -32,10 +33,11 @@ const CategoryEven = () => {
   const navigate = useNavigate();
   const handleCategoryClick = async (id: number | string) => {
     await fetchEventsByCategory(id);
+    console.log(events);
     navigate(`/event-category/${id}`);
   };
 
-  const [filteredEvents, setFilteredEvents] = useState(events); // Sự kiện đã lọc
+  // const [filteredEvents, setEvents] = useState(events); // Sự kiện đã lọc
   const location = useLocation();
   const [start_time, setStart_time] = useState(""); // Ngày bắt đầu
   const [end_time, setEnd_time] = useState(""); // Ngày kết thúc
@@ -48,7 +50,7 @@ const CategoryEven = () => {
         end_time: endTime,
       });
       console.log("API Response:", response);
-      setFilteredEvents(response.data.data.data);
+      setEvents(response.data.data.data);
     } catch (error) {
       console.log(error);
     }
@@ -57,6 +59,8 @@ const CategoryEven = () => {
   const handleApplyFilters = () => {
     if (start_time && end_time) {
       const params = new URLSearchParams(location.search);
+      params.delete("province");
+      params.delete("query");
       params.set("start_time", start_time);
       params.set("end_time", end_time);
       navigate(`?${params.toString()}`);
@@ -77,7 +81,7 @@ const CategoryEven = () => {
       fetchEventsByDate(startTime, endTime);
     }
     if (province) {
-      fetchEventsByProvince(province).then((data) => setFilteredEvents(data));
+      fetchEventsByProvince(province).then((data) => setEvents(data));
     }
   }, [location.search]);
 
@@ -85,7 +89,7 @@ const CategoryEven = () => {
     navigate("/event-list");
     setStart_time("");
     setEnd_time("");
-    setFilteredEvents(events);
+    setEvents(events);
   };
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -98,13 +102,16 @@ const CategoryEven = () => {
   const handleProvinceClick = async (Inputlocation: any) => {
     setSelectedProvince(Inputlocation);
     const params = new URLSearchParams(location.search);
+    params.delete("query");
+    params.delete("start_time");
+    params.delete("end_time");
     params.set("province", Inputlocation);
     navigate(`?${params.toString()}`);
     try {
       const data = await fetchEventsByProvince(Inputlocation);
-      setFilteredEvents(data); // Cập nhật danh sách sự kiện
+      setEvents(data); // Cập nhật danh sách sự kiện
     } catch (err) {
-      setFilteredEvents([]); // Xóa danh sách sự kiện cũ
+      setEvents([]); // Xóa danh sách sự kiện cũ
     }
   };
   const [Inputlocation, setLocation] = useState("");
@@ -280,60 +287,68 @@ const CategoryEven = () => {
           <div className="border-b-[1px] border-gray-300 mb-4"></div>
           {/* <!-- Items --> */}
           <div className="space-y-4 ">
-            {filteredEvents.map((item) => (
-              <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
-                <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
-                  <Link to={`/event-detail/${item.id}`}>
-                    <img
-                      alt={item.name}
-                      className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
-                      src={item.thumbnail}
-                    />
-                  </Link>
-                </div>
-                <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
-                  <div className="mt-2 lg:flex">
-                    <div className="flex flex-col justify-between lg:w-2/3">
-                      <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer">
-                        <Link to={`/event-detail/${item.id}`}>{item.name}</Link>
-                      </h3>
-                      <div className="flex items-center text-gray-600 mb-2 mt-1">
-                        <i className="fas fa-clock mr-2"></i>
-                        Thời gian bắt đầu: {item.start_time}
-                      </div>
-                      <div className="flex items-center text-gray-600 mb-2 mt-1">
-                        <i className="fas fa-clock mr-2"></i>
-                        Thời gian kết thúc: {item.end_time}
-                      </div>
-                      <div className="flex items-center text-gray-600 mb-2 mt-1">
-                        <i className="fas fa-map-marker-alt mr-2"></i>
-                        Địa điểm: {item.location}
-                      </div>
-                      <div
-                        className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
-                      >
-                        Mô tả: {item.description}
-                      </div>
+            {events.length > 0 ? (
+              events.map((item) => (
+                <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
+                  <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
+                    <Link to={`/event-detail/${item.id}`}>
+                      <img
+                        alt={item.name}
+                        className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
+                        src={item.thumbnail}
+                      />
+                    </Link>
+                  </div>
+                  <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
+                    <div className="mt-2 lg:flex">
+                      <div className="flex flex-col justify-between lg:w-2/3">
+                        <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer">
+                          <Link to={`/event-detail/${item.id}`}>
+                            {item.name}
+                          </Link>
+                        </h3>
+                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                          <i className="fas fa-clock mr-2"></i>
+                          Thời gian bắt đầu: {item.start_time}
+                        </div>
+                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                          <i className="fas fa-clock mr-2"></i>
+                          Thời gian kết thúc: {item.end_time}
+                        </div>
+                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                          <i className="fas fa-map-marker-alt mr-2"></i>
+                          Địa điểm: {item.location}
+                        </div>
+                        <div
+                          className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
+                        >
+                          Mô tả: {item.description}
+                        </div>
 
-                      <Link
-                        to={`/event-detail/${item.id}`}
-                        className="text-blue-500 "
-                      >
-                        Xem thêm
-                      </Link>
-                    </div>
-
-                    <div className="lg:ml-5 lg:mt-28">
-                      <button className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
-                        <Link to={`/event-detail/${item.id}`}>
-                          Xem chi tiết
+                        <Link
+                          to={`/event-detail/${item.id}`}
+                          className="text-blue-500 "
+                        >
+                          Xem thêm
                         </Link>
-                      </button>
+                      </div>
+
+                      <div className="lg:ml-5 lg:mt-28">
+                        <button className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
+                          <Link to={`/event-detail/${item.id}`}>
+                            Xem chi tiết
+                          </Link>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-center text-gray-500 mt-4">
+                Không tìm thấy sự kiện nào phù hợp.
+              </p>
+            )}
           </div>
         </div>
       </div>

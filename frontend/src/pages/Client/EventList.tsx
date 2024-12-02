@@ -48,13 +48,15 @@ const EventListing = () => {
       console.log("API Response:", response);
       setFilteredEvents(response.data.data.data);
     } catch (error) {
-      console.log(error);
+      setFilteredEvents([]);
     }
   };
 
   const handleApplyFilters = () => {
     if (start_time && end_time) {
       const params = new URLSearchParams(location.search);
+      params.delete("query");
+      params.delete("province");
       params.set("start_time", start_time);
       params.set("end_time", end_time);
       navigate(`?${params.toString()}`);
@@ -96,6 +98,9 @@ const EventListing = () => {
   const handleProvinceClick = async (Inputlocation: any) => {
     setSelectedProvince(Inputlocation);
     const params = new URLSearchParams(location.search);
+    params.delete("query");
+    params.delete("start_time");
+    params.delete("end_time");
     params.set("province", Inputlocation);
     navigate(`?${params.toString()}`);
     try {
