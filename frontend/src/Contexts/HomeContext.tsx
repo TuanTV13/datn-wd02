@@ -27,29 +27,45 @@ const HomeContexts = ({ children }: Props) => {
 
     useEffect(() => {
         (async () => {
-          const data = await getHeaderEvents();
-          setHeaderEvents(data);
+          try {
+            const data = await getHeaderEvents();
+            setHeaderEvents(data);
+          } catch (error) {
+            setHeaderEvents([])
+          }
         })();
       }, []);
 
       useEffect(() => {
         (async () => {
-          const data = await getUpcomingEvents();
+          try {
+            const data = await getUpcomingEvents();
           setUpcomingEvents(data);
+          } catch (error) {
+            setUpcomingEvents([])
+          }
         })();
       }, []);
 
       useEffect(() => {
         (async () => {
-            const data = await getFeaturedEvents();
+            try {
+              const data = await getFeaturedEvents();
             setFeaturedEvents(data);
+            } catch (error) {
+              setFeaturedEvents([])
+            }
         })();
       }, []);
 
       useEffect(() => {
         (async () => {
-            const data = await getTopRatedEvents();
+            try {
+              const data = await getTopRatedEvents();
             setTopRatedEvents(data);
+            } catch (error) {
+              setTopRatedEvents([])
+            }
         })();
       }, []);
     return (
