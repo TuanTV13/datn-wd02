@@ -35,6 +35,7 @@ import RatingList from "./pages/Admin/Rating/RatingList";
 import AddRating from "./pages/Admin/Rating/AddRating";
 import SearchEvent from "./pages/Client/SearchEvent";
 import ListTicketDelete from "./pages/Admin/Tickets/ListTicketDelete";
+import Dashboard from "./pages/Admin/Dashboard/Dashboard";
 
 function App() {
   const route = useRoutes([
@@ -60,7 +61,9 @@ function App() {
     {
       path: "admin",
       element: <LayoutAdmin />,
-      children: [{ path: "ticket-list", element: <ListTicket /> },
+      children: [
+        { path: "", element: <Dashboard /> },
+        { path: "ticket-list", element: <ListTicket /> },
         { path: "ticket-list-user", element: <ListUserBuyTicket /> },
         { path: "add-ticket", element: <AddTicket /> },
         { path: "edit-ticket/:id", element: <EditTicket /> },
