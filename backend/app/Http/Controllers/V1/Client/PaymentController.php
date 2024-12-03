@@ -76,13 +76,12 @@ class PaymentController extends Controller
         $ticket_id = $request->input('ticket_id');
 
         $ticket = $this->ticketRepository->find($ticket_id);
-            if (!$ticket) {
-                return response()->json(['message' => 'Vé không tồn tại'], 404);
-            }
+        if (!$ticket) {
+            return response()->json(['message' => 'Vé không tồn tại'], 404);
+        }
 
         $totalAmount = $ticket->price;
 
-        // BEGIN
         DB::beginTransaction();
         try {
 
@@ -92,11 +91,27 @@ class PaymentController extends Controller
                 $user = Auth::user();
             } else {
                 // Nếu người dùng chưa đăng nhập, tạo mới người dùng từ dữ liệu trong request
-                $validatedData = $request->validate([
-                    'name' => 'required',
-                    'email' => 'required|email',
-                    'phone' => 'required'
-                ]);
+                try {
+                    // Kiểm tra dữ liệu gửi lên có hợp lệ hay không
+                    $validatedData = $request->validate([
+                        'name' => 'required',
+                        'email' => 'required|email',
+                        'phone' => 'required'
+                    ], [
+                        'name.required' => 'Vui lòng nhập họ tên',
+                        'email.required' => 'Vui lòng nhập email',
+                        'email.email' => 'Email không hợp lệ',
+                        'phone.required' => 'Vui lòng nhập số điện thoại'
+                    ]);
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    // Trả về phản hồi JSON khi có lỗi xác thực
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Dữ liệu không hợp lệ',
+                        'errors' => $e->errors()
+                    ], 422); 
+                }
+
                 $user = $this->userRepository->create($validatedData);
             }
 
@@ -104,7 +119,6 @@ class PaymentController extends Controller
                 'payment_method' => 'required|string|in:cash,paypal,vnpay',
                 'discount_code' => 'nullable|string'
             ]);
-
 
             // Mã vé
             $ticketCode = strtoupper(uniqid('TICKET-'));
@@ -272,25 +286,16 @@ class PaymentController extends Controller
 
     public function handleReturn(Request $request)
     {
-        // Lấy các tham số từ query string
         $responseCode = $request->input('vnp_ResponseCode');
         $transaction_id = $request->input('transaction_id');
-        // dd($transaction_id);
+
         // Ghi log để kiểm tra request trả về
         Log::info('VNPay handleReturn called', ['request' => $request->all()]);
         Log::info('Session data:', session()->all());
 
         // Kiểm tra mã phản hồi (vnp_ResponseCode) có phải 00 không
         if ($responseCode == '00') {
-            // dd($responseCode);
-            // Kiểm tra session có lưu transaction_id không
-            // $transactionId = session('transaction_id');
-    
-            // if (!$transaction_id) {
-            //     Log::error('Không tìm thấy transaction_id trong session.');
-            //     return response()->json(['message' => 'Không tìm thấy mã giao dịch'], 400);
-            // }
-    
+
             // Tìm giao dịch theo ID
             $transaction = Transaction::find($transaction_id);
 
@@ -298,12 +303,12 @@ class PaymentController extends Controller
                 Log::error('Không tìm thấy giao dịch với ID: ' . $transaction_id);
                 return response()->json(['message' => 'Giao dịch không tồn tại'], 404);
             }
-            // dd($transaction->status);
+
             if ($responseCode == "00" && $transaction->status == "pending") {
                     $transaction->status = 'completed';
                     $transaction->save();
         
-                    // Giảm số lượng vé nếu cần
+                    // Giảm số lượng vé
                     $ticket = Ticket::find($transaction->ticket_id);
                     if ($ticket) {
                         $ticket->decrement('available_quantity', 1);
@@ -397,5 +402,3 @@ class PaymentController extends Controller
         return response()->json(['status' => 'success']);
     }  
 }
-
-

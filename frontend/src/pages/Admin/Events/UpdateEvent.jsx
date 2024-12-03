@@ -21,7 +21,7 @@ const UpdateEvent = () => {
   useEffect(() => {
     // Lấy thông tin sự kiện từ API
     axios
-      .get(`http://192.168.2.112:8000/api/v1/events/${id}/show`, { headers })
+      .get(`http://127.0.0.1:8000/api/v1/events/${id}/show`, { headers })
       .then((response) => {
         const event = response.data.data.event;
        
@@ -77,7 +77,7 @@ const UpdateEvent = () => {
  
    try {
      const result = await axios.put(
-       `http://192.168.2.112:8000/api/v1/events/${id}/update`,
+       `http://127.0.0.1:8000/api/v1/events/${id}/update`,
        formattedData, // Gửi dữ liệu dạng JSON
        { 
          headers: {
