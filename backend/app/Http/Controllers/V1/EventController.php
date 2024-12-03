@@ -357,4 +357,20 @@ class EventController extends Controller
         $user->save();
         return response()->json(['message' => 'Check-in thành công']);
     }
+
+    public function cancelCheckIn($eventId, Request $request)
+    {
+        $ticketCode = $request->input('ticket_code');
+        $event = $this->eventRepository->find($eventId);
+
+        // if (!$event) {
+        //     return response()->json(['message' => 'Sự kiện không tồn tại'], 404);
+        // }
+
+        $user = EventUser::where('ticket_code', $ticketCode)->first();
+        $user->checked_in = 0;
+        $user->save();
+        return response()->json(['message' => 'Check-in thành công']);
+    }
+
 }
