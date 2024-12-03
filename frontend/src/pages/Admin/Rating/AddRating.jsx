@@ -35,7 +35,7 @@ const AddRating = () => {
     // Cấu trúc dữ liệu body theo yêu cầu API
     const requestBody = {
       event_id: formData.event_id,
-      user_id: localStorage.getItem("id"),
+      user_id: localStorage.getItem("user_id"),
       rating: formData.rating,
       feedback: formData.feedback,
       suggestions: formData.suggestions,

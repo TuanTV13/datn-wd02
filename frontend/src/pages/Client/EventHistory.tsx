@@ -71,12 +71,12 @@ const EventHistory = ({id}: {id: number}) => {
                     <td className="border border-gray-400 p-2 text-center">
                       {indexOfFirstEvent + index + 1}
                     </td>
-                    <td className="border border-gray-400 p-2 text-center">{item.event_name}</td>
-                    <td className="border border-gray-400 p-2 text-center">{item.event_date}</td>
+                    <td className="border border-gray-400 p-2 text-center">{item.name}</td>
+                    <td className="border border-gray-400 p-2 text-center">{item.start_time}</td>
                     <td className="border border-gray-400 p-2 text-center">{item.location}</td>
                     <td className="border border-gray-400 p-2 text-center">
                       <img
-                        src={item.thumbanail}
+                        src={item.thumbnail}
                         alt="Event"
                         className="w-12 h-auto mx-auto"
                       />

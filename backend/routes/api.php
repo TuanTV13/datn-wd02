@@ -1,6 +1,6 @@
 <?php
 
-
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
@@ -19,8 +19,8 @@ use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
 use App\Http\Controllers\v1\VNPayController;
 use App\Http\Controllers\V1\VoucherController;
-use App\Http\Services\Payments\VNPayService;
 use App\Http\Services\Payments\ZaloPayService;
+use App\Http\Services\VNPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -57,10 +57,10 @@ Route::prefix('v1')->group(function () {
 
     Route::get('user/profile', [AuthController::class, 'me']);
 
-    // Route cập nhật thông tin tài khoản người dùng
+    // Route cập nhật thông tin tài khoản
     Route::put('user/update-profile/{id}', [AuthController::class, 'updateProfile']);
 
-    // Route cập nhật mật khẩu
+    // Route thay đổi mật khẩu
     Route::put('user/change-password/{id}', [AuthController::class, 'changePassword']);
 
     Route::get('events', [EventController::class, 'index']);
@@ -94,11 +94,8 @@ Route::prefix('v1')->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
 
     Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-event-categories'])->group(function () {
-        // Thêm mới danh mục loại sự kiện
         Route::post('create', [CategoryController::class, 'create']);
-        // Cập nhật loại sự kiện
         Route::put('{id}/update', [CategoryController::class, 'update']);
-        // Xóa loại sự kiện
         Route::delete('{id}/delete', [CategoryController::class, 'delete']);
     });
 
@@ -180,16 +177,17 @@ Route::prefix('v1')->group(function () {
             Route::get('/top-revenue', [StatisticsController::class, 'topRevenueEvents']);
 
             // Route để lấy thống kê số sự kiện hoàn thành trong khoảng thời gian
-            Route::get('/event-statistics', [StatisticsController::class, 'getEventStatistics']);
+            Route::get('/event-statistics', [StatisticsController::class, 'getEventStatisticsByTime']);
 
             // Route để lấy thống kê sự kiện theo thể loại (chỉ sự kiện đã được xác nhận)
-            Route::get('/statistics-by-category', [StatisticsController::class, 'getStatisticsByEventType']);
+            Route::get('/statistics-by-category', [StatisticsController::class, 'getEventCountTotalAmountAndPercentageByEventType']);
 
             // Route để lấy thống kê sự kiện theo tỉnh/thành phố (chỉ sự kiện đã được xác nhận)
-            Route::get('/statistics-by-province', [StatisticsController::class, 'getStatisticsByProvince']);
+            Route::get('/statistics-by-province', [StatisticsController::class, 'getEventCountTotalAmountAndPercentageByProvince']);
 
             // Route để lấy danh sách các sự kiện có số lượng người tham gia cao nhất trong khoảng thời gian
             Route::get('/top-participants', [StatisticsController::class, 'topParticipantsEvents']);
+
 
             // Route để lấy thống kê số sự kiện đã xác nhận và bị hủy bỏ trong khoảng thời gian
             Route::get('/event-status-statistics', [StatisticsController::class, 'getEventStatusStatistics']);
@@ -197,7 +195,20 @@ Route::prefix('v1')->group(function () {
             // Route để lấy doanh thu và số lượng người tham gia của các sự kiện trong khoảng thời gian
             Route::get('/event-revenue-participants', [StatisticsController::class, 'getEventRevenueAndParticipants']);
         });
+
+
+        // Lấy danh sách giao dịch
+        Route::get('/transactions', [TransactionController::class, 'getTransactionHistory']);
+
+        // Lấy giao dịch theo ID
+        Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
     });
 });
 
 Route::post('/vnpay/return', [PaymentController::class, 'handleVNPayResponse']);
+
+Route::get('/return-momo', [PaymentController::class, 'paymentSuccess']);
+Route::post('/notify-momo', [PaymentController::class, 'notifyMomo']);
+
+
+Route::post('/upload-image', [ImageController::class, 'upload']);

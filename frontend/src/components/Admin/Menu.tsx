@@ -57,15 +57,6 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
           defaultSelectedKeys={[getSelectedKey()]}
           items={[
             {
-              key: "1",
-              icon: (
-                <Tooltip title={!collapsed ? "" : "Bảng điều khiển"}>
-                  <TfiDashboard />
-                </Tooltip>
-              ),
-              label: <Link to="/admin">Bảng điều khiển</Link>,
-            },
-            {
               key: "2",
               icon: (
                 <Tooltip title={!collapsed ? "" : "Quản lý người dùng"}>
@@ -156,6 +147,15 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
                 //   ),
                 // },
               ],
+            },
+            {
+              key: "1",
+              icon: (
+                <Tooltip title={!collapsed ? "" : "Bảng điều khiển"}>
+                  <TfiDashboard />
+                </Tooltip>
+              ),
+              label: <Link to="/admin">Bảng Thống Kê</Link>,
             },
             {
               key: "6",

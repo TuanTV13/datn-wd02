@@ -18,7 +18,7 @@ const SearchEvent = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const { categories, fetchEventsByCategory } = useContext(CategoryCT);
-  const { events, setEvents, provinces } = useContext(EventCT);
+  const { events,setEvents, provinces } = useContext(EventCT);
 
   // Function to toggle category menu
   const toggleCategory = () => {
@@ -58,6 +58,8 @@ const SearchEvent = () => {
   const handleApplyFilters = () => {
     if (start_time && end_time) {
       const params = new URLSearchParams(location.search);
+      params.delete("query");
+      params.delete("province");
       params.set("start_time", start_time);
       params.set("end_time", end_time);
       navigate(`?${params.toString()}`);
@@ -99,6 +101,9 @@ const SearchEvent = () => {
   const handleProvinceClick = async (Inputlocation: any) => {
     setSelectedProvince(Inputlocation);
     const params = new URLSearchParams(location.search);
+    params.delete("query");
+    params.delete("start_time");
+    params.delete("end_time");
     params.set("province", Inputlocation);
     navigate(`?${params.toString()}`);
     try {
@@ -123,7 +128,7 @@ const SearchEvent = () => {
       api
         .post("/clients/events/search", { name: searchTerm }) // Gửi request với từ khóa
         .then((response) => {
-          setEvents(response.data.data.data);
+          setFilteredEvents(response.data.data.data);
         })
         .catch((err) => {
           console.log(
@@ -292,8 +297,8 @@ const SearchEvent = () => {
           <div className="border-b-[1px] border-gray-300 mb-4"></div>
           {/* <!-- Items --> */}
           <div className="space-y-4 ">
-            {events.length > 0 ? (
-              events.map((item) => (
+            {filteredEvents.length > 0 ? (
+              filteredEvents.map((item) => (
                 <div
                   key={item.id}
                   className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]"

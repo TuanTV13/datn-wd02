@@ -26,6 +26,11 @@ const EditTicket = () => {
   }, []);
 
   const { events } = useContext(EventCT);
+  // Lấy tên sự kiện từ danh sách sự kiện
+  const getEventName = (eventId: number) => {
+    const event = events.find((e) => e.id === eventId);
+    return event ? event.name : "Không xác định";
+  };
   const [ticketTypesList] = useState(Object.values(TicketType));
   // Lấy thông tin ticket khi component được render
   useEffect(() => {
@@ -65,15 +70,50 @@ const EditTicket = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+      <div className="bg-white p-6 shadow-md rounded-lg">
+        <h1 className="text-2xl font-bold mb-4">Thông tin vé</h1>
+        {ticket ? (
+          <ul className="mt-4 list-disc list-inside text-gray-700">
+            <li className="mb-3">
+              <strong>Sự kiện:</strong> {ticket ? getEventName(ticket.event_id) : "Đang tải..."}
+            </li>
+            <li className="mb-3">
+              <strong>Loại vé:</strong> {ticket.ticket_type}
+            </li>
+            <li className="mb-3">
+              <strong>Giá:</strong> {ticket.price} VND
+            </li>
+            <li className="mb-3">
+              <strong>Vị trí:</strong> {ticket.seat_location || "N/A"}
+            </li>
+            <li className="mb-3">
+              <strong>Số lượng:</strong> {ticket.quantity}
+            </li>
+            <li className="mb-3">
+              <strong>Ngày bắt đầu:</strong>{" "}
+              {dayjs(ticket.sale_start).format("DD/MM/YYYY")}
+            </li>
+            <li className="mb-3">
+              <strong>Ngày kết thúc:</strong>{" "}
+              {dayjs(ticket.sale_end).format("DD/MM/YYYY")}
+            </li>
+            <li className="mb-3">
+              <strong>Mô tả:</strong> {ticket.description || "Không có mô tả"}
+            </li>
+          </ul>
+        ) : (
+          <p className="text-gray-500">Đang tải thông tin vé...</p>
+        )}
+      </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="max-w mx-auto p-6 bg-white shadow-md rounded-lg"
       >
-        <h2 className="text-2xl font-bold text-center mb-5">Cập nhật vé</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <h2 className="text-2xl font-bold text-center mb-4">Cập nhật vé</h2>
+        <div className="grid-cols-1 sm:grid-cols-2 gap-6 ">
           {/* Trường sự kiện */}
-          <div>
+          <div className="mb-3">
             <label
               htmlFor="event"
               className="block text-sm font-medium text-gray-700"
@@ -99,7 +139,7 @@ const EditTicket = () => {
           </div>
 
           {/* Trường loại vé */}
-          <div>
+          <div className="mb-3">
             <label
               htmlFor="ticket-type"
               className="block text-sm font-medium text-gray-700"
@@ -124,7 +164,7 @@ const EditTicket = () => {
             )}
           </div>
           {/* Trường giá vé */}
-          <div>
+          <div className="mb-3">
             <label
               htmlFor="ticket-price"
               className="block text-sm font-medium text-gray-700"
@@ -143,7 +183,7 @@ const EditTicket = () => {
           </div>
 
           {/* Trường vị trí */}
-          <div>
+          <div className="mb-3">
             <label
               htmlFor="seat_location"
               className="block text-sm font-medium text-gray-700"
@@ -163,7 +203,7 @@ const EditTicket = () => {
           </div>
 
           {/* Trường số lượng vé */}
-          <div>
+          <div className="mb-3">
             <label
               htmlFor="quantity"
               className="block text-sm font-medium text-gray-700"
@@ -182,7 +222,7 @@ const EditTicket = () => {
           </div>
 
           {/* Trường ngày bắt đầu */}
-          <div>
+          <div className="mb-3">
             <label
               htmlFor="sale_start"
               className="block text-sm font-medium text-gray-700"
@@ -202,7 +242,7 @@ const EditTicket = () => {
           </div>
 
           {/* Trường ngày kết thúc */}
-          <div>
+          <div className="mb-3">
             <label
               htmlFor="sale_end"
               className="block text-sm font-medium text-gray-700"
@@ -221,7 +261,7 @@ const EditTicket = () => {
           </div>
 
           {/* Trường mô tả */}
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 mb-3">
             <label
               htmlFor="description"
               className="block text-sm font-medium text-gray-700"
