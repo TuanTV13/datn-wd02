@@ -309,7 +309,13 @@ const DetailEvents = () => {
       {/* Popup hiển thị Vé */}
 {/* Popup hiển thị Vé */}
 {showTickets && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+  onClick={(e) => {
+    // Kiểm tra nếu click không nằm trong nội dung popup
+    if (e.target === e.currentTarget) {
+      setShowTickets(false);
+    }
+  }}>
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[90vh] overflow-auto">
       <h2 className="text-2xl font-semibold mb-4 text-center">Thông tin Vé</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -367,7 +373,13 @@ const DetailEvents = () => {
 
       {/* Popup hiển thị Người dùng */}
       {showUsers && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+  onClick={(e) => {
+    // Kiểm tra nếu click không nằm trong nội dung popup
+    if (e.target === e.currentTarget) {
+      setShowUsers(false);
+    }
+  }}>
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[80vh] overflow-auto">
       <h2 className="text-2xl font-semibold mb-4 text-center">Người đã mua vé</h2>
       <div className="overflow-x-auto">
@@ -404,7 +416,7 @@ const DetailEvents = () => {
                   <td className="border border-gray-300 px-4 py-2 text-center">
                     <button
                       onClick={() => handleCheckInToggle(user)}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
                         user.pivot.checked_in === 1
                           ? "bg-red-500 text-white hover:bg-red-600"
                           : "bg-green-500 text-white hover:bg-green-600"

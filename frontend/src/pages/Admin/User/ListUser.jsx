@@ -33,9 +33,9 @@ const ListClient = () => {
           province_id: 1,
           district_id: 1,
           ward_id: 1,
-          image: client.image || "link_image_default.jpg",
+         
           email_verified_at: client.email_verified_at,
-          gender: "Chưa xác định",
+          
           status: client.deleted_at ? "Đã xóa" : "Đang hoạt động",
         }));
         setClients(formattedClients);
@@ -59,7 +59,7 @@ const ListClient = () => {
         "Quận/Huyện": client.district_id,
         "Phường/Xã": client.ward_id,
         "Ngày xác thực email": client.email_verified_at,
-        "Giới tính": client.gender,
+       
         "Trạng thái": client.status,
       })
     );
@@ -162,7 +162,7 @@ const ListClient = () => {
             onClick={toggleDeletedClients}
             className="bg-blue-500 text-white px-4 py-2 rounded-[10px]"
           >
-            {showDeletedClients ? "Danh sách người dùng" : "người dùng đã xóa"}
+            {showDeletedClients ? "Danh sách người dùng" : "Người dùng đã xóa"}
           </button>
           <button
             onClick={exportToExcel}
@@ -246,33 +246,43 @@ const ListClient = () => {
         >
           <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
             <h2 className="text-2xl font-bold mb-4">Chi tiết người dùng</h2>
-            <div>
-              <p>
-                <strong>Tên:</strong> {selectedClient.name}
-              </p>
-              <p>
-                <strong>Email:</strong> {selectedClient.email}
-              </p>
-              <p>
-                <strong>Số điện thoại:</strong> {selectedClient.phone}
-              </p>
-              <p>
-                <strong>Địa chỉ:</strong> {selectedClient.address}
-              </p>
-              <p>
-                <strong>Ảnh:</strong> {selectedClient.image}
-              </p>
-              <p>
-                <strong>Ngày xác thực email:</strong>{" "}
-                {selectedClient.email_verified_at}
-              </p>
-              <p>
-                <strong>Giới tính:</strong> {selectedClient.gender}
-              </p>
-              <p>
-                <strong>Trạng thái:</strong> {selectedClient.status}
-              </p>
-            </div>
+            <table className="min-w-full table-auto border border-gray-700">
+          <thead className="bg-gray-100 text-left">
+            <tr>
+              <th className="p-2 border border-gray-300">Thứ tự</th>
+              <th className="p-2 border border-gray-300">Thông tin</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            <tr>
+              <td className="p-2 border border-gray-300">Tên</td>
+              <td className="p-2 border border-gray-300">{selectedClient.name}</td>
+            </tr>
+            <tr>
+              <td className="p-2 border border-gray-300">Email</td>
+              <td className="p-2 border border-gray-300">{selectedClient.email}</td>
+            </tr>
+            <tr>
+              <td className="p-2 border border-gray-300">Số điện thoại</td>
+              <td className="p-2 border border-gray-300">{selectedClient.phone}</td>
+            </tr>
+            <tr>
+              <td className="p-2 border border-gray-300">Địa chỉ</td>
+              <td className="p-2 border border-gray-300">{selectedClient.address}</td>
+            </tr>
+            <tr>
+              <td className="p-2 border border-gray-300">Trạng thái</td>
+              <td className="p-2 border border-gray-300">{selectedClient.status}</td>
+            </tr>
+            <tr>
+              <td className="p-2 border border-gray-300">Ngày xác thực email</td>
+              <td className="p-2 border border-gray-300">
+                {selectedClient.email_verified_at || "Chưa xác thực"}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      
             <button
               onClick={closeModal}
               className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
@@ -284,64 +294,11 @@ const ListClient = () => {
       )}
 
       {/* Modal chỉnh sửa người dùng */}
-      {editModalIsOpen && (
-        <Modal
-          isOpen={editModalIsOpen}
-          onRequestClose={closeEditModal}
-          ariaHideApp={false}
-          className="fixed inset-0 flex items-center justify-center z-50"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50"
-        >
-          <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
-            <h2 className="text-2xl font-bold mb-4">Chỉnh sửa người dùng</h2>
-            <form>
-              <label className="block text-gray-700">Tên</label>
-              <input
-                type="text"
-                name="name"
-                value={editFormData?.name || ""}
-                onChange={handleEditChange}
-                className="border rounded w-full px-3 py-2 mb-4"
-              />
-              <label className="block text-gray-700">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={editFormData?.email || ""}
-                onChange={handleEditChange}
-                className="border rounded w-full px-3 py-2 mb-4"
-              />
-              <label className="block text-gray-700">Số điện thoại</label>
-              <input
-                type="text"
-                name="phone"
-                value={editFormData?.phone || ""}
-                onChange={handleEditChange}
-                className="border rounded w-full px-3 py-2 mb-4"
-              />
-              <label className="block text-gray-700">Địa chỉ</label>
-              <input
-                type="text"
-                name="address"
-                value={editFormData?.address || ""}
-                onChange={handleEditChange}
-                className="border rounded w-full px-3 py-2 mb-4"
-              />
-              <button
-                type="button"
-                onClick={handleSaveEdit}
-                className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
-              >
-                Lưu
-              </button>
-            </form>
-          </div>
-        </Modal>
-      )}
-
+    
       {/* Modal xác nhận xóa người dùng */}
       {confirmDeleteClientId && (
         <Modal
+        
           isOpen={confirmModalIsOpen}
           onRequestClose={closeConfirmModal}
           ariaHideApp={false}

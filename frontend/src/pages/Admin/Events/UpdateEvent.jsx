@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-
+import { useNavigate } from "react-router-dom";
 const UpdateEvent = () => {
+  const navigate = useNavigate();
   const { id } = useParams(); // Lấy id từ URL
   const [formData, setFormData] = useState({
     start_time: "",
@@ -141,10 +142,18 @@ const UpdateEvent = () => {
           />
         </div>
       </div>
-
-      <button type="submit" className="btn btn-success" disabled={loading}>
+      <div className="flex justify-between">
+      <button type="submit"  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300" disabled={loading}>
         {loading ? "Đang cập nhật..." : "Lưu sự kiện"}
       </button>
+      <button
+              type="button"
+              onClick={() => navigate("/admin/event-list")}
+              className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-300"
+            >
+              Quay lại danh sách
+            </button>
+      </div>
     </form>
     <ToastContainer/>
     </div>

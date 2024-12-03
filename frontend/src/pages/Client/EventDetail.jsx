@@ -218,6 +218,14 @@ const EventDetail = () => {
                   Mua vé
                 </button>
               )}
+              {event.status !== 'ongoing' && (
+                <button
+                  onClick={() => setShowPopup(true)}
+                  className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
+                >
+                  Mua vé
+                </button>
+              )}
               {event.status === 'checkin' && (
                 <button
                   onClick={handleCheckIn}
