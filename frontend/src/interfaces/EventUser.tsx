@@ -1,8 +1,8 @@
 export interface EventUser {
   id: number;
-  event_name: string
-  event_date: string
+  name: string
+  start_time: string
   location: string
-  thumbanail: string
+  thumbnail: string
   status: string
 }
