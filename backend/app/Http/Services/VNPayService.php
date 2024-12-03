@@ -2,10 +2,7 @@
 
 namespace App\Http\Services;
 
-use App\Events\TransactionVerified;
-use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class VNPayService
 {
@@ -76,57 +73,55 @@ class VNPayService
         ]);
     }
 
-    public function return(Request $request)
-    {
-        // Ghi log vào file để kiểm tra xem hàm có được gọi không
-        Log::info('VNPay return function called', ['request' => $request->all()]);
+    // public function return(Request $request)
+    // {
+    //     // Ghi log vào file để kiểm tra xem hàm có được gọi không
+    //     Log::info('VNPay return function called', ['request' => $request->all()]);
     
-        $url = session('url_prev', '/');
-        $vnp_SecureHash = $request->vnp_SecureHash;
-        $vnp_HashSecret = env('VNPAY_HASH_SECRET');
-        $inputData = $request->except('vnp_SecureHash'); 
-        $vnp_ResponseCode = $request->query('vnp_ResponseCode');
+    //     $url = session('url_prev', '/');
+    //     $vnp_SecureHash = $request->vnp_SecureHash;
+    //     $vnp_HashSecret = env('VNPAY_HASH_SECRET');
+    //     $inputData = $request->except('vnp_SecureHash'); 
+    //     $vnp_ResponseCode = $request->query('vnp_ResponseCode');
     
-        ksort($inputData);
-        $hashData = "";
-        foreach ($inputData as $key => $value) {
-            $hashData .= ($hashData ? '&' : '') . $key . '=' . $value;
-        }
+    //     ksort($inputData);
+    //     $hashData = "";
+    //     foreach ($inputData as $key => $value) {
+    //         $hashData .= ($hashData ? '&' : '') . $key . '=' . $value;
+    //     }
     
-        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+    //     $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
     
-        if ($secureHash === $vnp_SecureHash) {
-            if ($vnp_ResponseCode == "00") {
-                $transactionId = session('transaction_id');
-                $transaction = Transaction::find($transactionId);
+    //     if ($secureHash === $vnp_SecureHash) {
+    //         if ($vnp_ResponseCode == "00") {
+    //             $transactionId = session('transaction_id');
+    //             $transaction = Transaction::find($transactionId);
                 
-                if ($transaction) {
-                    $transaction->status = 'completed';
-                    $transaction->vnp_TransactionNo = $request->vnp_TransactionNo;
-                    $transaction->vnp_BankCode = $request->vnp_BankCode;
-                    $transaction->vnp_PayDate = $request->vnp_PayDate;
-                    $transaction->save();
+    //             if ($transaction) {
+    //                 $transaction->status = 'completed';
+    //                 $transaction->vnp_TransactionNo = $request->vnp_TransactionNo;
+    //                 $transaction->vnp_BankCode = $request->vnp_BankCode;
+    //                 $transaction->vnp_PayDate = $request->vnp_PayDate;
+    //                 $transaction->save();
     
-                    event(new TransactionVerified($transaction));
+    //                 event(new TransactionVerified($transaction));
     
-                    // Ghi log sau khi giao dịch thành công
-                    Log::info('Transaction completed', ['transaction' => $transaction]);
+    //                 // Ghi log sau khi giao dịch thành công
+    //                 Log::info('Transaction completed', ['transaction' => $transaction]);
     
-                    return redirect($url)->with('success', 'Thanh toán thành công và giao dịch đã được xử lý.');
-                }
-            } else {
-                // Ghi log nếu giao dịch không thành công
-                Log::error('Transaction failed', ['response_code' => $request->vnp_ResponseCode]);
+    //                 return redirect($url)->with('success', 'Thanh toán thành công và giao dịch đã được xử lý.');
+    //             }
+    //         } else {
+    //             // Ghi log nếu giao dịch không thành công
+    //             Log::error('Transaction failed', ['response_code' => $request->vnp_ResponseCode]);
     
-                return redirect($url)->with('error', 'Giao dịch không thành công. Mã lỗi: ' . $request->vnp_ResponseCode);
-            }
-        } else {
-            // Ghi log nếu xác thực chữ ký không thành công
-            Log::error('SecureHash verification failed');
+    //             return redirect($url)->with('error', 'Giao dịch không thành công. Mã lỗi: ' . $request->vnp_ResponseCode);
+    //         }
+    //     } else {
+    //         // Ghi log nếu xác thực chữ ký không thành công
+    //         Log::error('SecureHash verification failed');
     
-            return redirect($url)->with('error', 'Xác thực chữ ký không thành công.');
-        }
-    }
+    //         return redirect($url)->with('error', 'Xác thực chữ ký không thành công.');
+    //     }
+    // }
 }
-
-
