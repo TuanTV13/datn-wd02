@@ -76,6 +76,7 @@ Route::prefix('v1')->group(function () {
         Route::get('statistics/top-revenue-events', [StatisticsController::class, 'topRevenueEvents']); // Thống kê trong khoảng thời gian chọn
         Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng
         Route::put('changeStatus/{id}', [EventController::class, 'changeStatus']);
+        Route::put('{eventId}/checkin', [EventController::class, 'checkIn']);
 
     });
 

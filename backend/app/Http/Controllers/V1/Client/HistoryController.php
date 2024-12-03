@@ -29,19 +29,9 @@ class HistoryController extends Controller
         }
     
         $participationHistory = $user->events()
-            ->where('checked_in', true)  
-            ->select('events.id', 'events.name', 'events.start_time', 'events.location', 'events.thumbnail', 'events.status') 
-            ->distinct()
-            ->get()
-            ->map(function ($event) {
-                return [
-                    'event_name' => $event->name,
-                    'event_date' => $event->start_time, 
-                    'location' => $event->location,
-                    'thumbanail' => $event->thumbnail, 
-                    'status' => $event->status,
-                ];
-            });
+            ->wherePivot('checked_in', true) 
+            ->select('events.id', 'events.name', 'events.start_time', 'events.location', 'events.thumbnail', 'events.status')
+            ->get();
     
         if ($participationHistory->isEmpty()) {
             return response()->json([

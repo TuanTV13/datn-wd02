@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
 use App\Http\Services\CheckEventIPService;
+use App\Models\EventUser;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
 use Exception;
@@ -141,13 +142,13 @@ class EventController extends Controller
         try {
             $data = $request->validated();
 
-            if ($request->has('speakers') && is_string($request->speakers)) {
-                $data['speakers'] = json_decode($request->speakers, true);
-            } elseif ($request->has('speakers') && is_array($request->speakers)) {
-                $data['speakers'] = json_encode($request->speakers);
-            } else {
-                $data['speakers'] = null;
-            }
+            // if ($request->has('speakers') && is_string($request->speakers)) {
+            //     $data['speakers'] = json_decode($request->speakers, true);
+            // } elseif ($request->has('speakers') && is_array($request->speakers)) {
+            //     $data['speakers'] = json_encode($request->speakers);
+            // } else {
+            //     $data['speakers'] = null;
+            // }
 
             $data['display_header'] ??= 0;
             if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
@@ -307,7 +308,7 @@ class EventController extends Controller
         $result = $this->checkEventIPService->checkEventsWithoutIP();
 
         Log::info('Kết quả kiểm tra sự kiện IP', $result);
-        
+
         return response()->json([
             'status' => $result['status'],
             'message' => $result['message'],
@@ -340,5 +341,20 @@ class EventController extends Controller
         $data = $this->eventRepository->trashed();
 
         return response()->json($data);
+    }
+
+    public function checkIn($eventId, Request $request)
+    {
+        $ticketCode = $request->input('ticket_code');
+        $event = $this->eventRepository->find($eventId);
+
+        // if (!$event) {
+        //     return response()->json(['message' => 'Sự kiện không tồn tại'], 404);
+        // }
+
+        $user = EventUser::where('ticket_code', $ticketCode)->first();
+        $user->checked_in = 1;
+        $user->save();
+        return response()->json(['message' => 'Check-in thành công']);
     }
 }
