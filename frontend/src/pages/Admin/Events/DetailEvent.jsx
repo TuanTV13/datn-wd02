@@ -55,7 +55,7 @@ const DetailEvents = () => {
 
     try {
       await axios.put(
-        `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
+        `http://127.0.0.1:800/api/v1/events/changeStatus/${id}`,
         { status: selectedStatus },
         { headers }
       );
@@ -64,7 +64,7 @@ const DetailEvents = () => {
       // Fetch lại dữ liệu sự kiện
       setLoading(true);
       const response = await axios.get(
-        `http://127.0.0.1:8000/api/v1/events/${id}/show`,
+        `http://127.0.0.1:800/api/v1/events/${id}/show`,
         { headers }
       );
       setEventDetails(response.data);
@@ -74,6 +74,31 @@ const DetailEvents = () => {
       console.error(err);
     }
   };
+  const handleCheckInToggle = (user) => {
+    // Gửi yêu cầu tới backend để cập nhật trạng thái check-in
+    const newStatus = user.pivot.checked_in === 1 ? 0 : 1;
+  
+    fetch(`/api/tickets/${user.id}/check-in`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ checked_in: newStatus }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          // Cập nhật trạng thái check-in trong state users
+          setUsers((prevUsers) =>
+            prevUsers.map((u) =>
+              u.id === user.id ? { ...u, pivot: { ...u.pivot, checked_in: newStatus } } : u
+            )
+          );
+        } else {
+          alert("Không thể cập nhật trạng thái.");
+        }
+      })
+      .catch((error) => console.error("Lỗi khi cập nhật trạng thái:", error));
+  };
+  
   if (loading) return <div className="text-center py-10 text-gray-700">Đang tải...</div>;
   if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
   if (!eventDetails || !eventDetails.data) return <div className="text-center py-10 text-gray-500">Không tìm thấy dữ liệu sự kiện.</div>;
@@ -282,120 +307,139 @@ const DetailEvents = () => {
       </div>
 
       {/* Popup hiển thị Vé */}
-      {/* Popup hiển thị Vé */}
-      {showTickets && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 ">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full h-auto max-h-[80vh] overflow-auto">
-            <h2 className="text-2xl font-semibold mb-4">Thông tin Vé</h2>
-            <div className="space-y-4">
-              {tickets.length > 0 ? (
-                tickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    className="p-4 bg-gray-50 rounded-lg shadow-md"
-                  >
-                    <p className="font-semibold text-gray-800">
-                      Loại vé: {ticket.ticket_type}
-                    </p>
-                    <p className="text-gray-600">Giá: {ticket.price} VND</p>
-                    <p className="text-gray-600">Số lượng: {ticket.quantity}</p>
-                    <p className="text-gray-600">
-                      Khu vực: {ticket.seat_location}
-                    </p>
-                    <p className="text-gray-600">
-                      Ngày mở bán: {new Date(ticket.sale_start).toLocaleString()}
-                    </p>
-                    <p className="text-gray-600">
-                      Ngày kết thúc bán:{" "}
-                      {new Date(ticket.sale_end).toLocaleString()}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">Chưa có thông tin vé</p>
-              )}
-            </div>
-            <br />
-            <hr />
-            <br />
-            <h2 className="text-2xl font-semibold mb-4">Thống kê Vé</h2>
-            <div className="space-y-4">
-
-              <div className="p-4 bg-gray-50 rounded-lg shadow-md">
-                <p className="font-semibold text-gray-800">
-                  Tổng vé đã bán: {data.totalTickets}
-                </p>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-lg shadow-md">
-                <p className="font-semibold text-gray-800">
-                  Vé Thường đã bán: {data.normalTickets} <p> {data.normalPercentage
-                  } % </p>
-                </p>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-lg shadow-md">
-                <p className="font-semibold text-gray-800">
-                  Vé VIP đã bán: {data.vipTickets} <p>{data.vipPercentage
-                  } %</p>
-                </p>
-              </div>
-
-              <br />
-              <hr />
-              <br />
-              <h2 className="text-2xl font-semibold mb-4">Biểu đồ</h2>
-              <div className="flex justify-center mb-6">
-                <Pie data={chartData} />
-              </div>
-            </div>
-            <button
-              onClick={() => setShowTickets(false)}
-              className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+{/* Popup hiển thị Vé */}
+{showTickets && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[90vh] overflow-auto">
+      <h2 className="text-2xl font-semibold mb-4 text-center">Thông tin Vé</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {tickets.length > 0 ? (
+          tickets.map((ticket) => (
+            <div
+              key={ticket.id}
+              className="p-4 bg-gray-50 rounded-lg shadow-md"
             >
-              Đóng
-            </button>
-          </div>
+              <p className="font-semibold text-gray-800">
+                Loại vé: {ticket.ticket_type}
+              </p>
+              <p className="text-gray-600">Giá: {ticket.price} VND</p>
+              <p className="text-gray-600">Số lượng: {ticket.quantity}</p>
+              <p className="text-gray-600">
+                Khu vực: {ticket.seat_location}
+              </p>
+              <p className="text-gray-600">
+                Ngày mở bán: {new Date(ticket.sale_start).toLocaleString()}
+              </p>
+              <p className="text-gray-600">
+                Ngày kết thúc bán:{" "}
+                {new Date(ticket.sale_end).toLocaleString()}
+              </p>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 col-span-2 text-center">
+            Chưa có thông tin vé
+          </p>
+        )}
+      </div>
+
+      <hr className="my-6" />
+
+      <h2 className="text-2xl font-semibold mb-4 text-center">Biểu đồ</h2>
+      <div className="flex justify-center mb-6">
+        <div className="w-1/3 max-w-sm">
+          <Pie data={chartData} />
         </div>
-      )}
+      </div>
+
+      <div className="text-right mt-4">
+        <button
+          onClick={() => setShowTickets(false)}
+          className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+        >
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Popup hiển thị Người dùng */}
       {showUsers && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full h-auto max-h-[80vh] overflow-auto">
-            <h2 className="text-2xl font-semibold mb-4">Người đã mua vé</h2>
-            <div className="grid grid-cols-2 gap-4 max-h-[500px] overflow-y-auto">
-              {users && users.length > 0 ? (
-                users.map((user) => (
-                  <div
-                    key={user.id}
-                    className="p-4 bg-gray-50 rounded-lg shadow-md"
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[90vh] overflow-auto">
+      <h2 className="text-2xl font-semibold mb-4 text-center">Người đã mua vé</h2>
+      <div className="overflow-x-auto">
+        <table className="table-auto w-full border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border border-gray-300 px-4 py-2 text-left">STT</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">ID người dùng</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Mã vé</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Trạng thái check-in</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users && users.length > 0 ? (
+              users.map((user, index) => (
+                <tr key={user.id} className="hover:bg-gray-100">
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                    {index + 1}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                    {user.pivot.user_id}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {user.ticket_code}
+                  </td>
+                  <td
+                    className={`border border-gray-300 px-4 py-2 ${
+                      user.pivot.checked_in === 1 ? "text-green-500" : "text-red-500"
+                    }`}
                   >
-
-                    <p className="font-semibold text-gray-800">Mã vé: {user.ticket_code}</p>
-                    <p className="text-gray-600">Loại vé: {user.pivot.ticket_type}</p>
-                    <p className="text-gray-600">ID người dùng: {user.pivot.user_id
-                    }</p>
-                    <p
-                      className={`text-sm font-medium ${user.pivot.checked_in === 1 ? "text-green-500" : "text-red-500"
-                        }`}
+                    {user.pivot.checked_in === 1 ? "Đã check-in" : "Chưa check-in"}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+                    <button
+                      onClick={() => handleCheckInToggle(user)}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                        user.pivot.checked_in === 1
+                          ? "bg-red-500 text-white hover:bg-red-600"
+                          : "bg-green-500 text-white hover:bg-green-600"
+                      }`}
                     >
-                      {user.pivot.checked_in === 1 ? "Đã check-in" : "Chưa check-in"}
-                    </p>
+                      {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="border border-gray-300 px-4 py-2 text-center text-gray-500"
+                >
+                  Chưa có người mua vé
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="text-right mt-4">
+        <button
+          onClick={() => setShowUsers(false)}
+          className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+        >
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">Chưa có người mua vé</p>
-              )}
-            </div>
-            <button
-              onClick={() => setShowUsers(false)}
-              className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

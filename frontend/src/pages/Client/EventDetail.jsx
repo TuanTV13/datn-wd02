@@ -243,33 +243,37 @@ const EventDetail = () => {
 
         </div>
       </div>
+<br />
+<div className="mt-8 p-8 bg-white rounded-lg shadow-md">
+<h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
 
-      {/* Diễn giả */}
-      {event.speakers && event.speakers.length > 0 && (
-        <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4 text-center">Diễn giả</h2>
-          <ul className="list-none">
-            {event.speakers.map((speaker, index) => (
-              <li key={index} className="flex flex-col items-center mb-8">
-                {speaker.image_url && (
-                  <img
-                    src={speaker.image_url}
-                    alt={speaker.name}
-                    className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 shadow-md mb-4"
-                  />
-                )}
-                <p className="text-lg font-bold">{speaker.name}</p>
-                <p className="text-gray-600">Email: {speaker.email}</p>
-                <p className="text-gray-600">Số điện thoại: {speaker.phone}</p>
-                {speaker.profile && (
-                  <p className="text-gray-500 text-sm italic mt-2">{speaker.profile}</p>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+{event.speakers && event.speakers.length > 0 && (
+  
+<div className="flex flex-wrap justify-center mt-8 gap-6">
+  
+{event.speakers.map((speaker, index) => (
+  <div
+    key={index}
+    className="flex flex-col items-center w-48"
+  >
+    <img
+      src={speaker.image_url}
+      alt={speaker.name}
+      className="w-40 h-40 object-cover rounded-full border-4 border-gray-300"
+    />
+    <p className="mt-4 text-center font-semibold text-lg">{speaker.name}</p>
+    <p className="text-gray-600">Email: {speaker.email}</p>
+    <p className="text-gray-600">Số điện thoại: {speaker.phone}</p>
+    {speaker.profile && (
+      <p className="text-gray-500 text-sm italic mt-2">{speaker.profile}</p>
+    )}
+  </div>
+))}
+</div>
 
+)}
+
+</div>
       {/* Mô tả sự kiện */}
       <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4">Mô tả sự kiện</h2>
