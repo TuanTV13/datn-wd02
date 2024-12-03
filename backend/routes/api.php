@@ -77,6 +77,7 @@ Route::prefix('v1')->group(function () {
         Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng
         Route::put('changeStatus/{id}', [EventController::class, 'changeStatus']);
         Route::put('{eventId}/checkin', [EventController::class, 'checkIn']);
+        Route::put('{eventId}/cancelcheckin', [EventController::class, 'cancelCheckIn']);
 
     });
 
