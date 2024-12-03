@@ -5,7 +5,6 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\CategoryController;
-use App\Http\Controllers\V1\Client\CartController;
 use App\Http\Controllers\V1\Client\EventController as ClientEventController;
 use App\Http\Controllers\V1\Client\HistoryController;
 use App\Http\Controllers\V1\Client\HomeController;
@@ -17,7 +16,6 @@ use App\Http\Controllers\V1\StatisticsController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
 use App\Http\Controllers\V1\UserController;
-use App\Http\Controllers\v1\VNPayController;
 use App\Http\Controllers\V1\VoucherController;
 use App\Http\Services\Payments\ZaloPayService;
 use App\Http\Services\VNPayService;
@@ -77,6 +75,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/check-event-ip', [EventController::class, 'checkEventIP']); // Thông báo hi chưa có ip checkin cục bộ
         Route::get('statistics/top-revenue-events', [StatisticsController::class, 'topRevenueEvents']); // Thống kê trong khoảng thời gian chọn
         Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng
+        Route::put('changeStatus/{id}', [EventController::class, 'changeStatus']);
+        Route::put('{eventId}/checkin', [EventController::class, 'checkIn']);
+        Route::put('{eventId}/cancelcheckin', [EventController::class, 'cancelCheckIn']);
 
     });
 
