@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
 use App\Http\Services\CheckEventIPService;
+use App\Models\EventUser;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
 use Exception;
@@ -103,6 +104,36 @@ class EventController extends Controller
             'message' => 'Sự kiện đã được xác nhận trước đó.'
         ], 400);
     }
+    public function changeStatus($id, Request $request)
+    {
+        // $status = $request->validate([
+        //     'status' => 'required'
+        // ]);
+
+        $event = $this->eventRepository->find($id);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Sự kiện không tồn tại.'
+            ], 404);
+        }
+
+        $event->update(['status' => $request->input('status')]);
+
+        // if ($event->status == 'pending') {
+        //     $event->status = 'confirmed';
+        //     $event->save();
+
+        //     return response()->json([
+        //         'message' => 'Xác nhận thành công',
+        //         'data' => $event
+        //     ], 200);
+        // }
+
+        return response()->json([
+            'message' => 'Thanh cong'
+        ], 200);
+    }
 
     public function create(StoreEventRequest $request)
     {
@@ -153,35 +184,35 @@ class EventController extends Controller
         }
     }
 
-    private function validateEventTiming($event, array $data)
-    {
-        $eventStartTime = \Carbon\Carbon::parse($event->start_time);
-        $newStartTime = \Carbon\Carbon::parse($data['start_time']);
-        $newEndTime = \Carbon\Carbon::parse($data['end_time']);
+    // private function validateEventTiming($event, array $data)
+    // {
+    //     $eventStartTime = \Carbon\Carbon::parse($event->start_time);
+    //     $newStartTime = \Carbon\Carbon::parse($data['start_time']);
+    //     $newEndTime = \Carbon\Carbon::parse($data['end_time']);
 
-        if (now()->diffInDays($eventStartTime) < 10) {
-            return [
-                'status' => false,
-                'message' => 'Không thể cập nhật thời gian sự kiện vì sự kiện còn dưới 10 ngày.'
-            ];
-        }
+    //     if (now()->diffInDays($eventStartTime) < 10) {
+    //         return [
+    //             'status' => false,
+    //             'message' => 'Không thể cập nhật thời gian sự kiện vì sự kiện còn dưới 10 ngày.'
+    //         ];
+    //     }
 
-        if ($newStartTime->lt(now()->addDays(10))) {
-            return [
-                'status' => false,
-                'message' => 'Thời gian bắt đầu mới phải sau ít nhất 10 ngày so với hiện tại.'
-            ];
-        }
+    //     if ($newStartTime->lt(now()->addDays(10))) {
+    //         return [
+    //             'status' => false,
+    //             'message' => 'Thời gian bắt đầu mới phải sau ít nhất 10 ngày so với hiện tại.'
+    //         ];
+    //     }
 
-        if ($newEndTime->lt($newStartTime->addHours(2))) {
-            return [
-                'status' => false,
-                'message' => 'Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 2 giờ.'
-            ];
-        }
+    //     if ($newEndTime->lt($newStartTime->addHours(2))) {
+    //         return [
+    //             'status' => false,
+    //             'message' => 'Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 2 giờ.'
+    //         ];
+    //     }
 
-        return ['status' => true];
-    }
+    //     return ['status' => true];
+    // }
 
     public function update($eventId, UpdateEventRequest $request)
     {
@@ -201,12 +232,12 @@ class EventController extends Controller
 
         $data = $request->validated();
 
-        $validationResult = $this->validateEventTiming($event, $data);
-        if (!$validationResult['status']) {
-            return response()->json([
-                'message' => $validationResult['message']
-            ], 400);
-        }
+        // $validationResult = $this->validateEventTiming($event, $data);
+        // if (!$validationResult['status']) {
+        //     return response()->json([
+        //         'message' => $validationResult['message']
+        //     ], 400);
+        // }
 
         $data['display_header'] ??= 0;
 
@@ -277,7 +308,7 @@ class EventController extends Controller
         $result = $this->checkEventIPService->checkEventsWithoutIP();
 
         Log::info('Kết quả kiểm tra sự kiện IP', $result);
-        
+
         return response()->json([
             'status' => $result['status'],
             'message' => $result['message'],
@@ -311,4 +342,35 @@ class EventController extends Controller
 
         return response()->json($data);
     }
+
+    public function checkIn($eventId, Request $request)
+    {
+        $ticketCode = $request->input('ticket_code');
+        $event = $this->eventRepository->find($eventId);
+
+        // if (!$event) {
+        //     return response()->json(['message' => 'Sự kiện không tồn tại'], 404);
+        // }
+
+        $user = EventUser::where('ticket_code', $ticketCode)->first();
+        $user->checked_in = 1;
+        $user->save();
+        return response()->json(['message' => 'Check-in thành công']);
+    }
+
+    public function cancelCheckIn($eventId, Request $request)
+    {
+        $ticketCode = $request->input('ticket_code');
+        $event = $this->eventRepository->find($eventId);
+
+        // if (!$event) {
+        //     return response()->json(['message' => 'Sự kiện không tồn tại'], 404);
+        // }
+
+        $user = EventUser::where('ticket_code', $ticketCode)->first();
+        $user->checked_in = 0;
+        $user->save();
+        return response()->json(['message' => 'Check-in thành công']);
+    }
+
 }
