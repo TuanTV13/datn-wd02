@@ -53,6 +53,7 @@ const DetailEvents = () => {
       "Content-Type": "application/json",
     };
 
+  if (window.confirm('xac nhan')) {
     try {
       await axios.put(
         `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
@@ -73,31 +74,82 @@ const DetailEvents = () => {
       alert("Cập nhật trạng thái thất bại!");
       console.error(err);
     }
+  }
   };
-  const handleCheckInToggle = (user) => {
-    // Gửi yêu cầu tới backend để cập nhật trạng thái check-in
-    const newStatus = user.pivot.checked_in === 1 ? 0 : 1;
-  
-    fetch(`/api/tickets/${user.id}/check-in`, {
+ 
+const handleCheckIn = async (id, ticketCode) => {
+ if (window.confirm('xac nhan')) {
+  try {
+    // Lấy token từ localStorage
+    const token = localStorage.getItem("access_token");
+
+    // Tạo headers với token
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json', // Nếu bạn gửi JSON
+    };
+
+    const response = await fetch(`http://127.0.0.1:8000/api/v1/events/${id}/checkin`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ checked_in: newStatus }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          // Cập nhật trạng thái check-in trong state users
-          setUsers((prevUsers) =>
-            prevUsers.map((u) =>
-              u.id === user.id ? { ...u, pivot: { ...u.pivot, checked_in: newStatus } } : u
-            )
-          );
-        } else {
-          alert("Không thể cập nhật trạng thái.");
-        }
-      })
-      .catch((error) => console.error("Lỗi khi cập nhật trạng thái:", error));
-  };
+      headers: headers,
+      body: JSON.stringify({ ticket_code: ticketCode }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.log('Error:', error);
+      // Xử lý lỗi tại đây
+    }
+
+    const data = await response.json();
+    console.log('Check-in successful:', data);
+    // Xử lý kết quả thành công nếu cần
+   
+    setShowUsers(false); // Ẩn popup tạm thời
+    
+    setTimeout(() => {
+      setShowUsers(true); // Hiện lại popup sau khi dữ liệu được cập nhật
+    }, 300);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+ }
+};
+
+const handleCancelCheckIn = async (id, ticketCode) => {
+  try {
+    // Lấy token từ localStorage
+    const token = localStorage.getItem("access_token");
+
+    // Tạo headers với token
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+
+    const response = await fetch(`http://127.0.0.1:8000/api/v1/events/${id}/cancelcheckin`, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify({ ticket_code: ticketCode }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to cancel check-in');
+    }
+
+    const data = await response.json();
+    console.log('Cancel check-in successful:', data);
+    // Xử lý kết quả thành công nếu cần
+   
+    setShowUsers(false); // Ẩn popup tạm thời
+    setTimeout(() => {
+      setShowUsers(true); // Hiện lại popup sau khi dữ liệu được cập nhật
+    }, 300);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
   
   if (loading) return <div className="text-center py-10 text-gray-700">Đang tải...</div>;
   if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
@@ -414,16 +466,27 @@ const DetailEvents = () => {
                     {user.pivot.checked_in === 1 ? "Đã check-in" : "Chưa check-in"}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-center">
-                    <button
-                      onClick={() => handleCheckInToggle(user)}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-                        user.pivot.checked_in === 1
-                          ? "bg-red-500 text-white hover:bg-red-600"
-                          : "bg-green-500 text-white hover:bg-green-600"
-                      }`}
-                    >
-                      {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
-                    </button>
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+  <button
+    onClick={() => {
+      // Kiểm tra trạng thái của user để gọi hàm phù hợp
+      if (user.pivot.checked_in === 1) {
+        handleCancelCheckIn(user.id, user.ticket_code);
+      } else {
+        handleCheckIn(user.id, user.ticket_code);
+      }
+    }}
+    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
+      user.pivot.checked_in === 1
+        ? "bg-red-500 text-white hover:bg-red-600"
+        : "bg-green-500 text-white hover:bg-green-600"
+    }`}
+  >
+    {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
+  </button>
+</td>
+
+
                   </td>
                 </tr>
               ))
