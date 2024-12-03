@@ -368,7 +368,7 @@ const DetailEvents = () => {
       {/* Popup hiển thị Người dùng */}
       {showUsers && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[90vh] overflow-auto">
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[80vh] overflow-auto">
       <h2 className="text-2xl font-semibold mb-4 text-center">Người đã mua vé</h2>
       <div className="overflow-x-auto">
         <table className="table-auto w-full border-collapse border border-gray-300">

@@ -1,4 +1,4 @@
-Flysystem<?php
+<?php
 
 return [
     'endpoint' => env('MOMO_ENDPOINT', 'https://test-payment.momo.vn/v2/gateway/api/create'),
@@ -7,7 +7,7 @@ return [
     'secret_key' => env('MOMO_SECRET_KEY', 'YOUR_SECRET_KEY'),
     'return_url' => env('MOMO_RETURN_URL', 'http://localhost:8000/return-momo'),
     'notify_url' => env('MOMO_NOTIFY_URL', 'http://localhost:8000/notify-momo'),
-        'notify_url' => env('MOMO_NOTIFY_URL', 'http://your-domain.com/api/momo/notify'),
+    'notify_url' => env('MOMO_NOTIFY_URL', 'http://your-domain.com/api/momo/notify'),
 
 
     
