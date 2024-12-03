@@ -32,9 +32,9 @@ const DetailEvents = () => {
         );
         setEventDetails(response.data);
         console.log(response.data);
-        
-        
-        
+
+
+
       } catch (err) {
         setError("Lỗi khi tải chi tiết sự kiện");
         console.error(err);
@@ -108,7 +108,7 @@ const DetailEvents = () => {
   // Kiểm tra các trường trước khi sử dụng .map()
   const speakers = data.speakers || [];
   const tickets = data.event.tickets || [];
-  const users =  data.event.users || []
+  const users = data.event.users || []
   // const normalPercentage = data.normalPercentage || [];
   // const normalTickets = data.normalTickets || [];
   // const totalTickets = data.totalTickets || [];
@@ -128,24 +128,24 @@ const DetailEvents = () => {
   };
   return (
     <div className="bg-white rounded-lg shadow p-6">
-             <h2 className="text-3xl font-bold mb-4 text-center">Chi tiết sự kiện</h2>
-             <br />
-             <br />
-             <hr />
-        {/* Tiêu đề và thông tin chung */}
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">{data.event.name}</h1> 
-        <p className="text-lg font-medium text-gray-600 mb-4 ">Trạng thái: {data.event.status}</p>
-        <div className="flex justify-between items-center mb-6">
-  <button
-    onClick={() => setShowStatusPopup(true)}
-    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-  >
-    Thay đổi trạng thái
-  </button>
-  <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-    Thêm địa chỉ IP check-in
-  </button>
-</div>
+      <h2 className="text-3xl font-bold mb-4 text-center">Chi tiết sự kiện</h2>
+      <br />
+      <br />
+      <hr />
+      {/* Tiêu đề và thông tin chung */}
+      <h1 className="text-3xl font-bold text-gray-800 mb-4">{data.event.name}</h1>
+      <p className="text-lg font-medium text-gray-600 mb-4 ">Trạng thái: {data.event.status}</p>
+      <div className="flex justify-between items-center mb-6">
+        <button
+          onClick={() => setShowStatusPopup(true)}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          Thay đổi trạng thái
+        </button>
+        <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+          Thêm địa chỉ IP check-in
+        </button>
+      </div>
       {showStatusPopup && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-md w-96">
@@ -182,19 +182,19 @@ const DetailEvents = () => {
           </div>
         </div>
       )}
-      
-        <img
-          src={data.event.thumbnail}
-          alt={data.event.name}
-          className="w-full h-64 object-cover rounded-lg mb-6"
-        />
-        <div
-  className="text-xl font-bold text-gray-600 mb-6 space-y-4"
-  dangerouslySetInnerHTML={{ __html: data.event.description }}
-></div>
 
-<style>
-  {`
+      <img
+        src={data.event.thumbnail}
+        alt={data.event.name}
+        className="w-full h-64 object-cover rounded-lg mb-6"
+      />
+      <div
+        className="text-xl font-bold text-gray-600 mb-6 space-y-4"
+        dangerouslySetInnerHTML={{ __html: data.event.description }}
+      ></div>
+
+      <style>
+        {`
     .text-xl img {
       width: 800px; /* Chiều rộng cố định */
       height: 400px; /* Chiều cao cố định */
@@ -204,90 +204,90 @@ const DetailEvents = () => {
       padding:20px 0
     }
   `}
-</style>
+      </style>
 
-        <hr />
-        <br /><br />
-        <h2 className="text-2xl font-bold text-gray-800 mb-4" >Thông tin sự kiện</h2>
-        <br />
-        <br />
-        {/* Thông tin sự kiện */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 flex justify-center ">
-    <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-      <p className="text-lg text-gray-700 font-semibold">Thời gian:</p>
-      <p className="text-lg text-gray-600">{new Date(data.event.start_time).toLocaleString()} - {new Date(data.event.end_time).toLocaleString()}</p>
-    </div>
-    
-    <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-      <p className="text-lg text-gray-700 font-semibold">Địa điểm:</p>
-      <p className="text-lg text-gray-600">{data.event.location}</p>
-    </div>
+      <hr />
+      <br /><br />
+      <h2 className="text-2xl font-bold text-gray-800 mb-4" >Thông tin sự kiện</h2>
+      <br />
+      <br />
+      {/* Thông tin sự kiện */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 flex justify-center ">
+        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
+          <p className="text-lg text-gray-700 font-semibold">Thời gian:</p>
+          <p className="text-lg text-gray-600">{new Date(data.event.start_time).toLocaleString()} - {new Date(data.event.end_time).toLocaleString()}</p>
+        </div>
 
-    <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-      <p className="text-lg text-gray-700 font-semibold">Tỉnh/Thành phố:</p>
-      <p className="text-lg text-gray-600">{data.event.province}</p>
-    </div>
+        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
+          <p className="text-lg text-gray-700 font-semibold">Địa điểm:</p>
+          <p className="text-lg text-gray-600">{data.event.location}</p>
+        </div>
 
-    <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-      <p className="text-lg text-gray-700 font-semibold">Quận/Huyện:</p>
-      <p className="text-lg text-gray-600">{data.event.district}</p>
-    </div>
+        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
+          <p className="text-lg text-gray-700 font-semibold">Tỉnh/Thành phố:</p>
+          <p className="text-lg text-gray-600">{data.event.province}</p>
+        </div>
 
-    <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-      <p className="text-lg text-gray-700 font-semibold">Phường/Xã:</p>
-      <p className="text-lg text-gray-600">{data.event.ward}</p>
-    </div>
+        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
+          <p className="text-lg text-gray-700 font-semibold">Quận/Huyện:</p>
+          <p className="text-lg text-gray-600">{data.event.district}</p>
+        </div>
 
-   
+        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
+          <p className="text-lg text-gray-700 font-semibold">Phường/Xã:</p>
+          <p className="text-lg text-gray-600">{data.event.ward}</p>
+        </div>
 
-    <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-      <p className="text-lg text-gray-700 font-semibold">Loại sự kiện:</p>
-      <p className="text-lg text-gray-600">{data.event.event_type}</p>
-    </div>
 
-    <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-      <p className="text-lg text-gray-700 font-semibold">Link trực tuyến:</p>
-      <p className="text-lg text-gray-600">{data.event.link_online ? data.link_online : "Không có"}</p>
-    </div>
 
-    <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-      <p className="text-lg text-gray-700 font-semibold">Số lượng tham gia tối đa:</p>
-      <p className="text-lg text-gray-600">{data.event.max_attendees}</p>
-    </div>
+        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
+          <p className="text-lg text-gray-700 font-semibold">Loại sự kiện:</p>
+          <p className="text-lg text-gray-600">{data.event.event_type}</p>
+        </div>
 
-    
-  </div>
+        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
+          <p className="text-lg text-gray-700 font-semibold">Link trực tuyến:</p>
+          <p className="text-lg text-gray-600">{data.event.link_online ? data.link_online : "Không có"}</p>
+        </div>
+
+        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
+          <p className="text-lg text-gray-700 font-semibold">Số lượng tham gia tối đa:</p>
+          <p className="text-lg text-gray-600">{data.event.max_attendees}</p>
+        </div>
+
+
+      </div>
 
 
       {/* Danh sách speakers */}
-  <h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
 
       <div className="mb-6 flex justify-center">
-  <div
-    className="grid gap-4 justify-center w-70"
-    style={{
-      gridTemplateColumns: `repeat(${Math.min(speakers.length, 4)}, 1fr)`
-    }}
-  >
-    {speakers.length > 0 ? (
-      speakers.map((speaker) => (
-        <div key={speaker.name} className="p-4 bg-gray-50 rounded-lg shadow-md">
-          <img
-            src={speaker.image_url}
-            alt={speaker.name}
-            className="w-16 h-16 object-cover rounded-full mb-2"
-          />
-          <p className="font-semibold text-gray-800 text-center">{speaker.name}</p>
-          <p className="text-gray-600 text-center">Chức vụ: {speaker.profile}</p>
-          <p className="text-gray-600 text-center">Email: {speaker.email}</p>
-          <p className="text-gray-600 text-center">Số điện thoại: {speaker.phone}</p>
+        <div
+          className="grid gap-4 justify-center w-70"
+          style={{
+            gridTemplateColumns: `repeat(${Math.min(speakers.length, 4)}, 1fr)`
+          }}
+        >
+          {speakers.length > 0 ? (
+            speakers.map((speaker) => (
+              <div key={speaker.name} className="p-4 bg-gray-50 rounded-lg shadow-md">
+                <img
+                  src={speaker.image_url}
+                  alt={speaker.name}
+                  className="w-16 h-16 object-cover rounded-full mb-2"
+                />
+                <p className="font-semibold text-gray-800 text-center">{speaker.name}</p>
+                <p className="text-gray-600 text-center">Chức vụ: {speaker.profile}</p>
+                <p className="text-gray-600 text-center">Email: {speaker.email}</p>
+                <p className="text-gray-600 text-center">Số điện thoại: {speaker.phone}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 col-span-full text-center">Chưa có diễn giả thông tin</p>
+          )}
         </div>
-      ))
-    ) : (
-      <p className="text-gray-500 col-span-full text-center">Chưa có diễn giả thông tin</p>
-    )}
-  </div>
-</div>
+      </div>
 
 
       {/* Nút hiển thị thông tin Vé và Người dùng */}
