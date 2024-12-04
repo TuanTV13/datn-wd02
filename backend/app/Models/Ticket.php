@@ -11,6 +11,7 @@ class Ticket extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'event_id',
         'status',
         'ticket_type',
     ];

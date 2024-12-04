@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Event;
 use App\Models\SeatZone;
 use App\Models\Ticket;
 use Illuminate\Database\Migrations\Migration;
@@ -15,6 +16,7 @@ return new class extends Migration
     {
         Schema::create('ticket_prices', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(Event::class)->constrained();
             $table->foreignIdFor(Ticket::class)->constrained();
             $table->foreignIdFor(SeatZone::class)->constrained();
             $table->decimal('price');
