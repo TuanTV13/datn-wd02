@@ -146,6 +146,7 @@ class TicketController extends Controller
                 ]);
 
                 $data = $ticketType->price()->create([
+                    'event_id' => $request->event_id,
                     'ticket_id' => $ticketType->id,
                     'seat_zone_id' => $zone->id,
                     'price' => $request->price,
@@ -164,6 +165,7 @@ class TicketController extends Controller
                 ]);
 
                 $data = $ticket->price()->create([
+                    'event_id' => $request->event_id,
                     'ticket_id' => $ticket->id,
                     'seat_zone_id' => $zone->id,
                     'price' => $request->price,

@@ -50,7 +50,7 @@ class Event extends Model
 
     public function tickets()
     {
-        return $this->hasMany(TicketPrice::class)->with('zone');
+        return $this->hasMany(Ticket::class)->with('price');
     }
 
     public function transactions()
