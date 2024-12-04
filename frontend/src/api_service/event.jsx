@@ -48,7 +48,7 @@ const addEvent = async (eventData) => {
     const response = await axios.post(`${API_URL}/events/create`, eventData, {
       headers,
     });
-    return response.data;
+    return response.data.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }

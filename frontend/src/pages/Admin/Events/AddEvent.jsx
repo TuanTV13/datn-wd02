@@ -2,8 +2,9 @@
   import { addEvent, fetchCategories } from "../../../api_service/event";
   import { fetchProvinces, fetchDistricts, fetchWards } from "../../../api_service/location";
   import { ToastContainer, toast } from "react-toastify";
-
+  import { useNavigate } from "react-router-dom";
   const AddEvent = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
       category_id: "",
       province_name: "",
@@ -134,6 +135,7 @@
         .then(() => {
           console.log("Thêm sự kiện thành công!")
           toast.success("Thêm sự kiện thành công!")
+          window.location.href = "/admin/event-list"
         })
         .catch((error) => {
           console.error("Lỗi khi thêm sự kiện:", error)
@@ -320,7 +322,7 @@
         </div>
     
     
-      <div className="form-group">
+      {/* <div className="form-group">
         <h3>Diễn giả:</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
@@ -379,9 +381,20 @@
         <button type="button" className="btn btn-primary" onClick={handleAddSpeaker}>
           Thêm diễn giả
         </button>
-      </div>
+      </div> */}
     
-      <button type="submit" className="btn btn-success">Lưu sự kiện</button>
+    <div className="flex justify-between">
+      <button type="submit"  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300" >
+       Lưu sự kiện
+      </button>
+      <button
+              type="button"
+              onClick={() => navigate("/admin/event-list")}
+              className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-300"
+            >
+              Quay lại danh sách
+            </button>
+      </div>
     </form>
     <ToastContainer />
      </div>

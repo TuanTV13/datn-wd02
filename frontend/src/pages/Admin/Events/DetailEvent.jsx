@@ -53,6 +53,7 @@ const DetailEvents = () => {
       "Content-Type": "application/json",
     };
 
+  if (window.confirm('xac nhan')) {
     try {
       await axios.put(
         `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
@@ -73,31 +74,79 @@ const DetailEvents = () => {
       alert("Cập nhật trạng thái thất bại!");
       console.error(err);
     }
+  }
   };
-  const handleCheckInToggle = (user) => {
-    // Gửi yêu cầu tới backend để cập nhật trạng thái check-in
-    const newStatus = user.pivot.checked_in === 1 ? 0 : 1;
-  
-    fetch(`/api/tickets/${user.id}/check-in`, {
+ 
+const handleCheckIn = async (id, ticketCode) => {
+ if (window.confirm('xac nhan')) {
+  try {
+    // Lấy token từ localStorage
+    const token = localStorage.getItem("access_token");
+
+    // Tạo headers với token
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json', // Nếu bạn gửi JSON
+    };
+
+    const response = await fetch(`http://127.0.0.1:8000/api/v1/events/${id}/checkin`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ checked_in: newStatus }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          // Cập nhật trạng thái check-in trong state users
-          setUsers((prevUsers) =>
-            prevUsers.map((u) =>
-              u.id === user.id ? { ...u, pivot: { ...u.pivot, checked_in: newStatus } } : u
-            )
-          );
-        } else {
-          alert("Không thể cập nhật trạng thái.");
-        }
-      })
-      .catch((error) => console.error("Lỗi khi cập nhật trạng thái:", error));
-  };
+      headers: headers,
+      body: JSON.stringify({ ticket_code: ticketCode }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.log('Error:', error);
+      // Xử lý lỗi tại đây
+    }
+
+    const data = await response.json();
+    console.log('Check-in successful:', data);
+    // Xử lý kết quả thành công nếu cần
+    setUsers(prevUsers => 
+      prevUsers.map(user => 
+        user.id === id ? { ...user, pivot: { ...user.pivot, checked_in: 1 } } : user
+      )
+    );
+    
+  } catch (error) {
+    console.error('Error:', error);
+  }
+ }
+};
+
+const handleCancelCheckIn = async (id, ticketCode) => {
+  try {
+    // Lấy token từ localStorage
+    const token = localStorage.getItem("access_token");
+
+    // Tạo headers với token
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+
+    const response = await fetch(`http://127.0.0.1:8000/api/v1/events/${id}/cancelcheckin`, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify({ ticket_code: ticketCode }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to cancel check-in');
+    }
+
+    const data = await response.json();
+    console.log('Cancel check-in successful:', data);
+    // Xử lý kết quả thành công nếu cần
+   
+    
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
   
   if (loading) return <div className="text-center py-10 text-gray-700">Đang tải...</div>;
   if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
@@ -128,24 +177,32 @@ const DetailEvents = () => {
   };
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-3xl font-bold mb-4 text-center">Chi tiết sự kiện</h2>
-      <br />
-      <br />
-      <hr />
-      {/* Tiêu đề và thông tin chung */}
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">{data.event.name}</h1>
-      <p className="text-lg font-medium text-gray-600 mb-4 ">Trạng thái: {data.event.status}</p>
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => setShowStatusPopup(true)}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Thay đổi trạng thái
-        </button>
-        <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-          Thêm địa chỉ IP check-in
-        </button>
-      </div>
+<h2 className="text-4xl font-bold mb-6 text-center text-gradient bg-clip-text text-transparent bg-gradient-to-r from-teal-400 via-blue-500 to-purple-600">
+  Chi tiết sự kiện
+</h2>
+<hr className="border-t-2 border-gray-300 mb-6" />
+
+{/* Tiêu đề và thông tin chung */}
+<h1 className="text-5xl font-extrabold text-gray-800 mb-4 shadow-md p-2 rounded-lg bg-gray-100"> 
+  {data.event.name}
+</h1>
+<p className="text-lg font-medium text-gray-700 mb-4 flex items-center">
+  <span className="mr-2 text-xl text-gray-600">📌</span>
+  Trạng thái: <span className="font-bold text-teal-600">{data.event.status}</span>
+</p>
+
+<div className="flex justify-between items-center mb-6">
+  <button
+    onClick={() => setShowStatusPopup(true)}
+    className="px-6 py-3 bg-gradient-to-r from-green-400 to-green-600 text-white font-bold rounded-lg shadow-lg transform hover:scale-105 hover:rotate-1 transition-transform duration-300"
+  >
+    Thay đổi trạng thái
+  </button>
+  <button className="px-6 py-3 bg-gradient-to-r from-blue-400 to-blue-600 text-white font-bold rounded-lg shadow-lg transform hover:scale-105 hover:rotate-1 transition-transform duration-300">
+    Thêm địa chỉ IP check-in
+  </button>
+</div>
+
       {showStatusPopup && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-md w-96">
@@ -182,14 +239,81 @@ const DetailEvents = () => {
           </div>
         </div>
       )}
+   <hr />
+      <br /><br />
+      <h2 className="text-2xl font-bold text-gray-800 mb-4" >Thông tin sự kiện</h2>
+      <br />
+      <br />
+      {/* Thông tin sự kiện */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 flex justify-center">
+  <div className="p-4 bg-gradient-to-r from-blue-50 via-blue-100 to-blue-200 border border-blue-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+    <p className="text-lg text-gray-800 font-semibold">Thời gian:</p>
+    <p className="text-lg text-gray-700 font-medium">{new Date(data.event.start_time).toLocaleString()} - {new Date(data.event.end_time).toLocaleString()}</p>
+  </div>
 
+  <div className="p-4 bg-gradient-to-r from-green-50 via-green-100 to-green-200 border border-green-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+    <p className="text-lg text-gray-800 font-semibold">Địa điểm:</p>
+    <p className="text-lg text-gray-700 font-medium">{data.event.location}</p>
+  </div>
+
+  <div className="p-4 bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-200 border border-yellow-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+    <p className="text-lg text-gray-800 font-semibold">Tỉnh/Thành phố:</p>
+    <p className="text-lg text-gray-700 font-medium">{data.event.province}</p>
+  </div>
+
+  <div className="p-4 bg-gradient-to-r from-pink-50 via-pink-100 to-pink-200 border border-pink-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+    <p className="text-lg text-gray-800 font-semibold">Quận/Huyện:</p>
+    <p className="text-lg text-gray-700 font-medium">{data.event.district}</p>
+  </div>
+
+  <div className="p-4 bg-gradient-to-r from-purple-50 via-purple-100 to-purple-200 border border-purple-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+    <p className="text-lg text-gray-800 font-semibold">Phường/Xã:</p>
+    <p className="text-lg text-gray-700 font-medium">{data.event.ward}</p>
+  </div>
+
+  <div className="p-4 bg-gradient-to-r from-teal-50 via-teal-100 to-teal-200 border border-teal-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+  <p className="text-lg text-gray-800 font-semibold">Loại sự kiện:</p>
+  <p className="text-lg text-gray-700 font-medium">
+    {data.event.event_type === 'offline' ? 'Trực tiếp' : data.event.event_type === 'online' ? 'Trực tuyến' : 'Không xác định'}
+  </p>
+</div>
+
+
+  <div className="p-4 bg-gradient-to-r from-indigo-50 via-indigo-100 to-indigo-200 border border-indigo-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+    <p className="text-lg text-gray-800 font-semibold">Link trực tuyến:</p>
+    <p className="text-lg text-gray-700 font-medium">{data.event.link_online ? data.link_online : "Không có"}</p>
+  </div>
+
+  <div className="p-4 bg-gradient-to-r from-red-50 via-red-100 to-red-200 border border-red-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+    <p className="text-lg text-gray-800 font-semibold">Số lượng tham gia tối đa:</p>
+    <p className="text-lg text-gray-700 font-medium">{data.event.max_attendees}</p>
+  </div>
+</div>
+
+
+      {/* Nút hiển thị thông tin Vé và Người dùng */}
+      <div className="flex space-x-4 mt-8 flex justify-center">
+        <button
+          onClick={() => setShowTickets(true)}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Xem thông tin Vé
+        </button>
+        <button
+          onClick={() => setShowUsers(true)}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          Xem Người mua vé
+        </button>
+      </div>
+      <br /><br />
       <img
         src={data.event.thumbnail}
         alt={data.event.name}
-        className="w-full h-64 object-cover rounded-lg mb-6"
+        className="w-full h-74 object-cover rounded-lg mb-6"
       />
       <div
-        className="text-xl font-bold text-gray-600 mb-6 space-y-4"
+        className="text-xl  text-gray-600 mb-6 space-y-4"
         dangerouslySetInnerHTML={{ __html: data.event.description }}
       ></div>
 
@@ -206,57 +330,7 @@ const DetailEvents = () => {
   `}
       </style>
 
-      <hr />
-      <br /><br />
-      <h2 className="text-2xl font-bold text-gray-800 mb-4" >Thông tin sự kiện</h2>
-      <br />
-      <br />
-      {/* Thông tin sự kiện */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 flex justify-center ">
-        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-          <p className="text-lg text-gray-700 font-semibold">Thời gian:</p>
-          <p className="text-lg text-gray-600">{new Date(data.event.start_time).toLocaleString()} - {new Date(data.event.end_time).toLocaleString()}</p>
-        </div>
-
-        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-          <p className="text-lg text-gray-700 font-semibold">Địa điểm:</p>
-          <p className="text-lg text-gray-600">{data.event.location}</p>
-        </div>
-
-        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-          <p className="text-lg text-gray-700 font-semibold">Tỉnh/Thành phố:</p>
-          <p className="text-lg text-gray-600">{data.event.province}</p>
-        </div>
-
-        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-          <p className="text-lg text-gray-700 font-semibold">Quận/Huyện:</p>
-          <p className="text-lg text-gray-600">{data.event.district}</p>
-        </div>
-
-        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-          <p className="text-lg text-gray-700 font-semibold">Phường/Xã:</p>
-          <p className="text-lg text-gray-600">{data.event.ward}</p>
-        </div>
-
-
-
-        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-          <p className="text-lg text-gray-700 font-semibold">Loại sự kiện:</p>
-          <p className="text-lg text-gray-600">{data.event.event_type}</p>
-        </div>
-
-        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-          <p className="text-lg text-gray-700 font-semibold">Link trực tuyến:</p>
-          <p className="text-lg text-gray-600">{data.event.link_online ? data.link_online : "Không có"}</p>
-        </div>
-
-        <div className="p-4 bg-white rounded-lg shadow-md flex justify-center">
-          <p className="text-lg text-gray-700 font-semibold">Số lượng tham gia tối đa:</p>
-          <p className="text-lg text-gray-600">{data.event.max_attendees}</p>
-        </div>
-
-
-      </div>
+     
 
 
       {/* Danh sách speakers */}
@@ -290,26 +364,17 @@ const DetailEvents = () => {
       </div>
 
 
-      {/* Nút hiển thị thông tin Vé và Người dùng */}
-      <div className="flex space-x-4 mt-8 flex justify-center">
-        <button
-          onClick={() => setShowTickets(true)}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Xem thông tin Vé
-        </button>
-        <button
-          onClick={() => setShowUsers(true)}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Xem Người mua vé
-        </button>
-      </div>
-
+      
       {/* Popup hiển thị Vé */}
 {/* Popup hiển thị Vé */}
 {showTickets && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+  onClick={(e) => {
+    // Kiểm tra nếu click không nằm trong nội dung popup
+    if (e.target === e.currentTarget) {
+      setShowTickets(false);
+    }
+  }}>
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[90vh] overflow-auto">
       <h2 className="text-2xl font-semibold mb-4 text-center">Thông tin Vé</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -367,8 +432,14 @@ const DetailEvents = () => {
 
       {/* Popup hiển thị Người dùng */}
       {showUsers && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[90vh] overflow-auto">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+  onClick={(e) => {
+    // Kiểm tra nếu click không nằm trong nội dung popup
+    if (e.target === e.currentTarget) {
+      setShowUsers(false);
+    }
+  }}>
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[80vh] overflow-auto">
       <h2 className="text-2xl font-semibold mb-4 text-center">Người đã mua vé</h2>
       <div className="overflow-x-auto">
         <table className="table-auto w-full border-collapse border border-gray-300">
@@ -402,16 +473,27 @@ const DetailEvents = () => {
                     {user.pivot.checked_in === 1 ? "Đã check-in" : "Chưa check-in"}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-center">
-                    <button
-                      onClick={() => handleCheckInToggle(user)}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                        user.pivot.checked_in === 1
-                          ? "bg-red-500 text-white hover:bg-red-600"
-                          : "bg-green-500 text-white hover:bg-green-600"
-                      }`}
-                    >
-                      {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
-                    </button>
+                  <td className="border border-gray-300 px-4 py-2 text-center">
+  <button
+    onClick={() => {
+      // Kiểm tra trạng thái của user để gọi hàm phù hợp
+      if (user.pivot.checked_in === 1) {
+        handleCancelCheckIn(user.id, user.ticket_code);
+      } else {
+        handleCheckIn(user.id, user.ticket_code);
+      }
+    }}
+    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
+      user.pivot.checked_in === 1
+        ? "bg-red-500 text-white hover:bg-red-600"
+        : "bg-green-500 text-white hover:bg-green-600"
+    }`}
+  >
+    {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
+  </button>
+</td>
+
+
                   </td>
                 </tr>
               ))
