@@ -23,7 +23,7 @@ class Ticket extends Model
 
     public function zone()
     {
-        return $this->belongsTo(SeatZone::class);
+        return $this->belongsTo(SeatZone::class, 'id');
     }
 
     public function transactions()

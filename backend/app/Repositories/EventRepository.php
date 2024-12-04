@@ -58,7 +58,7 @@ class EventRepository
     public function find($id)
     {
         return $this->event
-            ->with(['tickets'])
+            ->with(['tickets', 'users'])
             ->find($id);
     }
 
@@ -66,6 +66,7 @@ class EventRepository
     public function findDetail($id)
     {
         $event = $this->event->with(['tickets', 'users'])->find($id);
+        // dd($event);
 
         $totalTickets = $event->users->count();
 
