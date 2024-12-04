@@ -137,18 +137,18 @@ class EventController extends Controller
 
     public function create(StoreEventRequest $request)
     {
-        Log::info('Thông tin vé', ['data' => $request->all()]);
+        // Log::info('Thông tin vé', ['data' => $request->all()]);
         DB::beginTransaction();
         try {
             $data = $request->validated();
 
-            // if ($request->has('speakers') && is_string($request->speakers)) {
-            //     $data['speakers'] = json_decode($request->speakers, true);
-            // } elseif ($request->has('speakers') && is_array($request->speakers)) {
-            //     $data['speakers'] = json_encode($request->speakers);
-            // } else {
-            //     $data['speakers'] = null;
-            // }
+            if ($request->has('speakers') && is_string($request->speakers)) {
+                $data['speakers'] = json_decode($request->speakers, true);
+            } elseif ($request->has('speakers') && is_array($request->speakers)) {
+                $data['speakers'] = json_encode($request->speakers);
+            } else {
+                $data['speakers'] = null;
+            }
 
             $data['display_header'] ??= 0;
             if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {

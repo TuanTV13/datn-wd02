@@ -11,21 +11,18 @@ class Ticket extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'event_id',
         'status',
         'ticket_type',
-        'price',
-        'quantity',
-        'available_quantity',
-        'seat_location',
-        'sale_start',
-        'sale_end',
-        'description'
     ];
 
-    public function event()
+    public function price()
     {
-        return $this->belongsTo(Event::class);
+        return $this->hasMany(TicketPrice::class)->with('zone');
+    }
+
+    public function zone()
+    {
+        return $this->belongsTo(SeatZone::class);
     }
 
     public function transactions()
@@ -37,4 +34,4 @@ class Ticket extends Model
     {
         return $this->belongsToMany(User::class, 'event_users')->withPivot('ticket_id', 'user_id');
     }
-}    
+}
