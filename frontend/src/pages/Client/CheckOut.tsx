@@ -8,7 +8,7 @@ const CheckOut = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const ticketType = searchParams.get("ticketType");
-  const initialTotalPrice = parseFloat(searchParams.get("totalPrice") || "0");
+  const initialTotalPrice = parseFloat(searchParams.get("price") || "0");
   const ticketId = searchParams.get("ticketId");
 
   const [userInfo, setUserInfo] = useState({
