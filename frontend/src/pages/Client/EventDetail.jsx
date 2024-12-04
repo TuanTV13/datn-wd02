@@ -201,41 +201,35 @@ const EventDetail = () => {
               </div>
             </div>
           )}
-          {event.status !== 'completed' && (
-            <>
-              <p className="mt-4 text-lg">
-                Thời gian bắt đầu: {new Date(event.start_time).toLocaleString()}
-              </p>
-              <p className="text-lg">
-                Thời gian kết thúc: {new Date(event.end_time).toLocaleString()}
-              </p>
-              <br />
-              {event.status !== 'checkin' && (
-                <button
-                  onClick={() => setShowPopup(true)}
-                  className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
-                >
-                  Mua vé
-                </button>
-              )}
-              {event.status !== 'ongoing' && (
-                <button
-                  onClick={() => setShowPopup(true)}
-                  className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
-                >
-                  Mua vé
-                </button>
-              )}
-              {event.status === 'checkin' && (
-                <button
-                  onClick={handleCheckIn}
-                  className="w-[150px] h-[50px] bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md mt-4"
-                >
-                  Check-in
-                </button>
-              )}
-            </>
-          )}
+        {event.status !== 'completed' && event.status !== 'ongoing' && (
+  <>
+    <p className="mt-4 text-lg">
+      Thời gian bắt đầu: {new Date(event.start_time).toLocaleString()}
+    </p>
+    <p className="text-lg">
+      Thời gian kết thúc: {new Date(event.end_time).toLocaleString()}
+    </p>
+    <br />
+    {event.status !== 'checkin' && (
+      <button
+        onClick={() => setShowPopup(true)}
+        className="w-[150px] h-[50px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
+      >
+        Mua vé
+      </button>
+    )}
+    
+    {event.status === 'checkin' && (
+      <button
+        onClick={handleCheckIn}
+        className="w-[150px] h-[50px] bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md mt-4"
+      >
+        Check-in
+      </button>
+    )}
+  </>
+)}
+
           <div className="mt-4 text-center">
             <p className="text-lg">
               Địa điểm: {`${event.ward}, ${event.district}, ${event.province}`}
