@@ -203,6 +203,8 @@ Route::prefix('v1')->group(function () {
 
         // Lấy giao dịch theo ID
         Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
+
+
     });
 });
 
