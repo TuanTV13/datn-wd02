@@ -53,18 +53,11 @@ class UserRepository
 
     public function trashed()
     {
-        $usersTrashed = $this->user->onlyTrashed()->orderBy('deleted_at', 'desc')->get();
-        return $usersTrashed;
+        return $this->user->onlyTrashed()->get();
     }
 
     public function findTrashed($id)
     {
         return $this->user->onlyTrashed()->find($id);
-    }
-
-    public function restore($id)
-    {
-        $userTrashed = $this->user->withTrashed()->find($id);
-        return $userTrashed->restore();
     }
 }
