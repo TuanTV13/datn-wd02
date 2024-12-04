@@ -65,7 +65,7 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('events')->middleware(['check.jwt', 'check.permission:manage-events'])->group(function () {
         Route::post('create', [EventController::class, 'create']);
-        Route::post('trashed', [EventController::class, 'trashed']);
+        Route::get('trashed', [EventController::class, 'trashed']);
         Route::get('{event}/show', [EventController::class, 'show']);
         Route::put('{event}/update', [EventController::class, 'update']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
@@ -84,10 +84,10 @@ Route::prefix('v1')->group(function () {
     Route::get('users', [UserController::class, 'index']);
 
     Route::prefix('users')->middleware(['check.jwt', 'check.permission:manage-users'])->group(function () {
+        Route::get('trashed', [UserController::class, 'trashed']); // khóa
         Route::get('{id}', [UserController::class, 'show']);
         Route::post('create', [UserController::class, 'create']);
         Route::delete('{id}/delete', [UserController::class, 'destroy']);
-        Route::post('trashed', [UserController::class, 'trashed']); // khóa
         Route::post('{id}/restore', [UserController::class, 'restore']); // mở khóa
         Route::delete('{id}/force-delete', [UserController::class, 'forceDelete']); // xóa
     });

@@ -82,34 +82,28 @@ class UserController extends Controller
 
     public function trashed()
     {
-        $usersTrashed = $this->userRepository->trashed();
-
-        if ($usersTrashed->isEmpty()) {
-            return response()->json([
-                'message' => 'Không có người dùng nào đã xóa!'
-            ], 200);
-        }
+        $data = $this->userRepository->trashed();
 
         return response()->json([
-            'message' => 'Danh sách người dùng đã xóa',
-            'usersTrashed' => $usersTrashed
+            'message' => 'Danh sách người dùng đã xóa.',
+            'data' => $data
         ], 200);
     }
 
-    public function restore(string $id)
+    public function restore($id)
     {
         $user = $this->userRepository->findTrashed($id);
 
         if (!$user) {
             return response()->json([
-                'error' => 'Người dùng không tồn tại!'
+                'message' => 'Không tìm thấy người dùng đã xóa.'
             ], 404);
         }
 
-        $this->userRepository->restore($id);
+        $user->restore();
 
         return response()->json([
-            'message' => 'Khôi phục người dùng thành công!'
+            'message' => 'Khôi phục người dùng thành công.'
         ], 200);
     }
 }
