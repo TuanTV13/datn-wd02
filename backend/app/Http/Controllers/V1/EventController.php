@@ -370,7 +370,7 @@ class EventController extends Controller
         $user = EventUser::where('ticket_code', $ticketCode)->first();
         $user->checked_in = 0;
         $user->save();
-        return response()->json(['message' => 'Check-in thành công']);
+        return response()->json(['message' => 'Hủy check-in thành công']);
     }
 
 }
