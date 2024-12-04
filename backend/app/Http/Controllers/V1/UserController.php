@@ -51,27 +51,30 @@ class UserController extends Controller
             }
 
             $data['email_verified_at'] = now();
+
+            // Thêm mới người dùng
             $user = $this->userRepository->create($data);
 
             $user->assignRole('user');
 
             DB::commit();
 
-            return response()->json(['message' => 'Tạo người dùng thành công!'], 201);
+            return response()->json(['message' => 'Tạo mới người dùng thành công!'], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Đã xảy ra lỗi khi thêm người dùng!'], 500);
+            return response()->json(['error' => 'Đã xảy ra lỗi khi thêm mới người dùng!'], 500);
         }
     }
 
     public function destroy(string $id)
     {
         try {
+            // Tìm người dùng theo ID
             $user = $this->userRepository->find($id);
             if (!$user) {
                 return response()->json(['error' => 'Người dùng không tồn tại!'], 404);
             }
-
+            // Xóa người dùng
             $user->delete();
 
             return response()->json(['message' => 'Xóa người dùng thành công!'], 200);
@@ -105,7 +108,7 @@ class UserController extends Controller
                 'error' => 'Người dùng không tồn tại!'
             ], 404);
         }
-
+        // Khôi phục người dùng
         $this->userRepository->restore($id);
 
         return response()->json([
