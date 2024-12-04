@@ -3,7 +3,8 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DetailEvents = () => {
@@ -14,9 +15,10 @@ const DetailEvents = () => {
   const [showUsers, setShowUsers] = useState(false); // Quản lý popup người dùng
   const [showStatusPopup, setShowStatusPopup] = useState(false); // Popup trạng thái
   const [selectedStatus, setSelectedStatus] = useState(""); // Lưu trạng thái được chọn
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
 
   const { id } = useParams();
-
+ 
   useEffect(() => {
     const fetchEventDetails = async () => {
       const token = localStorage.getItem("access_token");
@@ -52,16 +54,23 @@ const DetailEvents = () => {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     };
-
-  if (window.confirm('xac nhan')) {
+  
     try {
       await axios.put(
         `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
         { status: selectedStatus },
         { headers }
       );
-      alert("Cập nhật trạng thái thành công!");
+      toast.success("Cập nhật trạng thái thành công!", {
+        position: "top-right",
+        autoClose: 3000, // Thời gian tự động đóng (ms)
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       setShowStatusPopup(false);
+  
       // Fetch lại dữ liệu sự kiện
       setLoading(true);
       const response = await axios.get(
@@ -71,10 +80,16 @@ const DetailEvents = () => {
       setEventDetails(response.data);
       setLoading(false);
     } catch (err) {
-      alert("Cập nhật trạng thái thất bại!");
+      toast.error("Cập nhật trạng thái thất bại!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       console.error(err);
     }
-  }
   };
  
 const handleCheckIn = async (id, ticketCode) => {
@@ -203,42 +218,98 @@ const handleCancelCheckIn = async (id, ticketCode) => {
   </button>
 </div>
 
-      {showStatusPopup && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-md w-96">
-            <h3 className="text-xl font-bold mb-4">Thay đổi trạng thái vé</h3>
-            <select
-              className="w-full p-2 border rounded mb-4"
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-            >
-              <option value="" disabled>
-                -- Chọn trạng thái --
-              </option>
-              <option value="confirmed">Confirmed</option>
-              <option value="checkin">Check-in</option>
-              <option value="ongoing">Ongoing</option>
-              <option value="completed">Completed</option>
-              <option value="canceled">Canceled</option>
-            </select>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setShowStatusPopup(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleChangeStatus}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                disabled={!selectedStatus}
-              >
-                Lưu
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+{showStatusPopup && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 ">
+    <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full h-[400px] max-h-[100vh] relative">
+      <button
+        onClick={() => setShowStatusPopup(false)}
+        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+      >
+        <i className="fas fa-times"></i>
+      </button>
+      <h3 className="text-2xl font-semibold mb-6 text-center text-gray-700">
+        Thay đổi trạng thái vé
+      </h3>
+      <div className="mb-4">
+        <label htmlFor="status-select" className="block text-gray-600 mb-2">
+          Chọn trạng thái:
+        </label>
+        <select
+          id="status-select"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+        >
+          <option value="" disabled>
+            -- Chọn trạng thái --
+          </option>
+          <option value="confirmed">Confirmed</option>
+          <option value="checkin">Check-in</option>
+          <option value="ongoing">Ongoing</option>
+          <option value="completed">Completed</option>
+          <option value="canceled">Canceled</option>
+        </select>
+      </div>
+      <div className="flex justify-end space-x-3">
+        <button
+          onClick={() => setShowStatusPopup(false)}
+          className="px-5 py-2 text-sm text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
+        >
+          Hủy
+        </button>
+        <button
+  onClick={() => setShowConfirmPopup(true)}
+  className={`px-5 py-2 text-sm text-white rounded-lg transition-all ${
+    selectedStatus
+      ? "bg-blue-500 hover:bg-blue-600"
+      : "bg-blue-300 cursor-not-allowed"
+  }`}
+  disabled={!selectedStatus}
+>
+  Lưu
+</button>
+
+      </div>
+    </div>
+  </div>
+)}
+{showConfirmPopup && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
+      <button
+        onClick={() => setShowConfirmPopup(false)}
+        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+      >
+        <i className="fas fa-times"></i>
+      </button>
+      <h3 className="text-xl font-semibold mb-4 text-gray-700 text-center">
+        Xác nhận thay đổi trạng thái
+      </h3>
+      <p className="text-gray-600 mb-6 text-center">
+        Bạn có chắc chắn muốn thay đổi trạng thái vé sang{" "}
+        <span className="font-bold text-blue-500">{selectedStatus}</span> không?
+      </p>
+      <div className="flex justify-center space-x-4">
+        <button
+          onClick={() => setShowConfirmPopup(false)}
+          className="px-6 py-2 text-sm text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
+        >
+          Hủy
+        </button>
+        <button
+          onClick={() => {
+            setShowConfirmPopup(false);
+            handleChangeStatus();
+          }}
+          className="px-6 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-all"
+        >
+          Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
    <hr />
       <br /><br />
       <h2 className="text-2xl font-bold text-gray-800 mb-4" >Thông tin sự kiện</h2>
@@ -378,34 +449,51 @@ const handleCancelCheckIn = async (id, ticketCode) => {
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[90vh] overflow-auto">
       <h2 className="text-2xl font-semibold mb-4 text-center">Thông tin Vé</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {tickets.length > 0 ? (
-          tickets.map((ticket) => (
-            <div
-              key={ticket.id}
-              className="p-4 bg-gray-50 rounded-lg shadow-md"
-            >
-              <p className="font-semibold text-gray-800">
-                Loại vé: {ticket.ticket_type}
-              </p>
-              <p className="text-gray-600">Giá: {ticket.price} VND</p>
-              <p className="text-gray-600">Số lượng: {ticket.quantity}</p>
-              <p className="text-gray-600">
-                Khu vực: {ticket.seat_location}
-              </p>
-              <p className="text-gray-600">
-                Ngày mở bán: {new Date(ticket.sale_start).toLocaleString()}
-              </p>
-              <p className="text-gray-600">
-                Ngày kết thúc bán:{" "}
-                {new Date(ticket.sale_end).toLocaleString()}
-              </p>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500 col-span-2 text-center">
-            Chưa có thông tin vé
-          </p>
-        )}
+      {tickets.length > 0 ? (
+  tickets.map((ticket) => (
+    <div
+      key={ticket.id}
+      className="p-4 bg-gray-50 rounded-lg shadow-md mb-4"
+    >
+      <p className="font-semibold text-gray-800">
+        Loại vé: {ticket.ticket_type}
+      </p>
+      {ticket.price && ticket.price.length > 0 ? (
+        ticket.price.map((priceItem) => (
+          <div
+            key={priceItem.id}
+            className="mt-2 p-3 border rounded-lg bg-white shadow-sm"
+          >
+            <p className="text-gray-600">
+              Giá: <span className="font-semibold">{priceItem.price} VND</span>
+            </p>
+            <p className="text-gray-600">
+              Số lượng: <span className="font-semibold">{priceItem.quantity}</span>
+            </p>
+            <p className="text-gray-600">
+              Khu vực: <span className="font-semibold">{priceItem.zone?.name || "Không xác định"}</span>
+            </p>
+            <p className="text-gray-600">
+              Ngày mở bán:{" "}
+              {new Date(priceItem.sale_start).toLocaleString()}
+            </p>
+            <p className="text-gray-600">
+              Ngày kết thúc bán:{" "}
+              {new Date(priceItem.sale_end).toLocaleString()}
+            </p>
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500">Chưa có thông tin giá vé.</p>
+      )}
+    </div>
+  ))
+) : (
+  <p className="text-gray-500 col-span-2 text-center">
+    Chưa có thông tin vé.
+  </p>
+)}
+
       </div>
 
       <hr className="my-6" />
