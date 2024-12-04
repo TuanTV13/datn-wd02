@@ -57,8 +57,11 @@ class EventRepository
 
     public function find($id)
     {
-        return $this->event->with('tickets')->find($id);
+        return $this->event
+            ->with(['tickets'])
+            ->find($id);
     }
+
 
     public function findDetail($id)
     {
@@ -161,7 +164,7 @@ class EventRepository
             ->orderBy('registrants_count', 'desc')
             ->limit(10)
             ->get();
-    }  
+    }
 
     public function getTopRatedEvents()
     {
@@ -235,7 +238,7 @@ class EventRepository
 
         return $eventCount;
     }
-    
+
     /**
      * Thống kê sự kiện theo thể loại (chỉ lấy sự kiện có trạng thái confirmed)
      */
@@ -256,13 +259,13 @@ class EventRepository
                 ->whereNull('deleted_at') // Lọc các sự kiện không bị xóa
                 ->groupBy('event_type') // Nhóm theo event_type
                 ->get();
-    
+
             return $statistics;
         } catch (\Exception $e) {
             throw new \Exception("Lỗi khi lấy thống kê theo event_type: " . $e->getMessage());
         }
     }
-        
+
     public function getStatisticsByProvinceAndStatus($status, $startDate, $endDate)
     {
         try {
@@ -286,7 +289,7 @@ class EventRepository
             throw new \Exception("Lỗi khi lấy thống kê theo tỉnh/thành phố: " . $e->getMessage());
         }
     }
-        
+
     // Add this method to the EventRepository
     public function getTopParticipantsEvents($limit, $startDate, $endDate)
     {
@@ -299,7 +302,7 @@ class EventRepository
             ->limit($limit)
             ->get();
     }
-           
+
     public function getEventStatusStatistics($startDate, $endDate)
     {
         try {
@@ -356,5 +359,4 @@ class EventRepository
             ->whereNull('deleted_at')  // Đảm bảo không lấy sự kiện đã bị xóa (nếu có)
             ->count();  // Đếm số lượng sự kiện
     }
-
 }
