@@ -340,7 +340,10 @@ class EventController extends Controller
     {
         $data = $this->eventRepository->trashed();
 
-        return response()->json($data);
+        return response()->json([
+            'message' => 'Danh sách sự kiện đã bị hủy',
+            'data' => $data
+        ], 200);
     }
 
     public function checkIn($eventId, Request $request)
