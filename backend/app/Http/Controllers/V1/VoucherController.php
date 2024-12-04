@@ -23,7 +23,8 @@ class VoucherController extends Controller
         $this->voucherRepository = $voucherRepository;
     }
 
-    private function jsonResponse($success, $message, $data = [], $status = 200) {
+    private function jsonResponse($success, $message, $data = [], $status = 200)
+    {
         $response = [
             'success' => $success,
             'message' => $message,
@@ -37,6 +38,7 @@ class VoucherController extends Controller
     public function index()
     {
         try {
+            // Lấy danh sách mã gaimr giá
             $vouchers = $this->voucherRepository->getAll();
 
             return $this->jsonResponse(true, 'Lấy danh sách mã giảm giá thành công.', $vouchers);
@@ -50,10 +52,11 @@ class VoucherController extends Controller
     public function create(StoreVoucherRequest $request)
     {
         DB::beginTransaction();
-        
+
         $data = $request->validated();
 
         try {
+            // Thêm mã giảm giá
             $voucher = $this->voucherRepository->create($data);
 
             if ($data['event_id'] ?? false) {
@@ -75,10 +78,11 @@ class VoucherController extends Controller
     public function update(UpdateVoucherRequest $request, $id)
     {
         DB::beginTransaction();
-        
+
         $data = $request->validated();
 
         try {
+            // Cập nhật mã giảm giá
             $voucher = $this->voucherRepository->update($id, $data);
 
             if ($data['event_id'] ?? false) {
@@ -88,7 +92,6 @@ class VoucherController extends Controller
             DB::commit();
 
             return $this->jsonResponse(true, 'Cập nhật mã giảm giá thành công.', $voucher);
-
         } catch (Exception $e) {
             DB::rollback();
 
@@ -101,6 +104,7 @@ class VoucherController extends Controller
     public function delete($id)
     {
         try {
+            // Tìm mã giảm giá theo ID
             $voucher = $this->voucherRepository->findById($id);
 
             if (!$voucher) {
@@ -111,10 +115,10 @@ class VoucherController extends Controller
                 return $this->jsonResponse(false, 'Không thể xóa mã giảm giá.', [], 400);
             }
 
+            // Xóa mã giảm giá
             $this->voucherRepository->delete($voucher->id);
 
             return $this->jsonResponse(true, 'Xóa mã giảm giá thành công.');
-
         } catch (Exception $e) {
             Log::error('Error:' . $e->getMessage());
 
@@ -123,7 +127,7 @@ class VoucherController extends Controller
     }
 
     public function trashed()
-    { 
+    {
         try {
             $vouchersTrashed = $this->voucherRepository->trashed();
 
@@ -139,7 +143,7 @@ class VoucherController extends Controller
         }
     }
 
-    public function restore($id) 
+    public function restore($id)
     {
         try {
             $voucher = $this->voucherRepository->findTrashed($id);
@@ -148,6 +152,7 @@ class VoucherController extends Controller
                 return $this->jsonResponse(false, 'Không tìm thấy mã giảm giá đã xóa.', [], 404);
             }
 
+            // Khôi phục mã giảm giá
             $this->voucherRepository->restore($voucher->id);
 
             return $this->jsonResponse(true, 'Khôi phục mã giảm giá thành công.');
@@ -161,29 +166,29 @@ class VoucherController extends Controller
     public function apply(Request $request, $totalAmount)
     {
         $request->validate([
-            'event_id' => ['required', 'integer'], 
+            'event_id' => ['required', 'integer'],
             'user_id' => ['required', 'integer'],
             'code' => ['required', 'string'],
         ]);
 
         try {
             $voucher = $this->voucherRepository->findByCode($request->code);
-            
+
             if (!$voucher) {
-                return $this->jsonResponse(false, 'Mã giảm giá không hợp lệ.', [], 404);
+                return $this->jsonResponse(false, 'Mã giảm giá của bạn không hợp lệ không hợp lệ.', [], 404);
             }
-            
+
             if ($validateResponse = $this->validateVoucher($voucher, $request->event_id)) {
                 return $validateResponse;
             }
 
             $totalPrice = $this->calculateDiscountPrice($voucher, $totalAmount);
-            
+
             if ($applyResponse = $this->applyVoucherForUser($voucher, $request->user_id)) {
                 return $applyResponse;
             }
 
-            return $this->jsonResponse(true, 'Áp dụng mã giảm giá thành công.', [
+            return $this->jsonResponse(true, 'Bạn đã áp dụng mã giảm giá thành công.', [
                 'total_price' => $totalPrice,
                 'voucher' => $voucher->only(['code', 'discount_value', 'discount_type']),
             ]);
@@ -191,14 +196,14 @@ class VoucherController extends Controller
             Log::info('Total Price before PayPal call: ', ['total_price' => $totalPrice]);
             Log::error('Error:' . $e->getMessage());
 
-            return $this->jsonResponse(false, 'Có lỗi xảy ra khi áp dụng mã giảm giá.', [], 500);
+            return $this->jsonResponse(false, 'Có lỗi xảy ra khi bạn áp dụng mã giảm giá.', [], 500);
         }
     }
 
     private function validateVoucher($voucher, $eventId)
     {
         if ($voucher->status !== 'published') {
-            return $this->jsonResponse(false, 'Mã giảm giá chưa được phát hành.', [], 400);
+            return $this->jsonResponse(false, 'Mã giảm giá này chưa được phát hành.', [], 400);
         }
 
         if ($voucher->event_id != $eventId) {
@@ -209,7 +214,7 @@ class VoucherController extends Controller
             if ($voucher->status !== VoucherStatus::EXPIRED) {
                 $voucher->update(['status' => VoucherStatus::EXPIRED]);
             }
-            return $this->jsonResponse(false, 'Mã giảm giá đã hết hạn.', [], 400);
+            return $this->jsonResponse(false, 'Mã giảm giá này đã hết hạn.', [], 400);
         }
 
         // if ($voucher->status == 'published' && Carbon::parse($voucher->start_time) > now()) {
@@ -222,7 +227,8 @@ class VoucherController extends Controller
         // $totalPrice = 1000000; // Đang fix cứng khi chưa có thông tin về tổng giá trị đơn hàng
 
         return max(
-            $voucher->discount_type === 'percent' ? $totalPrice * ((100 - $voucher->discount_value) / 100) : $totalPrice - $voucher->discount_value, 0
+            $voucher->discount_type === 'percent' ? $totalPrice * ((100 - $voucher->discount_value) / 100) : $totalPrice - $voucher->discount_value,
+            0
         );
     }
 
@@ -238,17 +244,17 @@ class VoucherController extends Controller
                 if ($voucher->status !== VoucherStatus::OUT_OF_STOCK) {
                     $voucher->update(['status' => VoucherStatus::OUT_OF_STOCK]);
                 }
-                return $this->jsonResponse(false, 'Mã giảm giá đã hết lượt sử dụng.', [], 400);
+                return $this->jsonResponse(false, 'Mã giảm giá này đã hết lượt sử dụng.', [], 400);
             }
         }
 
         $discountValue = $voucher->discount_value;
-        $discountType = $voucher->discount_type; 
-        $usedAt = now(); 
+        $discountType = $voucher->discount_type;
+        $usedAt = now();
 
         if ($existVoucher) {
             if ($existVoucher->pivot->used_count == $voucher->used_limit) {
-                return $this->jsonResponse(false, 'Mã giảm giá đã đến tối đa số lần sử dụng.', [], 400);
+                return $this->jsonResponse(false, 'Mã giảm giá này đã đến tối đa số lần sử dụng.', [], 400);
             }
 
             $voucher->users()->updateExistingPivot($userId, [
