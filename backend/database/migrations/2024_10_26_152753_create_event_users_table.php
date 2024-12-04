@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
             $table->string('ticket_type', 255);
+            $table->string('seat_zone');
             $table->string('ticket_code')->unique();
             $table->boolean('checked_in')->default(false);
             $table->dateTime('order_date');

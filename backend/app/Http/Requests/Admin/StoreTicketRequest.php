@@ -22,15 +22,15 @@ class StoreTicketRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'event_id' => 'required|exists:events,id',
+            'event_id' => 'required',
             'ticket_type' => 'required',
             'price' => 'required|numeric|min:1',
             'quantity' => 'required|integer|min:1',
-            'evailable_quantity' => 'nullable|integer',
-            'seat_location' => 'required|string|max:100',
+            'sold_quantity' => 'nullable|integer',
+            'name' => 'required|string|max:100',
             'sale_start' => 'required|date|after_or_equal:today',
             'sale_end' => 'required|date|after:sale_start',
-            'description' => 'nullable|string'
+            // 'description' => 'nullable|string'
         ];
     }
 }

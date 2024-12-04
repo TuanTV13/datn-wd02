@@ -15,7 +15,10 @@ const EventDetail = () => {
     axios.get(`http://127.0.0.1:8000/api/v1/clients/events/${id}`)
       .then((response) => {
         setEvent(response.data.data);
+        console.log("giang",response);
+        
       })
+      
       .catch((error) => {
         console.error("Lỗi khi gọi API:", error);
       });

@@ -65,7 +65,7 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('events')->middleware(['check.jwt', 'check.permission:manage-events'])->group(function () {
         Route::post('create', [EventController::class, 'create']);
-        Route::post('trashed', [EventController::class, 'trashed']);
+        Route::get('trashed', [EventController::class, 'trashed']);
         Route::get('{event}/show', [EventController::class, 'show']);
         Route::put('{event}/update', [EventController::class, 'update']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
@@ -84,10 +84,10 @@ Route::prefix('v1')->group(function () {
     Route::get('users', [UserController::class, 'index']);
 
     Route::prefix('users')->middleware(['check.jwt', 'check.permission:manage-users'])->group(function () {
+        Route::get('trashed', [UserController::class, 'trashed']); // khóa
         Route::get('{id}', [UserController::class, 'show']);
         Route::post('create', [UserController::class, 'create']);
         Route::delete('{id}/delete', [UserController::class, 'destroy']);
-        Route::post('trashed', [UserController::class, 'trashed']); // khóa
         Route::post('{id}/restore', [UserController::class, 'restore']); // mở khóa
         Route::delete('{id}/force-delete', [UserController::class, 'forceDelete']); // xóa
     });
@@ -103,11 +103,11 @@ Route::prefix('v1')->group(function () {
     Route::get('tickets', [TicketController::class, 'index']);
     Route::prefix('tickets')->group(function () {
         Route::get('{id}', [TicketController::class, 'show']); // chi tiết vé
-        Route::post('/block', [TicketController::class, 'getAll']);
+        Route::post('/block', [TicketController::class, 'listBlock']);
         Route::get('block/{id}', [TicketController::class, 'getBlockById']); // danh sách vé bị khóa
         Route::post('create', [TicketController::class, 'create']);
-        Route::put('{id}/update', [TicketController::class, 'update']);
-        Route::delete('{id}/delete', [TicketController::class, 'delete']);
+        Route::put('{id}/update/{seatZoneId}', [TicketController::class, 'update']);
+        Route::delete('{id}/delete/{seatZoneId}', [TicketController::class, 'delete']);
         Route::post('{id}/restore', [TicketController::class, 'restoreTicket']); // mở khóa vé
         Route::put('{id}/verified', [TicketController::class, 'verifiedTicket']); // xác nhận vé
         Route::get('{eventId}/{ticketType}', [TicketController::class, 'findTicketDataByEventAndType']); // ?
@@ -129,7 +129,6 @@ Route::prefix('v1')->group(function () {
         Route::delete('{id}/delete', [VoucherController::class, 'delete']);
         Route::get('trashed', [VoucherController::class, 'trashed']);
         Route::post('{id}/restore', [VoucherController::class, 'restore']);
-
     });
 
     Route::get('feedbacks', [FeedbackController::class, 'index']);
@@ -177,40 +176,37 @@ Route::prefix('v1')->group(function () {
         Route::prefix('statistics')->group(function () {
             // Route để lấy danh sách các sự kiện có doanh thu cao nhất trong khoảng thời gian
             Route::get('/top-revenue', [StatisticsController::class, 'topRevenueEvents']);
-    
+
             // Route để lấy thống kê số sự kiện hoàn thành trong khoảng thời gian
             Route::get('/event-statistics', [StatisticsController::class, 'getEventStatisticsByTime']);
-        
+
             // Route để lấy thống kê sự kiện theo thể loại (chỉ sự kiện đã được xác nhận)
             Route::get('/statistics-by-category', [StatisticsController::class, 'getEventCountTotalAmountAndPercentageByEventType']);
-        
+
             // Route để lấy thống kê sự kiện theo tỉnh/thành phố (chỉ sự kiện đã được xác nhận)
             Route::get('/statistics-by-province', [StatisticsController::class, 'getEventCountTotalAmountAndPercentageByProvince']);
-        
+
             // Route để lấy danh sách các sự kiện có số lượng người tham gia cao nhất trong khoảng thời gian
             Route::get('/top-participants', [StatisticsController::class, 'topParticipantsEvents']);
-    
-    
+
+
             // Route để lấy thống kê số sự kiện đã xác nhận và bị hủy bỏ trong khoảng thời gian
             Route::get('/event-status-statistics', [StatisticsController::class, 'getEventStatusStatistics']);
-    
+
             // Route để lấy doanh thu và số lượng người tham gia của các sự kiện trong khoảng thời gian
             Route::get('/event-revenue-participants', [StatisticsController::class, 'getEventRevenueAndParticipants']);
         });
 
 
-    // Lấy danh sách giao dịch
-    Route::get('/transactions', [TransactionController::class, 'getTransactionHistory']);
-    
-    // Lấy giao dịch theo ID
-    Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
-    
-    
+        // Lấy danh sách giao dịch
+        Route::get('/transactions', [TransactionController::class, 'getTransactionHistory']);
+
+        // Lấy giao dịch theo ID
+        Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
 
 
-        });
-  
     });
+});
 
 Route::post('/vnpay/return', [PaymentController::class, 'handleVNPayResponse']);
 
@@ -219,5 +215,3 @@ Route::post('/notify-momo', [PaymentController::class, 'notifyMomo']);
 
 
 Route::post('/upload-image', [ImageController::class, 'upload']);
-
-

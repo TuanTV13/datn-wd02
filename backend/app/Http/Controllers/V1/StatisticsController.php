@@ -432,6 +432,7 @@ public function getEventCountTotalAmountAndPercentageByProvince()
             }
     
             return ['start' => $startDate, 'end' => $endDate];
+
         }
     }
         // return response()->json([

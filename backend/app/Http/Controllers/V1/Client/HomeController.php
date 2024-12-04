@@ -13,32 +13,32 @@ class HomeController extends Controller
     {
         $this->eventRepository = $eventRepository;
     }
-            
+
     public function headerEvents()
     {
         $headerEvents = $this->eventRepository->getHeaderEvents();
 
         if ($headerEvents->isEmpty()) {
             return response()->json([
-                'message' => 'Không có sự kiện nào được hiển thị ở đầu trang.'
+                'message' => 'Không có sự kiện nào được hiển thị ở đầu trang!'
             ]);
         }
-    
+
         return response()->json([
             'data' => $headerEvents
         ], 200);
     }
-    
+
     public function upcomingEvents($province = null)
     {
         $upcomingEvents = $this->eventRepository->getUpcomingEvents($province);
 
         if ($upcomingEvents->isEmpty()) {
             return response()->json([
-                'message' => 'Không có sự kiện nào sắp diễn ra.'
+                'message' => 'Không có sự kiện nào sắp diễn ra!'
             ], 404);
         }
-    
+
         return response()->json([
             'data' => $upcomingEvents
         ], 200);
@@ -68,7 +68,7 @@ class HomeController extends Controller
                 'message' => 'Không có sự kiện nào được đánh giá cao.'
             ]);
         }
-    
+
         return response()->json([
             'data' => $topRatedEvents
         ], 200);
