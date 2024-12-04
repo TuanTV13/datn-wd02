@@ -103,11 +103,11 @@ Route::prefix('v1')->group(function () {
     Route::get('tickets', [TicketController::class, 'index']);
     Route::prefix('tickets')->group(function () {
         Route::get('{id}', [TicketController::class, 'show']); // chi tiết vé
-        Route::post('/block', [TicketController::class, 'getAll']);
+        Route::post('/block', [TicketController::class, 'listBlock']);
         Route::get('block/{id}', [TicketController::class, 'getBlockById']); // danh sách vé bị khóa
         Route::post('create', [TicketController::class, 'create']);
-        Route::put('{id}/update', [TicketController::class, 'update']);
-        Route::delete('{id}/delete', [TicketController::class, 'delete']);
+        Route::put('{id}/update/{seatZoneId}', [TicketController::class, 'update']);
+        Route::delete('{id}/delete/{seatZoneId}', [TicketController::class, 'delete']);
         Route::post('{id}/restore', [TicketController::class, 'restoreTicket']); // mở khóa vé
         Route::put('{id}/verified', [TicketController::class, 'verifiedTicket']); // xác nhận vé
         Route::get('{eventId}/{ticketType}', [TicketController::class, 'findTicketDataByEventAndType']); // ?
