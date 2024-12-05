@@ -2,12 +2,10 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { TicketsCT } from "../../../Contexts/TicketContext";
 import { useForm } from "react-hook-form";
-import { Tickets, TicketType } from "../../../interfaces/Ticket";
-import { EventCT } from "../../../Contexts/ClientEventContext";
+import { StatusType, Tickets, TicketType } from "../../../interfaces/Ticket";
 
 const AddTicket = () => {
-  const { onAdd } = useContext(TicketsCT);
-  const { events } = useContext(EventCT);
+  const { onAdd,events } = useContext(TicketsCT);
 
   const {
     register,
@@ -16,6 +14,7 @@ const AddTicket = () => {
   } = useForm<Tickets>();
 
   const [ticketTypesList] = useState(Object.values(TicketType));
+
   const onSubmit = (data: Tickets) => {
     onAdd(data); // Xử lý khi người dùng gửi form
   };
@@ -39,7 +38,7 @@ const AddTicket = () => {
             <select
               id="event_id"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("ticket.ticket_id", { required: true })}
+              {...register("event_id", { required: true })}
             >
               <option value="">Chọn sự kiện</option>
               {events.map((event) => (
@@ -48,7 +47,7 @@ const AddTicket = () => {
                 </option>
               ))}
             </select>
-            {errors.seat_zones?.event_id && (
+            {errors.event_id && (
               <span className="text-red-500">Vui lòng chọn sự kiện</span>
             )}
           </div>
@@ -64,7 +63,7 @@ const AddTicket = () => {
             <select
               id="ticket_type"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("ticket.ticket_type", { required: true })}
+              {...register("ticket_type", { required: true })}
             >
               <option value="">Chọn loại vé</option>
               {ticketTypesList.map((type) => (
@@ -73,10 +72,11 @@ const AddTicket = () => {
                 </option>
               ))}
             </select>
-            {errors.ticket?.ticket_type && (
+            {errors.ticket_type && (
               <span className="text-red-500">Vui lòng chọn loại vé</span>
             )}
           </div>
+
           {/* Trường giá vé */}
           <div>
             <label
@@ -108,9 +108,9 @@ const AddTicket = () => {
               type="text"
               id="name"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("seat_zone_id", { required: true })}
+              {...register("name", { required: true })}
             />
-            {errors.seat_zone_id && (
+            {errors.name && (
               <span className="text-red-500">Vị trí không hợp lệ</span>
             )}
           </div>

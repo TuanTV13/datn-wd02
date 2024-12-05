@@ -14,6 +14,10 @@ export interface Events {
   event_type: string;
   link_online: string;
   max_attendees: number;
+  speakers?: {
+    name: string
+    email: string
+  }[] | undefined
   registed_attendees: number;
   created_at: string;
   category?: {
