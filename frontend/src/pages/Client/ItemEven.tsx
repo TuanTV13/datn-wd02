@@ -17,7 +17,7 @@ const ItemEven = () => {
     "Mới nhất",
     ...new Set(upcomingEvents.map((event) => event.province)),
   ];
-
+  const displayedCities = cities.slice(0, 4);
   const filteredEvents = upcomingEvents.filter((event) => {
     const normalizedProvince = event.province.toLowerCase();
     const normalizedFilter = filter.toLowerCase();
@@ -36,7 +36,7 @@ const ItemEven = () => {
         <div className="flex lg:mt-6">
           <div className="overflow-x-auto w-full">
             <ul className="flex space-x-4 w-max px-4 mb-4 mt-4">
-              {cities.map((city) => (
+              {displayedCities.map((city) => (
                 <li
                   key={city}
                   className={`px-4 py-2 ${
@@ -53,7 +53,7 @@ const ItemEven = () => {
           </div>
         </div>
         <div className="grid lg:pt-8 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-12 mt-4">
-          {featuredEvents && featuredEvents?.length > 0 ? (
+          {upcomingEvents && upcomingEvents?.length > 0 ? (
             filteredEvents
               .slice(0, showUpcoming ? filteredEvents.length : 4)
               .map((event) => (
@@ -73,8 +73,24 @@ const ItemEven = () => {
                   </Link>
                   <div className="text-xs text-gray-700 mb-2 mt-2 h-24">
                     <p>{event.location}</p>
-                    <p className="mt-1">
+                    <p className="mt-2 line-clamp-1">
                       <Link to={"/event-detail/" + event.id}>{event.name}</Link>
+                    </p>
+                    <p className="mt-2">Thành phố tổ chức: {event.province}</p>
+                    <p className="mt-2 line-clamp-1">
+                      Diễn giả:{" "}
+                      {event.speakers &&
+                      JSON.parse(event.speakers).length > 0 ? (
+                        JSON.parse(event.speakers).map((speaker, index) => (
+                          <span key={index} className="inline-block mr-2">
+                            {speaker.name}
+                            {index < JSON.parse(event.speakers).length - 1 &&
+                              ","}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-500">Không có diễn giả</span>
+                      )}
                     </p>
                   </div>
                   <div className="text-xs mb-2">
@@ -162,9 +178,25 @@ const ItemEven = () => {
                   </div>
                   <div className="text-xs text-gray-700 mb-2 h-24">
                     <p className="pt-2">{event.location}</p>
-                    <p className="mt-1">
+                    <p className="mt-1 line-clamp-1">
                       <Link to={"/event-detail/" + event.id}>{event.name}</Link>
                     </p>
+                    <p className="mt-2">Thành phố tổ chức: {event.province}</p>
+                    <p className="mt-2 line-clamp-1">
+                      Diễn giả:{" "}
+                      {event.speakers &&
+                      JSON.parse(event.speakers).length > 0 ? (
+                        JSON.parse(event.speakers).map((speaker, index) => (
+                          <span key={index} className="inline-block mr-2">
+                            {speaker.name}
+                            {index < JSON.parse(event.speakers).length - 1 &&
+                              ","}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-500">Không có diễn giả</span>
+                      )}
+                      </p>
                   </div>
                   <div className="text-xs mb-2">
                     <p className="text-gray-500 hover:text-[#070707]">
@@ -248,9 +280,25 @@ const ItemEven = () => {
                 </div>
                 <div className="text-xs text-gray-700 mb-2 h-24">
                   <p>{event.location}</p>
-                  <p className="mt-1">
+                  <p className="mt-1 line-clamp-1">
                     <Link to={"/event-detail/" + event.id}>{event.name}</Link>
                   </p>
+                  <p className="mt-2">Thành phố tổ chức: {event.province}</p>
+                    <p className="mt-2 line-clamp-1">
+                      Diễn giả:{" "}
+                      {event.speakers &&
+                      JSON.parse(event.speakers).length > 0 ? (
+                        JSON.parse(event.speakers).map((speaker, index) => (
+                          <span key={index} className="inline-block mr-2">
+                            {speaker.name}
+                            {index < JSON.parse(event.speakers).length - 1 &&
+                              ","}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-500">Không có diễn giả</span>
+                      )}
+                      </p>
                 </div>
                 <div className="text-xs mb-2">
                   <p className="text-gray-500 hover:text-[#070707]">
