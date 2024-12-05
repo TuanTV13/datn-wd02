@@ -360,4 +360,24 @@ class EventRepository
             ->whereNull('deleted_at')  // Đảm bảo không lấy sự kiện đã bị xóa (nếu có)
             ->count();  // Đếm số lượng sự kiện
     }
+
+    public function validateEventTimeAndVenue($startTime, $endTime,$ward, $location)
+    {
+        $existingEvent = $this->event->where('location', $location)
+            ->where('ward', $ward)
+            ->where(function ($query) use ($startTime, $endTime) {
+                // Kiểm tra thời gian trùng lặp
+                $query->whereBetween('start_time', [$startTime, $endTime])
+                    ->orWhereBetween('end_time', [$startTime, $endTime]);
+            })
+            ->exists();  // Kiểm tra nếu có sự kiện trùng lặp
+
+        if ($existingEvent) {
+            return response()->json([
+                'message' => 'Sự kiện đã tồn tại trong khoảng thời gian và địa điểm này, bao gồm tỉnh, huyện, và xã.',
+            ], 400); 
+        }
+
+        return null;
+    }
 }

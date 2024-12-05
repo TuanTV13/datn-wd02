@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import QrReader from 'react-qr-scanner'; // Import thư viện
+import { toast } from 'react-toastify';
 const EventDetail = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
@@ -11,19 +12,21 @@ const EventDetail = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [similarEvents, setSimilarEvents] = useState([]);
   const [checkInMode, setCheckInMode] = useState('code'); // 'code' hoặc 'qr'
-  const [selectedZone, setSelectedZone] = useState(null);
+  const [selectedZones, setSelectedZones] = useState({}); 
 
   // Hàm để cập nhật zone đã chọn
   const handleZoneChange = (ticket, zoneId) => {
-    // Tìm zone được chọn trong ticket
-    const selectedPriceItem = ticket.price.find(priceItem => priceItem.zone.id === zoneId);
+    // Tìm zone được chọn trong ticket.price
+    const selectedZones = ticket.price.find((priceItem) => priceItem.zone.id === zoneId);
   
-    if (selectedPriceItem) {
-      setSelectedZone(selectedPriceItem);
-    } else {
-      setSelectedZone(null);
+    if (selectedZones) {
+      setSelectedZones((prevState) => ({
+        ...prevState,
+        [ticket.id]: selectedZones
+      }));
     }
   };
+  
   
   useEffect(() => {
     axios.get(`http://127.0.0.1:8000/api/v1/clients/events/${id}`)
@@ -107,13 +110,31 @@ const EventDetail = () => {
   };
 
   const handleConfirmPurchase = () => {
-    if (selectedTicket && selectedZone) {
+    if (selectedTicket && selectedZones) {
+      console.log("Selected Zones:", selectedZones); // Kiểm tra giá trị của selectedZones
       const ticketId = selectedTicket.id;
       const ticketType = selectedTicket.ticket_type;
-      const price = selectedZone.price;
   
-      // Giả sử URL của trang checkout là '/checkout'
-      const checkoutUrl = `/checkout?ticketId=${encodeURIComponent(ticketId)}&ticketType=${encodeURIComponent(ticketType)}&price=${encodeURIComponent(price)}`;
+      // Lấy thông tin zone được chọn
+      const zoneInfo = selectedZones[selectedTicket.id]?.zone;
+  
+      if (!zoneInfo) {
+        toast.error("Khu vực chưa được chọn hoặc không hợp lệ.");
+        return;
+      }
+  
+      const { id: seatZoneId, name: zoneName } = zoneInfo;
+  
+      // Kiểm tra giá trị price có tồn tại không
+      const price = selectedZones[selectedTicket.id]?.price;
+  
+      if (price === undefined) {
+        alert("Giá chưa được chọn hoặc không hợp lệ.");
+        return;
+      }
+  
+      // Tạo URL với các tham số bổ sung
+      const checkoutUrl = `/checkout?ticketId=${encodeURIComponent(ticketId)}&ticketType=${encodeURIComponent(ticketType)}&price=${encodeURIComponent(price)}&seatZoneId=${encodeURIComponent(seatZoneId)}&zoneName=${encodeURIComponent(zoneName)}`;
   
       // Chuyển hướng đến trang checkout
       window.location.href = checkoutUrl;
@@ -121,6 +142,7 @@ const EventDetail = () => {
       alert("Vui lòng chọn loại vé và khu vực trước khi xác nhận.");
     }
   };
+  
   
   const handleQrCodeScan = (data) => {
     if (data) {
@@ -363,28 +385,34 @@ const EventDetail = () => {
     <div className="mt-3">
       <label className="block text-sm font-medium text-gray-700 mb-2">Chọn khu vực:</label>
       <select
-        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-indigo-500 transition duration-300 ease-in-out"
-        onChange={(e) => handleZoneChange(ticket, parseInt(e.target.value))}
-        value={selectedZone?.zone.id || ""}
-      >
-        <option value="" disabled>Chọn zone</option>
-        {ticket.price.map((priceItem) => (
-          <option key={priceItem.zone.id} value={priceItem.zone.id}>
-            {priceItem.zone.name}
-          </option>
-        ))}
-      </select>
+  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-indigo-500 transition duration-300 ease-in-out"
+  onChange={(e) => handleZoneChange(ticket, parseInt(e.target.value))}
+  value={selectedZones[ticket.id]?.zone?.id || ""}
+>
+  <option value="" disabled>Chọn Khu vực</option>
+  {ticket.price.map((priceItem) => (
+    <option key={priceItem.zone.id} value={priceItem.zone.id}>
+      {priceItem.zone.name}
+    </option>
+  ))}
+</select>
+
     </div>
 
     {/* Hiển thị thông tin giá và số lượng nếu zone đã chọn */}
-    {selectedZone && selectedZone.zone ? (
-      <div className="mt-4 p-4 border-t border-gray-300 bg-blue-50 rounded-md shadow-sm">
-        <p className="text-sm text-gray-800 font-medium">Giá: <span className="font-bold text-green-600">{selectedZone.price} VND</span></p>
-        <p className="text-sm text-gray-800 font-medium">Số lượng còn lại: <span className="font-bold text-red-600">{selectedZone.sold_quantity}</span></p>
-      </div>
-    ) : (
-      <p className="mt-4 text-sm text-gray-500">Chọn zone để xem thông tin giá và số lượng</p>
-    )}
+    {selectedZones[ticket.id] && selectedZones[ticket.id].zone ? (
+  <div className="mt-4 p-4 border-t border-gray-300 bg-blue-50 rounded-md shadow-sm">
+    <p className="text-sm text-gray-800 font-medium">
+      Giá: <span className="font-bold text-green-600">{selectedZones[ticket.id].price} VND</span>
+    </p>
+    <p className="text-sm text-gray-800 font-medium">
+      Số lượng còn lại: <span className="font-bold text-red-600">{selectedZones[ticket.id].sold_quantity}</span>
+    </p>
+  </div>
+) : (
+  <p className="mt-4 text-sm text-gray-500">Chọn zone để xem thông tin giá và số lượng</p>
+)}
+
   </div>
 ))}
 

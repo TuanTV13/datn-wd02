@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Input, Select, Modal } from 'antd';
 import { getEvents, deleteEvent } from '../../../api_service/event';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const EventList = () => {
   const [list, setList] = useState([]);
@@ -67,10 +68,10 @@ const EventList = () => {
       const updatedList = list.filter((event) => event.id !== deletingEventId);
       setList(updatedList);
       setFilteredEvents(updatedList);
-      alert('Xóa sự kiện thành công!');
+      toast.success('Xóa sự kiện thành công!');
     } catch (error) {
       console.error('Lỗi khi xóa sự kiện:', error);
-      alert('Xóa sự kiện không thành công!');
+      toast.error('Xóa sự kiện không thành công!');
     }
     setDeletingEventId(null);
     setConfirmModalIsOpen(false);
