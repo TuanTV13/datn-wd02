@@ -125,6 +125,11 @@ const CategoryEven = () => {
     fetchEventsByCategory(id!);
   }, []);
 
+  const stripHtmlTags = (html: string) => {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  };
   return (
     <div className="lg:mx-10 mt-36">
       <div className="flex flex-col lg:flex-row">
@@ -322,7 +327,7 @@ const CategoryEven = () => {
                         <div
                           className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
                         >
-                          Mô tả: {item.description}
+                          Mô tả: {stripHtmlTags(item.description)}
                         </div>
 
                         <Link

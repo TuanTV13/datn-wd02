@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import QrReader from 'react-qr-scanner'; // Import thư viện
+import { toast } from 'react-toastify';
 const EventDetail = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
@@ -114,16 +115,26 @@ const EventDetail = () => {
       const ticketId = selectedTicket.id;
       const ticketType = selectedTicket.ticket_type;
   
+      // Lấy thông tin zone được chọn
+      const zoneInfo = selectedZones[selectedTicket.id]?.zone;
+  
+      if (!zoneInfo) {
+        toast.error("Khu vực chưa được chọn hoặc không hợp lệ.");
+        return;
+      }
+  
+      const { id: seatZoneId, name: zoneName } = zoneInfo;
+  
       // Kiểm tra giá trị price có tồn tại không
-      const price = selectedZones[selectedTicket.id] ? selectedZones[selectedTicket.id].price : undefined;
+      const price = selectedZones[selectedTicket.id]?.price;
   
       if (price === undefined) {
         alert("Giá chưa được chọn hoặc không hợp lệ.");
         return;
       }
   
-      // Giả sử URL của trang checkout là '/checkout'
-      const checkoutUrl = `/checkout?ticketId=${encodeURIComponent(ticketId)}&ticketType=${encodeURIComponent(ticketType)}&price=${encodeURIComponent(price)}`;
+      // Tạo URL với các tham số bổ sung
+      const checkoutUrl = `/checkout?ticketId=${encodeURIComponent(ticketId)}&ticketType=${encodeURIComponent(ticketType)}&price=${encodeURIComponent(price)}&seatZoneId=${encodeURIComponent(seatZoneId)}&zoneName=${encodeURIComponent(zoneName)}`;
   
       // Chuyển hướng đến trang checkout
       window.location.href = checkoutUrl;
@@ -131,6 +142,7 @@ const EventDetail = () => {
       alert("Vui lòng chọn loại vé và khu vực trước khi xác nhận.");
     }
   };
+  
   
   const handleQrCodeScan = (data) => {
     if (data) {
