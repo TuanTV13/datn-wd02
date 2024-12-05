@@ -40,6 +40,7 @@ const HomeContexts = ({ children }: Props) => {
         (async () => {
           try {
             const data = await getUpcomingEvents();
+            console.log(data)
           setUpcomingEvents(data);
           } catch (error) {
             setUpcomingEvents([])
