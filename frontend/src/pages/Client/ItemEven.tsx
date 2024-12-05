@@ -53,7 +53,7 @@ const ItemEven = () => {
           </div>
         </div>
         <div className="grid lg:pt-8 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-12 mt-4">
-          {featuredEvents && featuredEvents.length > 0 ? (
+          {featuredEvents && featuredEvents?.length > 0 ? (
             filteredEvents
               .slice(0, showUpcoming ? filteredEvents.length : 4)
               .map((event) => (

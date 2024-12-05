@@ -1,19 +1,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { TicketsCT } from "../../../Contexts/TicketContext";
-import { Tickets } from "../../../interfaces/Ticket";
+import { DeletedTicket } from "../../../interfaces/Ticket";
 import api from "../../../api_service/api";
+import { message } from 'antd';
 
 const ListTicketDelete = () => {
   const { onRestore } = useContext(TicketsCT);
-  const [ticketDelete, setTicketDelete] = useState<Tickets[]>([]); // Dữ liệu vé đã xóa
+  const [ticketDelete, setTicketDelete] = useState<DeletedTicket[]>([]); // Dữ liệu vé đã xóa
 
   useEffect(() => {
     // Gọi API POST để lấy danh sách vé đã xóa
     const fetchDeletedTickets = async () => {
       try {
         const response = await api.post("/tickets/block");
-        setTicketDelete(response.data);
+        console.log(response.data.message)
+        setTicketDelete(response.data.message);
       } catch (error) {
         console.error("Error fetching deleted tickets:", error);
       }
@@ -22,8 +24,8 @@ const ListTicketDelete = () => {
     fetchDeletedTickets();
   }, []);
 
-  const handleRestore = (id: number) => {
-    onRestore(id); // Hàm khôi phục vé
+  const handleRestore = (id: number,seatId: number) => {
+    onRestore(id,seatId); // Hàm khôi phục vé
   };
 
   return (
@@ -49,7 +51,7 @@ const ListTicketDelete = () => {
             <button className="bg-gray-200 px-4 py-2 rounded-[10px]">
               Bộ lọc
             </button>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-[10px]">
+            <button className="bg-green-500 text-white px-4 py-2 rounded-[10px]">
               Xuất PDF
             </button>
           </div>
@@ -58,18 +60,9 @@ const ListTicketDelete = () => {
           <thead className="bg-gray-100 items-center text-center">
             <tr>
               <th className="p-4 border border-gray-300">STT</th>
-              <th className="p-4 border border-gray-300">Mã vé</th>
               <th className="p-4 border border-gray-300">Tên sự kiện</th>
               <th className="p-4 border border-gray-300">Loại vé</th>
-              <th className="p-4 border border-gray-300">Số lượng</th>
               <th className="p-4 border border-gray-300">Trạng thái</th>
-              <th className="p-4 border border-gray-300">Giá</th>
-              <th className="p-4 border border-gray-300">
-                Thời gian bắt đầu bán
-              </th>
-              <th className="p-4 border border-gray-300">
-                Thời gian kết thúc bán
-              </th>
               <th className="p-4 border border-gray-300">Thao tác</th>
             </tr>
           </thead>
@@ -78,24 +71,13 @@ const ListTicketDelete = () => {
               ticketDelete.map((item, index) => (
                 <tr key={item.id}>
                   <td className="p-4 border border-gray-300">{index + 1}</td>
-                  <td className="p-4 border border-gray-300">{item.id}</td>
                   <td className="p-4 border border-gray-300">
-                    {item.event?.name}
+                  {item.event_id}
                   </td>
                   <td className="p-4 border border-gray-300">
-                    {item.ticket_type}
-                  </td>
-                  <td className="p-4 border border-gray-300">
-                    {item.quantity}
+                  {item.ticket_type}
                   </td>
                   <td className="p-4 border border-gray-300">{item.status}</td>
-                  <td className="p-4 border border-gray-300">{item.price}</td>
-                  <td className="p-4 border border-gray-300">
-                    {item.sale_start}
-                  </td>
-                  <td className="p-4 border border-gray-300">
-                    {item.sale_end}
-                  </td>
                   <td className="p-4 border border-gray-300">
                     <button
                       className="bg-green-500 text-white px-1 py-1 rounded"
@@ -114,7 +96,7 @@ const ListTicketDelete = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="10" className="text-center py-4">
+                <td colSpan={10} className="text-center py-4">
                   Không có vé nào đã xóa.
                 </td>
               </tr>

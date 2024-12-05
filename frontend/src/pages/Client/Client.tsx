@@ -6,7 +6,9 @@ const Client = () => {
   return (
     <div>
       <Header/>
+      <div className='min-h-[900px]'>
       <Outlet/>
+      </div>
       <Footer/>
     </div>
   )
