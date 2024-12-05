@@ -152,13 +152,13 @@ class EventController extends Controller
             if ($validationError) {
                 return $validationError;  // Trả về lỗi nếu có sự kiện trùng lặp
             }
-            // if ($request->has('speakers') && is_string($request->speakers)) {
-            //     $data['speakers'] = json_decode($request->speakers, true);
-            // } elseif ($request->has('speakers') && is_array($request->speakers)) {
-            //     $data['speakers'] = json_encode($request->speakers);
-            // } else {
-            //     $data['speakers'] = null;
-            // }
+            if ($request->has('speakers') && is_string($request->speakers)) {
+                $data['speakers'] = json_decode($request->speakers, true);
+            } elseif ($request->has('speakers') && is_array($request->speakers)) {
+                $data['speakers'] = json_encode($request->speakers);
+            } else {
+                $data['speakers'] = null;
+            }
 
             $data['display_header'] ??= 0;
             if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
