@@ -206,7 +206,7 @@ class PaymentController extends Controller
                     ->setCancelUrl(route('payment.cancel', compact(['transaction_id', 'ticket_id'])));
 
                 // Tạo URL thanh toán PayPal
-                $paymentUrl = $paypalService->createPayment('Thanh toán vé cho sự kiện #' . $ticket->id);
+                $paymentUrl = $paypalService->createPayment('Thanh toán vé cho sự kiện #' . $ticket->event_id);
 
                 // Lưu dữ liệu thông tin người dùng mua vé
                 $user->events()->attach($ticket->event_id, [
@@ -226,34 +226,31 @@ class PaymentController extends Controller
                 // session()->flush();
                 return response()->json(['message' => 'Chuyển hướng đến PayPal', 'payment_url' => $paymentUrl]);
             } elseif ($request->payment_method === 'vnpay') {
-                DB::beginTransaction(); // Bắt đầu giao dịch
+
+                    $transaction = $this->transactionRepository->createTransaction($transactionData);
+                    Log::info('VNPay transaction', ['transaction' => $transaction]);
+                    $transaction_id = $transaction->id;
+                    Log::info('VNPay transaction_id', ['transaction_id' => $transaction_id]);
             
-                try {
+                    // Đính kèm dữ liệu người dùng mua vé
+                    $user->events()->attach($zone->event_id, [
+                        'ticket_id' => $ticket->id,
+                        'ticket_type' => $ticket->ticket_type,
+                        'ticket_code' => $ticketCode,
+                        'seat_zone' => $zone->name,
+                        'checked_in' => false,
+                        'order_date' => now(),
+                        'original_price' => $ticketZone->price,
+                        'discount_code' => $discountCode ?? null,
+                        'amount' => $totalAmount,
+                    ]);
+            
+                    DB::commit(); // Commit giao dịch trước khi gọi VNPay Service
+            
                     $vnpayService = new VNPayService();
             
-                    // Lưu dữ liệu giao dịch sau khi tạo URL thành công
-                    $transaction = $this->transactionRepository->createTransaction($transactionData);
-
-                    $transaction_id = $transaction->id;
-
-                $user->events()->attach($zone->event_id, [
-                    'ticket_id' => $ticket->id,
-                    'ticket_type' => $ticket->ticket_type,
-                    'ticket_code' => $ticketCode,
-                    'seat_zone' => $zone->name,
-                    'checked_in' => false,
-                    'order_date' => now(),
-                    'original_price' => $ticketZone->price,
-                    'discount_code' => $discountCode ?? null,
-                    'amount' => $totalAmount,
-                ]);
-                
-                DB::commit();
-
-                $vnpayService = new VNPayService();
-
-                // Gọi trực tiếp phương thức create trong VNPayService để tạo URL thanh toán
-                return $vnpayService->create($request, $transaction_id);
+                    // Gọi hàm tạo URL thanh toán VNPay
+                    return $vnpayService->create($request, $transaction_id, $zone->id);
             } else {
                 // Lưu thông tin giao dịch
                 $transaction = $this->transactionRepository->createTransaction($transactionData);

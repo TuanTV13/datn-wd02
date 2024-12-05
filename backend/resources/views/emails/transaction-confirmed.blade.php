@@ -109,7 +109,7 @@
 
         <h2>Thông tin vé:</h2>
         <ul>
-            <li><strong>Mã vé:</strong> {{ $transaction->ticket_code }} - <strong>Giá:</strong> {{ $transaction->ticket->price }} VNĐ</li>
+            <li><strong>Mã vé:</strong> {{ $transaction->ticket_code }} - <strong>Link Online:</strong> {{ $event->link_online }}</li>
         </ul>
 
         <div class="qr-code">
