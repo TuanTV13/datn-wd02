@@ -293,76 +293,64 @@ const EventDetail = () => {
 
         </div>
       </div>
-<br />
-<div className="mt-8 p-8 bg-white rounded-lg shadow-md">
-<h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
 
-{event.speakers && event.speakers.length > 0 && (
-  
-<div className="flex flex-wrap justify-center mt-8 gap-6">
-  
-{event.speakers.map((speaker, index) => (
-  <div
-    key={index}
-    className="flex flex-col items-center w-48"
-  >
-    <img
-      src={speaker.image_url}
-      alt={speaker.name}
-      className="w-40 h-40 object-cover rounded-full border-4 border-gray-300"
-    />
-    <p className="mt-4 text-center font-semibold text-lg">{speaker.name}</p>
-    <p className="text-gray-600">Email: {speaker.email}</p>
-    <p className="text-gray-600">Số điện thoại: {speaker.phone}</p>
-    {speaker.profile && (
-      <p className="text-gray-500 text-sm italic mt-2">{speaker.profile}</p>
-    )}
-  </div>
-))}
-</div>
-
-)}
-
-</div>
-      {/* Mô tả sự kiện */}
-      <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">Mô tả sự kiện</h2>
-        <div
-          className="mb-4 text-gray-700 leading-relaxed"
-          dangerouslySetInnerHTML={{
-            __html: event.description.replace(
-              /<img/g,
-              '<img class="max-w-[40%] h-auto mx-auto my-4 p-2 border border-gray-300 rounded-md shadow-sm"'
-            ),
-          }}
-        ></div>
-      </div>
-      {/* Sự kiện tương tự */}
-      <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">Sự kiện tương tự</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {similarEvents.map((event) => (
-            <div key={event.id} className="border p-4 rounded-lg">
-              <img
-                src={event.thumbnail}
-                alt={event.name}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              <h3 className="text-lg font-semibold text-center">
-                {event.name}
-              </h3>
-              <button
-                className="text-blue-500 hover:underline mt-2 block text-center"
-                onClick={() =>
-                  (window.location.href = `/event-detail/${event.id}`)
-                }
-              >
-                Xem chi tiết
-              </button>
+      <div className="mt-8 p-10 bg-gradient-to-r from-indigo-50 via-white to-indigo-100 rounded-xl shadow-lg border-l-4 border-indigo-400">
+  {event.speakers && event.speakers.length > 0 && (
+    <div className="mt-6">
+      <h2 className="text-3xl font-bold text-center text-indigo-600 mb-8 uppercase tracking-wide">
+        Diễn Giả
+      </h2>
+      <div className="flex flex-wrap justify-center gap-10">
+        {event.speakers.map((speaker, index) => (
+          <div
+            key={index}
+            className="relative flex flex-col items-center w-72 p-6 bg-white rounded-xl shadow-md hover:shadow-lg transform transition-all hover:scale-105 border-t-4 border-indigo-400"
+          >
+            <img
+              src={speaker.image_url}
+              alt={speaker.name}
+              className="w-48 h-48 object-cover rounded-full border-4 border-indigo-500 shadow-md"
+            />
+            <div className="absolute top-2 left-2 bg-indigo-600 text-white text-xs px-3 py-1 rounded-full shadow">
+              #{index + 1}
             </div>
-          ))}
-        </div>
+            <p className="mt-6 text-xl font-bold text-indigo-700">{speaker.name}</p>
+            <p className="text-gray-800 mt-2">
+              <span className="font-medium">Email:</span> {speaker.email}
+            </p>
+            <p className="text-gray-800 mt-2">
+              <span className="font-medium">Số điện thoại:</span> {speaker.phone}
+            </p>
+            {speaker.profile && (
+              <p className="text-gray-600 text-sm italic mt-3 text-center">
+                "{speaker.profile}"
+              </p>
+            )}
+          </div>
+        ))}
       </div>
+    </div>
+  )}
+</div>
+
+<div className="mt-10 p-10 bg-gradient-to-r from-indigo-50 via-white to-indigo-100 rounded-xl shadow-lg border-l-4 border-indigo-400">
+  <h2 className="text-3xl font-bold text-indigo-600 mb-6 text-center uppercase tracking-wide">
+    Mô tả sự kiện
+  </h2>
+  <div
+    className="mb-6 text-gray-800 leading-loose text-lg"
+    dangerouslySetInnerHTML={{
+      __html: event.description.replace(
+        /<img/g,
+        '<img class="max-w-[50%] h-auto mx-auto my-6 p-3 border-2 border-indigo-400 rounded-lg shadow-md hover:shadow-lg transition-all"'
+      ),
+    }}
+  ></div>
+</div>
+
+
+      {/* Sự kiện tương tự */}
+    
 
       {/* Hiển thị Popup nếu showPopup là true */}
       {showPopup && (
