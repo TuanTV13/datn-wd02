@@ -378,7 +378,7 @@ class StatisticsController extends Controller
 // Thống kê sự kiện theo tỉnh/thành phố với trạng thái "confirmed"
 public function getEventCountTotalAmountAndPercentageByProvince()
 {
-    // Tính tổng doanh thu của tất cả các sự kiện
+    // Tinh tổng doanh thu tất cả các sự kiện 
     $totalRevenue = DB::table('events')
         ->join('transactions', 'events.id', '=', 'transactions.event_id')
         ->where('events.status', '!=', 'pending')
