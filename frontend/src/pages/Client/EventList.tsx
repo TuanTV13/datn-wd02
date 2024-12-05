@@ -48,7 +48,7 @@ const EventListing = () => {
       console.log("API Response:", response);
       setFilteredEvents(response.data.data.data);
     } catch (error) {
-      setFilteredEvents([]);
+      console.log(error)
     }
   };
 
@@ -107,7 +107,7 @@ const EventListing = () => {
       const data = await fetchEventsByProvince(Inputlocation);
       setFilteredEvents(data); // Cập nhật danh sách sự kiện
     } catch (err) {
-      setFilteredEvents([]); // Xóa danh sách sự kiện cũ
+      console.log(err)
     }
   };
   const [Inputlocation, setLocation] = useState("");
@@ -116,6 +116,11 @@ const EventListing = () => {
     item.name.toLowerCase().includes(Inputlocation.toLowerCase())
   );
 
+  const stripHtmlTags = (html: string) => {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  };
   return (
     <div className="lg:mx-10 mt-36">
       <div className="flex flex-col lg:flex-row">
@@ -292,29 +297,43 @@ const EventListing = () => {
                     </Link>
                   </div>
                   <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
-                    <div className="mt-2 lg:flex">
+                    <div className="lg:flex">
                       <div className="flex flex-col justify-between lg:w-2/3">
                         <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer">
                           <Link to={`/event-detail/${item.id}`}>
                             {item.name}
                           </Link>
                         </h3>
-                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <div className="flex items-center text-gray-600 mb-1 mt-1">
                           <i className="fas fa-clock mr-2"></i>
                           Thời gian bắt đầu: {item.start_time}
                         </div>
-                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <div className="flex items-center text-gray-600 mb-1 mt-1">
                           <i className="fas fa-clock mr-2"></i>
                           Thời gian kết thúc: {item.end_time}
                         </div>
-                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <div className="flex items-center text-gray-600 mb-1 mt-1">
+                        <i className="fa-solid fa-user mr-2"></i>
+                          Diễn giả: 
+                          {item.speakers?.length > 0 ? (
+                            item.speakers?.map((speaker, index) => (
+                              <span className="ml-1">
+                                {speaker.name}
+                                {index < item.speakers.length - 1 && " , "}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="ml-1">Không có diễn giả</span>
+                          )}
+                        </div>
+                        <div className="flex items-center text-gray-600 mb-1 mt-1">
                           <i className="fas fa-map-marker-alt mr-2"></i>
                           Địa điểm: {item.location}
                         </div>
                         <div
-                          className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
+                          className={`flex items-center text-gray-600 mb-1 line-clamp-1`}
                         >
-                          Mô tả: {item.description}
+                          Mô tả: {stripHtmlTags(item.description)}
                         </div>
 
                         <Link
