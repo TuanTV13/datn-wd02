@@ -173,8 +173,8 @@ class PaymentController extends Controller
             ];
 
             // Ghi vào log
-            Log::info('Thông tin vé', ['ticket' => $ticket]);
-            Log::info('Thông tin giao dịch', ['transaction_data' => $transactionData]);
+            // Log::info('Thông tin vé', ['ticket' => $ticket]);
+            // Log::info('Thông tin giao dịch', ['transaction_data' => $transactionData]);
 
             // Tiến hành thanh toán theo phương thức đã chọn
             if ($request->payment_method === 'paypal') {
