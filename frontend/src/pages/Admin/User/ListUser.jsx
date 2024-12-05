@@ -4,7 +4,8 @@ import * as XLSX from "xlsx";
 import axios from "axios";
 import axiosInstance from "../../../axios";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const ListClient = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false); // Modal chi tiết người dùng
   const [editModalIsOpen, setEditModalIsOpen] = useState(false); // Modal chỉnh sửa người dùng
@@ -108,6 +109,7 @@ const ListClient = () => {
         ]);
 
         closeConfirmModal(); // Đóng modal xác nhận xóa
+        toast.success("Xóa người dùng thành công!");
       })
       .catch((error) => {
         if (error?.response?.status === 401) navigate("/auth");
