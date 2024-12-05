@@ -253,6 +253,7 @@ class StatisticsController extends Controller
                 $startDate = $dates['start'];
                 $endDate = $dates['end'];
             } else {
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Vui lòng cung cấp ngày bắt đầu (start_date) và ngày kết thúc (end_date) hoặc chọn khoảng thời gian (time_period).'
