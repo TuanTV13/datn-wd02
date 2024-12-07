@@ -137,18 +137,28 @@ class EventController extends Controller
 
     public function create(StoreEventRequest $request)
     {
-        Log::info('Thông tin vé', ['data' => $request->all()]);
         DB::beginTransaction();
+
         try {
             $data = $request->validated();
 
-            // if ($request->has('speakers') && is_string($request->speakers)) {
-            //     $data['speakers'] = json_decode($request->speakers, true);
-            // } elseif ($request->has('speakers') && is_array($request->speakers)) {
-            //     $data['speakers'] = json_encode($request->speakers);
-            // } else {
-            //     $data['speakers'] = null;
-            // }
+            $validationError = $this->eventRepository->validateEventTimeAndVenue(
+                $data['start_time'],
+                $data['end_time'],
+                $data['ward'],
+                $data['location']
+            );
+
+            if ($validationError) {
+                return $validationError;  // Trả về lỗi nếu có sự kiện trùng lặp
+            }
+            if ($request->has('speakers') && is_string($request->speakers)) {
+                $data['speakers'] = json_decode($request->speakers, true);
+            } elseif ($request->has('speakers') && is_array($request->speakers)) {
+                $data['speakers'] = json_encode($request->speakers);
+            } else {
+                $data['speakers'] = null;
+            }
 
             $data['display_header'] ??= 0;
             if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
@@ -232,12 +242,16 @@ class EventController extends Controller
 
         $data = $request->validated();
 
-        // $validationResult = $this->validateEventTiming($event, $data);
-        // if (!$validationResult['status']) {
-        //     return response()->json([
-        //         'message' => $validationResult['message']
-        //     ], 400);
-        // }
+        $validationError = $this->eventRepository->validateEventTimeAndVenue(
+            $data['start_time'],
+            $data['end_time'],
+            $data['ward'],
+            $data['location']
+        );
+
+        if ($validationError) {
+            return $validationError;
+        }
 
         $data['display_header'] ??= 0;
 
@@ -340,7 +354,10 @@ class EventController extends Controller
     {
         $data = $this->eventRepository->trashed();
 
-        return response()->json($data);
+        return response()->json([
+            'message' => 'Danh sách sự kiện đã bị hủy',
+            'data' => $data
+        ], 200);
     }
 
     public function checkIn($eventId, Request $request)
@@ -370,7 +387,6 @@ class EventController extends Controller
         $user = EventUser::where('ticket_code', $ticketCode)->first();
         $user->checked_in = 0;
         $user->save();
-        return response()->json(['message' => 'Check-in thành công']);
+        return response()->json(['message' => 'Hủy check-in thành công']);
     }
-
 }

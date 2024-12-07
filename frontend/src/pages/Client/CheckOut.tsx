@@ -8,9 +8,10 @@ const CheckOut = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const ticketType = searchParams.get("ticketType");
-  const initialTotalPrice = parseFloat(searchParams.get("totalPrice") || "0");
+  const initialTotalPrice = parseFloat(searchParams.get("price") || "0");
   const ticketId = searchParams.get("ticketId");
-
+  const seatZoneId = searchParams.get('seatZoneId');  
+const zoneName = searchParams.get('zoneName');
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -105,6 +106,7 @@ const CheckOut = () => {
       // Dữ liệu thanh toán gửi đến backend
       const paymentData = {
         ticket_id: ticketId,
+        seat_zone_id: seatZoneId,
         payment_method: paymentMethod,
         name: userInfo.name,
         email: userInfo.email,
@@ -154,6 +156,7 @@ const CheckOut = () => {
       // Chuẩn bị dữ liệu thanh toán với thông tin người dùng nhập
       const paymentData = {
         ticket_id: ticketId,
+        seat_zone_id: seatZoneId,
         payment_method: paymentMethod,
         name: userDetails.name,
         email: userDetails.email,
@@ -161,6 +164,7 @@ const CheckOut = () => {
         discount_code: voucherCode || null,
         amount: totalPrice,
       };
+      console.log(paymentData)
       try {
         const response = await fetch(
           "http://127.0.0.1:8000/api/v1/clients/payment/process",
@@ -173,6 +177,7 @@ const CheckOut = () => {
           }
         );
         const data = await response.json();
+        console.log(response)
         if (response.ok) {
           window.location.href = data.payment_url;
         } else {
@@ -345,6 +350,10 @@ const CheckOut = () => {
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Giá vé</span>
                 <p>{initialTotalPrice}</p>
+              </section>
+              <section className="flex justify-between text-sm">
+                <span className="text-[#9D9EA2]">Khu vực</span>
+                <p>{zoneName}</p>
               </section>
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Tổng cộng</span>

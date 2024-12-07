@@ -51,7 +51,7 @@ class CheckEventStatus extends Command
 
         foreach ($endedEvents as $event) {
             $event->update(['status' => 'completed']);
-            $users = $event->users()->wherePivot('checked_in', 1)->get()->unique('id');
+            // $users = $event->users()->wherePivot('checked_in', 1)->get()->unique('id');
             event(new EventCompleted($users, $event));
 
             $this->info("Đã cập nhật trạng thái sự kiện {$event->id} thành completed và gửi email cảm ơn.");

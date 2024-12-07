@@ -48,13 +48,20 @@ class TicketController extends Controller
         ]);
     }
 
-    public function getAll() {
+    public function listBlock()
+    {
         $data = $this->ticketRepository->trashed();
-    
-        return response()->json($data);
+
+        if ($data->isEmpty()) {
+            return response()->json([
+                'message' => 'Không có vé nào đã bị xóa'
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => $data
+        ]);
     }
-    
-    
 
     public function findTicketDataByEventAndType($eventId = null, $ticketTypeId = null)
     {
@@ -114,45 +121,66 @@ class TicketController extends Controller
     {
         DB::beginTransaction();
         $data = $request->validated();
-        $data['available_quantity'] = $data['quantity'];
+        $data['sold_quantity'] = $data['quantity'];
 
-        $eventId = $data['event_id'];
-        $ticketTypeId = $data['ticket_type'];
-        $event = $this->eventRepository->find($eventId);
+        $ticketType = $request->ticket_type;
+        $zoneName = $request->name;
 
-        if (!$event) {
+        $existingTicket = $this->ticketRepository->findByTicketTypeAndZoneName($ticketType, $zoneName, $request->event_id);
+
+        if ($existingTicket) {
             return response()->json([
-                'message' => 'Sự kiện không tồn tại'
-            ], 404);
+                'message' => 'Vé với loại và khu vực này đã tồn tại, vui lòng kiểm tra lại.',
+            ], 400);
         }
 
-        if ($response = $this->checkSaleEndTime($data['sale_end'], $event->start_time)) {
-            return $response;
-        }
+        $ticketType = $this->ticketRepository->findByType($ticketType, $request->event_id);
 
         try {
-            $existingTicket = $this->ticketRepository->findByEventAndType($eventId, $ticketTypeId);
 
-            if ($existingTicket) {
-                // $existingTicket->quantity += $data['quantity'];
-                // $existingTicket->available_quantity += $data['quantity'];
-                // $existingTicket->save();
+            if ($ticketType) {
 
-                // $ticket = $existingTicket;
+                $zone = $ticketType->zone()->create([
+                    'event_id' => $request->event_id,
+                    'name' => $request->name
+                ]);
 
-                return response()->json([
-                    'message' => 'Vé đã có vui lòng kiểm tra lại',
-                    // 'data' => $ticket
-                ], 404);
+                $data = $ticketType->price()->create([
+                    'event_id' => $request->event_id,
+                    'ticket_id' => $ticketType->id,
+                    'seat_zone_id' => $zone->id,
+                    'price' => $request->price,
+                    'quantity' => $request->quantity,
+                    'sold_quantity' => $data['sold_quantity'],
+                    'sale_start' => $request->sale_start,
+                    'sale_end' => $request->sale_end
+                ]);
             } else {
+
                 $ticket = $this->ticketRepository->create($data);
+
+                $zone = $ticket->zone()->create([
+                    'event_id' => $request->event_id,
+                    'name' => $request->name
+                ]);
+
+                $data = $ticket->price()->create([
+                    'event_id' => $request->event_id,
+                    'ticket_id' => $ticket->id,
+                    'seat_zone_id' => $zone->id,
+                    'price' => $request->price,
+                    'quantity' => $request->quantity,
+                    'sold_quantity' => $data['sold_quantity'],
+                    'sale_start' => $request->sale_start,
+                    'sale_end' => $request->sale_end
+                ]);
             }
 
             DB::commit();
 
             return response()->json([
                 'message' => 'Vé đã được tạo thành công, vui lòng kiểm tra và xác thực trước khi bán',
-                'data' => $ticket
+                'data' => $data
             ], 201);
         } catch (Exception $e) {
             DB::rollBack();
@@ -165,47 +193,25 @@ class TicketController extends Controller
         }
     }
 
-    public function update($id, UpdateTicketRequest $request)
+    public function update($id, $seatId, UpdateTicketRequest $request)
     {
         DB::beginTransaction();
 
         $data = $request->validated();
-        $ticket = $this->ticketRepository->find($id);
-        // dd($ticket->status);
-
-        // $status = EventStatus::PENDING;
-
-        // if (!$ticket) {
-        //     return response()->json([
-        //         'message' => 'Vé không tồn tại'
-        //     ], 404);
-        // }
-
-        // if ($ticket->status != 'pending') {
-        //     return response()->json([
-        //         'message' => 'Không thể cập nhật vé trong trạng thái này'
-        //     ], 403);
-        // }
-
-        $event = $this->eventRepository->find($ticket->event_id);
-        // if (!$event) {
-        //     return response()->json([
-        //         'message' => 'Sự kiện không tồn tại'
-        //     ], 404);
-        // }
-
-        if ($response = $this->checkSaleEndTime($data['sale_end'], $event->start_time)) {
-            return $response;
-        }
+        $ticket = $this->ticketRepository->findById($id);
+        $data['sold_quantity'] = $data['quantity'];
 
         try {
 
-            $ticket = $this->ticketRepository->update($id, $data);
-            $ticket->quantity += $data['quantity'];
-            $ticket->available_quantity += $data['quantity'];
-            $ticket->save();
+            $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
 
-            $ticket = $this->ticketRepository->update($id, $data);
+            $ticketPrice->update([
+                'price' => $request->price,
+                'quantity' => $request->quantity,
+                'sold_quantity' => $data['sold_quantity'],
+                'sale_start' => $request->sale_start,
+                'sale_end' => $request->sale_end
+            ]);
 
             DB::commit();
 
@@ -224,7 +230,7 @@ class TicketController extends Controller
         }
     }
 
-    public function delete($id)
+    public function delete($id, $seatId)
     {
         $ticket = $this->ticketRepository->find($id);
 
@@ -241,7 +247,10 @@ class TicketController extends Controller
         // }
 
         try {
-            $ticket->delete();
+
+            $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
+
+            $ticketPrice->delete();
 
             return response()->json([
                 'message' => 'Vé đã được khóa'
@@ -255,7 +264,7 @@ class TicketController extends Controller
         }
     }
 
-    public function restoreTicket($id)
+    public function restoreTicket($id, $seatId)
     {
         $ticket = $this->ticketRepository->findTrashed($id);
 
@@ -264,8 +273,9 @@ class TicketController extends Controller
                 'message' => 'Không tìm thấy vé hoặc vé không bị hủy'
             ], 404);
         }
+        $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
 
-        $ticket->restore();
+        $ticketPrice->restore();
 
         return response()->json([
             'message' => 'Khôi phục vé thành công'

@@ -14,6 +14,7 @@ class EventUser extends Model
         'user_id',
         'ticket_id',
         'ticket_type',
+        'seat_zone',
         'ticket_code',
         'checked_in',
         'order_date',

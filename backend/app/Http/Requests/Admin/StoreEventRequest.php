@@ -32,7 +32,7 @@ class StoreEventRequest extends FormRequest
             'start_time' => [
                 'required',
                 'date',
-                'after:' . now()->addDays(10)->toDateTimeString(),
+                // 'after:' . now()->addDays(10)->toDateTimeString(),
             ],
             'end_time' => [
                 'required',
@@ -50,7 +50,7 @@ class StoreEventRequest extends FormRequest
                 },
             ],
 
-            'speakers' => 'nullable|string',
+            'speakers' => 'nullable',
 
         ];
     }

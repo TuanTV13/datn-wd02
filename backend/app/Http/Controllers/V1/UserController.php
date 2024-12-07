@@ -110,29 +110,18 @@ class UserController extends Controller
         }
     }
 
-
     public function trashed()
     {
-        // Lấy danh sách người dùng đã bị xóa (soft delete) từ repository
-        $usersTrashed = $this->userRepository->trashed();
-
-        // Kiểm tra nếu danh sách rỗng
-        if ($usersTrashed->isEmpty()) {
-            // Trả về thông báo không có người dùng đã xóa kèm mã HTTP 200
-            return response()->json([
-                'message' => 'Không có người dùng nào đã xóa!'
-            ], 200);
-        }
+        $data = $this->userRepository->trashed();
 
         // Nếu có người dùng đã xóa, trả về danh sách cùng thông báo kèm mã HTTP 200
         return response()->json([
-            'message' => 'Danh sách người dùng đã xóa',
-            'usersTrashed' => $usersTrashed
+            'message' => 'Danh sách người dùng đã xóa.',
+            'data' => $data
         ], 200);
     }
 
-
-    public function restore(string $id)
+    public function restore($id)
     {
         // Tìm người dùng đã bị xóa tạm thời theo ID
         $user = $this->userRepository->findTrashed($id);
@@ -140,16 +129,15 @@ class UserController extends Controller
         // Kiểm tra nếu người dùng không tồn tại
         if (!$user) {
             return response()->json([
-                'error' => 'Người dùng không tồn tại!'
-            ], 404); // Trả về mã HTTP 404 nếu không tìm thấy
+                'message' => 'Không tìm thấy người dùng đã xóa.'
+            ], 404);
         }
 
-        // Khôi phục người dùng bằng phương thức từ repository
-        $this->userRepository->restore($id);
+        $user->restore();
 
         // Trả về thông báo thành công kèm mã HTTP 200
         return response()->json([
-            'message' => 'Khôi phục người dùng thành công!'
+            'message' => 'Khôi phục người dùng thành công.'
         ], 200);
     }
 }

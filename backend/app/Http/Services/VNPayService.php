@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class VNPayService
 {
-    public function create(Request $request, $transaction_id)
+    public function create(Request $request, $transaction_id, $seat_zone_id)
     {
         // Lưu transaction_id vào session để dùng ở return
         session(['cost_id' => $request->id]);
@@ -16,7 +16,7 @@ class VNPayService
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
 
         $vnp_Url = "http://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = "http://127.0.0.1:8000/return-vnpay/" . '?transaction_id=' . $transaction_id;
+        $vnp_Returnurl = "http://127.0.0.1:8000/return-vnpay/" . '?transaction_id=' . $transaction_id . '&seat_zone_id=' . $seat_zone_id;
         $vnp_TxnRef = date("YmdHis");
         $vnp_OrderInfo = "Thanh toán hóa đơn phí dịch vụ";
         $vnp_OrderType = 'billpayment';
