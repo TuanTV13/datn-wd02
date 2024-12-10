@@ -79,12 +79,6 @@ class AuthController extends Controller
             return redirect('/your-react-url?status=already_verified');
         }
 
-        // if ($user->email_verified_at) {
-        //     return response()->json([
-        //         'message' => 'Tài khoản của bạn đã được xác thực trước đó.'
-        //     ]);
-        // }
-
         $user->email_verified_at = now();
         $user->email_verification_token = null;
         $user->save();
@@ -111,23 +105,23 @@ class AuthController extends Controller
     {
         $credentials = $request->validated();
         $user = $this->userRepository->findByEmail($credentials['email']);
-    
+
         if (!$user) {
             return response()->json(['message' => 'Không tìm thấy tài khoản']);
         }
-    
+
         if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             return response()->json(['message' => 'Mật khẩu sai']);
         }
-    
+
         if (!$user->hasVerifiedEmail()) {
             return response()->json(['message' => 'Tài khoản chưa được xác thực'], 403);
         }
-    
+
         if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Thông tin xác thực không hợp lệ'], 401);
         }
-    
+
         $user = Auth::user();
         $token = JWTAuth::fromUser($user);
         // $user = JWTAuth::authenticate($token);
@@ -138,14 +132,14 @@ class AuthController extends Controller
                 'name' => $role->name
             ];
         });
-    
+
         $permissions = $user->getAllPermissions()->map(function ($permission) {
             return [
                 'id' => $permission->id,
                 'name' => $permission->name
             ];
         });
-    
+
         return response()->json([
             'user' => [
                 'id' => $user->id,
@@ -295,10 +289,8 @@ class AuthController extends Controller
             'image' => 'nullable|string|max:2048',
         ]);
 
-        // Tìm thông tin người dùng cần cập nhật theo id
         $user = $this->userRepository->find($id);
 
-        // Cập nhật thông tin người dùng
         $user->update($data);
 
         return response()->json(['message' => 'Cập nhật thành công vui lòng kiểm tra', 'data' => $user]);
@@ -312,20 +304,18 @@ class AuthController extends Controller
             'new_password' => 'required|string|confirmed'
         ]);
 
-        // Tìm người dùng theo id
         $user = $this->userRepository->find($id);
 
         if (!$user) {
             return response()->json(['message' => 'Người dùng không tồn tại'], 404);
         }
 
-        // Kiểm tra mật khẩu cũ
         if (!Hash::check($data['password'], $user->password)) {
             return response()->json([
                 'message' => 'Mật khẩu cũ không đúng'
             ], 403);
         }
-        // Cập nhật mật khẩu mới
+
         $user->update(['password' => bcrypt($data['new_password'])]);
 
         return response()->json([
