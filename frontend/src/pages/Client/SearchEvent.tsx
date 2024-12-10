@@ -18,7 +18,7 @@ const SearchEvent = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const { categories, fetchEventsByCategory } = useContext(CategoryCT);
-  const { events,setEvents, provinces } = useContext(EventCT);
+  const { events, setEvents, provinces } = useContext(EventCT);
 
   // Function to toggle category menu
   const toggleCategory = () => {
@@ -178,176 +178,173 @@ const SearchEvent = () => {
     });
   };
   return (
-    <div className="lg:mx-10 mt-36">
-      <div className="flex flex-col lg:flex-row">
+    <div className="lg:mx-10 mt-36 ">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* <!-- Sidebar --> */}
-        <div className="w-full lg:w-1/4 p-4 bg-white rounded-[30px]  mb-4 lg:mb-0 border">
-          <h2 className="text-4xl font-semibold mb-4">Bộ lọc</h2>
-          <div className="mb-9 ">
+        <div className="w-full lg:w-1/4 bg-white shadow-lg rounded-2xl p-6 border h-fit border-gray-100">
+          <h2 className="text-3xl font-bold text-gray-800 mb-6">Bộ lọc</h2>
+
+          {/* Category Filter */}
+          <div className="mb-6">
             <div
-              className="flex justify-between lg:text-2xl font-medium mb-1 hover:text-[#007BFF] cursor-pointer"
+              className="flex justify-between items-center cursor-pointer text-xl font-semibold text-gray-700 hover:text-blue-600 transition-colors"
               onClick={toggleCategory}
             >
               Danh mục
               <svg
                 xmlns="http://www.w3.org/2000/svg"
+                className={`h-6 w-6 transform transition-transform ${
+                  isCategoryOpen ? "rotate-180" : ""
+                }`}
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
                 stroke="currentColor"
-                className="size-5"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
                 />
               </svg>
             </div>
+
             {isCategoryOpen && (
-              <>
-                {/* Ô input */}
+              <div className="mt-4">
                 <input
                   type="text"
-                  className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Tìm kiếm danh mục..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <ul className="ml-2 text-gray-400 lg:text-base">
+                <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
                   {filteredCategories.map((category) => (
                     <li
                       key={category.id}
-                      className="cursor-pointer hover:text-[#007BFF]"
+                      className="px-2 py-1 hover:bg-blue-50 rounded cursor-pointer text-gray-600 hover:text-blue-600"
                       onClick={() => handleCategoryClick(category.id)}
                     >
                       {category.name}
                     </li>
                   ))}
-                  {filteredCategories.length === 0 && (
-                    <li className="text-gray-500">Không tìm thấy danh mục</li>
-                  )}
                 </ul>
-              </>
+              </div>
             )}
           </div>
 
-          <div className="mb-9 ">
+          {/* Location Filter */}
+          <div className="mb-6">
             <div
-              className="flex justify-between lg:text-2xl font-medium mb-1 hover:text-[#007BFF] cursor-pointer"
+              className="flex justify-between items-center cursor-pointer text-xl font-semibold text-gray-700 hover:text-blue-600 transition-colors"
               onClick={toggleLocation}
             >
               Địa điểm
               <svg
                 xmlns="http://www.w3.org/2000/svg"
+                className={`h-6 w-6 transform transition-transform ${
+                  isLocationOpen ? "rotate-180" : ""
+                }`}
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
                 stroke="currentColor"
-                className="size-5"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
                 />
               </svg>
             </div>
+
             {isLocationOpen && (
-              <>
-                {/* Ô input */}
+              <div className="mt-4">
                 <input
                   type="text"
-                  id="location"
-                  className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Tìm kiếm địa điểm..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                   value={Inputlocation}
                   onChange={(e) => setLocation(e.target.value)}
                 />
-                <ul
-                  className="ml-2 text-gray-400 lg:text-base overflow-y-auto"
-                  style={{ maxHeight: "150px" }}
-                >
-                  {filteredProvince?.map((province) => (
+                <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                  {filteredProvince.map((province) => (
                     <li
-                      onClick={() => handleProvinceClick(province.name)}
                       key={province.id}
-                      className={`cursor-pointer hover:text-[#007BFF] ${
+                      className={`px-2 py-1 rounded cursor-pointer ${
                         selectedProvince === province.name
-                          ? "text-blue-500 font-semibold"
-                          : ""
+                          ? "bg-blue-100 text-blue-600"
+                          : "hover:bg-blue-50 text-gray-600 hover:text-blue-600"
                       }`}
+                      onClick={() => handleProvinceClick(province.name)}
                     >
                       {province.name}
                     </li>
                   ))}
-                  {filteredProvince.length === 0 && (
-                    <li className="text-gray-500">
-                      Không tìm thấy tỉnh/thành phố
-                    </li>
-                  )}
                 </ul>
-              </>
+              </div>
             )}
           </div>
 
-          {/* Bộ lọc ngày */}
-          <div className="mb-9">
-            <label className="flex flex-col space-y-2">
-              <span className="text-lg">Từ ngày:</span>
-              <input
-                type="date"
-                id="start_time"
-                value={start_time}
-                onChange={(e) => setStart_time(e.target.value)}
-                className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </label>
-            <label className="flex flex-col space-y-2 mt-4">
-              <span className="text-lg">Đến ngày:</span>
-              <input
-                type="date"
-                id="end_time"
-                value={end_time}
-                onChange={(e) => setEnd_time(e.target.value)}
-                className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </label>
-            <button
-              onClick={handleApplyFilters}
-              className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]"
-            >
-              Apply
-            </button>
-            <button
-              className="mt-4 ml-2 px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
-              onClick={clearFilters}
-            >
-              Clear
-            </button>
+          {/* Date Filter */}
+          <div className="mb-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-2">Từ ngày:</label>
+                <input
+                  type="date"
+                  value={start_time}
+                  onChange={(e) => setStart_time(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Đến ngày:</label>
+                <input
+                  type="date"
+                  value={end_time}
+                  onChange={(e) => setEnd_time(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleApplyFilters}
+                  className="flex-1 bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
+                >
+                  Áp dụng
+                </button>
+                <button
+                  onClick={clearFilters}
+                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 transition-colors"
+                >
+                  Xóa
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         {/* <!-- Main Content --> */}
         <div className="w-full lg:w-3/4 p-4">
-          <div className=" mb-4 ">
-            <div className="flex justify-between space-x-2  items-center">
-              <h2 className="text-3xl font-semibold">
-                Kết quả tìm kiếm liên quan đến "{searchTerm}"
-              </h2>
-            </div>
+          <div className="mb-4">
+            <h2 className="text-3xl font-semibold text-[#007BFF]">
+              Kết quả tìm kiếm liên quan đến "{searchTerm}"
+            </h2>
           </div>
           <div className="border-b-[1px] border-gray-300 mb-4"></div>
-          {/* <!-- Items --> */}
-          <div className="space-y-4 ">
+
+          <div className="space-y-4">
             {currentEvents.length > 0 ? (
               currentEvents.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]"
+                  className="bg-white p-4 rounded-lg shadow-lg flex flex-col lg:flex-row border border-gray-200 hover:shadow-xl transition-shadow duration-300"
                 >
                   <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
                     <Link to={`/event-detail/${item.id}`}>
                       <img
                         alt={item.name}
-                        className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
+                        className="rounded-lg h-[300px] w-full object-cover transition-transform duration-300 hover:scale-105"
                         src={item.thumbnail}
                       />
                     </Link>
@@ -355,7 +352,7 @@ const SearchEvent = () => {
                   <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
                     <div className="mt-2 lg:flex">
                       <div className="flex flex-col justify-between lg:w-2/3">
-                        <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer line-clamp-1">
+                        <h3 className="text-lg font-semibold text-[#007BFF] hover:underline cursor-pointer">
                           <Link to={`/event-detail/${item.id}`}>
                             {item.name}
                           </Link>
@@ -368,14 +365,14 @@ const SearchEvent = () => {
                           <i className="fas fa-clock mr-2"></i>
                           Thời gian kết thúc: {item.end_time}
                         </div>
-                        <div className="flex items-center text-gray-600 mb-1 mt-1 line-clamp-1">
+                        <div className="flex items-center text-gray-600 mb-1 mt-1">
                           <i className="fa-solid fa-user mr-2"></i>
-                          Diễn giả:
+                          Diễn giả:{" "}
                           {item.speakers?.length > 0 ? (
-                            item.speakers?.map((speaker, index) => (
-                              <span className="ml-1 ">
+                            item.speakers.map((speaker, index) => (
+                              <span key={index} className="ml-1">
                                 {speaker.name}
-                                {index < item.speakers.length - 1 && " , "}
+                                {index < item.speakers.length - 1 && ", "}
                               </span>
                             ))
                           ) : (
@@ -386,22 +383,18 @@ const SearchEvent = () => {
                           <i className="fas fa-map-marker-alt mr-2"></i>
                           Địa điểm: {item.location}
                         </div>
-                        <div
-                          className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
-                        >
+                        <div className="flex items-center text-gray-600 mb-2">
                           Mô tả: {stripHtmlTags(item.description)}
                         </div>
-
                         <Link
                           to={`/event-detail/${item.id}`}
-                          className="text-blue-500 "
+                          className="text-blue-500 hover:underline"
                         >
                           Xem thêm
                         </Link>
                       </div>
-
                       <div className="lg:ml-5 lg:mt-28">
-                        <button className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
+                        <button className="w-full px-8 py- 3 border rounded-lg text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white transition-colors duration-300">
                           <Link to={`/event-detail/${item.id}`}>
                             Xem chi tiết
                           </Link>
@@ -412,7 +405,9 @@ const SearchEvent = () => {
                 </div>
               ))
             ) : (
-              <p>Không tìm thấy sự kiện nào phù hợp.</p>
+              <p className="text-gray-600">
+                Không tìm thấy sự kiện nào phù hợp.
+              </p>
             )}
             <div className="flex items-center justify-center mt-4 space-x-2">
               <button
@@ -424,13 +419,13 @@ const SearchEvent = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
                   className="size-5"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"
                   />
                 </svg>
@@ -447,13 +442,13 @@ const SearchEvent = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
                   className="size-5"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
                   />
                 </svg>
