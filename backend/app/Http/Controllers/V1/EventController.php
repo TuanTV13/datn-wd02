@@ -55,15 +55,6 @@ class EventController extends Controller
         $event = $this->eventRepository->findDetail($eventId);
         $eventS = $this->eventRepository->find($eventId);
         $speakers = $eventS->speakers = $eventS->speakers ? json_decode($eventS->speakers, true) : null;
-        // $eventAttendees = $this->eventRepository->getEventAttendees($eventId);
-
-        // if (is_array($event)) {
-        //     // Nếu $event là mảng
-        //     $speakers = isset($event['speakers']) ? json_decode($event['speakers'], true) : null;
-        // } else {
-        //     // Nếu $event là đối tượng
-        //     $speakers = $event->speakers ? json_decode($event->speakers, true) : null;
-        // }
 
         $event['speakers'] = $speakers;
 
@@ -78,7 +69,6 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Xem chi tiết sự kiện.',
             'data' => $event,
-            // 'users' => $eventAttendees
         ], 200);
     }
 
@@ -108,9 +98,6 @@ class EventController extends Controller
     }
     public function changeStatus($id, Request $request)
     {
-        // $status = $request->validate([
-        //     'status' => 'required'
-        // ]);
 
         $event = $this->eventRepository->find($id);
 
@@ -121,16 +108,6 @@ class EventController extends Controller
         }
 
         $event->update(['status' => $request->input('status')]);
-
-        // if ($event->status == 'pending') {
-        //     $event->status = 'confirmed';
-        //     $event->save();
-
-        //     return response()->json([
-        //         'message' => 'Xác nhận thành công',
-        //         'data' => $event
-        //     ], 200);
-        // }
 
         return response()->json([
             'message' => 'Thanh cong'
@@ -152,7 +129,7 @@ class EventController extends Controller
             );
 
             if ($validationError) {
-                return $validationError;  // Trả về lỗi nếu có sự kiện trùng lặp
+                return $validationError;
             }
             if ($request->has('speakers') && is_string($request->speakers)) {
                 $data['speakers'] = json_decode($request->speakers, true);
@@ -236,12 +213,6 @@ class EventController extends Controller
             ], 404);
         }
 
-        // if ($event->status != "pending") {
-        //     return response()->json([
-        //         'message' => 'Sự kiện đã được xác nhận không thể cập nhật'
-        //     ], 403);
-        // }
-
         $data = $request->validated();
 
         $validationError = $this->eventRepository->validateEventTimeAndVenue(
@@ -262,7 +233,7 @@ class EventController extends Controller
         }
 
         try {
-            // Cập nhật sự kiện
+
             $event->update($data);
             event(new EventUpdate($event));
 
@@ -288,12 +259,6 @@ class EventController extends Controller
                 'message' => 'Không tồn tại sự kiện nào'
             ], 404);
         }
-
-        // if ($event->status_id != "PENDING") {
-        //     return response()->json([
-        //         'message' => 'Sự kiện đã được xác nhận không thể hủy'
-        //     ], 403);
-        // }
 
         $event->delete();
 
@@ -367,10 +332,6 @@ class EventController extends Controller
         $ticketCode = $request->input('ticket_code');
         $event = $this->eventRepository->find($eventId);
 
-        // if (!$event) {
-        //     return response()->json(['message' => 'Sự kiện không tồn tại'], 404);
-        // }
-
         $user = EventUser::where('ticket_code', $ticketCode)->first();
         $user->checked_in = 1;
         $user->save();
@@ -381,10 +342,6 @@ class EventController extends Controller
     {
         $ticketCode = $request->input('ticket_code');
         $event = $this->eventRepository->find($eventId);
-
-        // if (!$event) {
-        //     return response()->json(['message' => 'Sự kiện không tồn tại'], 404);
-        // }
 
         $user = EventUser::where('ticket_code', $ticketCode)->first();
         $user->checked_in = 0;
