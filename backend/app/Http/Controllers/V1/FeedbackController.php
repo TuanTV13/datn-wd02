@@ -50,13 +50,6 @@ class FeedbackController extends Controller
             return response()->json(['message' => 'Người dùng không tồn tại.'], 404);
         }
 
-        // return response()->json([
-        //     'message' => 'Form đánh giá',
-        //     'data'    => [
-        //         'event' => $event->only(['id', 'name']),
-        //         'user'  => $user->only(['id', 'name', 'email']),
-        //     ],
-        // ], 200);
         return view('emails.evaluation', compact('event', 'user'));
     }
 
