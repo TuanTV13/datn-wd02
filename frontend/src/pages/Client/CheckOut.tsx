@@ -8,19 +8,23 @@ const CheckOut = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const ticketType = searchParams.get("ticketType");
-  const initialTotalPrice = parseFloat(searchParams.get("price") || "0");
   const ticketId = searchParams.get("ticketId");
-  const seatZoneId = searchParams.get('seatZoneId');  
-const zoneName = searchParams.get('zoneName');
+  const seatZoneId = Number(searchParams.get("seatZoneId") || 1);
+  const quantity = searchParams.get("quantity");
+  const initialTotalPrice = parseFloat(searchParams.get("price") || "0");
+
+  const zoneName = searchParams.get("zoneName");
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
     phone: "",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [voucherCode, setVoucherCode] = useState("");
-  const [totalPrice, setTotalPrice] = useState(initialTotalPrice);
+  const [totalPrice, setTotalPrice] = useState(
+    initialTotalPrice * Number(quantity)
+  );
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
 
   useEffect(() => {
@@ -42,10 +46,12 @@ const zoneName = searchParams.get('zoneName');
             phone: userData.phone || "",
           });
         })
-        .catch((error) => console.error("Error fetching user data:", error));
+        .catch((error) => {
+          if (error?.response?.status === 401) navigate("/auth");
+        });
     }
   }, []);
-
+  console.log(userInfo);
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setUserInfo((prevState) => ({
@@ -164,7 +170,8 @@ const zoneName = searchParams.get('zoneName');
         discount_code: voucherCode || null,
         amount: totalPrice,
       };
-      console.log(paymentData)
+
+      console.log(paymentData);
       try {
         const response = await fetch(
           "http://127.0.0.1:8000/api/v1/clients/payment/process",
@@ -177,7 +184,7 @@ const zoneName = searchParams.get('zoneName');
           }
         );
         const data = await response.json();
-        console.log(response)
+        console.log(response);
         if (response.ok) {
           window.location.href = data.payment_url;
         } else {
@@ -245,6 +252,7 @@ const zoneName = searchParams.get('zoneName');
               </span>
               <input
                 type="text"
+                required
                 name="name"
                 className="h-12 border px-4 text-sm"
                 placeholder="Vui lòng nhập họ và tên"
@@ -264,6 +272,7 @@ const zoneName = searchParams.get('zoneName');
                 </label>
                 <input
                   id="phone"
+                  required
                   type="text"
                   className="h-12 rounded-lg border px-4 text-sm"
                   placeholder="+84"
@@ -282,6 +291,7 @@ const zoneName = searchParams.get('zoneName');
                 <input
                   id="email"
                   type="text"
+                  required
                   className="h-12 border rounded-lg px-4 text-sm"
                   placeholder="abc@gmail.com"
                   name="email"
@@ -321,6 +331,8 @@ const zoneName = searchParams.get('zoneName');
                     className="mr-2"
                     type="radio"
                     name="paymentMethod"
+                    defaultChecked
+                    aria-checked
                     value="vnpay"
                     checked={paymentMethod === "vnpay"}
                     onChange={handlePaymentMethodChange}
@@ -350,6 +362,10 @@ const zoneName = searchParams.get('zoneName');
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Giá vé</span>
                 <p>{initialTotalPrice}</p>
+              </section>
+              <section className="flex justify-between text-sm">
+                <span className="text-[#9D9EA2]">Số vé</span>
+                <p>{quantity}</p>
               </section>
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Khu vực</span>

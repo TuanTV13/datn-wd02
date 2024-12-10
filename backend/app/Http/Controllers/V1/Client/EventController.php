@@ -103,9 +103,9 @@ class EventController extends Controller
             ], 404);
         }
 
-        $now = Carbon::now(); 
+        $now = Carbon::now();
 
-        $availableTickets = []; 
+        $availableTickets = [];
 
         foreach ($event->tickets as $ticket) {
             foreach ($ticket['price'] as $price) {
@@ -113,8 +113,8 @@ class EventController extends Controller
                 $saleEnd = Carbon::parse($price['sale_end']);
 
                 if ($now->between($saleStart, $saleEnd)) {
-                    $availableTickets[] = $ticket; 
-                    break; 
+                    $availableTickets[] = $ticket;
+                    break;
                 }
             }
         }

@@ -72,6 +72,8 @@ class EventController extends Controller
                 'message' => 'Không tìm thấy sự kiện'
             ], 404);
         }
+        $users = $eventS->users = $eventS->users ? json_decode($eventS->users, true) : null;
+        $event['users'] = $users;
 
         return response()->json([
             'message' => 'Xem chi tiết sự kiện.',
@@ -245,7 +247,7 @@ class EventController extends Controller
         $validationError = $this->eventRepository->validateEventTimeAndVenue(
             $data['start_time'],
             $data['end_time'],
-            $data['ward'],
+            'abc',
             $data['location']
         );
 
