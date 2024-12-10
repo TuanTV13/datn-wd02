@@ -30,12 +30,16 @@ const AddClient = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 mx-auto shadow">
-      <div className="bg-gray-100 rounded-lg p-8 mx-auto max-w-md shadow-md">
-        <h2 className="text-3xl font-bold mb-6 text-center text-blue-700">
+    <div className="flex justify-center">
+      <div className="bg-white max-w-3xl rounded-lg p-8 shadow-lg w-full">
+        <h2 className="text-3xl  font-bold mb-6 text-center text-blue-600">
           Thêm người dùng
         </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6 max-w-xl mx-auto"
+        >
           {/* Tên */}
           <div>
             <label className="block text-lg font-medium text-gray-700 mb-1">
@@ -46,7 +50,7 @@ const AddClient = () => {
               {...register("name", { required: "Tên là bắt buộc." })}
               className={`border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 ${
                 errors.name ? "focus:ring-red-500" : "focus:ring-blue-500"
-              }`}
+              } transition duration-200`}
             />
             {errors.name && (
               <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
@@ -68,7 +72,7 @@ const AddClient = () => {
               })}
               className={`border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 ${
                 errors.email ? "focus:ring-red-500" : "focus:ring-blue-500"
-              }`}
+              } transition duration-200`}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">
@@ -92,7 +96,7 @@ const AddClient = () => {
               })}
               className={`border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 ${
                 errors.password ? "focus:ring-red-500" : "focus:ring-blue-500"
-              }`}
+              } transition duration-200`}
             />
             {errors.password && (
               <p className="text-red-500 text-sm mt-1">
@@ -114,7 +118,7 @@ const AddClient = () => {
                 errors.password_confirmation
                   ? "focus:ring-red-500"
                   : "focus:ring-blue-500"
-              }`}
+              } transition duration-200`}
             />
             {errors.password_confirmation && (
               <p className="text-red-500 text-sm mt-1">
@@ -138,10 +142,12 @@ const AddClient = () => {
               })}
               className={`border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 ${
                 errors.phone ? "focus:ring-red-500" : "focus:ring-blue-500"
-              }`}
+              } transition duration-200`}
             />
             {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.phone.message}
+              </p>
             )}
           </div>
           {/* Địa chỉ */}
@@ -152,7 +158,7 @@ const AddClient = () => {
             <input
               type="text"
               {...register("address")}
-              className="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
             />
           </div>
           {/* Nút Submit */}
