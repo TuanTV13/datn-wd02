@@ -361,10 +361,10 @@ class EventRepository
             ->count();  // Đếm số lượng sự kiện
     }
 
-    public function validateEventTimeAndVenue($startTime, $endTime,$ward, $location)
+    public function validateEventTimeAndVenue($startTime, $endTime, $ward, $location)
     {
         $existingEvent = $this->event->where('location', $location)
-            ->where('ward', $ward)
+            // ->where('ward', $ward)
             ->where(function ($query) use ($startTime, $endTime) {
                 // Kiểm tra thời gian trùng lặp
                 $query->whereBetween('start_time', [$startTime, $endTime])
@@ -375,7 +375,7 @@ class EventRepository
         if ($existingEvent) {
             return response()->json([
                 'message' => 'Sự kiện đã tồn tại trong khoảng thời gian và địa điểm này, bao gồm tỉnh, huyện, và xã.',
-            ], 400); 
+            ], 400);
         }
 
         return null;
