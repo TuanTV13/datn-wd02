@@ -126,7 +126,7 @@ class TicketController extends Controller
         $ticketType = $request->ticket_type;
         $zoneName = $request->name;
 
-        $existingTicket = $this->ticketRepository->findByTicketTypeAndZoneName($ticketType, $zoneName);
+        $existingTicket = $this->ticketRepository->findByTicketTypeAndZoneName($ticketType, $zoneName, $request->event_id);
 
         if ($existingTicket) {
             return response()->json([
@@ -134,7 +134,7 @@ class TicketController extends Controller
             ], 400);
         }
 
-        $ticketType = $this->ticketRepository->findByType($ticketType);
+        $ticketType = $this->ticketRepository->findByType($ticketType, $request->event_id);
 
         try {
 
@@ -146,6 +146,7 @@ class TicketController extends Controller
                 ]);
 
                 $data = $ticketType->price()->create([
+                    'event_id' => $request->event_id,
                     'ticket_id' => $ticketType->id,
                     'seat_zone_id' => $zone->id,
                     'price' => $request->price,
@@ -164,6 +165,7 @@ class TicketController extends Controller
                 ]);
 
                 $data = $ticket->price()->create([
+                    'event_id' => $request->event_id,
                     'ticket_id' => $ticket->id,
                     'seat_zone_id' => $zone->id,
                     'price' => $request->price,

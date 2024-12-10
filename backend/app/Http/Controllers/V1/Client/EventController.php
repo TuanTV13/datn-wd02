@@ -9,6 +9,7 @@ use App\Repositories\TicketRepository;
 use App\Repositories\TransactionRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -101,6 +102,25 @@ class EventController extends Controller
                 'error' => 'Không tìm thấy sự kiện'
             ], 404);
         }
+
+        $now = Carbon::now();
+
+        $availableTickets = [];
+
+        foreach ($event->tickets as $ticket) {
+            foreach ($ticket['price'] as $price) {
+                $saleStart = Carbon::parse($price['sale_start']);
+                $saleEnd = Carbon::parse($price['sale_end']);
+
+                if ($now->between($saleStart, $saleEnd)) {
+                    $availableTickets[] = $ticket;
+                    break;
+                }
+            }
+        }
+
+        $event->setRelation('tickets', collect($availableTickets));
+
         $event->speakers = $event->speakers ? json_decode($event->speakers, true) : null;
 
         return response()->json([

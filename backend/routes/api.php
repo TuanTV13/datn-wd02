@@ -78,7 +78,6 @@ Route::prefix('v1')->group(function () {
         Route::put('changeStatus/{id}', [EventController::class, 'changeStatus']);
         Route::put('{eventId}/checkin', [EventController::class, 'checkIn']);
         Route::put('{eventId}/cancelcheckin', [EventController::class, 'cancelCheckIn']);
-
     });
 
     Route::get('users', [UserController::class, 'index']);
@@ -203,8 +202,6 @@ Route::prefix('v1')->group(function () {
 
         // Lấy giao dịch theo ID
         Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
-
-
     });
 });
 

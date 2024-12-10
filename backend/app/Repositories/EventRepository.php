@@ -57,12 +57,16 @@ class EventRepository
 
     public function find($id)
     {
-        return $this->event->with('tickets')->find($id);
+        return $this->event
+            ->with(['tickets', 'users'])
+            ->find($id);
     }
+
 
     public function findDetail($id)
     {
         $event = $this->event->with(['tickets', 'users'])->find($id);
+        // dd($event);
 
         $totalTickets = $event->users->count();
 
@@ -161,7 +165,7 @@ class EventRepository
             ->orderBy('registrants_count', 'desc')
             ->limit(10)
             ->get();
-    }  
+    }
 
     public function getTopRatedEvents()
     {
@@ -235,7 +239,6 @@ class EventRepository
 
         return $eventCount;
     }
-    
     /**
      * Thống kê sự kiện theo thể loại (chỉ lấy sự kiện có trạng thái confirmed)
      */
@@ -256,13 +259,11 @@ class EventRepository
                 ->whereNull('deleted_at') // Lọc các sự kiện không bị xóa
                 ->groupBy('event_type') // Nhóm theo event_type
                 ->get();
-    
             return $statistics;
         } catch (\Exception $e) {
             throw new \Exception("Lỗi khi lấy thống kê theo event_type: " . $e->getMessage());
         }
     }
-        
     public function getStatisticsByProvinceAndStatus($status, $startDate, $endDate)
     {
         try {
@@ -286,7 +287,6 @@ class EventRepository
             throw new \Exception("Lỗi khi lấy thống kê theo tỉnh/thành phố: " . $e->getMessage());
         }
     }
-        
     // Add this method to the EventRepository
     public function getTopParticipantsEvents($limit, $startDate, $endDate)
     {
@@ -299,7 +299,6 @@ class EventRepository
             ->limit($limit)
             ->get();
     }
-           
     public function getEventStatusStatistics($startDate, $endDate)
     {
         try {
@@ -357,4 +356,23 @@ class EventRepository
             ->count();  // Đếm số lượng sự kiện
     }
 
+    public function validateEventTimeAndVenue($startTime, $endTime, $ward, $location)
+    {
+        $existingEvent = $this->event->where('location', $location)
+            // ->where('ward', $ward)
+            ->where(function ($query) use ($startTime, $endTime) {
+                // Kiểm tra thời gian trùng lặp
+                $query->whereBetween('start_time', [$startTime, $endTime])
+                    ->orWhereBetween('end_time', [$startTime, $endTime]);
+            })
+            ->exists();  // Kiểm tra nếu có sự kiện trùng lặp
+
+        if ($existingEvent) {
+            return response()->json([
+                'message' => 'Sự kiện đã tồn tại trong khoảng thời gian và địa điểm này, bao gồm tỉnh, huyện, và xã.',
+            ], 400);
+        }
+
+        return null;
+    }
 }

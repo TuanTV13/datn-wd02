@@ -9,18 +9,23 @@ const CheckOut = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const ticketType = searchParams.get("ticketType");
-  const initialTotalPrice = parseFloat(searchParams.get("totalPrice") || "0");
   const ticketId = searchParams.get("ticketId");
+  const seatZoneId = Number(searchParams.get("seatZoneId") || 1);
+  const quantity = searchParams.get("quantity");
+  const initialTotalPrice = parseFloat(searchParams.get("price") || "0");
 
+  const zoneName = searchParams.get("zoneName");
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
     phone: "",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [voucherCode, setVoucherCode] = useState("");
-  const [totalPrice, setTotalPrice] = useState(initialTotalPrice);
+  const [totalPrice, setTotalPrice] = useState(
+    initialTotalPrice * Number(quantity)
+  );
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
 
   useEffect(() => {
@@ -42,10 +47,12 @@ const CheckOut = () => {
             phone: userData.phone || "",
           });
         })
-        .catch((error) => console.error("Error fetching user data:", error));
+        .catch((error) => {
+          if (error?.response?.status === 401) navigate("/auth");
+        });
     }
   }, []);
-
+  console.log(userInfo);
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setUserInfo((prevState) => ({
@@ -108,6 +115,7 @@ const CheckOut = () => {
       // Dữ liệu thanh toán gửi đến backend
       const paymentData = {
         ticket_id: ticketId,
+        seat_zone_id: seatZoneId,
         payment_method: paymentMethod,
         name: userInfo.name,
         email: userInfo.email,
@@ -163,6 +171,7 @@ const CheckOut = () => {
       // Chuẩn bị dữ liệu thanh toán với thông tin người dùng nhập
       const paymentData = {
         ticket_id: ticketId,
+        seat_zone_id: seatZoneId,
         payment_method: paymentMethod,
         name: userDetails.name,
         email: userDetails.email,
@@ -170,6 +179,8 @@ const CheckOut = () => {
         discount_code: voucherCode || null,
         amount: totalPrice,
       };
+
+      console.log(paymentData);
       try {
         const response = await fetch(
           "http://127.0.0.1:8000/api/v1/clients/payment/process",
@@ -253,8 +264,8 @@ const CheckOut = () => {
               </span>
               <input
                 type="text"
-                name="name"
                 required
+                name="name"
                 className="h-12 border px-4 text-sm"
                 placeholder="Vui lòng nhập họ và tên"
                 value={userInfo.name}
@@ -332,6 +343,8 @@ const CheckOut = () => {
                     className="mr-2"
                     type="radio"
                     name="paymentMethod"
+                    defaultChecked
+                    aria-checked
                     value="vnpay"
                     checked={paymentMethod === "vnpay"}
                     onChange={handlePaymentMethodChange}
@@ -361,6 +374,14 @@ const CheckOut = () => {
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Giá vé</span>
                 <p>{initialTotalPrice}</p>
+              </section>
+              <section className="flex justify-between text-sm">
+                <span className="text-[#9D9EA2]">Số vé</span>
+                <p>{quantity}</p>
+              </section>
+              <section className="flex justify-between text-sm">
+                <span className="text-[#9D9EA2]">Khu vực</span>
+                <p>{zoneName}</p>
               </section>
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Tổng cộng</span>

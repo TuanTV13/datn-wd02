@@ -72,6 +72,8 @@ class EventController extends Controller
                 'message' => 'Không tìm thấy sự kiện'
             ], 404);
         }
+        $users = $eventS->users = $eventS->users ? json_decode($eventS->users, true) : null;
+        $event['users'] = $users;
 
         return response()->json([
             'message' => 'Xem chi tiết sự kiện.',
@@ -139,8 +141,20 @@ class EventController extends Controller
     {
         // Log::info('Thông tin vé', ['data' => $request->all()]);
         DB::beginTransaction();
+
         try {
             $data = $request->validated();
+
+            $validationError = $this->eventRepository->validateEventTimeAndVenue(
+                $data['start_time'],
+                $data['end_time'],
+                $data['ward'],
+                $data['location']
+            );
+
+            if ($validationError) {
+                return $validationError;  // Trả về lỗi nếu có sự kiện trùng lặp
+            }
 
             if ($request->has('speakers') && is_string($request->speakers)) {
                 $data['speakers'] = json_decode($request->speakers, true);
@@ -232,12 +246,16 @@ class EventController extends Controller
 
         $data = $request->validated();
 
-        // $validationResult = $this->validateEventTiming($event, $data);
-        // if (!$validationResult['status']) {
-        //     return response()->json([
-        //         'message' => $validationResult['message']
-        //     ], 400);
-        // }
+        $validationError = $this->eventRepository->validateEventTimeAndVenue(
+            $data['start_time'],
+            $data['end_time'],
+            'abc',
+            $data['location']
+        );
+
+        if ($validationError) {
+            return $validationError;
+        }
 
         $data['display_header'] ??= 0;
 
@@ -375,5 +393,4 @@ class EventController extends Controller
         $user->save();
         return response()->json(['message' => 'Hủy check-in thành công']);
     }
-
 }
