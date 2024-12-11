@@ -24,7 +24,7 @@ interface TypeTickets {
   onRestore: (id: number, seatId: number) => void;
   onVerify: (id: number) => void;
   tickets: Tickets[];
-  events: Events[]
+  events: Events[];
 }
 
 export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
@@ -48,21 +48,22 @@ const TicketsContext = ({ children }: Props) => {
     })();
   }, []);
 
-
   const onDel = async (id: number, seatId: number) => {
     if (confirm("Bạn có muốn xóa không?")) {
       try {
-        await deleteTicket(id,seatId);
-        setTickets((prevTickets) => prevTickets.filter((item) => item.id !== id));
+        await deleteTicket(id, seatId);
+        setTickets((prevTickets) =>
+          prevTickets.filter((item) => item.id !== id)
+        );
         toast.success("Xóa thành công");
-      navigate("/admin/list-ticket-delete");
+        navigate("/admin/list-ticket-delete");
       } catch (error) {
         console.error("Error deleting ticket:", error);
         toast.error("Lỗi khi xóa vé");
       }
     }
   };
-  
+
   const onAdd = async (ticket: Tickets) => {
     try {
       // Gửi thẳng lên backend
@@ -73,14 +74,14 @@ const TicketsContext = ({ children }: Props) => {
       window.location.reload();
     } catch (error) {
       console.error("Error adding ticket:", error);
-      console.log(error)
+      console.log(error);
       toast.error("Lỗi khi thêm vé");
     }
   };
 
-  const onEdit = async (ticket: Tickets,seatId: number) => {
+  const onEdit = async (ticket: Tickets, seatId: number) => {
     try {
-      const updatedTicket = await editTicket(ticket,seatId);
+      const updatedTicket = await editTicket(ticket, seatId);
       setTickets(
         tickets.map((item) =>
           item.id === updatedTicket.id ? updatedTicket : item
@@ -95,10 +96,10 @@ const TicketsContext = ({ children }: Props) => {
     }
   };
 
-  const onRestore = async (id: number,seatId: number) => {
-    if(confirm("Bạn có muốn khôi phục vé không?")){
+  const onRestore = async (id: number, seatId: number) => {
+    if (confirm("Bạn có muốn khôi phục vé không?")) {
       try {
-        const restoredTicket = await restoreTicket(id,seatId);
+        const restoredTicket = await restoreTicket(id, seatId);
         setTickets([...tickets, restoredTicket]);
         toast.success("Khôi phục thành công");
         navigate("/admin/ticket-list");
@@ -109,7 +110,7 @@ const TicketsContext = ({ children }: Props) => {
       }
     }
   };
-// Xác nhận vé
+  // Xác nhận vé
   const onVerify = async (id: number) => {
     try {
       const verifiedTicket = await verifyTicket(id);
@@ -132,7 +133,7 @@ const TicketsContext = ({ children }: Props) => {
         onRestore,
         onVerify,
         tickets,
-        events
+        events,
       }}
     >
       {children}

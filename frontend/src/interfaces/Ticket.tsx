@@ -2,7 +2,7 @@ export interface Tickets {
   id?: number | string;
   ticket_id: number | string;
   seat_zone_id: number | string;
-  price: number ;
+  price: number;
   quantity: number;
   sold_quantity: number;
   sale_start: string;
@@ -13,7 +13,7 @@ export interface Tickets {
     ticket_type: TicketType;
   };
   seat_zones: {
-    id: number | string
+    id: number | string;
     event_id: number | string;
     name: string;
   };

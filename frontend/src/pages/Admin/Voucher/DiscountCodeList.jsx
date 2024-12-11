@@ -8,6 +8,7 @@ import {
   Col,
   Card,
   notification,
+  Empty,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import "./hehe.css";
@@ -19,6 +20,7 @@ import {
   EditOutlined,
   LockOutlined,
   DeleteOutlined,
+  ExportOutlined,
 } from "@ant-design/icons";
 import * as XLSX from "xlsx";
 import axiosInstance from "../../../axios";
@@ -232,11 +234,12 @@ const DiscountCodeList = () => {
                 style={{ marginRight: 10 }}
                 onClick={handleExportPDFAndExcel}
               >
-                Xuất Excel
+                <ExportOutlined /> Xuất Excel
               </button>
               <Button
                 type="default"
                 size="large"
+                className="bg-blue-500 text-white px-4 py-2 rounded-[10px]"
                 onClick={handleAddNew}
                 style={{ marginRight: 10 }}
               >
@@ -261,7 +264,7 @@ const DiscountCodeList = () => {
         </Col>
         <Col span={8}>
           <Card style={{ padding: 10 }}>
-            <Select
+            {/* <Select
               value={statusFilter}
               onChange={(value) => setStatusFilter(value)}
               placeholder="Trạng thái"
@@ -269,8 +272,18 @@ const DiscountCodeList = () => {
             >
               <Option value="">Trạng Thái</Option>
               <Option value="active">Hoạt động</Option>
-              <Option value="expired">Hết hạn</Option>
-            </Select>
+              <Option value="expired">Bản nháp</Option>
+            </Select> */}
+
+            <select
+              // value={statusFilter}
+              // onChange={(value) => setStatusFilter(value)}
+              placeholder="Trạng thái"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="published">Hoạt động</option>
+              <option value="draft">Bản nháp</option>
+            </select>
           </Card>
         </Col>
         <Col span={8}>
@@ -296,20 +309,24 @@ const DiscountCodeList = () => {
 
       <Row gutter={16}>
         <Col span={24}>
-          <Table
-            dataSource={listVoucher}
-            columns={columns}
-            pagination={{ pageSize: filterValue }}
-            className="custom-table"
-            locale={{
-              emptyText: (
-                <div className="empty-state">
-                  <img src="/path/to/empty-icon.png" alt="No data" />
-                  <p>Không có dữ liệu hiển thị</p>
-                </div>
-              ),
-            }}
-          />
+          {listVoucher.length > 0 ? (
+            <Table
+              dataSource={listVoucher}
+              columns={columns}
+              pagination={{ pageSize: filterValue }}
+              className="custom-table"
+              locale={{
+                emptyText: (
+                  <div className="empty-state">
+                    <img src="/path/to/empty-icon.png" alt="No data" />
+                    <p>Không có dữ liệu hiển thị</p>
+                  </div>
+                ),
+              }}
+            />
+          ) : (
+            <Empty />
+          )}
         </Col>
       </Row>
     </div>

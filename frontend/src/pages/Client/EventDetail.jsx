@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import QrReader from "react-qr-scanner"; // Import thư viện
-import { toast } from "react-toastify";
+import { Modal, notification } from "antd";
 const EventDetail = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
@@ -34,9 +34,7 @@ const EventDetail = () => {
       .get(`http://127.0.0.1:8000/api/v1/clients/events/${id}`)
       .then((response) => {
         setEvent(response.data.data);
-        console.log("giang", response);
       })
-
       .catch((error) => {
         console.error("Lỗi khi gọi API:", error);
       });
@@ -47,7 +45,7 @@ const EventDetail = () => {
 
     if (!ticketCode) {
       // Hiển thị thông báo lỗi nếu mã vé không được nhập
-      alert("Vui lòng nhập mã vé");
+      notification.error({ message: "Vui lòng nhập mã vé" });
       return; // Dừng lại và không gửi yêu cầu API
     }
 
@@ -63,19 +61,19 @@ const EventDetail = () => {
       )
       .then((response) => {
         console.log("Check-in thành công:", response.data);
-        alert("Check-in thành công");
+        notification.error({ message: "Check-in thành công" });
         setCheckInPopup(false); // Đóng popup sau khi check-in thành công
       })
       .catch((error) => {
         console.error("Lỗi khi check-in:", error);
         if (error.response && error.response.data) {
-          alert(
-            `Lỗi: ${
+          notification.error({
+            message: `Lỗi: ${
               error.response.data.message || "Không thể thực hiện check-in"
-            }`
-          );
+            }`,
+          });
         } else {
-          alert("Có lỗi xảy ra. Vui lòng thử lại.");
+          notification.error({ message: "Có lỗi xảy ra. Vui lòng thử lại." });
         }
       });
   };
@@ -294,7 +292,6 @@ const EventDetail = () => {
                   Mua vé
                 </button>
               )}
-
               {event.status === "checkin" && (
                 <button
                   onClick={handleCheckIn}
@@ -305,7 +302,6 @@ const EventDetail = () => {
               )}
             </>
           )}
-
           <div className="mt-4 text-center">
             <p className="text-lg">
               Địa điểm: {`${event.ward}, ${event.district}, ${event.province}`}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Button, Select, Row, Col, Modal } from "antd";
+import { Table, Button, Select, Row, Col, Modal, Empty } from "antd";
 import { EyeOutlined, DeleteOutlined, ReloadOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
@@ -15,25 +15,25 @@ const ListUser = () => {
   const [users, setUsers] = useState([
     {
       id: 1,
-      name: 'Nguyễn Văn A',
-      email: 'nguyenvana@example.com',
-      phone: '0123456789',
-      status: 'Đang hoạt động',
-      address: 'Hà Nội',
-      birthday: '01/01/1990',
-      gender: 'Nam',
-      createdAt: '01/01/2023',
+      name: "Nguyễn Văn A",
+      email: "nguyenvana@example.com",
+      phone: "0123456789",
+      status: "Đang hoạt động",
+      address: "Hà Nội",
+      birthday: "01/01/1990",
+      gender: "Nam",
+      createdAt: "01/01/2023",
     },
     {
       id: 2,
-      name: 'Trần Thị B',
-      email: 'tranthib@example.com',
-      phone: '0987654321',
-      status: 'Ngưng hoạt động',
-      address: 'Đà Nẵng',
-      birthday: '02/02/1992',
-      gender: 'Nữ',
-      createdAt: '05/05/2023',
+      name: "Trần Thị B",
+      email: "tranthib@example.com",
+      phone: "0987654321",
+      status: "Ngưng hoạt động",
+      address: "Đà Nẵng",
+      birthday: "02/02/1992",
+      gender: "Nữ",
+      createdAt: "05/05/2023",
     },
   ]);
 
@@ -44,16 +44,16 @@ const ListUser = () => {
   };
 
   const handleDeleteUser = (userId) => {
-    const userToDelete = users.find(user => user.id === userId);
-    setUsers(users.filter(user => user.id !== userId));
-    setDeletedUsers([...deletedUsers, { ...userToDelete, status: 'Đã xóa' }]);
+    const userToDelete = users.find((user) => user.id === userId);
+    setUsers(users.filter((user) => user.id !== userId));
+    setDeletedUsers([...deletedUsers, { ...userToDelete, status: "Đã xóa" }]);
     closeConfirmModal();
   };
 
   const handleRestoreUser = (userId) => {
-    const userToRestore = deletedUsers.find(user => user.id === userId);
-    setDeletedUsers(deletedUsers.filter(user => user.id !== userId));
-    setUsers([...users, { ...userToRestore, status: 'Đang hoạt động' }]);
+    const userToRestore = deletedUsers.find((user) => user.id === userId);
+    setDeletedUsers(deletedUsers.filter((user) => user.id !== userId));
+    setUsers([...users, { ...userToRestore, status: "Đang hoạt động" }]);
   };
 
   const openConfirmModal = (userId) => {
@@ -127,7 +127,7 @@ const ListUser = () => {
     },
   ];
 
-  const dataSource = (showDeletedUsers ? deletedUsers : users).map(user => ({
+  const dataSource = (showDeletedUsers ? deletedUsers : users).map((user) => ({
     key: user.id,
     name: user.name,
     email: user.email,
@@ -140,15 +140,18 @@ const ListUser = () => {
       <div className="bg-white rounded-lg shadow p-6">
         <Row className="mb-4" justify="space-between">
           <Col>
-            <Button onClick={toggleDeletedUsers} className="bg-blue-500 text-white">
-              {showDeletedUsers ? 'Danh sách người dùng' : 'Người dùng đã xóa'}
+            <Button
+              onClick={toggleDeletedUsers}
+              className="bg-blue-500 text-white"
+            >
+              {showDeletedUsers ? "Danh sách người dùng" : "Người dùng đã xóa"}
             </Button>
           </Col>
           <Col>
             <Select
               defaultValue="5"
               style={{ width: 120 }}
-              onChange={value => setFilterValue(value)}
+              onChange={(value) => setFilterValue(value)}
             >
               <Option value="5">5</Option>
               <Option value="10">10</Option>
@@ -156,12 +159,16 @@ const ListUser = () => {
             </Select>
           </Col>
         </Row>
-        <Table
-          columns={columns}
-          dataSource={dataSource}
-          pagination={{ pageSize: filterValue }}
-          rowKey="key"
-        />
+        {dataSource.length > 0 ? (
+          <Table
+            columns={columns}
+            dataSource={dataSource}
+            pagination={{ defaultPageSize: 5 }}
+            rowKey="key"
+          />
+        ) : (
+          <Empty />
+        )}
       </div>
 
       {/* Modal chi tiết người dùng */}
@@ -173,16 +180,35 @@ const ListUser = () => {
           footer={null}
         >
           <div>
-            <p><strong>Tên:</strong> {selectedUser.name}</p>
-            <p><strong>Email:</strong> {selectedUser.email}</p>
-            <p><strong>Số điện thoại:</strong> {selectedUser.phone}</p>
-            <p><strong>Địa chỉ:</strong> {selectedUser.address}</p>
-            <p><strong>Ngày sinh:</strong> {selectedUser.birthday}</p>
-            <p><strong>Giới tính:</strong> {selectedUser.gender}</p>
-            <p><strong>Trạng thái:</strong> {selectedUser.status}</p>
-            <p><strong>Ngày tạo:</strong> {selectedUser.createdAt}</p>
+            <p>
+              <strong>Tên:</strong> {selectedUser.name}
+            </p>
+            <p>
+              <strong>Email:</strong> {selectedUser.email}
+            </p>
+            <p>
+              <strong>Số điện thoại:</strong> {selectedUser.phone}
+            </p>
+            <p>
+              <strong>Địa chỉ:</strong> {selectedUser.address}
+            </p>
+            <p>
+              <strong>Ngày sinh:</strong> {selectedUser.birthday}
+            </p>
+            <p>
+              <strong>Giới tính:</strong> {selectedUser.gender}
+            </p>
+            <p>
+              <strong>Trạng thái:</strong> {selectedUser.status}
+            </p>
+            <p>
+              <strong>Ngày tạo:</strong> {selectedUser.createdAt}
+            </p>
           </div>
-          <Button onClick={() => setModalIsOpen(false)} className="bg-red-500 text-white">
+          <Button
+            onClick={() => setModalIsOpen(false)}
+            className="bg-red-500 text-white"
+          >
             Đóng
           </Button>
         </Modal>

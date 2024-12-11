@@ -71,7 +71,7 @@ const DiscountCodeForm: React.FC = () => {
             Lưu
           </Button>
           <Button style={{ marginLeft: 8 }} onClick={() => form.resetFields()}>
-            Quay lại
+            Danh sách
           </Button>
         </Form.Item>
       </Form>

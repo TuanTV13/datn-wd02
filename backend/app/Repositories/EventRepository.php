@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Event;
 use App\Models\Ticket;
+use App\Models\TicketPrice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -197,15 +198,15 @@ class EventRepository
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
-        $ticket = new Ticket();
+        $ticket = new TicketPrice();
         $totalRevenue = $ticket
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('price');
 
         $topEvents = $this->event
-            ->select('events.id', 'events.name', DB::raw('SUM(tickets.price) as total_revenue'))
-            ->join('tickets', 'events.id', '=', 'tickets.event_id')
-            ->whereBetween('tickets.created_at', [$startDate, $endDate])
+            ->select('events.id', 'events.name', DB::raw('SUM(ticket_prices.price) as total_revenue'))
+            ->join('ticket_prices', 'events.id', '=', 'ticket_prices.event_id')
+            ->whereBetween('ticket_prices.created_at', [$startDate, $endDate])
             ->groupBy('events.id', 'events.name')
             ->orderByDesc('total_revenue')
             ->limit($limit)
@@ -239,7 +240,6 @@ class EventRepository
 
         return $eventCount;
     }
-
     /**
      * Thống kê sự kiện theo thể loại (chỉ lấy sự kiện có trạng thái confirmed)
      */
@@ -260,13 +260,11 @@ class EventRepository
                 ->whereNull('deleted_at') // Lọc các sự kiện không bị xóa
                 ->groupBy('event_type') // Nhóm theo event_type
                 ->get();
-
             return $statistics;
         } catch (\Exception $e) {
             throw new \Exception("Lỗi khi lấy thống kê theo event_type: " . $e->getMessage());
         }
     }
-
     public function getStatisticsByProvinceAndStatus($status, $startDate, $endDate)
     {
         try {
@@ -290,7 +288,6 @@ class EventRepository
             throw new \Exception("Lỗi khi lấy thống kê theo tỉnh/thành phố: " . $e->getMessage());
         }
     }
-
     // Add this method to the EventRepository
     public function getTopParticipantsEvents($limit, $startDate, $endDate)
     {
@@ -303,7 +300,6 @@ class EventRepository
             ->limit($limit)
             ->get();
     }
-
     public function getEventStatusStatistics($startDate, $endDate)
     {
         try {

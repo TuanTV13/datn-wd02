@@ -111,23 +111,23 @@ class AuthController extends Controller
     {
         $credentials = $request->validated();
         $user = $this->userRepository->findByEmail($credentials['email']);
-    
+
         if (!$user) {
             return response()->json(['message' => 'Không tìm thấy tài khoản']);
         }
-    
+
         if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             return response()->json(['message' => 'Mật khẩu sai']);
         }
-    
+
         if (!$user->hasVerifiedEmail()) {
             return response()->json(['message' => 'Tài khoản chưa được xác thực'], 403);
         }
-    
+
         if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Thông tin xác thực không hợp lệ'], 401);
         }
-    
+
         $user = Auth::user();
         $token = JWTAuth::fromUser($user);
         // $user = JWTAuth::authenticate($token);
@@ -138,14 +138,14 @@ class AuthController extends Controller
                 'name' => $role->name
             ];
         });
-    
+
         $permissions = $user->getAllPermissions()->map(function ($permission) {
             return [
                 'id' => $permission->id,
                 'name' => $permission->name
             ];
         });
-    
+
         return response()->json([
             'user' => [
                 'id' => $user->id,
