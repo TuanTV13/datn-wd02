@@ -1,5 +1,5 @@
 import axios from "axios";
-import API_URL from "./api_url"
+import API_URL from "./api_url";
 
 export const getEvents = async () => {
   try {
@@ -25,7 +25,7 @@ export const deleteEvent = async (id) => {
   try {
     // Gọi axios.delete với URL đúng cách
     const response = await axios.delete(`${API_URL}/events/${id}/delete`, {
-      headers
+      headers,
     });
     return response.data;
   } catch (error) {
@@ -49,7 +49,7 @@ const addEvent = async (eventData) => {
       headers,
     });
     console.log("eventdata", response);
-    
+
     return response.data.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;
@@ -75,28 +75,27 @@ export const updateEvent = async (id, eventData) => {
     return response.data; // Trả về dữ liệu phản hồi
   } catch (error) {
     // Xử lý lỗi
-    throw error.response ? error.response.data : new Error("Lỗi khi cập nhật sự kiện");
+    throw error.response
+      ? error.response.data
+      : new Error("Lỗi khi cập nhật sự kiện");
   }
 };
 
-
- export const getEvent = async (id) => {
-   try {
-     const response = await axios.get(`${BASE_URL}/events/${id}`);
-     return response.data;
-   } catch (error) {
-     throw new Error('Lỗi khi lấy sự kiện: ' + error.message);
-   }
- };
- 
-
- export const fetchCategories = async () => {
+export const getEvent = async (id) => {
   try {
-      const response = await axios.get(`${API_URL}/categories`);
-      return response.data; // Trả về dữ liệu danh mục
+    const response = await axios.get(`${BASE_URL}/events/${id}`);
+    return response.data;
   } catch (error) {
-      console.error('Error fetching categories:', error);
-      throw error; // Ném lỗi để xử lý ở nơi sử dụng
+    throw new Error("Lỗi khi lấy sự kiện: " + error.message);
   }
 };
 
+export const fetchCategories = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/categories`);
+    return response.data; // Trả về dữ liệu danh mục
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    throw error; // Ném lỗi để xử lý ở nơi sử dụng
+  }
+};

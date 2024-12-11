@@ -80,7 +80,7 @@ const ListUserBuyTicket = () => {
           to={"/admin/ticket-list"}
           className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
         >
-          Quay lại
+          Danh sách
         </Link>
       </div>
     </div>
