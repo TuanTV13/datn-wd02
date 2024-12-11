@@ -2,38 +2,18 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { TicketsCT } from "../../../Contexts/TicketContext";
 import { useForm } from "react-hook-form";
-import { Tickets, TicketType } from "../../../interfaces/Ticket";
-import { EventCT } from "../../../Contexts/ClientEventContext";
-import { getTicketData } from "../../../api_service/ServiceTicket";
+import { StatusType, Tickets, TicketType } from "../../../interfaces/Ticket";
 
-const AddTicket = () => {
-  const { onAdd } = useContext(TicketsCT);
-  const { events } = useContext(EventCT);
+const AddTicket = (props: any) => {
+  const { onAdd, events } = useContext(TicketsCT);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    reset,
   } = useForm<Tickets>();
 
   const [ticketTypesList] = useState(Object.values(TicketType));
-  const [ticketData, setTicketData] = useState<any>(null);
-
-  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
-  const [selectedTicketType, setSelectedTicketType] = useState<string | null>(
-    null
-  );
-
-  // Hàm chuyển đổi định dạng ngày
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Tháng bắt đầu từ 0
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`; // Trả về định dạng yyyy-mm-dd
-  };
 
   const onSubmit = (data: Tickets) => {
     onAdd(data); // Xử lý khi người dùng gửi form
@@ -48,40 +28,42 @@ const AddTicket = () => {
         <h2 className="text-2xl font-bold text-center mb-5">Thêm mới vé</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Trường sự kiện */}
-          <div>
-            <label
-              htmlFor="event"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Sự kiện
-            </label>
-            <select
-              id="event"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("event_id", { required: true })}
-            >
-              <option value="">Chọn sự kiện</option>
-              {events.map((event) => (
-                <option key={event.id} value={event.id}>
-                  {event.name}
-                </option>
-              ))}
-            </select>
-            {errors.event_id && (
-              <span className="text-red-500">Vui lòng chọn sự kiện</span>
-            )}
-          </div>
+          {!props.eventId && (
+            <div>
+              <label
+                htmlFor="event"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Sự kiện
+              </label>
+              <select
+                id="event_id"
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                {...register("event_id", { required: true })}
+              >
+                <option value="">Chọn sự kiện</option>
+                {events?.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.name}
+                  </option>
+                ))}
+              </select>
+              {errors.event_id && (
+                <span className="text-red-500">Vui lòng chọn sự kiện</span>
+              )}
+            </div>
+          )}
 
           {/* Trường loại vé */}
           <div>
             <label
-              htmlFor="ticket-type"
+              htmlFor="ticket_type"
               className="block text-sm font-medium text-gray-700"
             >
               Loại vé
             </label>
             <select
-              id="ticket-type"
+              id="ticket_type"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               {...register("ticket_type", { required: true })}
             >
@@ -96,6 +78,7 @@ const AddTicket = () => {
               <span className="text-red-500">Vui lòng chọn loại vé</span>
             )}
           </div>
+
           {/* Trường giá vé */}
           <div>
             <label
@@ -107,7 +90,6 @@ const AddTicket = () => {
             <input
               type="number"
               id="price"
-              min={1}
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               {...register("price", { required: true, min: 0 })}
             />
@@ -119,18 +101,18 @@ const AddTicket = () => {
           {/* Trường vị trí */}
           <div>
             <label
-              htmlFor="seat_location"
+              htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
               Vị trí
             </label>
             <input
               type="text"
-              id="seat_location"
+              id="name"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("seat_location", { required: true })}
+              {...register("name", { required: true })}
             />
-            {errors.seat_location && (
+            {errors.name && (
               <span className="text-red-500">Vị trí không hợp lệ</span>
             )}
           </div>
@@ -145,7 +127,6 @@ const AddTicket = () => {
             </label>
             <input
               type="number"
-              min={1}
               id="quantity"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               {...register("quantity", { required: true, min: 1 })}
@@ -192,23 +173,6 @@ const AddTicket = () => {
               <span className="text-red-500">Ngày kết thúc không hợp lệ</span>
             )}
           </div>
-
-          {/* Trường mô tả */}
-          <div className="sm:col-span-2">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Mô tả
-            </label>
-            <textarea
-              id="description"
-              rows={3}
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("description")}
-              placeholder="Mô tả của bạn ....."
-            ></textarea>
-          </div>
         </div>
 
         {/* Các nút thao tác */}
@@ -219,12 +183,14 @@ const AddTicket = () => {
           >
             Thêm mới
           </button>
-          <Link
-            to="/admin/ticket-list"
-            className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-          >
-            Danh sách
-          </Link>
+          {!props.eventId && (
+            <Link
+              to="/admin/ticket-list"
+              className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Danh sách vé
+            </Link>
+          )}
         </div>
       </form>
     </div>

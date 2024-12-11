@@ -7,6 +7,13 @@ import {
 } from "../../../api_service/location";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { Modal, Button, Form, Input, Select, DatePicker } from "antd";
+import axiosInstance from "../../../axios";
+import AddDiscountCode from "../Voucher/AddDiscountCode";
+import AddTicket from "../Tickets/AddTicket";
+
+const { Option } = Select;
+
 const AddEvent = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -15,27 +22,24 @@ const AddEvent = () => {
     district_name: "",
     ward_name: "",
     name: "",
+    link_online: "abc",
     description: "",
     start_time: "",
     end_time: "",
     location: "",
     event_type: "",
     thumbnail: null,
-    speakers: [], // Danh sách diễn giả
   });
 
   const [categories, setCategories] = useState([]);
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
-  const [newSpeaker, setNewSpeaker] = useState({
-    name: "",
-    profile: "",
-    email: "",
-    phone: "",
-    image_url: "",
-  });
 
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTicketForm, setIsTicketForm] = useState(true);
+  const [eventId, setEventId] = useState(undefined);
   useEffect(() => {
     fetchCategories()
       .then((response) => setCategories(response.data))
@@ -90,32 +94,6 @@ const AddEvent = () => {
     setFormData({ ...formData, ward_name: wardName, ward_id: ward.code });
   };
 
-  // const handleAddSpeaker = () => {
-  //   if (
-  //     newSpeaker.name &&
-  //     newSpeaker.profile &&
-  //     newSpeaker.email &&
-  //     newSpeaker.phone &&
-  //     newSpeaker.image_url
-  //   ) {
-  //     setFormData((prevState) => ({
-  //       ...prevState,
-  //       speakers: [...prevState.speakers, { ...newSpeaker }],
-  //     }));
-  //     setNewSpeaker({
-  //       name: "",
-  //       profile: "",
-  //       email: "",
-  //       phone: "",
-  //       image_url: "",
-  //     });
-  //   } else {
-  //     console.log("Hãy điền đầy đủ thông tin diễn giả!");
-  //     toast.error("Hãy điền đầy đủ thông tin diễn giả!");
-
-  //   }
-  // };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     const dataToSubmit = new FormData();
@@ -130,36 +108,28 @@ const AddEvent = () => {
       } else if (key === "ward_name") {
         const ward = wards.find((w) => w.name === value);
         dataToSubmit.append("ward", ward ? ward.name : "");
-        // } else if (key === "speakers" && Array.isArray(value)) {
-        //   dataToSubmit.append("speakers", JSON.stringify(value));
       } else {
         dataToSubmit.append(key, value || "");
       }
     });
 
-    // Gửi request lên backend
     addEvent(dataToSubmit)
-      .then(() => {
-        console.log(formData);
-
-        window.location.href = "/admin/event-list";
+      .then((res) => {
+        setEventId(res.id);
         toast.success("Thêm sự kiện thành công!");
+        setIsModalOpen(true); // Mở modal sau khi lưu sự kiện thành công
       })
       .catch((error) => {
-        // Kiểm tra nếu response trả về có lỗi chi tiết
         if (
           error.response &&
           error.response.data &&
           error.response.data.errors
         ) {
           const errors = error.response.data.errors;
-
-          // Hiển thị từng lỗi bằng toast.error
           Object.values(errors).forEach((message) => {
             toast.error(message);
           });
         } else {
-          // Lỗi không xác định
           console.error("Lỗi khi thêm sự kiện:", error);
           toast.error(error.message);
         }
@@ -169,8 +139,6 @@ const AddEvent = () => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-3xl font-bold mb-4 text-center">Thêm sự kiện mới</h2>
-      <hr />
-      <br />
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Danh mục và Tỉnh */}
         <div className="grid grid-cols-2 gap-4">
@@ -348,68 +316,6 @@ const AddEvent = () => {
             className="form-control"
           />
         </div>
-
-        {/* <div className="form-group">
-        <h3>Diễn giả:</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Tên diễn giả"
-              value={newSpeaker.name}
-              onChange={(e) => setNewSpeaker({ ...newSpeaker, name: e.target.value })}
-              className="form-control"
-            />
-          </div>
-    
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Hồ sơ"
-              value={newSpeaker.profile}
-              onChange={(e) => setNewSpeaker({ ...newSpeaker, profile: e.target.value })}
-              className="form-control"
-            />
-          </div>
-        </div>
-    
-        <div className="grid grid-cols-2 gap-4">
-          <div className="form-group">
-            <input
-              type="email"
-              placeholder="Email"
-              value={newSpeaker.email}
-              onChange={(e) => setNewSpeaker({ ...newSpeaker, email: e.target.value })}
-              className="form-control"
-            />
-          </div>
-    
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Số điện thoại"
-              value={newSpeaker.phone}
-              onChange={(e) => setNewSpeaker({ ...newSpeaker, phone: e.target.value })}
-              className="form-control"
-            />
-          </div>
-        </div>
-    
-        <div className="form-group">
-          <input
-            type="text"
-            placeholder="URL hình ảnh"
-            value={newSpeaker.image_url}
-            onChange={(e) => setNewSpeaker({ ...newSpeaker, image_url: e.target.value })}
-            className="form-control"
-          />
-        </div>
-    
-        <button type="button" className="btn btn-primary" onClick={handleAddSpeaker}>
-          Thêm diễn giả
-        </button>
-      </div> */}
-
         <div className="flex justify-between">
           <button
             type="submit"
@@ -427,6 +333,52 @@ const AddEvent = () => {
         </div>
       </form>
       <ToastContainer />
+
+      <Modal
+        title="Thêm vé hoặc voucher"
+        width={1000}
+        visible={isModalOpen}
+        // onCancel={() => {
+        //   setIsModalOpen(false);
+        //   navigate("/admin/detail-event/" + eventId);
+        // }}
+        footer={[
+          <Button
+            type="primary"
+            onClick={() => {
+              setIsModalOpen(false);
+              navigate("/admin/detail-event/" + eventId);
+            }}
+          >
+            Lưu
+          </Button>,
+        ]}
+      >
+        <div className="flex justify-center gap-3">
+          {" "}
+          <Button
+            key="ticket"
+            onClick={() => {
+              setIsTicketForm(true);
+            }}
+          >
+            Thêm vé
+          </Button>
+          <Button
+            key="voucher"
+            onClick={() => {
+              setIsTicketForm(false);
+            }}
+          >
+            Thêm voucher
+          </Button>
+        </div>
+        {isTicketForm ? (
+          <AddTicket eventId={eventId} />
+        ) : (
+          <AddDiscountCode eventId={eventId} />
+        )}
+      </Modal>
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import QrReader from "react-qr-scanner"; // Import thư viện
-import { notification } from "antd";
+import { Modal, notification } from "antd";
 const EventDetail = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);

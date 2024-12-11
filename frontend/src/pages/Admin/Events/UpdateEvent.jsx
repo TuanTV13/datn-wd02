@@ -70,11 +70,9 @@ const UpdateEvent = () => {
     // Định dạng dữ liệu gửi đi
     const formattedData = {
       start_time: formatDate(formData.start_time),
-
       end_time: formatDate(formData.end_time),
       location: formData.location,
     };
-    console.log(formData.end_time);
     console.log("Dữ liệu gửi đi:", formattedData);
 
     try {
@@ -108,8 +106,6 @@ const UpdateEvent = () => {
       toast.success("Cập nhật sự kiện thành công!");
       navigate("/admin/event-list");
     } catch (error) {
-      console.log(error);
-
       console.error("Lỗi khi cập nhật sự kiện:", error);
       toast.error(error.response.data.message);
     } finally {
@@ -119,67 +115,79 @@ const UpdateEvent = () => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <h2 className="text-3xl font-bold mb-4 text-center">
-          Cập nhật sự kiện
-        </h2>
-        <hr />
-        <br />
-
-        <div className="grid grid-cols-1 gap-4">
-          <div className="form-group">
-            <label className="form-label">Địa điểm:</label>
-            <input
-              name="location"
-              type="text"
-              value={formData.location}
-              onChange={handleChange}
-              className="form-control"
-            />
-          </div>
+      <h2 className="text-3xl font-bold mb-4 text-center">Cập nhật sự kiện</h2>
+      <hr />
+      <br />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="p-4 border-r">
+          <h3 className="text-xl font-semibold">Thông tin sự kiện</h3>
+          <p>
+            <strong>Địa điểm:</strong> {formData.location}
+          </p>
+          <p>
+            <strong>Thời gian bắt đầu:</strong>{" "}
+            {new Date(formData.start_time).toLocaleString()}
+          </p>
+          <p>
+            <strong>Thời gian kết thúc:</strong>{" "}
+            {new Date(formData.end_time).toLocaleString()}
+          </p>
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="form-group">
-            <label className="form-label">Thời gian bắt đầu:</label>
-            <input
-              name="start_time"
-              type="datetime-local"
-              value={formData.start_time}
-              onChange={handleChange}
-              required
-              className="form-control"
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Thời gian kết thúc:</label>
-            <input
-              name="end_time"
-              type="datetime-local"
-              value={formData.end_time}
-              onChange={handleChange}
-              required
-              className="form-control"
-            />
-          </div>
+        <div className="p-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="form-group">
+              <label className="form-label">Địa điểm:</label>
+              <input
+                name="location"
+                type="text"
+                value={formData.location}
+                onChange={handleChange}
+                className="form-control"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="form-group">
+                <label className="form-label">Thời gian bắt đầu:</label>
+                <input
+                  name="start_time"
+                  type="datetime-local"
+                  value={formData.start_time}
+                  onChange={handleChange}
+                  required
+                  className="form-control"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Thời gian kết thúc:</label>
+                <input
+                  name="end_time"
+                  type="datetime-local"
+                  value={formData.end_time}
+                  onChange={handleChange}
+                  required
+                  className="form-control"
+                />
+              </div>
+            </div>
+            <div className="flex justify-between">
+              <button
+                type="submit"
+                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                disabled={loading}
+              >
+                {loading ? "Đang cập nhật..." : "Lưu sự kiện"}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/admin/event-list")}
+                className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-300"
+              >
+                Quay lại danh sách
+              </button>
+            </div>
+          </form>
         </div>
-        <div className="flex justify-between">
-          <button
-            type="submit"
-            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-            disabled={loading}
-          >
-            {loading ? "Đang cập nhật..." : "Lưu sự kiện"}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/admin/event-list")}
-            className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-300"
-          >
-            Quay lại danh sách
-          </button>
-        </div>
-      </form>
+      </div>
       <ToastContainer />
     </div>
   );

@@ -20,7 +20,7 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
   const location = useLocation();
   useEffect(() => {
     const roles: any[] = JSON.parse(localStorage.getItem("roles") as string);
-    const role = roles.find((v) => v.name === "admin");
+    const role = roles?.find((v) => v.name === "admin");
     if (!role) {
       navigate("/");
     }

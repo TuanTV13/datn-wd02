@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Bar } from "react-chartjs-2";
+import { Bar, Line, Pie, Doughnut } from "react-chartjs-2"; // Import Doughnut chart
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
   Legend,
+  ArcElement,
 } from "chart.js";
 import axiosInstance from "../../../axios";
 import { DatePicker, Table, Spin, message, Empty } from "antd";
@@ -19,9 +22,12 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement // Đăng ký biểu đồ Doughnut
 );
 
 const Dashboard = () => {
@@ -29,8 +35,8 @@ const Dashboard = () => {
   const [eventCount, setEventCount] = useState<number>(0); // Tổng số sự kiện
   const [loading, setLoading] = useState(true); // Trạng thái đang tải
   const [error, setError] = useState<any>(null); // Lỗi khi gọi API
-  const [startDate, setStartDate] = useState<any>(dayjs("2024-01-26")); // Ngày bắt đầu
-  const [endDate, setEndDate] = useState<any>(dayjs("2024-11-26")); // Ngày kết thúc
+  const [startDate, setStartDate] = useState<any>(dayjs().subtract(1, "y")); // Ngày bắt đầu
+  const [endDate, setEndDate] = useState<any>(dayjs()); // Ngày kết thúc
 
   // Gọi API để lấy doanh thu theo ngày bắt đầu và kết thúc
   const fetchRevenueData = async (start_date: string, end_date: string) => {
@@ -116,6 +122,62 @@ const Dashboard = () => {
     ],
   };
 
+  // Dữ liệu cho biểu đồ đường (Line chart)
+  const lineChartData = {
+    labels: data?.top_events?.map((event: any) => event.name), // Tên sự kiện
+    datasets: [
+      {
+        label: "Doanh thu theo sự kiện",
+        data: data?.top_events?.map((event: any) =>
+          parseFloat(event.total_revenue)
+        ),
+        fill: false,
+        borderColor: "#4BC0C0",
+        tension: 0.1,
+      },
+    ],
+  };
+
+  // Dữ liệu cho biểu đồ tròn (Pie chart)
+  const pieChartData = {
+    labels: data?.top_events?.map((event: any) => event.name), // Tên sự kiện
+    datasets: [
+      {
+        label: "Tỷ lệ doanh thu",
+        data: data?.top_events?.map((event: any) =>
+          parseFloat(event.total_revenue)
+        ), // Doanh thu của từng sự kiện
+        backgroundColor: [
+          "#FF5733",
+          "#33FF57",
+          "#3357FF",
+          "#FF33A1",
+          "#FFC300",
+        ], // Các màu sắc cho các phần tử
+      },
+    ],
+  };
+
+  // Dữ liệu cho biểu đồ Doughnut (hình tròn phân khúc)
+  const doughnutChartData = {
+    labels: data?.top_events?.map((event: any) => event.name), // Tên sự kiện
+    datasets: [
+      {
+        label: "Tỷ lệ doanh thu",
+        data: data?.top_events?.map((event: any) =>
+          parseFloat(event.total_revenue)
+        ),
+        backgroundColor: [
+          "#FF5733",
+          "#33FF57",
+          "#3357FF",
+          "#FF33A1",
+          "#FFC300",
+        ], // Các màu sắc cho các phần tử
+      },
+    ],
+  };
+
   // Tùy chọn cho biểu đồ
   const chartOptions = {
     responsive: true,
@@ -126,6 +188,22 @@ const Dashboard = () => {
       title: {
         display: true,
         text: "Doanh thu theo sự kiện",
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          font: {
+            size: 10, // Thu nhỏ chữ trên trục X
+          },
+        },
+      },
+      y: {
+        ticks: {
+          font: {
+            size: 10, // Thu nhỏ chữ trên trục Y
+          },
+        },
       },
     },
   };
@@ -199,21 +277,48 @@ const Dashboard = () => {
           Tổng doanh thu: {data.total_revenue} VNĐ
         </h3>
       </div>
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        {/* Biểu đồ cột */}
+        <div>
+          <h3 className="text-xl font-semibold mb-4">
+            Biểu đồ doanh thu theo sự kiện
+          </h3>
+          <Bar data={chartData} options={chartOptions} />
+        </div>
 
+        {/* Biểu đồ đường */}
+        <div>
+          <h3 className="text-xl font-semibold mb-4">
+            Biểu đồ doanh thu theo sự kiện (Đường)
+          </h3>
+          <Line data={lineChartData} options={chartOptions} />
+        </div>
+
+        {/* Biểu đồ tròn */}
+        <div>
+          <h3 className="text-xl font-semibold mb-4">
+            Biểu đồ tỷ lệ doanh thu (Tròn)
+          </h3>
+          <Pie data={pieChartData} options={chartOptions} />
+        </div>
+
+        {/* Biểu đồ Doughnut */}
+        <div>
+          <h3 className="text-xl font-semibold mb-4">
+            Biểu đồ tỷ lệ doanh thu (Doughnut)
+          </h3>
+          <Doughnut data={doughnutChartData} options={chartOptions} />
+        </div>
+      </div>
       {/* Bảng báo cáo doanh thu */}
-      {tableData.length > 0 ? (
+      <h2 className="text-xl mb-2">Top 5 sự kiện có doanh thu cao nhất </h2>
+      {tableData?.length > 0 ? (
         <Table columns={columns} dataSource={tableData} className="mb-6" />
       ) : (
         <Empty />
       )}
 
-      {/* Biểu đồ doanh thu theo sự kiện */}
-      <div className="w-full">
-        <h3 className="text-xl font-semibold mb-4">
-          Biểu đồ doanh thu theo sự kiện
-        </h3>
-        <Bar data={chartData} options={chartOptions} />
-      </div>
+      {/* Các biểu đồ */}
     </div>
   );
 };

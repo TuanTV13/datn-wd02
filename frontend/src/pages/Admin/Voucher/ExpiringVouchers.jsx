@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Input, Button, DatePicker, notification, Card } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeftOutlined } from "@ant-design/icons";
 import moment from "moment";
-
 import axiosInstance from "../../../axios";
 
 const ExpiringVoucherForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { state } = useLocation();
+
   useEffect(() => {
     if (!state) {
       navigate("/admin/discount-code-list");
     }
-  }, []);
+  }, [state, navigate]);
+
   // Lấy giá trị mặc định từ state?.item
   const [voucherData, setVoucherData] = useState({
     code: state?.item?.code || "",
@@ -28,8 +28,6 @@ const ExpiringVoucherForm = () => {
   const onFinish = async () => {
     setLoading(true);
     try {
-      // Gửi yêu cầu PUT với axios
-
       const response = await axiosInstance.put(
         `/vouchers/${state?.item?.id}/update`,
         {
@@ -44,8 +42,7 @@ const ExpiringVoucherForm = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization:
-              "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL3YxL2xvZ2luIiwiaWF0IjoxNzMxNjQ0MzIwLCJleHAiOjQ4Mzg3NjQ0MzIwLCJuYmYiOjE3MzE2NDQzMjAsImp0aSI6Ik9Eb3IwWjZWeUoyTDIxUksiLCJzdWIiOiI2IiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.-xRi4wH0bh3ysiTH9pMWmWaYgGoKiiYpfTkfx2J_D18",
+            Authorization: "Bearer YOUR_TOKEN_HERE", // Thay thế bằng token thực tế
           },
         }
       );
@@ -79,6 +76,33 @@ const ExpiringVoucherForm = () => {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Cột hiển thị thông tin voucher hiện tại */}
+          <div className="p-4 border-r">
+            <h3 className="text-lg font-semibold">
+              Thông tin voucher hiện tại
+            </h3>
+            <p>
+              <strong>Mã giảm giá:</strong> {voucherData.code}
+            </p>
+            <p>
+              <strong>Trạng thái:</strong>{" "}
+              {voucherData.status === "published" ? "Hoạt động" : "Bản nháp"}
+            </p>
+            <p>
+              <strong>Ngày hết hạn:</strong>{" "}
+              {voucherData.end_time
+                ? voucherData.end_time.format("DD/MM/YYYY")
+                : "Chưa xác định"}
+            </p>
+            <p>
+              <strong>Số lần sử dụng:</strong> {voucherData.issue_quantity}
+            </p>
+            <p>
+              <strong>Mô tả:</strong> {voucherData.description}
+            </p>
+          </div>
+
+          {/* Cột chứa các trường để sửa */}
           <div>
             <label
               htmlFor="code"
@@ -94,12 +118,10 @@ const ExpiringVoucherForm = () => {
                 setVoucherData({ ...voucherData, code: e.target.value })
               }
             />
-          </div>
 
-          <div>
             <label
               htmlFor="status"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 mt-4"
             >
               Trạng thái
             </label>
@@ -114,12 +136,10 @@ const ExpiringVoucherForm = () => {
               <option value="published">Hoạt động</option>
               <option value="draft">Bản nháp</option>
             </select>
-          </div>
 
-          <div>
             <label
               htmlFor="end_time"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 mt-4"
             >
               Ngày hết hạn
             </label>
@@ -132,12 +152,10 @@ const ExpiringVoucherForm = () => {
               style={{ width: "100%", padding: "12px 16px" }}
               format="DD/MM/YYYY"
             />
-          </div>
 
-          <div>
             <label
               htmlFor="issue_quantity"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 mt-4"
             >
               Số lần sử dụng
             </label>
@@ -154,12 +172,10 @@ const ExpiringVoucherForm = () => {
               }
               placeholder="Nhập số lần sử dụng"
             />
-          </div>
 
-          <div className="sm:col-span-2">
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 mt-4"
             >
               Mô tả
             </label>

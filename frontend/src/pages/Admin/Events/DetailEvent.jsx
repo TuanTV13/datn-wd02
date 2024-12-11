@@ -5,6 +5,9 @@ import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Button, Modal } from "antd";
+import AddTicket from "../Tickets/AddTicket";
+import AddDiscountCode from "../Voucher/AddDiscountCode";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DetailEvents = () => {
@@ -18,6 +21,12 @@ const DetailEvents = () => {
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
 
   const { id } = useParams();
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTicketForm, setIsTicketForm] = useState(true);
+  const [eventId, setEventId] = useState(id);
+  const [reload, setReload] = useState(false);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -43,7 +52,7 @@ const DetailEvents = () => {
     };
 
     fetchEventDetails();
-  }, [id]);
+  }, [id, reload]);
 
   const handleChangeStatus = async () => {
     const token = localStorage.getItem("access_token");
@@ -119,13 +128,14 @@ const DetailEvents = () => {
         const data = await response.json();
         console.log("Check-in successful:", data);
         // Xử lý kết quả thành công nếu cần
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === id
-              ? { ...user, pivot: { ...user.pivot, checked_in: 1 } }
-              : user
-          )
-        );
+        // setUsers((prevUsers) =>
+        //   prevUsers.map((user) =>
+        //     user.id === id
+        //       ? { ...user, pivot: { ...user.pivot, checked_in: 1 } }
+        //       : user
+        //   )
+        // );
+        setReload(!reload);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -206,24 +216,53 @@ const DetailEvents = () => {
       <hr className="border-t-2 border-gray-300 mb-6" />
 
       {/* Tiêu đề và thông tin chung */}
-      <h1 className="text-5xl font-extrabold text-gray-800 mb-4 shadow-md p-2 rounded-lg bg-gray-100">
+      <h1 className="text-3xl font-extrabold text-gray-900 mb-6 p-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-transparent bg-clip-text shadow-xl rounded-lg">
         {data.event.name}
       </h1>
-      <p className="text-lg font-medium text-gray-700 mb-4 flex items-center">
-        <span className="mr-2 text-xl text-gray-600">📌</span>
-        Trạng thái:{" "}
-        <span className="font-bold text-teal-600">{data.event.status}</span>
+
+      <p className="text-lg font-medium text-gray-700 mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md border-l-4 ">
+        <span className="flex items-center text-gray-800">
+          <span className="mr-2 text-xl">📌</span>
+          Trạng thái:{" "}
+          <span className="font-bold text-indigo-600">
+            {" "}
+            {data.event.status}
+          </span>
+        </span>
+        <Button
+          type="primary"
+          className="h-12 px-6 py-2  to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Thêm vé và voucher
+        </Button>
       </p>
 
-      <div className="flex justify-between items-center mb-6">
+      {/* Group the buttons in one row, with different colors */}
+      <div className="flex space-x-4 justify-center mb-8">
         <button
           onClick={() => setShowStatusPopup(true)}
-          className="px-6 py-3 bg-gradient-to-r from-green-400 to-green-600 text-white font-bold rounded-lg shadow-lg transform hover:scale-105 hover:rotate-1 transition-transform duration-300"
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
         >
           Thay đổi trạng thái
         </button>
-        <button className="px-6 py-3 bg-gradient-to-r from-blue-400 to-blue-600 text-white font-bold rounded-lg shadow-lg transform hover:scale-105 hover:rotate-1 transition-transform duration-300">
+        <button
+          onClick={() => {}}
+          className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
+        >
           Thêm địa chỉ IP check-in
+        </button>
+        <button
+          onClick={() => setShowTickets(true)}
+          className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
+        >
+          Xem thông tin Vé
+        </button>
+        <button
+          onClick={() => setShowUsers(true)}
+          className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
+        >
+          Xem Người mua vé
         </button>
       </div>
 
@@ -394,23 +433,26 @@ const DetailEvents = () => {
             {data.event.max_attendees}
           </p>
         </div>
+        <div className="p-4 bg-gradient-to-r from-red-50 via-red-100 to-red-200 border border-red-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+          <p className="text-lg text-gray-800 font-semibold">
+            Số lượng vé đã bán:
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            {data.event.tickets.length}
+          </p>
+        </div>
+        <div className="p-4 bg-gradient-to-r from-red-50 via-red-100 to-red-200 border border-red-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
+          <p className="text-lg text-gray-800 font-semibold">
+            Số lượng người tham gia:
+          </p>
+          <p className="text-lg text-gray-700 font-medium">
+            {data.event.users.length}
+          </p>
+        </div>
       </div>
 
       {/* Nút hiển thị thông tin Vé và Người dùng */}
-      <div className="flex space-x-4 mt-8 flex justify-center">
-        <button
-          onClick={() => setShowTickets(true)}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Xem thông tin Vé
-        </button>
-        <button
-          onClick={() => setShowUsers(true)}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Xem Người mua vé
-        </button>
-      </div>
+
       <br />
       <br />
       <img
@@ -684,6 +726,47 @@ const DetailEvents = () => {
           </div>
         </div>
       )}
+      <Modal
+        title="Thêm vé hoặc voucher"
+        width={1000}
+        open={isModalOpen}
+        footer={[
+          <Button
+            type="primary"
+            onClick={() => {
+              setIsModalOpen(false);
+              navigate("/admin/detail-event/" + eventId);
+            }}
+          >
+            Lưu
+          </Button>,
+        ]}
+      >
+        <div className="flex justify-center gap-3">
+          {" "}
+          <Button
+            key="ticket"
+            onClick={() => {
+              setIsTicketForm(true);
+            }}
+          >
+            Thêm vé
+          </Button>
+          <Button
+            key="voucher"
+            onClick={() => {
+              setIsTicketForm(false);
+            }}
+          >
+            Thêm voucher
+          </Button>
+        </div>
+        {isTicketForm ? (
+          <AddTicket eventId={eventId} />
+        ) : (
+          <AddDiscountCode eventId={eventId} />
+        )}
+      </Modal>
     </div>
   );
 };

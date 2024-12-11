@@ -1,23 +1,26 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Input, Button, Select, DatePicker, notification } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import axios from "axios";
 import api from "../../../api_service/api";
 import axiosInstance from "../../../axios";
+import { TicketsCT } from "../../../Contexts/TicketContext";
+import { register } from "../../../api_service/auth";
 
 const { Option } = Select;
 
-const AddDiscountCode = () => {
+const AddDiscountCode = (props) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { events } = useContext(TicketsCT);
 
   const [formData, setFormData] = useState({
     code: "",
     status: "published",
     startDate: "",
     endDate: "",
-    discountType: "",
+    discountType: "fixed",
     discountValue: "",
     minOrderValue: 1,
     maxOrderValue: 1,
@@ -51,7 +54,7 @@ const AddDiscountCode = () => {
 
     const requestData = {
       creator_id: 3,
-      event_id: 2,
+      event_id: props.eventId,
       code: formData.code,
       discount_type: formData.discountType,
       discount_value: formData.discountValue,
@@ -75,7 +78,7 @@ const AddDiscountCode = () => {
         description: `Mã giảm giá "${formData.code}" đã được thêm.`,
       });
       setLoading(false);
-      navigate("/admin/discount-code-list");
+      // navigate("/admin/discount-code-list");
     } catch (error) {
       setLoading(false);
       notification.error({
@@ -113,6 +116,29 @@ const AddDiscountCode = () => {
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+          {!props.eventId && (
+            <div>
+              <label
+                htmlFor="code"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Sự kiện
+              </label>
+              <select
+                id="event_id"
+                required
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                {...register("event_id", { required: true })}
+              >
+                <option value="">Chọn sự kiện</option>
+                {events?.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label
@@ -271,13 +297,15 @@ const AddDiscountCode = () => {
           >
             {loading ? "Đang lưu..." : "Lưu"}
           </button>
-          <button
-            type="button"
-            onClick={() => navigate("/admin/discount-code-list")}
-            className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-          >
-            Danh sách
-          </button>
+          {!props.eventId && (
+            <button
+              type="button"
+              onClick={() => navigate("/admin/discount-code-list")}
+              className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Danh sách
+            </button>
+          )}
         </div>
       </form>
     </div>

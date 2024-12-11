@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Event;
 use App\Models\Ticket;
+use App\Models\TicketPrice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -197,15 +198,15 @@ class EventRepository
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
-        $ticket = new Ticket();
+        $ticket = new TicketPrice();
         $totalRevenue = $ticket
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('price');
 
         $topEvents = $this->event
-            ->select('events.id', 'events.name', DB::raw('SUM(tickets.price) as total_revenue'))
-            ->join('tickets', 'events.id', '=', 'tickets.event_id')
-            ->whereBetween('tickets.created_at', [$startDate, $endDate])
+            ->select('events.id', 'events.name', DB::raw('SUM(ticket_prices.price) as total_revenue'))
+            ->join('ticket_prices', 'events.id', '=', 'ticket_prices.event_id')
+            ->whereBetween('ticket_prices.created_at', [$startDate, $endDate])
             ->groupBy('events.id', 'events.name')
             ->orderByDesc('total_revenue')
             ->limit($limit)

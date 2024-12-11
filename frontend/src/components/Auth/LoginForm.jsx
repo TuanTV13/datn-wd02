@@ -46,7 +46,9 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
 
         // Tự động quay về trang chủ sau 3 giây
         setTimeout(() => {
-          window.location.href = "/"; // Điều hướng về trang chủ
+          response.roles == "admin"
+            ? (window.location.href = "/")
+            : (window.location.href = "/admin"); // Điều hướng về trang chủ
         }, 3000);
       } else {
         setErrorMessage("Đăng nhập thất bại! Vui lòng thử lại.");
