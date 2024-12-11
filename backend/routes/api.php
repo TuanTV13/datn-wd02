@@ -74,11 +74,10 @@ Route::prefix('v1')->group(function () {
         Route::post('{eventId}/add-ip', [EventController::class, 'addIp']);
         Route::get('/check-event-ip', [EventController::class, 'checkEventIP']); // Thông báo hi chưa có ip checkin cục bộ
         Route::get('statistics/top-revenue-events', [StatisticsController::class, 'topRevenueEvents']); // Thống kê trong khoảng thời gian chọn
-        Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng
+        Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatisticsByTime']); // Đếm số lượng
         Route::put('changeStatus/{id}', [EventController::class, 'changeStatus']);
         Route::put('{eventId}/checkin', [EventController::class, 'checkIn']);
         Route::put('{eventId}/cancelcheckin', [EventController::class, 'cancelCheckIn']);
-
     });
 
     Route::get('users', [UserController::class, 'index']);
@@ -203,8 +202,6 @@ Route::prefix('v1')->group(function () {
 
         // Lấy giao dịch theo ID
         Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
-
-
     });
 });
 
@@ -215,6 +212,3 @@ Route::post('/notify-momo', [PaymentController::class, 'notifyMomo']);
 
 
 Route::post('/upload-image', [ImageController::class, 'upload']);
-
-
-

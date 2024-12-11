@@ -10,6 +10,7 @@ import {
 import { EventCT } from "../../Contexts/ClientEventContext";
 import api from "../../api_service/api";
 import { fetchEventsByProvince } from "../../api_service/ClientEvent";
+import { notification } from "antd";
 
 const CategoryEven = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -66,7 +67,9 @@ const CategoryEven = () => {
       navigate(`?${params.toString()}`);
       fetchEventsByDate(start_time, end_time); // Lấy sự kiện theo khoảng thời gian đã chọn
     } else {
-      alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!");
+      notification.success({
+        message: "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!",
+      });
     }
   };
   // Lấy query params từ URL khi tải trang

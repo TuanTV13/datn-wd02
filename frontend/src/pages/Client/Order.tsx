@@ -31,11 +31,9 @@ const Order = () => {
 
       <div className="max-w-4xl mx-auto p-6">
         <div className="text-center mt-8">
-          <p className="text-gray-500 mb-1">
-          Thanh toán đơn hàng thành công!
-          </p>
+          <p className="text-gray-500 mb-1">Thanh toán đơn hàng thành công!</p>
           <p className="text-gray-500 mb-4">
-             Cảm ơn bạn đã trải nghiệm dịch vụ của chùng tôi!
+            Cảm ơn bạn đã trải nghiệm dịch vụ của chùng tôi!
           </p>
           <Link
             to={`/`}

@@ -263,7 +263,6 @@ const ItemEven = () => {
             </p>
           )}
         </div>
-
         <div className="flex justify-center mt-2">
           <button
             onClick={() => setShowFeatured(!showFeatured)}

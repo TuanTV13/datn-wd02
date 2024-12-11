@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Input, Row, Col, Card, notification } from "antd";
+import {
+  Table,
+  Button,
+  Input,
+  Row,
+  Col,
+  Card,
+  notification,
+  Empty,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import {
   SearchOutlined,
   FilePdfOutlined,
   DeleteOutlined,
+  ExportOutlined,
 } from "@ant-design/icons";
 import * as XLSX from "xlsx";
 import axiosInstance from "../../../axios";
@@ -38,11 +48,6 @@ const RatingList = () => {
       title: "STT",
       dataIndex: "id",
       key: "id",
-    },
-    {
-      title: "Mã sự kiện",
-      dataIndex: "event_id",
-      key: "event_id",
     },
     {
       title: "Mã người dùng",
@@ -141,19 +146,19 @@ const RatingList = () => {
           <div className="header">
             <h2 className="title">Danh sách phản hồi</h2>
             <div className="action-buttons">
-              <Button
+              {/* <Button
                 type="default"
                 size="large"
                 onClick={() => navigate("/admin/add-rating")} // Điều hướng tới trang thêm mới
                 style={{ marginRight: 10 }}
               >
                 Thêm mới
-              </Button>
+              </Button> */}
               <button
                 className="bg-green-500 text-white px-4 py-2 rounded-[10px]"
                 onClick={handleExportExcel} // Xuất Excel
               >
-                Xuất Excel
+                <ExportOutlined /> Xuất Excel
               </button>
             </div>
           </div>
@@ -161,7 +166,7 @@ const RatingList = () => {
       </Row>
 
       <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={12}>
+        <Col span={8}>
           <Card style={{ padding: 10 }}>
             <Input
               prefix={<SearchOutlined />}
@@ -174,7 +179,7 @@ const RatingList = () => {
           </Card>
         </Col>
 
-        <Col span={12}>
+        <Col span={8}>
           <Card style={{ padding: 10 }}>
             <Button
               type="primary"
@@ -197,19 +202,23 @@ const RatingList = () => {
 
       <Row gutter={16}>
         <Col span={24}>
-          <Table
-            dataSource={filteredData} // Hiển thị dữ liệu đã lọc
-            columns={columns}
-            pagination={{ pageSize: filterValue }}
-            className="custom-table"
-            locale={{
-              emptyText: (
-                <div className="empty-state">
-                  <p>Không có dữ liệu hiển thị</p>
-                </div>
-              ),
-            }}
-          />
+          {filteredData.length > 0 ? (
+            <Table
+              dataSource={filteredData} // Hiển thị dữ liệu đã lọc
+              columns={columns}
+              pagination={{ pageSize: filterValue }}
+              className="custom-table"
+              locale={{
+                emptyText: (
+                  <div className="empty-state">
+                    <p>Không có dữ liệu hiển thị</p>
+                  </div>
+                ),
+              }}
+            />
+          ) : (
+            <Empty />
+          )}
         </Col>
       </Row>
     </div>

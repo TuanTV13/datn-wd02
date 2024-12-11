@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { notification } from "antd";
 
 const CheckOut = () => {
   const location = useLocation();
@@ -65,7 +66,7 @@ const CheckOut = () => {
     const token = localStorage.getItem("access_token");
     const userID = localStorage.getItem("user_id");
     if (!voucherCode) {
-      alert("Vui lòng nhập mã voucher!");
+      notification.success({ message: "Vui lòng nhập mã voucher!" });
       return;
     }
 
@@ -88,13 +89,15 @@ const CheckOut = () => {
 
       if (response.data.success) {
         setTotalPrice(response.data.data.total_price);
-        alert("Mã giảm giá áp dụng thành công!");
+        notification.success({ message: "Mã giảm giá áp dụng thành công!" });
       } else {
-        alert(response.data.message || "Mã giảm giá không hợp lệ.");
+        notification.error({
+          message: response.data.message || "Mã giảm giá không hợp lệ.",
+        });
       }
     } catch (error) {
       console.error("Error applying voucher:", error);
-      alert("Có lỗi xảy ra khi áp dụng mã giảm giá.");
+      notification.error({ message: "Có lỗi xảy ra khi áp dụng mã giảm giá." });
     }
   };
 
@@ -136,11 +139,15 @@ const CheckOut = () => {
         if (response.ok) {
           window.location.href = data.payment_url;
         } else {
-          alert(data.message || "Thanh toán không thành công.");
+          notification.error({
+            message: data.message || "Thanh toán không thành công.",
+          });
         }
       } catch (error) {
         console.error("Error during payment process:", error);
-        alert("Có lỗi xảy ra trong quá trình thanh toán.");
+        notification.success({
+          message: "Có lỗi xảy ra trong quá trình thanh toán.",
+        });
       }
     } else {
       // Nếu chưa đăng nhập, yêu cầu người dùng nhập thông tin
@@ -152,7 +159,9 @@ const CheckOut = () => {
 
       // Kiểm tra xem người dùng đã nhập đủ thông tin chưa
       if (!userDetails.name || !userDetails.email || !userDetails.phone) {
-        alert("Vui lòng điền đầy đủ các trường yêu cầu.");
+        notification.error({
+          message: "Vui lòng điền đầy đủ các trường yêu cầu.",
+        });
         setIsProcessing(false);
         return;
       }
@@ -184,15 +193,18 @@ const CheckOut = () => {
           }
         );
         const data = await response.json();
-        console.log(response);
         if (response.ok) {
           window.location.href = data.payment_url;
         } else {
-          alert(data.message || "Thanh toán không thành công.");
+          notification.error({
+            message: data.message || "Thanh toán không thành công.",
+          });
         }
       } catch (error) {
         console.error("Lỗi trong quá trình thanh toán:", error);
-        alert("Có lỗi xảy ra trong quá trình thanh toán.");
+        notification.success({
+          message: "Có lỗi xảy ra trong quá trình thanh toán.",
+        });
       }
     }
   };
@@ -268,12 +280,12 @@ const CheckOut = () => {
                   htmlFor="phone"
                   className="uppercase text-[#46494F] text-xs tracking-[0.9px]"
                 >
-                  Số điện thoại
+                  Số điện thoại *
                 </label>
                 <input
                   id="phone"
-                  required
                   type="text"
+                  required
                   className="h-12 rounded-lg border px-4 text-sm"
                   placeholder="+84"
                   name="phone"
@@ -290,8 +302,8 @@ const CheckOut = () => {
                 </label>
                 <input
                   id="email"
-                  type="text"
                   required
+                  type="text"
                   className="h-12 border rounded-lg px-4 text-sm"
                   placeholder="abc@gmail.com"
                   name="email"

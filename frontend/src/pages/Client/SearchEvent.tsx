@@ -9,6 +9,7 @@ import { EventCT } from "../../Contexts/ClientEventContext";
 import { CategoryCT } from "../../Contexts/CategoryContext";
 import api from "../../api_service/api";
 import { fetchEventsByProvince } from "../../api_service/ClientEvent";
+import { notification } from "antd";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -65,7 +66,9 @@ const SearchEvent = () => {
       navigate(`?${params.toString()}`);
       fetchEventsByDate(start_time, end_time); // Lấy sự kiện theo khoảng thời gian đã chọn
     } else {
-      alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!");
+      notification.error({
+        message: "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!",
+      });
     }
   };
   // Lấy query params từ URL khi tải trang

@@ -1,26 +1,37 @@
 import { Menu } from "antd";
 import { LuCalendarPlus, LuUsers } from "react-icons/lu";
-import { MdLogout } from "react-icons/md";
+import { MdLogout, MdPieChartOutlined } from "react-icons/md";
 import { TfiDashboard } from "react-icons/tfi";
 import {
   AiOutlineTag,
   AiOutlinePercentage,
   AiOutlineCheckCircle,
 } from "react-icons/ai";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Badge, Tooltip } from "antd"; // Thêm Badge và Tooltip
-import React from "react";
+import React, { useEffect } from "react";
 
 type Props = {
   collapsed?: boolean;
 };
 
 const MenuSidebar = ({ collapsed = false }: Props) => {
+  const navigate = useNavigate();
   const location = useLocation();
+  useEffect(() => {
+    const roles: any[] = JSON.parse(localStorage.getItem("roles") as string);
+    const role = roles?.find((v) => v.name === "admin");
+    if (!role) {
+      navigate("/");
+    }
+  }, []);
+
   const getSelectedKey = () => {
     const path = location.pathname;
 
     if (path === "/admin") return "1";
+    if (path === "/admin/report") return "6";
+
     if (path.startsWith("/admin/user-list")) return "2.1";
     if (path.startsWith("/admin/add-user")) return "2.2";
     if (path.startsWith("/admin/client-list")) return "7.1";
@@ -56,6 +67,24 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
           mode="inline"
           defaultSelectedKeys={[getSelectedKey()]}
           items={[
+            {
+              key: "1",
+              icon: (
+                <Tooltip title={!collapsed ? "" : "Bảng điều khiển"}>
+                  <TfiDashboard />
+                </Tooltip>
+              ),
+              label: <Link to="/admin">Bảng điều khiển</Link>,
+            },
+            {
+              key: "6",
+              icon: (
+                <Tooltip title={!collapsed ? "" : "Bảng điều khiển"}>
+                  <MdPieChartOutlined />{" "}
+                </Tooltip>
+              ),
+              label: <Link to="/admin/report">Bảng Thống Kê</Link>,
+            },
             {
               key: "2",
               icon: (
@@ -148,39 +177,37 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
                 // },
               ],
             },
-            {
-              key: "1",
-              icon: (
-                <Tooltip title={!collapsed ? "" : "Bảng điều khiển"}>
-                  <TfiDashboard />
-                </Tooltip>
-              ),
-              label: <Link to="/admin">Bảng Thống Kê</Link>,
-            },
+
             {
               key: "6",
               icon: (
-                <Tooltip title={!collapsed ? "" : "Danh sách đánh giá"}>
+                <Tooltip
+                  title={!collapsed ? "" : <div> "Danh sách đánh giá"</div>}
+                >
                   <AiOutlineCheckCircle />
                 </Tooltip>
               ),
               label: (
                 <Link to="/admin/rating-list">
                   {" "}
-                  <span className="relative">
-                    <Badge count={5} offset={[10, 0]}>
-                      <span className="whitespace-nowrap">
-                        Danh sách đánh giá
-                      </span>
-                    </Badge>
-                  </span>
+                  {/* <span className="">
+                    <Badge count={5} offset={[10, 0]}> */}
+                  <span>Danh sách đánh giá</span>
+                  {/* </Badge>
+                  </span> */}
                 </Link>
               ),
             },
           ]}
         />
       </div>
-      <div className="flex items-center gap-2 px-6 mb-10 cursor-pointer">
+      <div
+        onClick={() => {
+          localStorage.clear();
+          navigate("/");
+        }}
+        className="flex items-center gap-2 px-6 mb-10 cursor-pointer"
+      >
         <MdLogout />
         <p className={`w-full truncate ${collapsed && "hidden"}`}>Đăng xuất</p>
       </div>
