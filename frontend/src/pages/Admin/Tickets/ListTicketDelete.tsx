@@ -13,7 +13,7 @@ const ListTicketDelete = () => {
     const fetchDeletedTickets = async () => {
       try {
         const response = await api.post("/tickets/block");
-        setTicketDelete(response.data);
+        setTicketDelete(response.data?.message);
       } catch (error) {
         console.error("Error fetching deleted tickets:", error);
       }
@@ -25,7 +25,7 @@ const ListTicketDelete = () => {
   const handleRestore = (id: number) => {
     onRestore(id); // Hàm khôi phục vé
   };
-
+  console.log(ticketDelete);
   return (
     <div>
       <div className="bg-white rounded-lg shadow">

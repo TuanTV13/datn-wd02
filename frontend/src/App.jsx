@@ -62,7 +62,7 @@ function App() {
       path: "admin",
       element: <LayoutAdmin />,
       children: [
-        { path: "", element: <></> },
+        { path: "", element: <Dashboard /> },
         { path: "report", element: <Dashboard /> },
         { path: "ticket-list", element: <ListTicket /> },
         { path: "ticket-list-user", element: <ListUserBuyTicket /> },

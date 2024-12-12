@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TicketsCT } from "../../../Contexts/TicketContext";
 import { useForm } from "react-hook-form";
 import { StatusType, Tickets, TicketType } from "../../../interfaces/Ticket";
 
 const AddTicket = (props: any) => {
   const { onAdd, events } = useContext(TicketsCT);
-
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -16,7 +16,10 @@ const AddTicket = (props: any) => {
   const [ticketTypesList] = useState(Object.values(TicketType));
 
   const onSubmit = (data: Tickets) => {
-    onAdd(data); // Xử lý khi người dùng gửi form
+    onAdd({ ...data, event_id: props.eventId }); // Xử lý khi người dùng gửi form
+    if (!props.eventId) {
+      navigate("/admin/ticket-list");
+    }
   };
 
   return (

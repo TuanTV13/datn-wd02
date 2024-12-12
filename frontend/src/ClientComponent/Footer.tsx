@@ -9,11 +9,14 @@ const Footer = () => {
             {/* Support Information Section */}
             <div className="flex-grow p-4 max-w-xs md:max-w-sm">
               <div className="flex items-center">
-                <img
-                  src="../../public/images/logo.webp"
-                  alt="Logo"
-                  className="w-16 h-16 rounded-full mr-3"
-                />
+                <a href="/">
+                  {" "}
+                  <img
+                    src="../../public/images/logo.webp"
+                    alt="Logo"
+                    className="w-16 h-16 rounded-full mr-3"
+                  />
+                </a>
                 <h3 className="text-lg font-semibold">Thông tin hỗ trợ</h3>
               </div>
               <p className="mt-4 text-sm">
@@ -39,7 +42,7 @@ const Footer = () => {
                 <img
                   src="../../public/images/logo_paypal.png"
                   alt="Thanh toán 1"
-                  className="h-auto w-10 mx-auto"
+                  className="h-auto w-12 mx-auto"
                 />
                 <img
                   src="../../public/images/vnpay-logo.jpg"

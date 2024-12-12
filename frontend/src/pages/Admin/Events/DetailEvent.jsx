@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Button, Modal } from "antd";
 import AddTicket from "../Tickets/AddTicket";
 import AddDiscountCode from "../Voucher/AddDiscountCode";
+import UpdateEvent from "./UpdateEvent";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DetailEvents = () => {
@@ -16,6 +17,7 @@ const DetailEvents = () => {
   const [error, setError] = useState(null);
   const [showTickets, setShowTickets] = useState(false); // Quản lý popup vé
   const [showUsers, setShowUsers] = useState(false); // Quản lý popup người dùng
+  const [showUpdateEvent, setShowUpdateEvent] = useState(false); // Quản lý popup người dùng
   const [showStatusPopup, setShowStatusPopup] = useState(false); // Popup trạng thái
   const [selectedStatus, setSelectedStatus] = useState(""); // Lưu trạng thái được chọn
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
@@ -44,6 +46,10 @@ const DetailEvents = () => {
         setEventDetails(response.data);
         console.log(response.data);
       } catch (err) {
+        if (err.status === 401) {
+          localStorage.clear();
+          window.location = "/auth";
+        }
         setError("Lỗi khi tải chi tiết sự kiện");
         console.error(err);
       } finally {
@@ -137,6 +143,10 @@ const DetailEvents = () => {
         // );
         setReload(!reload);
       } catch (error) {
+        if (error.status === 401) {
+        }
+        localStorage.clear();
+        window.location = "/auth";
         console.error("Error:", error);
       }
     }
@@ -170,6 +180,10 @@ const DetailEvents = () => {
       console.log("Cancel check-in successful:", data);
       // Xử lý kết quả thành công nếu cần
     } catch (error) {
+      if (error.status === 401) {
+        localStorage.clear();
+        window.location = "/auth";
+      }
       console.error("Error:", error);
     }
   };
@@ -226,7 +240,10 @@ const DetailEvents = () => {
           Trạng thái:{" "}
           <span className="font-bold text-indigo-600">
             {" "}
-            {data.event.status}
+            {data.event.status === "pending" && "Đang chờ"}
+            {data.event.status === "completed" && "Đã kết thúc"}
+            {data.event.status === "confirmed" && "Đang chuẩn bị"}
+            {data.event.status === "checkin" && "Đang checkin"}
           </span>
         </span>
         <Button
@@ -264,8 +281,14 @@ const DetailEvents = () => {
         >
           Xem Người mua vé
         </button>
+        <button
+          onClick={() => setShowUpdateEvent(!showUpdateEvent)}
+          className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
+        >
+          Cập nhật sự kiện{" "}
+        </button>
       </div>
-
+      {showUpdateEvent && <UpdateEvent />}
       {showStatusPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 ">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full h-[400px] max-h-[100vh] relative">
@@ -538,8 +561,8 @@ const DetailEvents = () => {
               Thông tin Vé
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {tickets.length > 0 ? (
-                tickets.map((ticket) => (
+              {tickets?.length > 0 ? (
+                tickets?.map((ticket) => (
                   <div
                     key={ticket.id}
                     className="p-4 bg-gray-50 rounded-lg shadow-md mb-4"
@@ -547,43 +570,35 @@ const DetailEvents = () => {
                     <p className="font-semibold text-gray-800">
                       Loại vé: {ticket.ticket_type}
                     </p>
-                    {ticket.price && ticket.price.length > 0 ? (
-                      ticket.price.map((priceItem) => (
-                        <div
-                          key={priceItem.id}
-                          className="mt-2 p-3 border rounded-lg bg-white shadow-sm"
-                        >
-                          <p className="text-gray-600">
-                            Giá:{" "}
-                            <span className="font-semibold">
-                              {priceItem.price} VND
-                            </span>
-                          </p>
-                          <p className="text-gray-600">
-                            Số lượng:{" "}
-                            <span className="font-semibold">
-                              {priceItem.quantity}
-                            </span>
-                          </p>
-                          <p className="text-gray-600">
-                            Khu vực:{" "}
-                            <span className="font-semibold">
-                              {priceItem.zone?.name || "Không xác định"}
-                            </span>
-                          </p>
-                          <p className="text-gray-600">
-                            Ngày mở bán:{" "}
-                            {new Date(priceItem.sale_start).toLocaleString()}
-                          </p>
-                          <p className="text-gray-600">
-                            Ngày kết thúc bán:{" "}
-                            {new Date(priceItem.sale_end).toLocaleString()}
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500">Chưa có thông tin giá vé.</p>
-                    )}
+                    <div
+                      key={ticket.id}
+                      className="mt-2 p-3 border rounded-lg bg-white shadow-sm"
+                    >
+                      <p className="text-gray-600">
+                        Giá:{" "}
+                        <span className="font-semibold">
+                          {ticket.price} VND
+                        </span>
+                      </p>
+                      <p className="text-gray-600">
+                        Số lượng:{" "}
+                        <span className="font-semibold">{ticket.quantity}</span>
+                      </p>
+                      <p className="text-gray-600">
+                        Khu vực:{" "}
+                        <span className="font-semibold">
+                          {ticket.zone?.name || "Không xác định"}
+                        </span>
+                      </p>
+                      <p className="text-gray-600">
+                        Ngày mở bán:{" "}
+                        {new Date(ticket.sale_start).toLocaleString()}
+                      </p>
+                      <p className="text-gray-600">
+                        Ngày kết thúc bán:{" "}
+                        {new Date(ticket.sale_end).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
                 ))
               ) : (
