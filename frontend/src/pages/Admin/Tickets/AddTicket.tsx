@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TicketsCT } from "../../../Contexts/TicketContext";
 import { useForm } from "react-hook-form";
 import { StatusType, Tickets, TicketType } from "../../../interfaces/Ticket";
 
-const AddTicket = () => {
-  const { onAdd,events } = useContext(TicketsCT);
-
+const AddTicket = (props: any) => {
+  const { onAdd, events } = useContext(TicketsCT);
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -16,7 +16,10 @@ const AddTicket = () => {
   const [ticketTypesList] = useState(Object.values(TicketType));
 
   const onSubmit = (data: Tickets) => {
-    onAdd(data); // Xử lý khi người dùng gửi form
+    onAdd({ ...data, event_id: props.eventId }); // Xử lý khi người dùng gửi form
+    if (!props.eventId) {
+      navigate("/admin/ticket-list");
+    }
   };
 
   return (
@@ -28,29 +31,31 @@ const AddTicket = () => {
         <h2 className="text-2xl font-bold text-center mb-5">Thêm mới vé</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Trường sự kiện */}
-          <div>
-            <label
-              htmlFor="event"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Sự kiện
-            </label>
-            <select
-              id="event_id"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              {...register("event_id", { required: true })}
-            >
-              <option value="">Chọn sự kiện</option>
-              {events.map((event) => (
-                <option key={event.id} value={event.id}>
-                  {event.name}
-                </option>
-              ))}
-            </select>
-            {errors.event_id && (
-              <span className="text-red-500">Vui lòng chọn sự kiện</span>
-            )}
-          </div>
+          {!props.eventId && (
+            <div>
+              <label
+                htmlFor="event"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Sự kiện
+              </label>
+              <select
+                id="event_id"
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                {...register("event_id", { required: true })}
+              >
+                <option value="">Chọn sự kiện</option>
+                {events?.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.name}
+                  </option>
+                ))}
+              </select>
+              {errors.event_id && (
+                <span className="text-red-500">Vui lòng chọn sự kiện</span>
+              )}
+            </div>
+          )}
 
           {/* Trường loại vé */}
           <div>
@@ -181,12 +186,14 @@ const AddTicket = () => {
           >
             Thêm mới
           </button>
-          <Link
-            to="/admin/ticket-list"
-            className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-          >
-            Danh sách vé
-          </Link>
+          {!props.eventId && (
+            <Link
+              to="/admin/ticket-list"
+              className="px-6 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Danh sách vé
+            </Link>
+          )}
         </div>
       </form>
     </div>

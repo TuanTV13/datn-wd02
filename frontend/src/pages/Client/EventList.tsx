@@ -9,6 +9,7 @@ import { EventCT } from "../../Contexts/ClientEventContext";
 import { CategoryCT } from "../../Contexts/CategoryContext";
 import api from "../../api_service/api";
 import { fetchEventsByProvince } from "../../api_service/ClientEvent";
+import { Checkbox, notification } from "antd";
 
 const EventListing = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -62,7 +63,9 @@ const EventListing = () => {
       navigate(`?${params.toString()}`);
       fetchEventsByDate(start_time, end_time); // Lấy sự kiện theo khoảng thời gian đã chọn
     } else {
-      alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!");
+      notification.error({
+        message: "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!",
+      });
     }
   };
   // Lấy query params từ URL khi tải trang
@@ -115,7 +118,7 @@ const EventListing = () => {
   const filteredProvince = provinces.filter((item) =>
     item.name.toLowerCase().includes(Inputlocation.toLowerCase())
   );
-  
+
   const [allEvents, setAllEvents] = useState(events);
   useEffect(() => {
     // Khi trang tải lại, lấy lại sự kiện ban đầu
@@ -135,6 +138,7 @@ const EventListing = () => {
   }, [filteredEvents]);
   const eventsPerPage = 5; // Số sự kiện trên mỗi trang
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [categoryId, setCategoryId] = useState<any[]>([]);
 
   // Tính các sự kiện cần hiển thị dựa trên trang hiện tại
   const indexOfLastEvent = currentPage * eventsPerPage;
@@ -143,6 +147,16 @@ const EventListing = () => {
     indexOfFirstEvent,
     indexOfLastEvent
   );
+
+  useEffect(() => {
+    if (categoryId.length > 0) {
+      setFilteredEvents([
+        ...allEvents.filter((v) => categoryId.includes(v.category_id)),
+      ]);
+    } else {
+      setFilteredEvents([...allEvents]);
+    }
+  }, [categoryId]);
 
   // Hàm xử lý thay đổi trang
   const handlePageChange = (direction: any) => {
@@ -200,8 +214,16 @@ const EventListing = () => {
                     <li
                       key={category.id}
                       className="cursor-pointer hover:text-[#007BFF]"
-                      onClick={() => handleCategoryClick(category.id)}
                     >
+                      <Checkbox
+                        onChange={(e) => {
+                          e.target.checked
+                            ? setCategoryId([...categoryId, category.id])
+                            : setCategoryId([
+                                ...categoryId.filter((v) => v !== category.id),
+                              ]);
+                        }}
+                      />
                       {category.name}
                     </li>
                   ))}

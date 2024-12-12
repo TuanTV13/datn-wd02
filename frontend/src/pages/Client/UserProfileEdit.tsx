@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Form, Input, Button } from "antd";
+import { Form, Input, Button, notification } from "antd";
 import "tailwindcss/tailwind.css";
 import axiosInstance from "../../axios";
 import { useNavigate } from "react-router-dom";
@@ -13,13 +13,8 @@ const UserProfileEdit = () => {
 
   // Gọi API GET để lấy dữ liệu người dùng
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/api/v1/user", {
-        headers: {
-          Authorization:
-            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL3YxL2xvZ2luIiwiaWF0IjoxNzMxNjQ0MzIwLCJleHAiOjQ4Mzg3NjQ0MzIwLCJuYmYiOjE3MzE2NDQzMjAsImp0aSI6Ik9Eb3IwWjZWeUoyTDIxUksiLCJzdWIiOiI2IiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.-xRi4wH0bh3ysiTH9pMWmWaYgGoKiiYpfTkfx2J_D18",
-        },
-      })
+    axiosInstance
+      .get("user", {})
       .then((response) => {
         // Lưu thông tin người dùng vào state
         setUser(response.data.user);
@@ -53,6 +48,7 @@ const UserProfileEdit = () => {
       .put(`/user/update-profile/${user.id}`, formData)
       .then((response) => {
         navigate("/profile");
+        notification.success({ message: "Cập nhật profile thành công" });
         console.log("User updated successfully:", response.data);
       })
       .catch((error) => {
@@ -69,7 +65,7 @@ const UserProfileEdit = () => {
   return (
     <div className="w-full lg:py-10 py-4 border pb-[199px] mt-36">
       <div className="px-80 ">
-        <h2 className="text-xl font-bold mb-4">User Profile</h2>
+        <h2 className="text-xl font-bold mb-4">Sửa thông tin cá nhân</h2>
         <Form
           form={form}
           layout="vertical"
@@ -79,7 +75,7 @@ const UserProfileEdit = () => {
           <Form.Item
             label="Tên"
             name="name"
-            rules={[{ required: true, message: "Please enter your name" }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên" }]}
           >
             <Input placeholder="Name" />
           </Form.Item>
@@ -91,7 +87,7 @@ const UserProfileEdit = () => {
               {
                 required: true,
                 type: "email",
-                message: "Please enter a valid email",
+                message: "Vui lòng nhập  email",
               },
             ]}
           >
@@ -101,26 +97,16 @@ const UserProfileEdit = () => {
           <Form.Item
             label="Số điện thoại"
             name="phone"
-            rules={[
-              { required: true, message: "Please enter your phone number" },
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
           >
             <Input placeholder="Phone" />
           </Form.Item>
 
-          <Form.Item
-            label="Địa chỉ"
-            name="address"
-            rules={[{ required: true, message: "Please enter your address" }]}
-          >
+          <Form.Item label="Địa chỉ" name="address">
             <Input placeholder="Address" />
           </Form.Item>
 
-          <Form.Item
-            label="Link Ảnh Đại Diện"
-            name="avatar"
-            rules={[{ required: true, message: "Please enter the avatar URL" }]}
-          >
+          <Form.Item label="Link Ảnh Đại Diện" name="avatar">
             <Input placeholder="Avatar URL" />
           </Form.Item>
 

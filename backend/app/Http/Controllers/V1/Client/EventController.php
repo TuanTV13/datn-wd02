@@ -108,14 +108,12 @@ class EventController extends Controller
         $availableTickets = [];
 
         foreach ($event->tickets as $ticket) {
-            foreach ($ticket['price'] as $price) {
-                $saleStart = Carbon::parse($price['sale_start']);
-                $saleEnd = Carbon::parse($price['sale_end']);
+            $saleStart = Carbon::parse($ticket['sale_start']);
+            $saleEnd = Carbon::parse($ticket['sale_end']);
 
-                if ($now->between($saleStart, $saleEnd)) {
-                    $availableTickets[] = $ticket;
-                    break;
-                }
+            if ($now->between($saleStart, $saleEnd)) {
+                $availableTickets[] = $ticket;
+                break;
             }
         }
 
@@ -249,8 +247,8 @@ class EventController extends Controller
 
         if ($events->isEmpty()) {
             return response()->json([
-                'message' => 'Không tìm thấy sự kiện nào'
-            ], 404);
+                'data' => []
+            ]);
         }
 
         foreach ($events as $event) {

@@ -139,6 +139,7 @@ class EventController extends Controller
 
     public function create(StoreEventRequest $request)
     {
+        // Log::info('Thông tin vé', ['data' => $request->all()]);
         DB::beginTransaction();
 
         try {
@@ -154,6 +155,7 @@ class EventController extends Controller
             if ($validationError) {
                 return $validationError;  // Trả về lỗi nếu có sự kiện trùng lặp
             }
+
             if ($request->has('speakers') && is_string($request->speakers)) {
                 $data['speakers'] = json_decode($request->speakers, true);
             } elseif ($request->has('speakers') && is_array($request->speakers)) {

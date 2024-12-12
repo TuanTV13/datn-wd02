@@ -68,10 +68,10 @@ const ListTicket = () => {
           </thead>
           <tbody className="divide-y divide-gray-200 text-center">
             {tickets?.length > 0 ? (
-              tickets.map((item: Tickets, index: number) => (
+              tickets?.map((item: Tickets, index: number) => (
                 <>
                   {/* Lặp qua từng sự kiện */}
-                  {item.price?.map((priceItem: any, subIndex: number) => (
+                  {item?.price?.map((priceItem: any, subIndex: number) => (
                     <tr key={`${item.id}-${subIndex}`}>
                       {/* Số thứ tự (cho từng dòng sự kiện) */}
                       <td className="p-4 border border-gray-300">

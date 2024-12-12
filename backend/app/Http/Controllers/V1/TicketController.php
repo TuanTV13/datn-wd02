@@ -248,10 +248,10 @@ class TicketController extends Controller
 
         try {
 
-            $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
+            // $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
 
-            $ticketPrice->delete();
-
+            // $ticketPrice->delete();
+            $ticket->delete();
             return response()->json([
                 'message' => 'Vé đã được khóa'
             ], 201);
@@ -264,7 +264,7 @@ class TicketController extends Controller
         }
     }
 
-    public function restoreTicket($id, $seatId)
+    public function restoreTicket($id)
     {
         $ticket = $this->ticketRepository->findTrashed($id);
 
@@ -273,9 +273,6 @@ class TicketController extends Controller
                 'message' => 'Không tìm thấy vé hoặc vé không bị hủy'
             ], 404);
         }
-        $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
-
-        $ticketPrice->restore();
 
         return response()->json([
             'message' => 'Khôi phục vé thành công'

@@ -50,7 +50,7 @@ class TicketRepository
 
     public function trashed()
     {
-        return $this->ticket->withTrashed()->get();
+        return $this->ticket->onlyTrashed()->get();
     }
 
     public function findByEventAndType($eventId, $ticketTypeId)

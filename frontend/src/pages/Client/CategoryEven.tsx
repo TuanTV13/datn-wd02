@@ -10,6 +10,7 @@ import {
 import { EventCT } from "../../Contexts/ClientEventContext";
 import api from "../../api_service/api";
 import { fetchEventsByProvince } from "../../api_service/ClientEvent";
+import { Empty, notification } from "antd";
 
 const CategoryEven = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -66,7 +67,9 @@ const CategoryEven = () => {
       navigate(`?${params.toString()}`);
       fetchEventsByDate(start_time, end_time); // Lấy sự kiện theo khoảng thời gian đã chọn
     } else {
-      alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!");
+      notification.error({
+        message: "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!",
+      });
     }
   };
   // Lấy query params từ URL khi tải trang
@@ -400,7 +403,7 @@ const CategoryEven = () => {
               ))
             ) : (
               <p className="text-center text-gray-500 mt-4">
-                Không tìm thấy sự kiện nào phù hợp.
+                <Empty />{" "}
               </p>
             )}
             <div className="flex items-center justify-center mt-4 space-x-2">
