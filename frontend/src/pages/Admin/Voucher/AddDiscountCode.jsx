@@ -78,7 +78,7 @@ const AddDiscountCode = (props) => {
         description: `Mã giảm giá "${formData.code}" đã được thêm.`,
       });
       setLoading(false);
-      // navigate("/admin/discount-code-list");
+      if (!props.eventId) navigate("/admin/discount-code-list");
     } catch (error) {
       setLoading(false);
       notification.error({

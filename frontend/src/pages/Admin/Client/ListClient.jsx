@@ -195,9 +195,7 @@ const ListUser = () => {
             <p>
               <strong>Ngày sinh:</strong> {selectedUser.birthday}
             </p>
-            <p>
-              <strong>Giới tính:</strong> {selectedUser.gender}
-            </p>
+
             <p>
               <strong>Trạng thái:</strong> {selectedUser.status}
             </p>

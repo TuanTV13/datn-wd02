@@ -70,8 +70,7 @@ const TicketsContext = ({ children }: Props) => {
       const newTicket = await addTicket(ticket);
       setTickets([...tickets, newTicket]);
       toast.success("Thêm thành công");
-      navigate("/admin/ticket-list");
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       console.error("Error adding ticket:", error);
       console.log(error);
@@ -96,10 +95,10 @@ const TicketsContext = ({ children }: Props) => {
     }
   };
 
-  const onRestore = async (id: number, seatId: number) => {
+  const onRestore = async (id: number) => {
     if (confirm("Bạn có muốn khôi phục vé không?")) {
       try {
-        const restoredTicket = await restoreTicket(id, seatId);
+        const restoredTicket = await restoreTicket(id);
         setTickets([...tickets, restoredTicket]);
         toast.success("Khôi phục thành công");
         navigate("/admin/ticket-list");

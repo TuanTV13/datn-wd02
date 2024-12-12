@@ -42,6 +42,10 @@ export const addTicket = async (ticketData: Tickets) => {
     const { data } = await api.post(`/tickets/create`, ticketData, { headers });
     return data.data;
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.clear();
+      window.location = "/auth";
+    }
     console.error("Error adding ticket:", error);
     console.log(error);
   }
@@ -63,6 +67,10 @@ export const editTicket = async (ticket: Tickets, seatId: number) => {
     console.log(data.data);
     return data.data;
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.clear();
+      window.location = "/auth";
+    }
     console.error("Error editing ticket:", error);
     throw error;
   }
@@ -82,6 +90,10 @@ export const deleteTicket = async (id: number, seatId: number) => {
     console.log(data);
     return data.data;
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.clear();
+      window.location = "/auth";
+    }
     console.error("Error deleting ticket:", error);
     console.log(error);
     throw error;
@@ -89,20 +101,20 @@ export const deleteTicket = async (id: number, seatId: number) => {
 };
 
 // Khôi phục vé đã bị xóa
-export const restoreTicket = async (id: number, seatId: number) => {
+export const restoreTicket = async (id: number) => {
   const token = localStorage.getItem("access_token");
   const headers = {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
   try {
-    const { data } = await api.post(
-      `/tickets/${id}/restore`,
-      { seatId },
-      { headers }
-    );
+    const { data } = await api.post(`/tickets/${id}/restore`, { headers });
     return data.data;
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.clear();
+      window.location = "/auth";
+    }
     console.error("Error restoring ticket:", error);
     throw error;
   }
@@ -119,6 +131,10 @@ export const verifyTicket = async (id: number) => {
     const { data } = await api.put(`/tickets/${id}/verified`, { headers });
     return data.data;
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.clear();
+      window.location = "/auth";
+    }
     console.error("Error verifying ticket:", error);
     throw error;
   }
@@ -137,6 +153,10 @@ export const getTicketData = async (eventId: number, ticketType: string) => {
     console.log(data);
     return data;
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.clear();
+      window.location = "/auth";
+    }
     console.error("Error verifying ticket:", error);
     throw error;
   }

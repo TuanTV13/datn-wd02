@@ -291,7 +291,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            'address' => 'nllable|string|max:255',
+            'address' => 'nullable|string|max:255',
             'image' => 'nullable|string|max:2048',
         ]);
 
