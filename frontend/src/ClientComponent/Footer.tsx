@@ -21,7 +21,7 @@ const Footer = () => {
               </div>
               <p className="mt-4 text-sm">
                 Hệ thống quản lý và phân phối vé sự kiện hàng đầu Việt Nam
-                TicketBox Co. Ltd. © 2016
+                Eventify Co. Ltd. © 2024
               </p>
             </div>
 
@@ -76,7 +76,7 @@ const Footer = () => {
           </div>
 
           <div className="text-center mt-8 text-sm">
-            <p>&copy; 2016 TicketBox Co. Ltd. All rights reserved.</p>
+            <p>&copy; 2024 Eventify Co. Ltd. All rights reserved.</p>
           </div>
         </div>
       </footer>

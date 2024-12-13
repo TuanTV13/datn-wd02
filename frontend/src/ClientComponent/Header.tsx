@@ -161,11 +161,13 @@ const Header = () => {
               </svg>
             </button>
           </div>
-          <img
-            className=" w-12 h-12 rounded-full"
-            src="../../public/images/logo.webp"
-            alt="Logo"
-          />
+          <a href="/">
+            <img
+              className=" w-12 h-12 rounded-full"
+              src="../../public/images/logo.webp"
+              alt="Logo"
+            />
+          </a>
 
           {/* Desktop Search Bar */}
           <div className="hidden lg:block h-[40px]">
