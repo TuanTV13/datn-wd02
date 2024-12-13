@@ -14,51 +14,63 @@ import { Outlet } from "react-router-dom";
 import MenuSidebar from "../components/admin/Menu";
 import Notification from "../components/admin/Notification";
 import useWindowSize from "../hooks/hook";
-import React from 'react';
-
+import React from "react";
+import axiosInstance from "../axios";
 
 const { Header, Sider, Content } = Layout;
 const { Search } = Input;
-const items: MenuProps["items"] = [
-  {
-    key: "1",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.antgroup.com"
-      >
-        Phùng Quang Trường
-      </a>
-    ),
-  },
-  {
-    key: "2",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.aliyun.com"
-      ></a>
-    ),
-  },
-  {
-    key: "3",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.luohanacademy.com"
-      ></a>
-    ),
-  },
-];
 
 const LayoutAdmin = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [isOpenSibarMobile, setOpenSidebarMobile] = useState(false);
   const { width } = useWindowSize();
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    axiosInstance
+      .get("user", {})
+      .then((response) => {
+        // Lưu thông tin người dùng vào state
+        setUser(response.data.user);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+  }, []);
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.antgroup.com"
+        >
+          {user?.name}
+        </a>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.aliyun.com"
+        ></a>
+      ),
+    },
+    {
+      key: "3",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.luohanacademy.com"
+        ></a>
+      ),
+    },
+  ];
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -91,8 +103,13 @@ const LayoutAdmin = () => {
           <MenuSidebar />
         </Drawer>
       ) : (
-        <Sider trigger={null} collapsible collapsed={collapsed} width="20%"
-        style={{ minWidth: "200px" }}>
+        <Sider
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+          width="20%"
+          style={{ minWidth: "200px" }}
+        >
           <MenuSidebar collapsed={collapsed} />
         </Sider>
       )}
@@ -136,7 +153,7 @@ const LayoutAdmin = () => {
             minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
-            overflow: 'auto'
+            overflow: "auto",
           }}
         >
           <Outlet />

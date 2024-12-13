@@ -7,8 +7,7 @@ import {
 } from "../../../api_service/location";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { Modal, Button, Form, Input, Select, DatePicker } from "antd";
-import axiosInstance from "../../../axios";
+import { Modal, Button, Select } from "antd";
 import AddDiscountCode from "../Voucher/AddDiscountCode";
 import AddTicket from "../Tickets/AddTicket";
 
@@ -26,7 +25,7 @@ const AddEvent = () => {
     description: "",
     start_time: "",
     end_time: "",
-    location: "",
+    location: "abc",
     event_type: "",
     thumbnail: null,
   });
@@ -235,7 +234,7 @@ const AddEvent = () => {
               className="form-control"
             >
               <option value="">Chọn xã</option>
-              {wards.map((ward) => (
+              {wards?.map((ward) => (
                 <option key={ward.code} value={ward.name}>
                   {ward.name}
                 </option>
@@ -259,12 +258,20 @@ const AddEvent = () => {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Địa điểm:</label>
+            <label className="form-label">
+              {formData.event_type === "online" ? "Link" : "Địa điểm:"}
+            </label>
             <input
               type="text"
-              value={formData.location}
+              value={
+                formData.event_type === "online"
+                  ? formData.link_online
+                  : formData.location
+              }
               onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
+                formData.event_type === "online"
+                  ? setFormData({ ...formData, link_online: e.target.value })
+                  : setFormData({ ...formData, location: e.target.value })
               }
               required
               className="form-control"

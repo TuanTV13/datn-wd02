@@ -36,6 +36,10 @@ const UpdateEvent = () => {
         });
       })
       .catch((error) => {
+        if (error.status === 401) {
+          localStorage.clear();
+          window.location = "/auth";
+        }
         console.error("Lỗi khi lấy sự kiện:", error);
         toast.error("Lỗi khi lấy sự kiện. Vui lòng thử lại!");
       });

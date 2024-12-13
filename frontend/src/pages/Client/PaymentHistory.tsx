@@ -12,16 +12,23 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
       try {
         const token = localStorage.getItem("access_token");
         const userId = localStorage.getItem("user_id");
-        const response = await api.get(`/clients/${userId}/transaction-history`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await api.get(
+          `/clients/${userId}/transaction-history`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         setTransactions(response.data.data || []);
-        console.log(response)
+        console.log(response);
       } catch (err) {
-        console.log("hh",err);
+        if (err.status === 401) {
+          localStorage.clear();
+          window.location = "/auth";
+        }
+        console.log("hh", err);
       }
     };
 
@@ -67,34 +74,36 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
               </tr>
             </thead>
             <tbody>
-            {currentEvents.length > 0 ? (
-              currentEvents.map((event, index) => (
+              {currentEvents.length > 0 ? (
+                currentEvents.map((event, index) => (
+                  <tr>
+                    <td className="border border-gray-400 p-2 text-center">
+                      {indexOfFirstEvent + index + 1}
+                    </td>
+                    <td className="border border-gray-400 p-2 text-center">
+                      {event.event_name}
+                    </td>
+                    <td className="border border-gray-400 p-2 text-center">
+                      {event.total_amount}
+                    </td>
+                    <td className="border border-gray-400 p-2 text-center">
+                      {event.payment_method}
+                    </td>
+                    <td className="border border-gray-400 p-2 text-center">
+                      {event.status}
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
-                  <td className="border border-gray-400 p-2 text-center">
-                    {indexOfFirstEvent + index + 1}
-                  </td>
-                  <td className="border border-gray-400 p-2 text-center">
-                    {event.event_name}
-                  </td>
-                  <td className="border border-gray-400 p-2 text-center">
-                    {event.total_amount}
-                  </td>
-                  <td className="border border-gray-400 p-2 text-center">
-                    {event.payment_method}
-                  </td>
-                  <td className="border border-gray-400 p-2 text-center">
-                    {event.status}
+                  <td
+                    colSpan={6}
+                    className="border border-gray-400 p-2 text-center"
+                  >
+                    Không có thông tin giao dịch nào.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-              <td colSpan={6} className="border border-gray-400 p-2 text-center">
-                Không có thông tin giao dịch nào.
-              </td>
-            </tr>
-            )}
-              
+              )}
             </tbody>
           </table>
         </div>

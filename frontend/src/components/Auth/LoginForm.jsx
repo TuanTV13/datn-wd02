@@ -87,7 +87,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
                 onMouseEnter={() => errors.email && setShowEmailError(true)}
                 onMouseLeave={() => errors.email && setShowEmailError(false)}
               />
-              {errors.email && showEmailError && (
+              {errors.email && (
                 <div className="input-error">{errors.email.message}</div>
               )}
             </div>
@@ -124,7 +124,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
                 />
               )}
 
-              {errors.password && showPasswordError && (
+              {errors.password && (
                 <div className="input-error">{errors.password.message}</div>
               )}
             </div>

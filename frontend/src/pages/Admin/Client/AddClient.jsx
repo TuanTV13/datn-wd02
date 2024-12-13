@@ -137,7 +137,7 @@ const AddClient = () => {
           />
         </div>
 
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block text-gray-700">Giới tính</label>
           <select
             name="gender"
@@ -148,7 +148,7 @@ const AddClient = () => {
             <option value="Nam">Nam</option>
             <option value="Nữ">Nữ</option>
           </select>
-        </div>
+        </div> */}
         <div className="mb-4">
           <label className="block text-gray-700">Trạng thái</label>
           <select
