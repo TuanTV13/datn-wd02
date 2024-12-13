@@ -423,7 +423,7 @@ class PaymentController extends Controller
         return response()->json(['message' => 'Không rõ trạng thái giao dịch'], 400);
     }
 
-    // Xác thực thành công khi thanh toán bằng Paypal
+    // Xác thực thành công khi thanh toán bằng Paypal.
     public function paymentSuccess(Request $request)
     {
         // Dữ liệu gửi đi theo route từ trên
@@ -436,7 +436,7 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Không tìm thấy mã giao dịch'], 400);
         }
 
-        // Tìm kiếm giao dịch theo id
+        // Tìm kiếm giao dịch theo id.
         $transaction = $this->transactionRepository->findTransactionById($transactionId);
 
         if (!$transaction) {
@@ -450,7 +450,7 @@ class PaymentController extends Controller
         // Giảm số lượng vé đi 1
         $ticketZone->decrement('sold_quantity', $quantity);
 
-        // Nếu vé hết lượt mua đổi trạng thái thành sold_out
+        // Nếu vé hết lượt mua đổi trạng thái thành sold_out.
         if ($ticketZone->sold_quantity <= 0) {
             $ticket->update(['status' => 'sold_out']);
         }
