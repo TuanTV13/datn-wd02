@@ -76,6 +76,7 @@ class PaymentController extends Controller
     {
         $ticket_id = $request->input('ticket_id');
         $seatId = $request->input('seat_zone_id');
+        $quantity = $request->input('quantity');
 
         $ticket = $this->ticketRepository->find($ticket_id);
 
@@ -129,9 +130,16 @@ class PaymentController extends Controller
             ]);
 
             // Mã vé
-            $ticketCode = strtoupper(uniqid('TICKET-'));
+            $code = [];
+            for($i = 0; $i < $quantity; $i++){
+                $ticketCode = strtoupper(uniqid('TICKET-'.$i));
+                $code[] = $ticketCode;
+            }
+            $jsonTicketCodes = json_encode($code);
 
-            $totalAmount = $totalAmount; // Giá trị ban đầu của vé
+            // dd($jsonTicketCodes);
+
+            $totalAmount = $totalAmount * $quantity; // Giá trị ban đầu của vé
             $discountCode = $request->input('discount_code');  // Mã giảm giá
             $voucher = $this->voucherRepository->findByCode($discountCode); // Tìm kiếm theo discount_code
 
@@ -164,8 +172,8 @@ class PaymentController extends Controller
                 'user_id' => $user->id,
                 'ticket_id' => $ticket->id,
                 'event_id' => $zone->event_id,
-                'quantity' => 1,
-                'ticket_code' => $ticketCode,
+                'quantity' => $quantity,
+                'ticket_code' => $jsonTicketCodes,
                 'total_amount' => $totalAmount,
                 'payment_method' => $request->payment_method,
                 'status' => 'PENDING',
@@ -192,7 +200,7 @@ class PaymentController extends Controller
                 $paypalService->setItem([[
                     'name' => 'Vé ' . $ticket->ticket_type,
                     'sku' => $ticket->id,
-                    'quantity' => 1,
+                    'quantity' => $quantity,
                     'price' => number_format($totalAmountInUSD, 2, '.', ''),
                 ]]);
 
@@ -212,7 +220,7 @@ class PaymentController extends Controller
                 $user->events()->attach($ticket->event_id, [
                     'ticket_id' => $ticket->id,
                     'ticket_type' => $ticket->ticket_type,
-                    'ticket_code' => $ticketCode,
+                    'ticket_code' => $jsonTicketCodes,
                     'seat_zone' => $zone->name,
                     'checked_in' => false,
                     'order_date' => now(),
@@ -256,7 +264,7 @@ class PaymentController extends Controller
                 $transaction = $this->transactionRepository->createTransaction($transactionData);
 
                 // Giảm số lượng còn lại của vé
-                $ticketZone->decrement('sold_quantity', 1);
+                $ticketZone->decrement('sold_quantity', $quantity);
 
                 // Nếu hết đổi trạng thái thành sold_out
                 if ($ticketZone->sold_quantity <= 0) {
@@ -267,7 +275,7 @@ class PaymentController extends Controller
                 $user->events()->attach($ticket->event_id, [
                     'ticket_id' => $ticket->id,
                     'ticket_type' => $ticket->ticket_type,
-                    'ticket_code' => $ticketCode,
+                    'ticket_code' => $jsonTicketCodes,
                     'seat_zone' => $zone->name,
                     'checked_in' => false,
                     'order_date' => now(),
