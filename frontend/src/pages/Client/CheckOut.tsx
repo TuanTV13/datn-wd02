@@ -117,9 +117,9 @@ const CheckOut = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true); // Start processing
-  
+
     const token = localStorage.getItem("access_token");
-  
+
     // Lấy thông tin nhiều ticketId từ ticketData.tickets
     const tickets = ticketData.tickets.map(ticket => ({
       ticket_id: ticket.ticket_id,
@@ -129,7 +129,7 @@ const CheckOut = () => {
       seat_zone: ticket.seat_zone,
       original_price: parseFloat(ticket.original_price).toFixed(2),
     }));
-  
+
     const paymentData = {
       tickets: tickets,  // Mảng các vé
       payment_method: paymentMethod,
@@ -139,22 +139,22 @@ const CheckOut = () => {
       discount_code: voucherCode || null,
       amount: parseFloat(ticketData.totalPrice).toFixed(2),
     };
-  console.log(paymentData)
+    console.log(paymentData)
     try {
       const headers = {
         "Content-Type": "application/json",
       };
-  
+
       if (token) {
         headers.Authorization = `Bearer ${token}`;
       }
-  
+
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/clients/payment/process",
         paymentData,
         { headers }
       );
-  
+
       if (response.data.success) {
         window.location.href = response.data.payment_url;
       } else {
@@ -169,7 +169,7 @@ const CheckOut = () => {
     } finally {
       setIsProcessing(false); // End processing
     }
-  
+
     console.log(paymentData); // In ra dữ liệu gửi đi
   };
   return (
