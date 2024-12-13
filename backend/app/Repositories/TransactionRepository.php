@@ -35,15 +35,13 @@ class TransactionRepository
 
     public function findByTicketCode($ticketCode, $eventId)
     {
-        return $this->transaction->with([
-            'user',
-            'ticket',
-            'event'
-        ])->where('ticket_code', $ticketCode)
+        return $this->transaction->with(['user', 'ticket', 'event'])
+            ->whereRaw('JSON_CONTAINS(tickets, ?)', [json_encode(['ticket_code' => $ticketCode])])
             ->whereHas('event', function ($query) use ($eventId) {
                 $query->where('id', $eventId);
-            })->first();
-    }
+            })
+            ->first();
+    }    
 
     public function getUserTransactions($userId)
     {

@@ -119,7 +119,7 @@ const EventDetail = () => {
     if (selectedVIPTicket && vipTicketQuantity > 0) {
       const vipTicketTotalPrice = selectedVIPTicket.price * vipTicketQuantity;
       tickets.push({
-        ticket_id: selectedVIPTicket.id,
+        ticket_id: selectedVIPTicket.ticket.id,
         ticket_type: "VIP",
         quantity: vipTicketQuantity,
         seat_zone_id: selectedVIPTicket?.zone?.id,
@@ -133,7 +133,7 @@ const EventDetail = () => {
     if (selectedRegularTicket && regularTicketQuantity > 0) {
       const regularTicketTotalPrice = selectedRegularTicket.price * regularTicketQuantity;
       tickets.push({
-        ticket_id: selectedRegularTicket.id,
+        ticket_id: selectedRegularTicket.ticket.id,
         ticket_type: "Thường",
         quantity: regularTicketQuantity,
         seat_zone_id: selectedRegularTicket?.zone?.id,
