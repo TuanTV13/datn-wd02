@@ -29,6 +29,10 @@ export const deleteEvent = async (id) => {
     });
     return response.data;
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.clear();
+      window.location = "/auth";
+    }
     // Xử lý lỗi trả về chi tiết từ backend nếu có
     throw error.response ? error.response.data : error.message;
   }
@@ -52,6 +56,10 @@ const addEvent = async (eventData) => {
 
     return response.data.data;
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.clear();
+      window.location = "/auth";
+    }
     throw error.response ? error.response.data : error.message;
   }
 };
@@ -74,6 +82,10 @@ export const updateEvent = async (id, eventData) => {
     );
     return response.data; // Trả về dữ liệu phản hồi
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.clear();
+      window.location = "/auth";
+    }
     // Xử lý lỗi
     throw error.response
       ? error.response.data

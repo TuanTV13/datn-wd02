@@ -1,15 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Input, Select, Modal, Table, Button } from "antd";
+import {
+  Input,
+  Select,
+  Modal,
+  Table,
+  Button,
+  DatePicker,
+  notification,
+} from "antd";
 import { getEvents, deleteEvent } from "../../../api_service/event";
 import axios from "axios";
 import { toast } from "react-toastify";
+
+const { RangePicker } = DatePicker;
 
 const EventList = () => {
   const [list, setList] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [searchName, setSearchName] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
+  const [searchStatus, setSearchStatus] = useState(""); // New state for status filter
+  const [searchDateRange, setSearchDateRange] = useState([null, null]); // New state for date range filter
   const [categories, setCategories] = useState([]);
   const [deletingEventId, setDeletingEventId] = useState(null);
   const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false);
@@ -57,10 +69,19 @@ const EventList = () => {
       const matchesCategory = searchCategory
         ? event.category_id === searchCategory
         : true;
-      return matchesName && matchesCategory;
+      const matchesStatus = searchStatus ? event.status === searchStatus : true;
+
+      const matchesDateRange =
+        !searchDateRange[0] ||
+        (new Date(event.start_time) >= new Date(searchDateRange[0]) &&
+          new Date(event.end_time) <= new Date(searchDateRange[1]));
+
+      return (
+        matchesName && matchesCategory && matchesStatus && matchesDateRange
+      );
     });
     setFilteredEvents(filtered);
-  }, [searchName, searchCategory, list]);
+  }, [searchName, searchCategory, searchStatus, searchDateRange, list]);
 
   const onDelete = async (id) => {
     setDeletingEventId(id);
@@ -73,10 +94,11 @@ const EventList = () => {
       const updatedList = list.filter((event) => event.id !== deletingEventId);
       setList(updatedList);
       setFilteredEvents(updatedList);
+      notification.success({ message: "Xóa sự kiện thành công!" });
       toast.success("Xóa sự kiện thành công!");
     } catch (error) {
       console.error("Lỗi khi xóa sự kiện:", error);
-      toast.error("Xóa sự kiện không thành công!");
+      notification.error({ message: "Xóa sự kiện không thành công!" });
     }
     setDeletingEventId(null);
     setConfirmModalIsOpen(false);
@@ -119,7 +141,7 @@ const EventList = () => {
       render: (text) => (text === "online" ? "Trực tuyến" : "Trực tiếp"),
     },
     {
-      title: "Tr ạng thái",
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (status) => (
@@ -181,10 +203,13 @@ const EventList = () => {
             filterOption={(input, option) =>
               input && option?.label.toLowerCase().includes(input.toLowerCase())
             }
-            options={categories.map((category) => ({
-              label: category.name,
-              value: category.id,
-            }))}
+            options={[
+              { label: "Chọn danh mục", value: "" },
+              categories.map((category) => ({
+                label: category.name,
+                value: category.id,
+              })),
+            ]}
             notFoundContent={searchCategory ? "Không tìm thấy danh mục" : null}
             onDropdownVisibleChange={(open) => {
               if (!searchCategory) {
@@ -196,6 +221,29 @@ const EventList = () => {
                 <div style={{ maxHeight: 100, overflowY: "auto" }}>{menu}</div>
               </div>
             )}
+          />
+          <Select
+            placeholder="Chọn trạng thái"
+            value={searchStatus}
+            onChange={(value) => setSearchStatus(value)}
+            className="flex-1"
+            allowClear
+            options={[
+              { label: "Chọn trạng thái", value: "" },
+              { label: "Đang chuẩn bị", value: "confirmed" },
+              { label: "Đang check-in", value: "checkin" },
+              { label: "Đang diễn ra", value: "ongoing" },
+              { label: "Đã kết thúc", value: "completed" },
+              { label: "Đã hủy", value: "canceled" },
+              { label: "Đang chờ xác nhận", value: "pending" },
+            ]}
+          />
+          <RangePicker
+            value={searchDateRange}
+            onChange={(dates) => setSearchDateRange(dates)}
+            className="flex-1"
+            format="YYYY-MM-DD"
+            placeholder={["Ngày bắt đầu", "Ngày kết thúc"]}
           />
         </div>
 

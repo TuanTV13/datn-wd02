@@ -48,6 +48,10 @@ const CheckOut = () => {
           });
         })
         .catch((error) => {
+          if (error.status === 401) {
+            localStorage.clear();
+            window.location = "/auth";
+          }
           if (error?.response?.status === 401) navigate("/auth");
         });
     }
@@ -96,6 +100,10 @@ const CheckOut = () => {
         });
       }
     } catch (error) {
+      if (error.status === 401) {
+        localStorage.clear();
+        window.location = "/auth";
+      }
       console.error("Error applying voucher:", error);
       notification.error({ message: "Có lỗi xảy ra khi áp dụng mã giảm giá." });
     }
@@ -201,6 +209,10 @@ const CheckOut = () => {
           });
         }
       } catch (error) {
+        if (error.status === 401) {
+          localStorage.clear();
+          window.location = "/auth";
+        }
         console.error("Lỗi trong quá trình thanh toán:", error);
         notification.success({
           message: "Có lỗi xảy ra trong quá trình thanh toán.",

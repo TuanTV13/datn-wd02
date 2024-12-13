@@ -1,6 +1,6 @@
 export interface Tickets {
   id?: number | string;
-  ticket_id: number | string;
+  event_id: number | string;
   seat_zone_id: number | string;
   price: number;
   quantity: number;

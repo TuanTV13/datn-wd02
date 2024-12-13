@@ -1,27 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Modal, Button } from 'react-bootstrap';
-import Header from '../../ClientComponent/Header';
-import Footer from '../../ClientComponent/Footer';
+import React, { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Modal, Button } from "react-bootstrap";
+import Header from "../../ClientComponent/Header";
+import Footer from "../../ClientComponent/Footer";
+import { notification } from "antd";
 
 const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [verificationStatus, setVerificationStatus] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [countdown, setCountdown] = useState(300); // 5 phút tính bằng giây
 
-  const token = searchParams.get('token');
+  const token = searchParams.get("token");
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCountdown(prev => {
+      setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setVerificationStatus('failed');
-          setErrorMessage('Thời gian xác thực đã hết hạn. Vui lòng yêu cầu lại mã xác thực.');
+          setVerificationStatus("failed");
+          setErrorMessage(
+            "Thời gian xác thực đã hết hạn. Vui lòng yêu cầu lại mã xác thực."
+          );
           setShowModal(true);
           return 0;
         }
@@ -34,15 +37,20 @@ const VerifyEmailPage = () => {
 
   const verifyEmail = async () => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/verify-email', { token });
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/v1/verify-email",
+        { token }
+      );
       if (response.status === 200) {
-        setVerificationStatus('success');
-        setTimeout(() => navigate('/login'), 3000);
+        setVerificationStatus("success");
+        notification.success({ message: "Đăng ký thành công" });
+        setTimeout(() => navigate("/auth"), 3000);
       }
     } catch (error) {
-      setVerificationStatus('failed');
-      setErrorMessage('Xác thực email thất bại. Vui lòng thử lại.');
+      setVerificationStatus("failed");
+      setErrorMessage("Xác thực email thất bại. Vui lòng thử lại.");
       setShowModal(true);
+      setTimeout(() => navigate("/auth"), 2000);
     }
   };
 
@@ -62,15 +70,20 @@ const VerifyEmailPage = () => {
           <div className="auth-form-outer">
             <h2 className="auth-form-title">Xác Thực Email</h2>
             <br />
-            {verificationStatus === 'success' ? (
+            {verificationStatus === "success" ? (
               <p className="text-success">
-                Xác thực email thành công! Bạn sẽ được chuyển hướng về trang đăng nhập trong giây lát...
+                Xác thực email thành công! Bạn sẽ được chuyển hướng về trang
+                đăng nhập trong giây lát...
               </p>
-            ) : verificationStatus === 'failed' ? (
+            ) : verificationStatus === "failed" ? (
               <p className="text-danger">{errorMessage}</p>
             ) : (
               <div>
-                <p>Vui lòng kiểm tra email của bạn và ấn vào liên kết xác thực. Thời gian hết hạn: {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}</p>
+                <p>
+                  Vui lòng kiểm tra email của bạn và ấn vào liên kết xác thực.
+                  Thời gian hết hạn: {Math.floor(countdown / 60)}:
+                  {String(countdown % 60).padStart(2, "0")}
+                </p>
               </div>
             )}
           </div>
@@ -78,7 +91,11 @@ const VerifyEmailPage = () => {
 
         <div className="auth-action-right">
           <h2 className="welcome-text">Chào mừng đến với Eventify</h2>
-          <img src='../../public/images/logo.webp' alt="Logo" className="auth-logo" />
+          <img
+            src="../../public/images/logo.webp"
+            alt="Logo"
+            className="auth-logo"
+          />
         </div>
 
         {/* Modal thông báo lỗi */}
