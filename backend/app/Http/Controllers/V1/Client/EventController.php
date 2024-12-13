@@ -113,7 +113,6 @@ class EventController extends Controller
 
             if ($now->between($saleStart, $saleEnd)) {
                 $availableTickets[] = $ticket;
-                break;
             }
         }
 
@@ -125,6 +124,7 @@ class EventController extends Controller
             'data' => $event
         ], 200);
     }
+
 
     public function index()
     {
