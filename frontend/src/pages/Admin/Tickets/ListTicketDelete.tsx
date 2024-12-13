@@ -80,21 +80,23 @@ const ListTicketDelete = () => {
                   <td className="p-4 border border-gray-300">{index + 1}</td>
                   <td className="p-4 border border-gray-300">{item.id}</td>
                   <td className="p-4 border border-gray-300">
-                    {item.event?.name}
+                    {item.price[0].event?.name}
                   </td>
                   <td className="p-4 border border-gray-300">
                     {item.ticket_type}
                   </td>
                   <td className="p-4 border border-gray-300">
-                    {item.quantity}
+                    {item.price[0].quantity}
                   </td>
                   <td className="p-4 border border-gray-300">{item.status}</td>
-                  <td className="p-4 border border-gray-300">{item.price}</td>
                   <td className="p-4 border border-gray-300">
-                    {item.sale_start}
+                    {item.price[0].price}
                   </td>
                   <td className="p-4 border border-gray-300">
-                    {item.sale_end}
+                    {item.price[0].sale_start}
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {item.price[0].sale_end}
                   </td>
                   <td className="p-4 border border-gray-300">
                     <button
