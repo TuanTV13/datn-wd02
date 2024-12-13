@@ -59,7 +59,7 @@ class EventRepository
     public function find($id)
     {
         return $this->event
-            ->with(['tickets', 'users'])
+            ->with(['tickets', 'users', 'tickets.zone', 'tickets.ticket'])
             ->find($id);
     }
 
