@@ -41,15 +41,12 @@ const EventListing = () => {
 
   const fetchEventsByDate = async (startTime: string, endTime: string) => {
     try {
-      console.log("Calling API with:", { startTime, endTime }); // Debug
       const response = await api.post("/clients/events/filter", {
         start_time: startTime,
         end_time: endTime,
       });
-      console.log("API Response:", response);
       setFilteredEvents(response.data.data.data);
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -110,7 +107,6 @@ const EventListing = () => {
       const data = await fetchEventsByProvince(Inputlocation);
       setFilteredEvents(data); // Cập nhật danh sách sự kiện
     } catch (err) {
-      console.log(err);
     }
   };
   const [Inputlocation, setLocation] = useState("");

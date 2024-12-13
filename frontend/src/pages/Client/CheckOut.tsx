@@ -138,7 +138,6 @@ const CheckOut = () => {
       discount_code: voucherCode || null,
       amount: parseFloat(ticketData.totalPrice).toFixed(2),
     };
-    console.log(paymentData);
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -170,7 +169,6 @@ const CheckOut = () => {
       setIsProcessing(false); // End processing
     }
 
-    console.log(paymentData); // In ra dữ liệu gửi đi
   };
   return (
     <div className="mt-36 mx-4">

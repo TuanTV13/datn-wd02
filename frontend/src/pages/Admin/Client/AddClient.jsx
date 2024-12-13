@@ -27,7 +27,6 @@ const AddClient = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Gọi API để thêm khách hàng mới
-    console.log("Thêm khách hàng:", formData);
     // Reset form sau khi thêm thành công
     setFormData({
       name: "",

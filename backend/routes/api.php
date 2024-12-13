@@ -15,6 +15,7 @@ use App\Http\Controllers\V1\FeedbackController;
 use App\Http\Controllers\V1\StatisticsController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
+use App\Http\Controllers\V1\UploadImageController;
 use App\Http\Controllers\V1\UserController;
 use App\Http\Controllers\V1\VoucherController;
 use App\Http\Services\Payments\ZaloPayService;
@@ -37,6 +38,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('v1/upload', [UploadImageController::class, 'upload']);
 
 Route::prefix('v1/role')->middleware(['check.jwt'])->group(function () {
     Route::get('/{id}/permissions', [RolePermissionController::class, 'getPermissionsByRole']);

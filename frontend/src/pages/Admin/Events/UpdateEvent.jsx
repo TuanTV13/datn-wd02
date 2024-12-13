@@ -55,7 +55,6 @@ const UpdateEvent = () => {
     const { name, value } = e.target;
     setFormData((prevData) => {
       const updatedData = { ...prevData, [name]: value };
-      console.log("formData sau khi cập nhật:", updatedData);
       return updatedData;
     });
   };
@@ -66,7 +65,6 @@ const UpdateEvent = () => {
 
     // Kiểm tra dữ liệu trước khi gửi
     if (!formData.start_time || !formData.end_time || !formData.location) {
-      console.log("Vui lòng nhập đầy đủ thông tin.");
       setLoading(false);
       return;
     }
@@ -77,7 +75,6 @@ const UpdateEvent = () => {
       end_time: formatDate(formData.end_time),
       location: formData.location,
     };
-    console.log("Dữ liệu gửi đi:", formattedData);
 
     try {
       const result = await axios.put(
@@ -90,7 +87,6 @@ const UpdateEvent = () => {
           },
         }
       );
-      console.log("Cập nhật thành công:", result);
 
       for (const user of formData.users) {
         const templateParams = {

@@ -41,7 +41,6 @@ const ListTicket = () => {
       }
 
       if (startDate) {
-        console.log(filtered);
         filtered = filtered.filter(
           (ticket) =>
             new Date(ticket.price[0].sale_start) >= new Date(startDate)
