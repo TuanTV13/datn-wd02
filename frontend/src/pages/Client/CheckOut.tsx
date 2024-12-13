@@ -336,7 +336,7 @@ const CheckOut = () => {
               </section>
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Tổng cộng</span>
-                <p>{ticketData.totalPrice} VDN</p>
+                <p>{ticketData.totalPrice} VND</p>
               </section>
             </div>
 
@@ -364,7 +364,7 @@ const CheckOut = () => {
               type="submit"
               className="bg-[#007BFF] px-10 h-14 rounded-[100px] text-white flex gap-x-4 place-items-center justify-center"
             >
-              <span>Đặt vé</span>|<span>{ticketData.totalPrice} VDN</span>
+              <span>Đặt vé</span>|<span>{ticketData.totalPrice} VND</span>
             </button>
           </div>
         </div>
