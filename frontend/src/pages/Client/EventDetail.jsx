@@ -3,6 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import QrReader from "react-qr-scanner"; // Import thư viện
 import { Modal, notification } from "antd";
+import { toast } from "react-toastify";
 const EventDetail = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
@@ -17,18 +18,15 @@ const EventDetail = () => {
   // Hàm để cập nhật zone đã chọn
   const handleZoneChange = (ticket, zoneId) => {
     // Tìm zone được chọn trong ticket.price
-    const selectedZones = ticket.price.find(
-      (priceItem) => priceItem.zone.id === zoneId
-    );
+    const selectedZones = ticket.zone;
 
     if (selectedZones) {
       setSelectedZones((prevState) => ({
         ...prevState,
-        [ticket.id]: selectedZones,
+        [ticket.ticket.id]: selectedZones,
       }));
     }
   };
-
   useEffect(() => {
     axios
       .get(`http://127.0.0.1:8000/api/v1/clients/events/${id}`)
@@ -107,6 +105,7 @@ const EventDetail = () => {
 
   const handleBuyTicketClick = (ticket) => {
     setSelectedTicket(ticket);
+    handleZoneChange(ticket, ticket.zone.id);
   };
 
   const handleClosePopup = () => {
@@ -119,12 +118,10 @@ const EventDetail = () => {
   const handleConfirmPurchase = () => {
     if (selectedTicket && selectedZones) {
       console.log("Selected Zones:", selectedZones); // Kiểm tra giá trị của selectedZones
-      const ticketId = selectedTicket.id;
-      const ticketType = selectedTicket.ticket_type;
-
+      const ticketId = selectedTicket.ticket.id;
+      const ticketType = selectedTicket.ticket.ticket_type;
       // Lấy thông tin zone được chọn
-      const zoneInfo = selectedZones[selectedTicket.id]?.zone;
-
+      const zoneInfo = selectedZones[selectedTicket.ticket.id];
       if (!zoneInfo) {
         toast.error("Khu vực chưa được chọn hoặc không hợp lệ.");
         return;
@@ -133,7 +130,7 @@ const EventDetail = () => {
       const { id: seatZoneId, name: zoneName } = zoneInfo;
 
       // Kiểm tra giá trị price có tồn tại không
-      const price = selectedZones[selectedTicket.id]?.price;
+      const price = selectedTicket?.price;
 
       if (price === undefined) {
         alert("Giá chưa được chọn hoặc không hợp lệ.");
@@ -400,31 +397,32 @@ const EventDetail = () => {
                 onClick={() => handleBuyTicketClick(ticket)}
               >
                 <h3 className="text-xl font-bold text-indigo-700 mb-3">
-                  Loại vé: {ticket.ticket_type}
+                  Loại vé: {ticket?.ticket.ticket_type}
                 </h3>
 
                 {/* Dropdown chọn zone */}
-                <div className="mt-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Chọn khu vực:
-                  </label>
-                  <select
-                    className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-indigo-500 transition duration-300 ease-in-out"
-                    onChange={(e) =>
-                      handleZoneChange(ticket, parseInt(e.target.value))
-                    }
-                    value={selectedZones[ticket.id]?.zone?.id || ""}
-                  >
-                    <option value="" disabled>
-                      Chọn Khu vực
-                    </option>
-                    {ticket.price.map((priceItem) => (
-                      <option key={priceItem.zone.id} value={priceItem.zone.id}>
-                        {priceItem.zone.name}
+                {ticket?.zone && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Khu vực:
+                    </label>
+                    <select
+                      className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-indigo-500 transition duration-300 ease-in-out"
+                      onChange={(e) =>
+                        handleZoneChange(ticket, parseInt(e.target.value))
+                      }
+                      value={selectedZones[ticket.id]?.zone?.id || ""}
+                    >
+                      {/* <option value="" disabled>
+                        Chọn Khu vực
+                      </option> */}
+
+                      <option key={ticket.zone.id} value={ticket.zone.id}>
+                        {ticket.zone.name}
                       </option>
-                    ))}
-                  </select>
-                </div>
+                    </select>
+                  </div>
+                )}
 
                 {/* Hiển thị thông tin giá và số lượng nếu zone đã chọn */}
                 {selectedZones[ticket.id] && selectedZones[ticket.id].zone ? (
