@@ -31,7 +31,9 @@ class CheckEventStatus extends Command
                 $users = $event->users()
                     ->select('users.id', 'users.name', 'users.email')
                     ->get()
-                    ->unique('id');
+                    ->unique('email');
+                Log::info('Danh sách người dùng trong commands: ' . json_encode($users));
+                Log::info('Cập nhật sự kiện thành checkin.', ['users' => $users, 'status' => 'checkin']);
 
                 event(new EventUpcoming($users, $event));
                 $this->info("Đã cập nhật trạng thái của sự kiện {$event->id} thành checkin.");
@@ -49,9 +51,11 @@ class CheckEventStatus extends Command
             ->where('end_time', '<=', $now)
             ->get();
 
+        Log::info('Danh sách sự kiện đã kết thúc: ' . json_encode($endedEvents));
+
         foreach ($endedEvents as $event) {
             $event->update(['status' => 'completed']);
-            // $users = $event->users()->wherePivot('checked_in', 1)->get()->unique('id');
+            $users = $event->users()->wherePivot('checked_in', 1)->get()->unique('id');
             event(new EventCompleted($users, $event));
 
             $this->info("Đã cập nhật trạng thái sự kiện {$event->id} thành completed và gửi email cảm ơn.");

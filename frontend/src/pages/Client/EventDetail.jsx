@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import QrReader from "react-qr-scanner"; // Import thư viện
@@ -8,8 +9,12 @@ const EventDetail = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
   const [checkInPopup, setCheckInPopup] = useState(false); // Khởi tạo trạng thái của popup
-
+  const [selectedVIPTicket, setSelectedVIPTicket] = useState(null);
+  const [vipTicketQuantity, setVIPTicketQuantity] = useState(1);
+  const [selectedRegularTicket, setSelectedRegularTicket] = useState(null);
+  const [regularTicketQuantity, setRegularTicketQuantity] = useState(1);
   const [showPopup, setShowPopup] = useState(false);
+  const [ticketQuantity, setTicketQuantity] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [similarEvents, setSimilarEvents] = useState([]);
   const [checkInMode, setCheckInMode] = useState("code"); // 'code' hoặc 'qr'
@@ -66,9 +71,8 @@ const EventDetail = () => {
         console.error("Lỗi khi check-in:", error);
         if (error.response && error.response.data) {
           notification.error({
-            message: `Lỗi: ${
-              error.response.data.message || "Không thể thực hiện check-in"
-            }`,
+            message: `Lỗi: ${error.response.data.message || "Không thể thực hiện check-in"
+              }`,
           });
         } else {
           notification.error({ message: "Có lỗi xảy ra. Vui lòng thử lại." });
@@ -103,10 +107,57 @@ const EventDetail = () => {
     }
   };
 
-  const handleBuyTicketClick = (ticket) => {
-    setSelectedTicket(ticket);
-    handleZoneChange(ticket, ticket.zone.id);
+  const navigate = useNavigate();
+
+  const handleBuyTicketClick = () => {
+    // Khởi tạo mảng tickets
+    const tickets = [];
+    let totalAmount = 0;
+    let ticketQuantity = 0;
+
+    // Kiểm tra nếu có vé VIP được chọn và số lượng hợp lệ
+    if (selectedVIPTicket && vipTicketQuantity > 0) {
+      const vipTicketTotalPrice = selectedVIPTicket.price * vipTicketQuantity;
+      tickets.push({
+        ticket_id: selectedVIPTicket.ticket.id,
+        ticket_type: "VIP",
+        quantity: vipTicketQuantity,
+        seat_zone_id: selectedVIPTicket?.zone?.id,
+        seat_zone: selectedVIPTicket?.zone?.name,
+        original_price: selectedVIPTicket?.price,
+      });
+      totalAmount += vipTicketTotalPrice; 
+    }
+
+    // Kiểm tra nếu có vé Thường được chọn và số lượng hợp lệ
+    if (selectedRegularTicket && regularTicketQuantity > 0) {
+      const regularTicketTotalPrice = selectedRegularTicket.price * regularTicketQuantity;
+      tickets.push({
+        ticket_id: selectedRegularTicket.ticket.id,
+        ticket_type: "Thường",
+        quantity: regularTicketQuantity,
+        seat_zone_id: selectedRegularTicket?.zone?.id,
+        seat_zone: selectedRegularTicket?.zone?.name,
+        original_price: selectedRegularTicket?.price,
+      });
+      totalAmount += regularTicketTotalPrice; 
+    }
+    // Kiểm tra nếu có ít nhất một vé đã được chọn
+    if (tickets.length > 0) {
+      // Tạo dữ liệu để gửi sang trang checkout
+      const ticketData = {
+        tickets: tickets,
+        totalPrice: totalAmount,
+      };
+
+      console.log(ticketData)
+      // Điều hướng sang trang checkout và truyền dữ liệu
+      navigate('/checkout', { state: ticketData });
+    } else {
+      alert('Vui lòng chọn ít nhất một loại vé.');
+    }
   };
+
 
   const handleClosePopup = () => {
     setShowPopup(false);
@@ -211,21 +262,19 @@ const EventDetail = () => {
                 <h2 className="text-2xl font-bold mb-4">Check-in</h2>
                 <div className="flex space-x-4 mb-4">
                   <button
-                    className={`px-4 py-2 rounded ${
-                      checkInMode === "code"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
+                    className={`px-4 py-2 rounded ${checkInMode === "code"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700"
+                      }`}
                     onClick={() => handleSwitchCheckInMode("code")}
                   >
                     Nhập mã vé
                   </button>
                   <button
-                    className={`px-4 py-2 rounded ${
-                      checkInMode === "qr"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
+                    className={`px-4 py-2 rounded ${checkInMode === "qr"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700"
+                      }`}
                     onClick={() => handleSwitchCheckInMode("qr")}
                   >
                     Quét mã QR
@@ -386,92 +435,102 @@ const EventDetail = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-[700px]">
             <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
-            {event.tickets.map((ticket) => (
-              <div
-                key={ticket.id}
-                className={`border p-4 rounded-lg mb-4 cursor-pointer hover:shadow-2xl transition-transform transform ${
-                  selectedTicket?.id === ticket.id
-                    ? "bg-blue-200 border-blue-600 shadow-2xl"
-                    : "hover:bg-gray-100 hover:border-gray-300"
-                }`}
-                onClick={() => handleBuyTicketClick(ticket)}
+
+            {/* Nhóm vé VIP */}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-indigo-700 mb-4">Vé VIP</h3>
+              <select
+                value={selectedVIPTicket?.id || ""} // Giữ vé VIP đã chọn
+                onChange={(e) => {
+                  const selected = event.tickets.find(ticket => ticket.id === parseInt(e.target.value));
+                  setSelectedVIPTicket(selected);
+                  setVIPTicketQuantity(1); // Đặt lại số lượng vé VIP khi chọn vé mới
+                }}
+                className="border p-2 rounded w-full"
               >
-                <h3 className="text-xl font-bold text-indigo-700 mb-3">
-                  Loại vé: {ticket?.ticket.ticket_type}
-                </h3>
+                <option value="">Chọn khu vực</option>
+                {event.tickets
+                  .filter((ticket) => ticket?.ticket?.ticket_type === "VIP")
+                  .map((ticket) => (
+                    <option key={ticket.id} value={ticket.id}>
+                      Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND - Số lượng còn lại: {ticket.sold_quantity}
+                    </option>
+                  ))}
+              </select>
 
-                {/* Dropdown chọn zone */}
-                {ticket?.zone && (
-                  <div className="mt-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Khu vực:
-                    </label>
-                    <select
-                      className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-indigo-500 transition duration-300 ease-in-out"
-                      onChange={(e) =>
-                        handleZoneChange(ticket, parseInt(e.target.value))
-                      }
-                      value={selectedZones[ticket.id]?.zone?.id || ""}
-                    >
-                      {/* <option value="" disabled>
-                        Chọn Khu vực
-                      </option> */}
-
-                      <option key={ticket.zone.id} value={ticket.zone.id}>
-                        {ticket.zone.name}
-                      </option>
-                    </select>
-                  </div>
-                )}
-
-                {/* Hiển thị thông tin giá và số lượng nếu zone đã chọn */}
-                {selectedZones[ticket.id] && selectedZones[ticket.id].zone ? (
-                  <div className="mt-4 p-4 border-t border-gray-300 bg-blue-50 rounded-md shadow-sm">
-                    <p className="text-sm text-gray-800 font-medium">
-                      Giá:{" "}
-                      <span className="font-bold text-green-600">
-                        {selectedZones[ticket.id].price} VND
-                      </span>
-                    </p>
-                    <p className="text-sm text-gray-800 font-medium">
-                      Số lượng còn lại:{" "}
-                      <span className="font-bold text-red-600">
-                        {selectedZones[ticket.id].sold_quantity}
-                      </span>
-                    </p>
-                  </div>
-                ) : (
-                  <p className="mt-4 text-sm text-gray-500">
-                    Chọn zone để xem thông tin giá và số lượng
-                  </p>
-                )}
-                <div className="mt-3">
-                  <div>Số lượng</div>
+              {/* Hiển thị input số lượng khi vé VIP được chọn */}
+              {selectedVIPTicket && (
+                <div className="mt-4">
+                  <label className="block text-sm font-bold mb-2">Số lượng</label>
                   <input
                     type="number"
-                    className={`mt-2 block w-full border rounded-md shadow-sm p-3 text-lg`}
-                    defaultValue={1}
-                    min={1}
-                    onChange={(v) => {
-                      setQuantity(v.target.value);
-                    }}
+                    min="1"
+                    max={Math.min(10, selectedVIPTicket.quantity - selectedVIPTicket.sold_quantity)}
+                    value={vipTicketQuantity}
+                    onChange={(e) => setVIPTicketQuantity(e.target.value)}
+                    className="border p-2 rounded w-full"
                   />
                 </div>
-              </div>
-            ))}
+              )}
+            </div>
 
-            <div className="mt-4 flex justify-between">
+            {/* Nhóm vé Thường */}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-indigo-700 mb-4">Vé Thường</h3>
+              <select
+                value={selectedRegularTicket?.id || ""} // Giữ vé Thường đã chọn
+                onChange={(e) => {
+                  const selected = event.tickets.find(ticket => ticket.id === parseInt(e.target.value));
+                  setSelectedRegularTicket(selected);
+                  setRegularTicketQuantity(1); // Đặt lại số lượng vé Thường khi chọn vé mới
+                }}
+                className="border p-2 rounded w-full"
+              >
+                <option value="">Chọn khu vực</option>
+                {event.tickets
+                  .filter((ticket) => ticket?.ticket?.ticket_type === "Thường")
+                  .map((ticket) => (
+                    <option key={ticket.id} value={ticket.id}>
+                      Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND - Số lượng còn lại: {ticket.sold_quantity}
+                    </option>
+                  ))}
+              </select>
+
+              {/* Hiển thị input số lượng khi vé Thường được chọn */}
+              {selectedRegularTicket && (
+                <div className="mt-4">
+                  <label className="block text-sm font-bold mb-2">Số lượng</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={Math.min(10, selectedRegularTicket.quantity - selectedRegularTicket.sold_quantity)}
+                    value={regularTicketQuantity}
+                    onChange={(e) => setRegularTicketQuantity(e.target.value)}
+                    className="border p-2 rounded w-full"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Nút Mua vé và Đóng */}
+            <div className="mt-6 flex justify-end space-x-4">
               <button
                 onClick={handleClosePopup}
-                className="bg-gray-500 text-white py-2 px-4 rounded"
+                className="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600"
               >
                 Đóng
               </button>
+
               <button
-                onClick={handleConfirmPurchase}
-                className="bg-blue-500 text-white py-2 px-4 rounded"
+                onClick={handleBuyTicketClick}
+                className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+                disabled={
+                  (!selectedVIPTicket && !selectedRegularTicket) ||
+                  (selectedVIPTicket && vipTicketQuantity < 1) ||
+                  (selectedRegularTicket && regularTicketQuantity < 1)
+                }
               >
-                Xác nhận
+                Mua vé
               </button>
             </div>
           </div>
