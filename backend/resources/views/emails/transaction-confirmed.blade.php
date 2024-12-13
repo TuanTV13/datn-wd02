@@ -8,7 +8,7 @@
 </head>
 
 <body style="font-family: 'Arial', sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; color: #333;">
-    <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+    <div style="max-width: 700px; margin: auto; background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
         <h1 style="color: #007BFF; font-size: 26px; margin-bottom: 10px; text-align: center;">
             Xác Nhận Giao Dịch: {{ $transaction->transaction_code }}
         </h1>
@@ -49,7 +49,7 @@
                 <tr style="background-color: #007BFF; color: #ffffff;">
                     <th style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">STT</th>
                     <th style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">Mã vé</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">Loại vé</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Loại vé</th>
                     <th style="padding: 10px; border: 1px solid #ddd;">Ví trí</th>
                     <th style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">QR Code</th>
                     <th style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">Giá tiền</th>
@@ -60,7 +60,7 @@
                     <tr style="background-color: {{ $index % 2 == 0 ? '#f9f9f9' : '#ffffff' }};">
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">{{ $index + 1 }}</td>
                         <td style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">{{ $ticket['ticket_code'] }}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">{{ $ticket['ticket_type'] }}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">{{ $ticket['ticket_type'] }}</td>
                         <td style="padding: 10px; border: 1px solid #ddd;">{{ $ticket['seat_zone'] }}</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
                             <img src="{{ $ticket['qr_code_url'] }}" alt="QR Code" style="width: 50px; height: 50px;">

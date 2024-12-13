@@ -89,7 +89,7 @@ class AuthController extends Controller
         $user->email_verification_token = null;
         $user->save();
 
-        return redirect('/your-react-url?status=success');
+        return redirect('http://localhost:5173/auth');
     }
 
     private function generateRefreshToken($userId)
