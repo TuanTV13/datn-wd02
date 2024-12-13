@@ -285,7 +285,7 @@ class StatisticsController extends Controller
     
     
 
-    // Đếm số sự kiện đã xác nhận (status = confirmed)
+    // Đếm số sự kiện đã xác nhận trong sự kiện trạng thái(status = confirmed)
     private function getConfirmedEventCount($startDate, $endDate)
     {
         return DB::table('events')
@@ -294,7 +294,7 @@ class StatisticsController extends Controller
             ->count();
     }
 
-    // Đếm số sự kiện bị hủy (status = canceled)
+    // Đếm số sự kiện bị hủy trong sự kiện trạng thái (status = canceled)
     private function getCanceledEventCount($startDate, $endDate)
     {
         return DB::table('events')
