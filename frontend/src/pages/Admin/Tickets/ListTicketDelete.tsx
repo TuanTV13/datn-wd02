@@ -13,6 +13,7 @@ const ListTicketDelete = () => {
     const fetchDeletedTickets = async () => {
       try {
         const response = await api.post("/tickets/block");
+        console.log(response)
         setTicketDelete(response.data);
       } catch (error) {
         console.error("Error fetching deleted tickets:", error);
@@ -49,7 +50,7 @@ const ListTicketDelete = () => {
             <button className="bg-gray-200 px-4 py-2 rounded-[10px]">
               Bộ lọc
             </button>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-[10px]">
+            <button className="bg-green-500 text-white px-4 py-2 rounded-[10px]">
               Xuất PDF
             </button>
           </div>
@@ -114,7 +115,7 @@ const ListTicketDelete = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="10" className="text-center py-4">
+                <td colSpan={10} className="text-center py-4">
                   Không có vé nào đã xóa.
                 </td>
               </tr>

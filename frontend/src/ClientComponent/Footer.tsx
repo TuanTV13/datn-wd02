@@ -44,7 +44,7 @@ const Footer = () => {
                 <img
                   src="../../public/images/vnpay-logo.jpg"
                   alt="Thanh toán 2"
-                  className="h-auto w-12 mx-auto"
+                  className="h-auto w-10 mx-auto"
                 />
               </div>
             </div>
