@@ -44,15 +44,12 @@ const SearchEvent = () => {
 
   const fetchEventsByDate = async (startTime: string, endTime: string) => {
     try {
-      console.log("Calling API with:", { startTime, endTime }); // Debug
       const response = await api.post("/clients/events/filter", {
         start_time: startTime,
         end_time: endTime,
       });
-      console.log("API Response:", response);
       setFilteredEvents(response.data.data.data);
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -147,9 +144,7 @@ const SearchEvent = () => {
           setAllEvents(response.data.data.data); // Lưu lại tất cả sự kiện ban đầu
         })
         .catch((err) => {
-          console.log(
-            err.response?.data?.message || "Đã xảy ra lỗi khi tìm kiếm sự kiện"
-          );
+
         });
     }
   }, [searchTerm]);
@@ -360,67 +355,66 @@ const SearchEvent = () => {
           <div className="space-y-4">
             {currentEvents?.length > 0 ? (
               currentEvents?.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white p-4 rounded-lg shadow-lg flex flex-col lg:flex-row border border-gray-200 hover:shadow-xl transition-shadow duration-300"
-                >
+                <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
                   <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
                     <Link to={`/event-detail/${item.id}`}>
                       <img
                         alt={item.name}
-                        className="rounded-lg h-[300px] w-full object-cover transition-transform duration-300 hover:scale-105"
+                        className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
                         src={item.thumbnail}
                       />
                     </Link>
                   </div>
                   <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
-                    <div className="mt-2 lg:flex">
+                    <div className="lg:flex">
                       <div className="flex flex-col justify-between lg:w-2/3">
-                        <h3 className="text-lg font-semibold text-[#007BFF] hover:underline cursor-pointer">
+                        <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer line-clamp-1">
                           <Link to={`/event-detail/${item.id}`}>
                             {item.name}
                           </Link>
                         </h3>
-                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <div className="flex items-center text-gray-600 mb-1 mt-1">
                           <i className="fas fa-clock mr-2"></i>
                           Thời gian bắt đầu: {item.start_time}
                         </div>
-                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <div className="flex items-center text-gray-600 mb-1 mt-1">
                           <i className="fas fa-clock mr-2"></i>
                           Thời gian kết thúc: {item.end_time}
                         </div>
-                        <div className="flex items-center text-gray-600 mb-1 mt-1">
+                        <div className="flex items-center text-gray-600 mb-1 mt-1 line-clamp-1">
                           <i className="fa-solid fa-user mr-2"></i>
-                          Diễn giả:{" "}
+                          Diễn giả:
                           {item.speakers?.length > 0 ? (
-                            item.speakers.map((speaker, index) => (
-                              <span key={index} className="ml-1">
+                            item.speakers?.map((speaker, index) => (
+                              <span className="ml-1 ">
                                 {speaker.name}
-                                {index < item.speakers.length - 1 && ", "}
+                                {index < item.speakers.length - 1 && " , "}
                               </span>
                             ))
                           ) : (
                             <span className="ml-1">Không có diễn giả</span>
                           )}
                         </div>
-                        <div className="flex items-center text-gray-600 mb-2 mt-1">
+                        <div className="flex items-center text-gray-600 mb-1 mt-1">
                           <i className="fas fa-map-marker-alt mr-2"></i>
                           Địa điểm: {item.location}
                         </div>
                         <div
-                          className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
+                          className={`flex items-center text-gray-600 mb-1 line-clamp-1`}
                         >
                           Mô tả: {stripHtmlTags(item.description)}
                         </div>
+
                         <Link
                           to={`/event-detail/${item.id}`}
-                          className="text-blue-500 hover:underline"
+                          className="text-blue-500 "
                         >
                           Xem thêm
                         </Link>
                       </div>
+
                       <div className="lg:ml-5 lg:mt-28">
-                        <button className="w-full px-8 py- 3 border rounded-lg text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white transition-colors duration-300">
+                        <button className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
                           <Link to={`/event-detail/${item.id}`}>
                             Xem chi tiết
                           </Link>

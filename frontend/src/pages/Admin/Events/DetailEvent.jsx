@@ -44,7 +44,6 @@ const DetailEvents = () => {
           { headers }
         );
         setEventDetails(response.data);
-        console.log(response.data);
       } catch (err) {
         if (err.status === 401) {
           localStorage.clear();
@@ -127,12 +126,10 @@ const DetailEvents = () => {
 
         if (!response.ok) {
           const error = await response.json();
-          console.log("Error:", error);
           // Xử lý lỗi tại đây
         }
 
         const data = await response.json();
-        console.log("Check-in successful:", data);
         // Xử lý kết quả thành công nếu cần
         // setUsers((prevUsers) =>
         //   prevUsers.map((user) =>
@@ -177,7 +174,6 @@ const DetailEvents = () => {
       }
 
       const data = await response.json();
-      console.log("Cancel check-in successful:", data);
       // Xử lý kết quả thành công nếu cần
     } catch (error) {
       if (error.status === 401) {
@@ -317,11 +313,11 @@ const DetailEvents = () => {
                 <option value="" disabled>
                   -- Chọn trạng thái --
                 </option>
-                <option value="confirmed">Confirmed</option>
+                <option value="confirmed">Xác nhận</option>
                 <option value="checkin">Check-in</option>
-                <option value="ongoing">Ongoing</option>
-                <option value="completed">Completed</option>
-                <option value="canceled">Canceled</option>
+                <option value="ongoing">Đang diễn ra</option>
+                <option value="completed">Hoàn thành</option>
+                <option value="canceled">Hủy</option>
               </select>
             </div>
             <div className="flex justify-end space-x-3">
@@ -568,7 +564,7 @@ const DetailEvents = () => {
                     className="p-4 bg-gray-50 rounded-lg shadow-md mb-4"
                   >
                     <p className="font-semibold text-gray-800">
-                      Loại vé: {ticket.ticket_type}
+                      Loại vé: {ticket.ticket.ticket_type}
                     </p>
                     <div
                       key={ticket.id}

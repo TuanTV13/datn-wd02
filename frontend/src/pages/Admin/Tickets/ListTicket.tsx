@@ -41,7 +41,6 @@ const ListTicket = () => {
       }
 
       if (startDate) {
-        console.log(filtered);
         filtered = filtered.filter(
           (ticket) =>
             new Date(ticket.price[0].sale_start) >= new Date(startDate)
@@ -115,6 +114,8 @@ const ListTicket = () => {
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="20">20</option>
+              <option value="20">50</option>
+              <option value="20">100</option>
             </select>
             <button className="bg-gray-200 px-4 py-2 rounded-[10px]">
               Bộ lọc

@@ -34,7 +34,6 @@ const CategoryEven = () => {
   const navigate = useNavigate();
   const handleCategoryClick = async (id: number | string) => {
     await fetchEventsByCategory(id);
-    console.log(events);
     navigate(`/event-category/${id}`);
   };
 
@@ -45,15 +44,12 @@ const CategoryEven = () => {
 
   const fetchEventsByDate = async (startTime: string, endTime: string) => {
     try {
-      console.log("Calling API with:", { startTime, endTime }); // Debug
       const response = await api.post("/clients/events/filter", {
         start_time: startTime,
         end_time: endTime,
       });
-      console.log("API Response:", response);
       setEvents(response.data.data.data);
     } catch (error) {
-      console.log(error);
     }
   };
 

@@ -45,7 +45,6 @@ const AddRating = () => {
     axiosInstance
       .post("feedbacks/submit", requestBody)
       .then((response) => {
-        console.log("Gửi đánh giá thành công:", response.data);
         notification.success({ message: "Gửi đánh giá thành công:" });
         navigate("/admin/rating-list");
         // Reset form sau khi gửi thành công

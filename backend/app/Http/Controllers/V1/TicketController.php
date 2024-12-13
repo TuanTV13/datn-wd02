@@ -274,6 +274,8 @@ class TicketController extends Controller
             ], 404);
         }
 
+        $ticket->restore();
+
         return response()->json([
             'message' => 'Khôi phục vé thành công'
         ], 200);

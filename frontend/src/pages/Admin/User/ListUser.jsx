@@ -98,7 +98,6 @@ const ListClient = () => {
     axiosInstance
       .get("http://localhost:8000/api/v1/users/trashed")
       .then((res) => {
-        console.log(res);
         setDeletedClients(res.data.data);
         if (res.data.data.length <= 0 && !showDeletedClients) {
           notification.error({ message: "Không có người dùng nào được xóa" });

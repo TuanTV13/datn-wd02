@@ -57,7 +57,6 @@ const CheckOut = () => {
         });
     }
   }, []);
-  console.log(userInfo);
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setUserInfo((prevState) => ({
@@ -121,7 +120,7 @@ const CheckOut = () => {
     const token = localStorage.getItem("access_token");
 
     // Lấy thông tin nhiều ticketId từ ticketData.tickets
-    const tickets = ticketData.tickets.map(ticket => ({
+    const tickets = ticketData.tickets.map((ticket) => ({
       ticket_id: ticket.ticket_id,
       ticket_type: ticket.ticket_type,
       quantity: ticket.quantity,
@@ -131,7 +130,7 @@ const CheckOut = () => {
     }));
 
     const paymentData = {
-      tickets: tickets,  // Mảng các vé
+      tickets: tickets, // Mảng các vé
       payment_method: paymentMethod,
       name: userInfo.name,
       email: userInfo.email,
@@ -139,7 +138,6 @@ const CheckOut = () => {
       discount_code: voucherCode || null,
       amount: parseFloat(ticketData.totalPrice).toFixed(2),
     };
-    console.log(paymentData)
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -154,8 +152,7 @@ const CheckOut = () => {
         paymentData,
         { headers }
       );
-
-      if (response.data.success) {
+      if (response.data.status === "success") {
         window.location.href = response.data.payment_url;
       } else {
         notification.error({
@@ -164,13 +161,14 @@ const CheckOut = () => {
       }
     } catch (error) {
       console.error("Error during payment process:", error);
-      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra trong quá trình thanh toán.";
+      const errorMessage =
+        error.response?.data?.message ||
+        "Có lỗi xảy ra trong quá trình thanh toán.";
       notification.error({ message: errorMessage });
     } finally {
       setIsProcessing(false); // End processing
     }
 
-    console.log(paymentData); // In ra dữ liệu gửi đi
   };
   return (
     <div className="mt-36 mx-4">
@@ -368,8 +366,6 @@ const CheckOut = () => {
             </button>
           </div>
         </div>
-
-
       </form>
     </div>
   );

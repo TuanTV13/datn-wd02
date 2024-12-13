@@ -16,10 +16,11 @@ const AddTicket = (props: any) => {
   const [ticketTypesList] = useState(Object.values(TicketType));
 
   const onSubmit = (data: Tickets) => {
-    onAdd({ ...data, event_id: props.eventId }); // Xử lý khi người dùng gửi form
-    if (!props.eventId) {
+    const eventId = props.eventId || data.event_id;
+    if (!eventId) {
       navigate("/admin/ticket-list");
     }
+    onAdd({ ...data, event_id: eventId }); // Xử lý khi người dùng gửi form
   };
 
   return (

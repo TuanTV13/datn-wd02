@@ -11,12 +11,17 @@ class Transaction extends Model
 
     protected $fillable = [
         'user_id',
-        'ticket_id',
         'event_id',
-        'ticket_code',
+        'transaction_code',
+        'quantity',
         'total_amount',
         'payment_method',
         'status',
+        'tickets',
+    ];
+
+    protected $casts = [
+        'tickets' => 'array',
     ];
 
     public function user()

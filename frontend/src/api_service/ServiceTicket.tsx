@@ -108,8 +108,9 @@ export const restoreTicket = async (id: number) => {
     "Content-Type": "application/json",
   };
   try {
-    const { data } = await api.post(`/tickets/${id}/restore`, { headers });
-    return data.data;
+    const { data } = await api.post(`/tickets/${id}/restore`,{}, { headers });
+    console.log(data)
+    return data;
   } catch (error) {
     if (error.status === 401) {
       localStorage.clear();

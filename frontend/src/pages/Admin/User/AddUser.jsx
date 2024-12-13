@@ -43,7 +43,6 @@ const AddClient = () => {
     axiosInstance
       .post("/users/create", requestBody, {})
       .then((response) => {
-        console.log("Thêm người dùng thành công:", response.data);
         // Reset form sau khi thêm thành công
         setFormData({
           name: "",
