@@ -6,22 +6,26 @@ import {
   addTicket,
   deleteTicket,
   editTicket,
+  getAllEvent,
   getAllTickets,
   restoreTicket,
   verifyTicket,
 } from "../api_service/ServiceTicket";
+import { Events } from "../interfaces/Event";
+import { message } from "antd";
 
 type Props = {
   children: React.ReactNode;
 };
 
 interface TypeTickets {
-  onDel: (id: number) => void;
+  onDel: (id: number, seatId: number) => void;
   onAdd: (data: Tickets) => void;
-  onEdit: (data: Tickets) => void;
+  onEdit: (data: Tickets, seatId: number) => void;
   onRestore: (id: number) => void;
   onVerify: (id: number) => void;
   tickets: Tickets[];
+  events: Events[];
 }
 
 export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
@@ -29,6 +33,7 @@ export const TicketsCT = createContext<TypeTickets>({} as TypeTickets);
 const TicketsContext = ({ children }: Props) => {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<Tickets[]>([]);
+  const [events, setEvents] = useState<Events[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -37,14 +42,22 @@ const TicketsContext = ({ children }: Props) => {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      const data = await getAllEvent();
+      setEvents(data);
+    })();
+  }, []);
 
-  const onDel = async (id: number) => {
+  const onDel = async (id: number, seatId: number) => {
     if (confirm("Bạn có muốn xóa không?")) {
       try {
-        await deleteTicket(id);
-        setTickets(tickets.filter((item) => item.id !== id && id));
+        await deleteTicket(id, seatId);
+        setTickets((prevTickets) =>
+          prevTickets.filter((item) => item.id !== id)
+        );
         toast.success("Xóa thành công");
-      navigate("/admin/list-ticket-delete");
+        navigate("/admin/list-ticket-delete");
       } catch (error) {
         console.error("Error deleting ticket:", error);
         toast.error("Lỗi khi xóa vé");
@@ -52,90 +65,29 @@ const TicketsContext = ({ children }: Props) => {
     }
   };
 
-  // Thêm vé
-  const validateTicketCreation = async (ticket: Tickets) => {
-    const errors: string[] = [];
-  
-    // Kiểm tra ngày kết thúc bán vé
-    if (!ticket.sale_end) {
-      errors.push("Ngày kết thúc bán vé không hợp lệ.");
-    }
-  
-    // Kiểm tra số lượng vé
-    if (!ticket.quantity || ticket.quantity <= 0) {
-      errors.push("Số lượng vé phải lớn hơn 0.");
-    }
-  
-    // Kiểm tra loại vé
-    if (!ticket.ticket_type) {
-      errors.push("Loại vé không được để trống.");
-    }
-  
-    return errors;
-  };
-  
   const onAdd = async (ticket: Tickets) => {
     try {
-      // Kiểm tra vé đã tồn tại theo sự kiện
-      const existingTicket = tickets.find((t) => t.event_id === ticket.event_id);
-      if (existingTicket) {
-        toast.error("Sự kiện này đã có vé, không thể thêm vé mới.");
-        return;
-      }
-      // Chỉ validate dữ liệu local
-      const validationErrors = await validateTicketCreation(ticket);
-      if (validationErrors.length > 0) {
-        validationErrors.forEach((error) => toast.error(error));
-        return;
-      }
       // Gửi thẳng lên backend
       const newTicket = await addTicket(ticket);
-      setTickets([...tickets, newTicket]);
-      toast.success("Thêm thành công");
-      navigate("/admin/ticket-list");
-      window.location.reload();
+      if (newTicket) {
+        setTickets([...tickets, newTicket]);
+        toast.success("Thêm thành công");
+        navigate("/admin/ticket-list");
+        window.location.reload();
+      } else {
+        // Handle unexpected server response
+        toast.error("Vé đã tồn tại");
+      }
     } catch (error) {
       console.error("Error adding ticket:", error);
+      console.log(error);
       toast.error("Lỗi khi thêm vé");
     }
   };
-  
 
-  // Cập nhật ve
-  const validateTicket = (ticket: Tickets) => {
-    const errors: string[] = [];
-
-    // Kiểm tra xem sự kiện có tồn tại hay không
-    if (!ticket.event) {
-      errors.push("Sự kiện không tồn tại.");
-      return errors; // Không tiếp tục kiểm tra nếu không có sự kiện
-    }
-
-    // Kiểm tra nếu ngày bắt đầu sự kiện (start_time) tồn tại
-    if (!ticket.event.start_time) {
-      errors.push("Ngày bắt đầu sự kiện không tồn tại hoặc không hợp lệ.");
-    } else {
-      // Chuyển đổi ngày kết thúc bán vé và ngày bắt đầu sự kiện sang kiểu Date
-      const saleEndDate = new Date(ticket.sale_end);
-      const eventStartDate = new Date(ticket.event.start_time);
-
-      // Kiểm tra nếu ngày kết thúc bán vé sau ngày bắt đầu sự kiện
-      if (saleEndDate >= eventStartDate) {
-        errors.push("Ngày kết thúc bán vé phải trước ngày bắt đầu sự kiện.");
-      }
-    }
-    // Trả về danh sách lỗi (nếu có)
-    return errors;
-  };
-  const onEdit = async (ticket: Tickets) => {
+  const onEdit = async (ticket: Tickets, seatId: number) => {
     try {
-      // Kiểm tra lỗi logic
-      // const validationErrors = validacd b  teTicket(ticket);
-      // if (validationErrors.length > 0) {
-      //   validationErrors.forEach((error) => toast.error(error));
-      //   return; // Dừng tiếp tục nếu có lỗi
-      // }
-      const updatedTicket = await editTicket(ticket);
+      const updatedTicket = await editTicket(ticket, seatId);
       setTickets(
         tickets.map((item) =>
           item.id === updatedTicket.id ? updatedTicket : item
@@ -143,6 +95,7 @@ const TicketsContext = ({ children }: Props) => {
       );
       toast.success("Sửa thành công");
       navigate("/admin/ticket-list");
+      window.location.reload();
     } catch (error) {
       console.error("Error editing ticket:", error);
       toast.error("Lỗi khi sửa vé");
@@ -150,7 +103,7 @@ const TicketsContext = ({ children }: Props) => {
   };
 
   const onRestore = async (id: number) => {
-    if(confirm("Bạn có muốn khôi phục vé không?")){
+    if (confirm("Bạn có muốn khôi phục vé không?")) {
       try {
         const restoredTicket = await restoreTicket(id);
         setTickets([...tickets, restoredTicket]);
@@ -158,12 +111,12 @@ const TicketsContext = ({ children }: Props) => {
         navigate("/admin/ticket-list");
         window.location.reload();
       } catch (error) {
-        console.error("Error restoring ticket:", error);
+        console.log("Error restoring ticket:", error);
         toast.error("Lỗi khi khôi phục vé");
       }
     }
   };
-// Xác nhận vé
+  // Xác nhận vé
   const onVerify = async (id: number) => {
     try {
       const verifiedTicket = await verifyTicket(id);
@@ -186,6 +139,7 @@ const TicketsContext = ({ children }: Props) => {
         onRestore,
         onVerify,
         tickets,
+        events,
       }}
     >
       {children}

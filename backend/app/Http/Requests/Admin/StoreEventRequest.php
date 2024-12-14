@@ -26,7 +26,7 @@ class StoreEventRequest extends FormRequest
             'description' => 'required|string',
             'location' => 'required|string|max:255',
             'event_type' => 'required|in:online,offline',
-            'link_online' => 'nullable|string|255',
+            'link_online' => 'nullable|string|max:255',
             'max_attendess' => 'nullable',
             'thumbnail' => 'required|max:2048',
             'start_time' => [
@@ -51,7 +51,6 @@ class StoreEventRequest extends FormRequest
             ],
 
             'speakers' => 'nullable',
-
         ];
     }
 

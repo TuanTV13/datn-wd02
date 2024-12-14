@@ -26,7 +26,6 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
 
     try {
       const response = await login(data.email, data.password);
-      console.log(response)
       if (response.access_token) {
         setErrorMessage("Đăng nhập thành công!");
         setShowErrorModal(true);
@@ -35,6 +34,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
         localStorage.setItem("access_token", response.access_token);
         localStorage.setItem("refresh_token", response.refresh_token);
         localStorage.setItem("user_id", response.user.id);
+        localStorage.setItem("roles", JSON.stringify(response.roles));
 
         // Xử lý rememberMe
         if (rememberMe) {
@@ -45,7 +45,9 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
 
         // Tự động quay về trang chủ sau 3 giây
         setTimeout(() => {
-          window.location.href = "/"; // Điều hướng về trang chủ
+          response.roles == "admin"
+            ? (window.location.href = "/")
+            : (window.location.href = "/admin"); // Điều hướng về trang chủ
         }, 3000);
       } else {
         setErrorMessage("Đăng nhập thất bại! Vui lòng thử lại.");
@@ -84,7 +86,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
                 onMouseEnter={() => errors.email && setShowEmailError(true)}
                 onMouseLeave={() => errors.email && setShowEmailError(false)}
               />
-              {errors.email && showEmailError && (
+              {errors.email && (
                 <div className="input-error">{errors.email.message}</div>
               )}
             </div>
@@ -121,7 +123,7 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
                 />
               )}
 
-              {errors.password && showPasswordError && (
+              {errors.password && (
                 <div className="input-error">{errors.password.message}</div>
               )}
             </div>

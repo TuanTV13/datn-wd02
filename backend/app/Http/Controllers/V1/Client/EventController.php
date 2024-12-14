@@ -55,8 +55,8 @@ class EventController extends Controller
         $ticketCode = strtoupper($request->input('ticket_code'));
 
         $transaction = $this->transactionRepository->findByTicketCode($ticketCode, $eventId);
-        $userId = $transaction->user_id;
-        $ticketId = $transaction->ticket_id;
+        // $userId = $transaction->user_id;
+        // $ticketId = $transaction->ticket_id;
 
         if (!$transaction) {
             return response()->json([
@@ -103,19 +103,16 @@ class EventController extends Controller
             ], 404);
         }
 
-        $now = Carbon::now(); 
+        $now = Carbon::now();
 
-        $availableTickets = []; 
+        $availableTickets = [];
 
         foreach ($event->tickets as $ticket) {
-            foreach ($ticket['price'] as $price) {
-                $saleStart = Carbon::parse($price['sale_start']);
-                $saleEnd = Carbon::parse($price['sale_end']);
+            $saleStart = Carbon::parse($ticket['sale_start']);
+            $saleEnd = Carbon::parse($ticket['sale_end']);
 
-                if ($now->between($saleStart, $saleEnd)) {
-                    $availableTickets[] = $ticket; 
-                    break; 
-                }
+            if ($now->between($saleStart, $saleEnd) && $ticket->quantity > 0) {
+                $availableTickets[] = $ticket;
             }
         }
 
@@ -127,6 +124,7 @@ class EventController extends Controller
             'data' => $event
         ], 200);
     }
+
 
     public function index()
     {
@@ -249,8 +247,8 @@ class EventController extends Controller
 
         if ($events->isEmpty()) {
             return response()->json([
-                'message' => 'Không tìm thấy sự kiện nào'
-            ], 404);
+                'data' => []
+            ]);
         }
 
         foreach ($events as $event) {

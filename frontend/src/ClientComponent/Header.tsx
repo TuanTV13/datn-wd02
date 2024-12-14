@@ -113,11 +113,11 @@ const Header = () => {
 
   // Search
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = (e: any) => {
     e.preventDefault();
-    if (searchTerm.trim() !== '') {
+    if (searchTerm.trim() !== "") {
       navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
     }
   };
@@ -161,11 +161,13 @@ const Header = () => {
               </svg>
             </button>
           </div>
-          <img
-            className=" w-12 h-12 rounded-full"
-            src="../../public/images/logo.webp"
-            alt="Logo"
-          />
+          <a href="/">
+            <img
+              className=" w-12 h-12 rounded-full"
+              src="../../public/images/logo.webp"
+              alt="Logo"
+            />
+          </a>
 
           {/* Desktop Search Bar */}
           <div className="hidden lg:block h-[40px]">
@@ -178,7 +180,7 @@ const Header = () => {
                 className="border rounded-full w-[400px] px-6"
                 placeholder="Search"
                 value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button className="rounded-full bg-[#6C757D] w-[40px]">
                 <svg
@@ -220,8 +222,14 @@ const Header = () => {
               </Dropdown>
             )}
             {isAuthenticated && (
-              <div className="relative h-[24px] lg:ml-3  items-center" ref={notificationRef}>
-                <button onClick={toggleNotificationPopup} className="flex items-center">
+              <div
+                className="relative h-[24px] lg:ml-3  items-center"
+                ref={notificationRef}
+              >
+                <button
+                  onClick={toggleNotificationPopup}
+                  className="flex items-center"
+                >
                   <svg
                     className="w-[27px] h-[27px] fill-[#454444]"
                     viewBox="0 0 448 512"

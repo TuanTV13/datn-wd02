@@ -3,29 +3,33 @@ import Modal from "react-modal";
 import * as XLSX from "xlsx";
 import axios from "axios";
 import axiosInstance from "../../../axios";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Link, useNavigate } from "react-router-dom";
+import { ExportOutlined } from "@ant-design/icons";
+import { Empty, notification } from "antd";
+
 const ListClient = () => {
-  const [modalIsOpen, setModalIsOpen] = useState(false); // Modal chi tiết người dùng
-  const [editModalIsOpen, setEditModalIsOpen] = useState(false); // Modal chỉnh sửa người dùng
-  const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false); // Modal xác nhận xóa
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [editModalIsOpen, setEditModalIsOpen] = useState(false);
+  const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [confirmDeleteClientId, setConfirmDeleteClientId] = useState(null);
   const [showDeletedClients, setShowDeletedClients] = useState(false);
-  const [editFormData, setEditFormData] = useState(null); // Dữ liệu cho form chỉnh sửa
+  const [editFormData, setEditFormData] = useState(null);
   const navigate = useNavigate();
 
-  const [clients, setClients] = useState([]); // Dữ liệu người dùng từ API
+  const [clients, setClients] = useState([]);
   const [deletedClients, setDeletedClients] = useState([]);
 
-  // Gọi API để lấy danh sách người dùng
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // Số lượng mục trên mỗi trang
+
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/api/v1/users")
       .then((response) => {
         const { users } = response.data;
-        const formattedClients = users.map((client) => ({
+        const formattedClients = users.reverse().map((client) => ({
           id: client.id,
           name: client.name,
           email: client.email,
@@ -34,16 +38,15 @@ const ListClient = () => {
           province_id: 1,
           district_id: 1,
           ward_id: 1,
-         
+          image: client.image || "link_image_default.jpg",
           email_verified_at: client.email_verified_at,
-          
+          gender: "Chưa xác định",
           status: client.deleted_at ? "Đã xóa" : "Đang hoạt động",
         }));
         setClients(formattedClients);
       })
       .catch((error) => {
         if (error?.response?.status === 401) navigate("/auth");
-
         console.error("Lỗi khi lấy dữ liệu từ API: ", error);
       });
   }, []);
@@ -60,7 +63,7 @@ const ListClient = () => {
         "Quận/Huyện": client.district_id,
         "Phường/Xã": client.ward_id,
         "Ngày xác thực email": client.email_verified_at,
-       
+        // "Giới tính": client.gender,
         "Trạng thái": client.status,
       })
     );
@@ -77,7 +80,7 @@ const ListClient = () => {
   };
 
   const openEditModal = (client) => {
-    setEditFormData(client); // Gán dữ liệu người dùng vào form
+    setEditFormData(client);
     setEditModalIsOpen(true);
   };
 
@@ -92,40 +95,54 @@ const ListClient = () => {
   };
 
   const toggleDeletedClients = () => {
-    setShowDeletedClients(!showDeletedClients);
+    axiosInstance
+      .get("http://localhost:8000/api/v1/users/trashed")
+      .then((res) => {
+        setDeletedClients(res.data.data);
+        if (res.data.data.length <= 0 && !showDeletedClients) {
+          notification.error({ message: "Không có người dùng nào được xóa" });
+          return;
+        }
+        setCurrentPage(1);
+        setShowDeletedClients(!showDeletedClients);
+      });
   };
 
   const handleDeleteClient = (clientId) => {
     axiosInstance
       .delete(`/users/${clientId}/delete`, {})
       .then((response) => {
-        // Nếu xóa thành công, cập nhật lại danh sách người dùng
         const clientToDelete = clients.find((client) => client.id === clientId);
 
         setClients(clients.filter((client) => client.id !== clientId));
+        notification.success({ message: "Đã xoá người dùng thành công" });
         setDeletedClients([
           ...deletedClients,
           { ...clientToDelete, status: "Đã xóa" },
         ]);
-
-        closeConfirmModal(); // Đóng modal xác nhận xóa
-        toast.success("Xóa người dùng thành công!");
+        closeConfirmModal();
       })
       .catch((error) => {
         if (error?.response?.status === 401) navigate("/auth");
-
         console.error("Lỗi khi xóa người dùng: ", error);
       });
   };
 
   const handleRestoreClient = (clientId) => {
-    const clientToRestore = deletedClients.find(
-      (client) => client.id === clientId
-    );
-    setDeletedClients(
-      deletedClients.filter((client) => client.id !== clientId)
-    );
-    setClients([...clients, { ...clientToRestore, status: "Đang hoạt động" }]);
+    axiosInstance
+      .post(`http://localhost:8000/api/v1/users/${clientId}/restore`)
+      .then(() => {
+        const clientToRestore = deletedClients.find(
+          (client) => client.id === clientId
+        );
+        setDeletedClients(
+          deletedClients.filter((client) => client.id !== clientId)
+        );
+        setClients([
+          ...clients,
+          { ...clientToRestore, status: "Đang hoạt động" },
+        ]);
+      });
   };
 
   const openConfirmModal = (clientId) => {
@@ -155,62 +172,79 @@ const ListClient = () => {
     closeEditModal();
   };
 
+  // Tính toán số lượng trang
+  const totalItems = showDeletedClients
+    ? deletedClients.length
+    : clients.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  // Lấy danh sách người dùng cho trang hiện tại
+  const currentItems = (showDeletedClients ? deletedClients : clients).slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div>
       <div className="bg-white rounded-lg shadow">
         <h2 className="text-2xl font-bold text-center">Danh sách người dùng</h2>
         <div className="p-4 flex justify-between">
-          <button
-            onClick={toggleDeletedClients}
-            className="bg-blue-500 text-white px-4 py-2 rounded-[10px]"
-          >
-            {showDeletedClients ? "Danh sách người dùng" : "Người dùng đã xóa"}
-          </button>
+          <div className="flex space-x-4">
+            <Link
+              to="/admin/add-user"
+              className="bg-blue-500 text-white px-4 py-2 rounded-[10px]"
+            >
+              Thêm mới
+            </Link>
+            <button
+              onClick={toggleDeletedClients}
+              className="bg-blue-500 text-white px-4 py-2 rounded-[10px]"
+            >
+              {showDeletedClients
+                ? "Danh sách người dùng"
+                : "Người dùng đã xóa"}
+            </button>
+          </div>
           <button
             onClick={exportToExcel}
             className="bg-green-500 text-white px-4 py-2 rounded-[10px]"
           >
-            Xuất Excel
+            <ExportOutlined /> Xuất Excel
           </button>
         </div>
 
-        <table className="min-w-full table-auto border border-gray-700">
-          <thead className="bg-gray-100 text-left items-center text-center">
-            <tr>
-              <th className="p-4 border border-gray-300">STT</th>
-              <th className="p-4 border border-gray-300">Tên</th>
-              <th className="p-4 border border-gray-300">Email</th>
-              <th className="p-4 border border-gray-300">Số điện thoại</th>
-              <th className="p-4 border border-gray-300">Địa chỉ</th>
-              <th className="p-4 border border-gray-300">Trạng thái</th>
-              <th className="p-4 border border-gray-300">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 text-center">
-            {(showDeletedClients ? deletedClients : clients).map(
-              (client, index) => (
+        {clients.length > 0 ? (
+          <table className="min-w-full table-auto border border-gray-700">
+            <thead className="bg-gray-100 text-left items-center text-center">
+              <tr>
+                <th className="p-4 border border-gray-300">STT</th>
+                <th className="p-4 border border-gray-300">Tên</th>
+                <th className="p-4 border border-gray-300">Email</th>
+                <th className="p-4 border border-gray-300">Số điện thoại</th>
+                <th className="p-4 border border-gray-300">Địa chỉ</th>
+                <th className="p-4 border border-gray-300">Trạng thái</th>
+                <th className="p-4 border border-gray-300">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 text-center">
+              {currentItems.map((client, index) => (
                 <tr key={client.id}>
-                  <td className="p-4 border border-gray-300">{index + 1}</td>
+                  <td className="p-4 border border-gray-300">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
                   <td className="p-4 border border-gray-300">{client.name}</td>
                   <td className="p-4 border border-gray-300">{client.email}</td>
                   <td className="p-4 border border-gray-300">{client.phone}</td>
                   <td className="p-4 border border-gray-300">
                     {client.address}
                   </td>
-
                   <td className="p-4 border border-gray-300">
                     {client.status}
                   </td>
                   <td className="p-4 border border-gray-300">
                     <div className="flex flex-col items-center space-y-1">
-                      {/* <button
-                        className="bg-yellow-500 text-white w-full h-8 rounded-[10px]"
-                        onClick={() => openEditModal(client)}
-                      >
-                        Chỉnh sửa
-                      </button> */}
                       <button
-                        className="bg-red-500 text-white w-full h-8 rounded-[10px]"
+                        className="bg-red-500 text-white w-full h-8 rounded [10px]"
                         onClick={() => openConfirmModal(client.id)}
                       >
                         Xóa
@@ -232,10 +266,35 @@ const ListClient = () => {
                     </div>
                   </td>
                 </tr>
-              )
-            )}
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <Empty />
+        )}
+
+        {/* Phân trang */}
+        <div className="flex justify-between p-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="bg-gray-300 px-4 py-2 rounded"
+          >
+            Trước
+          </button>
+          <span>
+            Trang {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="bg-gray-300 px-4 py-2 rounded"
+          >
+            Sau
+          </button>
+        </div>
       </div>
 
       {selectedClient && (
@@ -248,43 +307,73 @@ const ListClient = () => {
         >
           <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
             <h2 className="text-2xl font-bold mb-4">Chi tiết người dùng</h2>
-            <table className="min-w-full table-auto border border-gray-700">
-          <thead className="bg-gray-100 text-left">
-            <tr>
-              <th className="p-2 border border-gray-300">Thứ tự</th>
-              <th className="p-2 border border-gray-300">Thông tin</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            <tr>
-              <td className="p-2 border border-gray-300">Tên</td>
-              <td className="p-2 border border-gray-300">{selectedClient.name}</td>
-            </tr>
-            <tr>
-              <td className="p-2 border border-gray-300">Email</td>
-              <td className="p-2 border border-gray-300">{selectedClient.email}</td>
-            </tr>
-            <tr>
-              <td className="p-2 border border-gray-300">Số điện thoại</td>
-              <td className="p-2 border border-gray-300">{selectedClient.phone}</td>
-            </tr>
-            <tr>
-              <td className="p-2 border border-gray-300">Địa chỉ</td>
-              <td className="p-2 border border-gray-300">{selectedClient.address}</td>
-            </tr>
-            <tr>
-              <td className="p-2 border border-gray-300">Trạng thái</td>
-              <td className="p-2 border border-gray-300">{selectedClient.status}</td>
-            </tr>
-            <tr>
-              <td className="p-2 border border-gray-300">Ngày xác thực email</td>
-              <td className="p-2 border border-gray-300">
-                {selectedClient.email_verified_at || "Chưa xác thực"}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      
+            <table className="min-w-full table-auto border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="p-4 border border-gray-300">Thông tin</th>
+                  <th className="p-4 border border-gray-300">Giá trị</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="p-4 border border-gray-300">
+                    <strong>Tên:</strong>
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {selectedClient.name}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="p-4 border border-gray-300">
+                    <strong>Email:</strong>
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {selectedClient.email}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="p-4 border border-gray-300">
+                    <strong>Số điện thoại:</strong>
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {selectedClient.phone}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="p-4 border border-gray-300">
+                    <strong>Địa chỉ:</strong>
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {selectedClient.address}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="p-4 border border-gray-300">
+                    <strong>Ảnh:</strong>
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {selectedClient.image}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="p-4 border border-gray-300">
+                    <strong>Ngày xác thực email:</strong>
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {selectedClient.email_verified_at}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="p-4 border border-gray-300">
+                    <strong>Trạng thái:</strong>
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {selectedClient.status}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
             <button
               onClick={closeModal}
               className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
@@ -295,12 +384,63 @@ const ListClient = () => {
         </Modal>
       )}
 
-      {/* Modal chỉnh sửa người dùng */}
-    
-      {/* Modal xác nhận xóa người dùng */}
+      {editModalIsOpen && (
+        <Modal
+          isOpen={editModalIsOpen}
+          onRequestClose={closeEditModal}
+          ariaHideApp={false}
+          className="fixed inset-0 flex items-center justify-center z-50"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        >
+          <div className="bg-white rounded-lg p-6 w-1/2 mx-auto">
+            <h2 className="text-2xl font-bold mb-4">Chỉnh sửa người dùng</h2>
+            <form>
+              <label className="block text-gray-700">Tên</label>
+              <input
+                type="text"
+                name="name"
+                value={editFormData?.name || ""}
+                onChange={handleEditChange}
+                className="border rounded w-full px-3 py-2 mb-4"
+              />
+              <label className="block text-gray-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={editFormData?.email || ""}
+                onChange={handleEditChange}
+                className="border rounded w-full px-3 py-2 mb-4"
+              />
+              <label className="block text-gray-700">Số điện thoại</label>
+              <input
+                type="text"
+                name="phone"
+                value={editFormData?.phone || ""}
+                onChange={handleEditChange}
+                className="border rounded w-full px- 3 py-2 mb-4"
+              />
+              <label className="block text-gray-700">Địa chỉ</label>
+              <input
+                type="text"
+                name="address"
+                value={editFormData?.address || ""}
+                onChange={handleEditChange}
+                className="border rounded w-full px-3 py-2 mb-4"
+              />
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+              >
+                Lưu
+              </button>
+            </form>
+          </div>
+        </Modal>
+      )}
+
       {confirmDeleteClientId && (
         <Modal
-        
           isOpen={confirmModalIsOpen}
           onRequestClose={closeConfirmModal}
           ariaHideApp={false}

@@ -16,12 +16,13 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('ticket_id')->constrained();
             $table->foreignId('event_id')->constrained();
-            $table->decimal('total_amount', 10,2);
-            $table->string('ticket_code')->unique();
+            $table->string('transaction_code')->unique();
+            $table->integer('quantity');
+            $table->decimal('total_amount', 10, 2);
             $table->enum('payment_method', PaymentMethod::getValues())->default(PaymentMethod::CASH);
             $table->enum('status', TransactionStatus::getValues())->default(TransactionStatus::PENDING);
+            $table->json('tickets'); // Lưu thông tin vé dưới dạng JSON
             $table->timestamps();
         });
     }

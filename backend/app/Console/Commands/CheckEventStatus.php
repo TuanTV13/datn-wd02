@@ -17,7 +17,7 @@ class CheckEventStatus extends Command
     public function handle()
     {
         $now = Carbon::now();
-        $addHourLater = $now->copy()->addHour();
+        $addHourLater = $now->copy()->addHour(2);
 
         $events = Event::whereIn('status', ['confirmed', 'checkin', 'ongoing'])
             ->whereBetween('start_time', [$now, $addHourLater])
@@ -31,7 +31,9 @@ class CheckEventStatus extends Command
                 $users = $event->users()
                     ->select('users.id', 'users.name', 'users.email')
                     ->get()
-                    ->unique('id');
+                    ->unique('email');
+                Log::info('Danh sách người dùng trong commands: ' . json_encode($users));
+                Log::info('Cập nhật sự kiện thành checkin.', ['users' => $users, 'status' => 'checkin']);
 
                 event(new EventUpcoming($users, $event));
                 $this->info("Đã cập nhật trạng thái của sự kiện {$event->id} thành checkin.");
@@ -48,6 +50,8 @@ class CheckEventStatus extends Command
         $endedEvents = Event::where('status', 'ongoing')
             ->where('end_time', '<=', $now)
             ->get();
+
+        Log::info('Danh sách sự kiện đã kết thúc: ' . json_encode($endedEvents));
 
         foreach ($endedEvents as $event) {
             $event->update(['status' => 'completed']);

@@ -1,20 +1,21 @@
 export interface Tickets {
   id?: number | string;
-  event_id: number;
-  status: StatusType;
-  ticket_type: TicketType;
-  name: string;
+  event_id: number | string;
+  seat_zone_id: number | string;
   price: number;
   quantity: number;
-  available_quantity: number;
-  seat_location: number;
+  sold_quantity: number;
   sale_start: string;
   sale_end: string;
-  description: string;
-  event?: {
-    id: number;
+  ticket: {
+    id: number | string;
+    status: StatusType;
+    ticket_type: TicketType;
+  };
+  seat_zones: {
+    id: number | string;
+    event_id: number | string;
     name: string;
-  start_time: string;
   };
 }
 export enum TicketType {
@@ -24,4 +25,11 @@ export enum TicketType {
 export enum StatusType {
   Pending = "pending",
   Confirmed = "confirmed",
+}
+
+export interface DeletedTicket {
+  id: number | string;
+  event_id: number | string;
+  status: string;
+  ticket_type: string;
 }

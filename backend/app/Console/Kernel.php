@@ -16,8 +16,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('check:event-status')->everyMinute();
         // $schedule->command('users:delete-unverified')->everyMinute();
         // $schedule->command('queue:run')->everyMinute();
+        // $schedule->command('send:email')->dailyAt('09:00');
+        // $schedule->command('send:email')->everyMinute();
+
         $schedule->command('transactions:clear-pending')->everyMinute();
-        $schedule->command('app:check-event-i-p-command')->everyMinute();
+        // $schedule->command('app:check-event-i-p-command')->everyMinute();
     }
 
     /**
@@ -25,10 +28,8 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }
-   
-
 }

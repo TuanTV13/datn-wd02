@@ -167,8 +167,7 @@ class FeedbackController extends Controller
             ], 404);
         }
 
-        $this->feedbackRepository->delete($feedback);
-
+        $feedback->delete();
         return response()->json([
             'message' => 'Xóa phản hồi thành công.'
         ], 200);

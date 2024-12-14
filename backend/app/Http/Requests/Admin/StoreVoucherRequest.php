@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreVoucherRequest extends FormRequest
 {
-/**
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -24,46 +24,45 @@ class StoreVoucherRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'creator_id'        => ['required', 'integer', 'exists:users,id'],       
-            'event_id'          => ['required', 'integer', 'exists:events,id'],       
-            'status'            => ['nullable', 'in:draft,pending,published'],     
-            'code'              => ['required', 'string', 'max:100', 'unique:vouchers,code'],  
-            'discount_type'     => ['required', 'in:percent,fixed'],                 
-            'discount_value'    => ['required', 'numeric', 'gt:0'],                        
-            'min_order_value'   => ['nullable', 'numeric', 'gt:0'],                        
-            'max_order_value'   => ['nullable', 'numeric', 'gt:0'],       
-            'issue_quantity'    => ['required', 'integer'],                    
-            'start_time'        => ['required', 'date', 'after_or_equal:today'], 
-            'end_time'          => ['required', 'date', 'after:start_time'],   
-            'used_limit'        => ['required', 'min:0', 'integer'],                       
-        ];    
+            'creator_id'        => ['required', 'integer', 'exists:users,id'],
+            'event_id'          => ['required', 'integer', 'exists:events,id'],
+            'status'            => ['nullable', 'in:draft,pending,published'],
+            'code'              => ['required', 'string', 'max:100', 'unique:vouchers,code'],
+            'discount_type'     => ['required', 'in:percent,fixed'],
+            'discount_value'    => ['required', 'numeric', 'gt:0'],
+            'min_order_value'   => ['nullable', 'numeric', 'gt:0'],
+            'max_order_value'   => ['nullable', 'numeric', 'gt:0'],
+            'issue_quantity'    => ['required', 'integer'],
+            'start_time'        => ['required', 'date', 'after_or_equal:today'],
+            'end_time'          => ['required', 'date', 'after:start_time'],
+            'used_limit'        => ['required', 'min:0', 'integer'],
+        ];
     }
-    
+
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
             if ($this->event_id) {
-                $event = Event::find($this->event_id);
-                if (!in_array($event->status, ['pending', 'confirmed'])) {
-                    $validator->errors()->add('event_id', 'Sự kiện có trạng thái không hợp lệ.');
-                }
+                // $event = Event::find($this->event_id);
+                // if (!in_array($event->status, ['pending', 'confirmed'])) {
+                //     $validator->errors()->add('event_id', 'Sự kiện có trạng thái không hợp lệ.');
+                // }
             }
 
-            if ($this->discount_type === 'percent' && $this->discount_value > 100 && is_numeric($this->discount_value) ) {
+            if ($this->discount_type === 'percent' && $this->discount_value > 100 && is_numeric($this->discount_value)) {
                 $validator->errors()->add('discount_value', 'Giá trị giảm giá loại phần trăm không được lớn hơn 100.');
             }
-        });     
-        
+        });
+
         $validator->sometimes('issue_quantity', 'gt:0', function ($input) {
             return is_numeric($input->issue_quantity);
-        }); 
+        });
 
         $validator->after(function ($validator) {
             if ($this->used_limit == '-0') {
                 $validator->errors()->add('used_limit', 'Giới hạn sử dụng mã giảm giá phải lớn hơn hoặc bằng 0.');
             }
         });
-       
     }
 
     public function messages()
@@ -91,10 +90,10 @@ class StoreVoucherRequest extends FormRequest
             'discount_value.required'    => 'Giá trị giảm giá là bắt buộc.',
             'discount_value.numeric'     => 'Giá trị giảm giá phải là số.',
             'discount_value.gt'          => 'Giá trị giảm giá phải lớn hơn 0.',
-            
+
             'min_order_value.numeric'    => 'Giá trị vé tối thiểu phải là số.',
             'min_order_value.gt'         => 'Giá trị vé tối thiểu phải lớn hơn 0.',
-            
+
             'max_order_value.numeric'    => 'Giá trị vé tối đa phải là số.',
             'max_order_value.gt'         => 'Giá trị vé tối đa phải lớn hơn 0.',
 

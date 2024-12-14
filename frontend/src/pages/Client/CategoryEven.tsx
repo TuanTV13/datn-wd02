@@ -10,6 +10,7 @@ import {
 import { EventCT } from "../../Contexts/ClientEventContext";
 import api from "../../api_service/api";
 import { fetchEventsByProvince } from "../../api_service/ClientEvent";
+import { Empty, notification } from "antd";
 
 const CategoryEven = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -33,7 +34,6 @@ const CategoryEven = () => {
   const navigate = useNavigate();
   const handleCategoryClick = async (id: number | string) => {
     await fetchEventsByCategory(id);
-    console.log(events);
     navigate(`/event-category/${id}`);
   };
 
@@ -44,15 +44,12 @@ const CategoryEven = () => {
 
   const fetchEventsByDate = async (startTime: string, endTime: string) => {
     try {
-      console.log("Calling API with:", { startTime, endTime }); // Debug
       const response = await api.post("/clients/events/filter", {
         start_time: startTime,
         end_time: endTime,
       });
-      console.log("API Response:", response);
       setEvents(response.data.data.data);
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -66,7 +63,9 @@ const CategoryEven = () => {
       navigate(`?${params.toString()}`);
       fetchEventsByDate(start_time, end_time); // Lấy sự kiện theo khoảng thời gian đã chọn
     } else {
-      alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!");
+      notification.error({
+        message: "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!",
+      });
     }
   };
   // Lấy query params từ URL khi tải trang
@@ -124,6 +123,46 @@ const CategoryEven = () => {
   useEffect(() => {
     fetchEventsByCategory(id!);
   }, []);
+  const [filteredEvents, setFilteredEvents] = useState(events);
+  const [allEvents, setAllEvents] = useState(events);
+  useEffect(() => {
+    // Khi trang tải lại, lấy lại sự kiện ban đầu
+    setAllEvents(events); // Lưu lại tất cả sự kiện ban đầu
+    setFilteredEvents(events); // Hiển thị tất cả sự kiện khi chưa có bộ lọc
+  }, [events]);
+
+  const stripHtmlTags = (html: string) => {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  };
+
+  const [totalPages, setTotalPages] = useState(Math.ceil(events.length / 5));
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredEvents.length / 5)); // Cập nhật lại tổng số trang khi có sự kiện lọc
+  }, [filteredEvents]);
+  const eventsPerPage = 5; // Số sự kiện trên mỗi trang
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+
+  // Tính các sự kiện cần hiển thị dựa trên trang hiện tại
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEvents = filteredEvents.slice(
+    indexOfFirstEvent,
+    indexOfLastEvent
+  );
+
+  // Hàm xử lý thay đổi trang
+  const handlePageChange = (direction: any) => {
+    setCurrentPage((prevPage) => {
+      if (direction === "next" && prevPage < totalPages) {
+        return prevPage + 1;
+      } else if (direction === "prev" && prevPage > 1) {
+        return prevPage - 1;
+      }
+      return prevPage;
+    });
+  };
 
   return (
     <div className="lg:mx-10 mt-36">
@@ -287,8 +326,8 @@ const CategoryEven = () => {
           <div className="border-b-[1px] border-gray-300 mb-4"></div>
           {/* <!-- Items --> */}
           <div className="space-y-4 ">
-            {events.length > 0 ? (
-              events.map((item) => (
+            {currentEvents.length > 0 ? (
+              currentEvents.map((item) => (
                 <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
                   <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
                     <Link to={`/event-detail/${item.id}`}>
@@ -302,7 +341,7 @@ const CategoryEven = () => {
                   <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
                     <div className="mt-2 lg:flex">
                       <div className="flex flex-col justify-between lg:w-2/3">
-                        <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer">
+                        <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer line-clamp-1">
                           <Link to={`/event-detail/${item.id}`}>
                             {item.name}
                           </Link>
@@ -315,6 +354,20 @@ const CategoryEven = () => {
                           <i className="fas fa-clock mr-2"></i>
                           Thời gian kết thúc: {item.end_time}
                         </div>
+                        <div className="flex items-center text-gray-600 mb-1 mt-1 line-clamp-1">
+                          <i className="fa-solid fa-user mr-2"></i>
+                          Diễn giả:
+                          {item.speakers?.length > 0 ? (
+                            item.speakers?.map((speaker, index) => (
+                              <span className="ml-1 ">
+                                {speaker.name}
+                                {index < item.speakers.length - 1 && " , "}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="ml-1">Không có diễn giả</span>
+                          )}
+                        </div>
                         <div className="flex items-center text-gray-600 mb-2 mt-1">
                           <i className="fas fa-map-marker-alt mr-2"></i>
                           Địa điểm: {item.location}
@@ -322,7 +375,7 @@ const CategoryEven = () => {
                         <div
                           className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
                         >
-                          Mô tả: {item.description}
+                          Mô tả: {stripHtmlTags(item.description)}
                         </div>
 
                         <Link
@@ -346,9 +399,54 @@ const CategoryEven = () => {
               ))
             ) : (
               <p className="text-center text-gray-500 mt-4">
-                Không tìm thấy sự kiện nào phù hợp.
+                <Empty />{" "}
               </p>
             )}
+            <div className="flex items-center justify-center mt-4 space-x-2">
+              <button
+                onClick={() => handlePageChange("prev")}
+                disabled={currentPage === 1}
+                className="px-2 py-1 border border-gray-600 rounded-l-md text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  className="size-5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"
+                  />
+                </svg>
+              </button>
+              <span className="px-2 py-1 border border-gray-600 text-gray-700 rounded-lg">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange("next")}
+                disabled={currentPage === totalPages}
+                className="px-2 py-1 border border-gray-600 rounded-r-md text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  className="size-5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>

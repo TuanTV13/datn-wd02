@@ -15,6 +15,7 @@ use App\Http\Controllers\V1\FeedbackController;
 use App\Http\Controllers\V1\StatisticsController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
+use App\Http\Controllers\V1\UploadImageController;
 use App\Http\Controllers\V1\UserController;
 use App\Http\Controllers\V1\VoucherController;
 use App\Http\Services\Payments\ZaloPayService;
@@ -37,6 +38,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('v1/upload', [UploadImageController::class, 'upload']);
 
 Route::prefix('v1/role')->middleware(['check.jwt'])->group(function () {
     Route::get('/{id}/permissions', [RolePermissionController::class, 'getPermissionsByRole']);
@@ -74,11 +77,10 @@ Route::prefix('v1')->group(function () {
         Route::post('{eventId}/add-ip', [EventController::class, 'addIp']);
         Route::get('/check-event-ip', [EventController::class, 'checkEventIP']); // Thông báo hi chưa có ip checkin cục bộ
         Route::get('statistics/top-revenue-events', [StatisticsController::class, 'topRevenueEvents']); // Thống kê trong khoảng thời gian chọn
-        Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatistics']); // Đếm số lượng
+        Route::get('statistics/event-count', [StatisticsController::class, 'getEventStatisticsByTime']); // Đếm số lượng
         Route::put('changeStatus/{id}', [EventController::class, 'changeStatus']);
         Route::put('{eventId}/checkin', [EventController::class, 'checkIn']);
         Route::put('{eventId}/cancelcheckin', [EventController::class, 'cancelCheckIn']);
-
     });
 
     Route::get('users', [UserController::class, 'index']);
@@ -203,8 +205,6 @@ Route::prefix('v1')->group(function () {
 
         // Lấy giao dịch theo ID
         Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
-
-
     });
 });
 
