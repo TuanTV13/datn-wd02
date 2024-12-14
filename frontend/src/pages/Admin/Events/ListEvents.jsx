@@ -111,10 +111,8 @@ const EventList = () => {
       const updatedList = list.filter((event) => event.id !== deletingEventId);
       setList(updatedList);
       setFilteredEvents(updatedList);
-      notification.success({ message: "Xóa sự kiện thành công!" });
       toast.success("Xóa sự kiện thành công!");
     } catch (error) {
-      console.error("Lỗi khi xóa sự kiện:", error);
       notification.error({ message: "Xóa sự kiện không thành công!" });
     }
     setDeletingEventId(null);
