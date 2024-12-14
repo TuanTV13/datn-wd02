@@ -147,9 +147,16 @@ class EventController extends Controller
                 return $validationError;
             }
 
+            if (isset($data['description'])) {
+                $data['description'] = $this->processImageInDescription($data['description']);
+            }
+
             if ($request->has('speakers')) {
                 $data['speakers'] = $this->handleSpeakers($request);
             }
+
+            // $speakers = $request->input('spes')
+            // $data['speakers'] = $this->handleSpeakers($speakers);
 
             // Kiểm tra và xử lý display_header
             if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'] ?? 0)) {
@@ -199,15 +206,61 @@ class EventController extends Controller
         }
     }
 
+    private function processImageInDescription($description)
+    {
+        // Sử dụng regex để tìm tất cả các thẻ <img>
+        preg_match_all('/<img[^>]+src="([^">]+)"/', $description, $matches);
+
+        if (!empty($matches[1])) {
+            foreach ($matches[1] as $imageUrl) {
+                // Gọi hàm uploadThumbnail để tải ảnh lên Cloudinary
+                $uploadedUrl = $this->uploadThumbnailFromUrl($imageUrl);
+                if ($uploadedUrl) {
+                    // Thay thế URL của ảnh trong mô tả với URL từ Cloudinary
+                    $description = str_replace($imageUrl, $uploadedUrl, $description);
+                }
+            }
+        }
+
+        return $description;
+    }
+
+    private function uploadThumbnailFromUrl($imageUrl)
+    {
+        try {
+            // Tải ảnh từ URL và upload lên Cloudinary
+            $imageData = file_get_contents($imageUrl);
+            $tempFile = tmpfile();
+            fwrite($tempFile, $imageData);
+            $tempFilePath = stream_get_meta_data($tempFile)['uri'];
+
+            $uploadResult = Cloudinary::upload($tempFilePath);
+
+            // Đảm bảo URL ảnh được lấy từ Cloudinary
+            if (!$uploadResult || !$uploadResult->getSecurePath()) {
+                throw new \RuntimeException('Không thể lấy URL của ảnh từ Cloudinary');
+            }
+
+            return $uploadResult->getSecurePath();
+        } catch (\Exception $e) {
+            Log::error("Error uploading image from URL: " . $e->getMessage());
+            return false;
+        }
+    }
 
     private function handleSpeakers($request)
     {
         if ($request->has('speakers')) {
-            return is_string($request->speakers)
-                ? json_decode($request->speakers, true)
-                : json_encode($request->speakers);
+            $speakers = $request->input('speakers');
+
+            if (!is_array($speakers)) {
+                $speakers = [$speakers];
+            }
+
+            return json_encode($speakers);
         }
-        return null;
+
+       return null;
     }
 
     private function validateEventDisplayHeader($data)

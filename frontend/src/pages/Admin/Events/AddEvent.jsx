@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import Quill from 'quill';
+import 'quill/dist/quill.snow.css';  // Import CSS của Quill
+import ReactQuill from 'react-quill';
 import { addEvent, fetchCategories } from "../../../api_service/event";
 import {
   fetchProvinces,
@@ -34,23 +37,39 @@ const AddEvent = () => {
 
   const handleAddSpeaker = () => {
     setFormData(prevData => {
-      const updatedSpeakers = Array.isArray(prevData.speakers) ?
-        [...prevData.speakers, { name: '', email: '', phone: '', image_url: '' }] :
-        [{ name: '', email: '', phone: '', image_url: '' }];
-
+      // Thêm một đối tượng diễn giả mới vào mảng speakers
+      const updatedSpeakers = [...prevData.speakers, { name: '', email: '', phone: '', image_url: '' }];
       return { ...prevData, speakers: updatedSpeakers };
     });
   };
-
-  const handleSpeakerChange = (index, e) => {
-    const { name, value } = e.target;
+  
+  // Hàm để thay đổi thông tin diễn giả
+  const handleSpeakerChange = (index, key, value) => {
+    // Cập nhật mảng diễn giả
     const updatedSpeakers = [...formData.speakers];
-    updatedSpeakers[index] = { ...updatedSpeakers[index], [name]: value };
-
+    updatedSpeakers[index] = { ...updatedSpeakers[index], [key]: value };
+    
     setFormData(prevState => ({
       ...prevState,
       speakers: updatedSpeakers,
     }));
+  };
+  const modules = {
+    toolbar: [
+      [{ 'header': '1' }, { 'header': '2' }],
+      ['bold', 'italic', 'underline'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      ['link', 'image'],
+      ['blockquote'],
+      [{ 'align': [] }],
+    ],
+  };
+
+  const handleChange = (value) => {
+    setFormData({
+      ...formData,
+      description: value,
+    });
   };
 
   const handleRemoveSpeaker = (index) => {
@@ -87,14 +106,12 @@ const AddEvent = () => {
     fetchCategories()
       .then((response) => setCategories(response.data))
       .catch((error) => {
-        console.error("Lỗi khi lấy danh mục:", error);
         toast.error("Lỗi khi lấy danh mục. Vui lòng thử lại!");
       });
 
     fetchProvinces()
       .then((response) => setProvinces(response.data.data))
       .catch((error) => {
-        console.error("Lỗi khi lấy tỉnh:", error);
         toast.error("Lỗi khi lấy tỉnh. Vui lòng thử lại!");
       });
   }, []);
@@ -111,7 +128,6 @@ const AddEvent = () => {
     fetchDistricts(province.code)
       .then((response) => setDistricts(response.data.data))
       .catch((error) => {
-        console.error("Lỗi khi lấy huyện:", error);
         toast.error("Lỗi khi lấy huyện. Vui lòng thử lại!");
       });
   };
@@ -127,7 +143,6 @@ const AddEvent = () => {
     fetchWards(district.code)
       .then((response) => setWards(response.data.data))
       .catch((error) => {
-        console.error("Lỗi khi lấy xã:", error);
         toast.error("Lỗi khi lấy xã. Vui lòng thử lại!");
       });
   };
@@ -144,7 +159,6 @@ const AddEvent = () => {
     console.log("Speakers before submit:", formData.speakers);
 
     const speakers = Array.isArray(formData.speakers) ? formData.speakers : [];
-
     const speakersData = speakers.map(speaker => ({
       name: speaker.name,
       email: speaker.email,
@@ -194,12 +208,14 @@ const AddEvent = () => {
   };
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-3xl font-bold mb-4 text-center">Thêm sự kiện mới</h2>
+      <h2 className="text-4xl font-bold mb-3 text-left">Thêm sự kiện mới</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Danh mục và Tỉnh */}
         <div className="grid grid-cols-1 gap-4">
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Tên sự kiện:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Tên sự kiện: <span className="text-red-500">*</span>
+            </label></label>
             <input
               type="text"
               value={formData.name}
@@ -214,7 +230,9 @@ const AddEvent = () => {
         {/* Ảnh và Loại sự kiện */}
         <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Danh mục:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Danh mục: <span className="text-red-500">*</span>
+            </label></label>
             <select
               value={formData.category_id}
               onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
@@ -231,7 +249,9 @@ const AddEvent = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Loại sự kiện:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Loại sự kiện: <span className="text-red-500">*</span>
+            </label></label>
             <select
               value={formData.event_type}
               onChange={(e) => {
@@ -254,7 +274,9 @@ const AddEvent = () => {
         {/* Link sự kiện cho loại trực tuyến */}
         {formData.event_type === "online" && (
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Link sự kiện:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Link online sự kiện: <span className="text-red-500">*</span>
+            </label></label>
             <input
               placeholder="Nhập url online sự kiện"
               type="url"
@@ -269,7 +291,9 @@ const AddEvent = () => {
         {/* Huyện và Xã + Địa điểm */}
         <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Tỉnh:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Tỉnh: <span className="text-red-500">*</span>
+            </label></label>
             <select
               value={formData.province_name}
               onChange={(e) => handleProvinceChange(e.target.value)}
@@ -286,7 +310,9 @@ const AddEvent = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Huyện:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Huyện: <span className="text-red-500">*</span>
+            </label></label>
             <select
               value={formData.district_name}
               onChange={(e) => handleDistrictChange(e.target.value)}
@@ -306,7 +332,9 @@ const AddEvent = () => {
         {/* Xã và Địa điểm */}
         <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Xã:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Xã: <span className="text-red-500">*</span>
+            </label></label>
             <select
               value={formData.ward_name}
               onChange={(e) => handleWardChange(e.target.value)}
@@ -323,7 +351,9 @@ const AddEvent = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Địa điểm:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Đại điểm: <span className="text-red-500">*</span>
+            </label></label>
             <input
               placeholder="Nhập địa điểm cụ thể"
               type="text"
@@ -338,7 +368,9 @@ const AddEvent = () => {
         {/* Các trường khác */}
         <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Thời gian bắt đầu:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Thời gian bắt đâu: <span className="text-red-500">*</span>
+            </label></label>
             <input
               type="datetime-local"
               value={formData.start_time}
@@ -348,7 +380,9 @@ const AddEvent = () => {
             />
           </div>
           <div className="form-group">
-            <label className="form-label text-xl font-semibold mb-2">Thời gian kết thúc:</label>
+            <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+              Thời gian kết thúc: <span className="text-red-500">*</span>
+            </label></label>
             <input
               type="datetime-local"
               value={formData.end_time}
@@ -360,7 +394,9 @@ const AddEvent = () => {
         </div>
 
         <div className="form-group">
-          <label className="form-label text-xl font-semibold mb-2">Ảnh sự kiện:</label>
+          <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+            Ảnh bìa sự kiện: <span className="text-red-500">*</span>
+          </label></label>
           <input
             type="file"
             onChange={handleFileChange}
@@ -392,18 +428,23 @@ const AddEvent = () => {
         </div>
 
         {/* Mô tả sự kiện */}
-        <div className="form-group">
-          <label className="form-label text-xl font-semibold mb-2">Mô tả:</label>
+        <div className="form-group" style={{ overflow: 'hidden', height: '700px' }}>
+          <label className="form-label text-xl font-semibold mb-2"><label className="form-label text-xl font-semibold mb-2">
+            Mô tả dài: <span className="text-red-500">*</span>
+          </label></label>
           <div className="relative">
-            <textarea
+            <ReactQuill
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              required
-              rows="5" // Số dòng hiển thị ban đầu của textarea
-              className="form-control p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg resize-none"
+              onChange={handleChange}
+              theme="snow"
+              modules={modules}
+              // className="form-control p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg resize-none"
               placeholder="Nhập mô tả chi tiết về sự kiện..."
+              style={{ width: '100%', height: '600px', boxSizing: 'border-box' }}
             />
-            <div className="absolute right-2 top-2 text-gray-500 text-xs">{formData.description.length}/1000</div>
+            <div className="absolute right-2 top-2 text-gray-500 text-xs">
+              {formData.description.length}
+            </div>
           </div>
         </div>
 
@@ -416,7 +457,9 @@ const AddEvent = () => {
             {formData.speakers.map((speaker, index) => (
               <div key={index} className="grid grid-cols-9 gap-4 mb-4 flex items-center justify-between">
                 <div className="form-group col-span-2">
-                  <label className="form-label text-l mb-2">Tên diễn giả:</label>
+                  <label className="form-label text-l mb-2">
+                    Tên diễn giả: <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     value={speaker.name}
@@ -427,8 +470,9 @@ const AddEvent = () => {
                 </div>
 
                 <div className="form-group col-span-2">
-                  <label className="form-label text-l mb-2">Email diễn giả:</label>
-                  <input
+                  <label className="form-label text-l mb-2">
+                    Email diễn giả: <span className="text-red-500">*</span>
+                  </label>                  <input
                     type="email"
                     value={speaker.email}
                     onChange={(e) => handleSpeakerChange(index, 'email', e.target.value)}
@@ -438,8 +482,9 @@ const AddEvent = () => {
                 </div>
 
                 <div className="form-group col-span-2">
-                  <label className="form-label text-l mb-2">Số điện thoại diễn giả:</label>
-                  <input
+                  <label className="form-label text-l mb-2">
+                    Số điện thoại diễn giả: <span className="text-red-500">*</span>
+                  </label>                  <input
                     type="tel"
                     value={speaker.phone}
                     onChange={(e) => handleSpeakerChange(index, 'phone', e.target.value)}
@@ -449,8 +494,9 @@ const AddEvent = () => {
                 </div>
 
                 <div className="form-group col-span-2">
-                  <label className="form-label text-l mb-2">Ảnh diễn giả:</label>
-                  <input
+                  <label className="form-label text-l mb-2">
+                    Ảnh đại diện diễn giả: <span className="text-red-500">*</span>
+                  </label>                  <input
                     type="file"
                     className="form-control"
                     accept="image/*"
@@ -474,7 +520,6 @@ const AddEvent = () => {
                     </div>
                   )}
                 </div>
-
                 <div className="form-group col-span-1">
                   {/* Dấu trừ nhỏ (xóa diễn giả) */}
                   <button
