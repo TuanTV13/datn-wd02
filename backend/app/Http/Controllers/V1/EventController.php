@@ -147,15 +147,15 @@ class EventController extends Controller
                 return $validationError;
             }
 
-            // Xử lý speakers
-            $data['speakers'] = $this->handleSpeakers($request);
+            if ($request->has('speakers')) {
+                $data['speakers'] = $this->handleSpeakers($request);
+            }
 
             // Kiểm tra và xử lý display_header
             if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'] ?? 0)) {
                 return $validateEventHeader;
             }
 
-            // Upload thumbnail nếu có
             if ($request->hasFile('thumbnail')) {
                 $thumbnailUrl = $this->uploadThumbnail($request->file('thumbnail'));
                 if (!$thumbnailUrl) {
@@ -168,7 +168,7 @@ class EventController extends Controller
             $event = $this->eventRepository->create($data);
 
             DB::commit();
-
+            // Log::info("message" . $request->all());
             return response()->json([
                 'message' => 'Tạo sự kiện thành công, vui lòng kiểm tra',
                 'data' => $event
@@ -260,12 +260,6 @@ class EventController extends Controller
             ], 404);
         }
 
-        // if ($event->status != "pending") {
-        //     return response()->json([
-        //         'message' => 'Sự kiện đã được xác nhận không thể cập nhật'
-        //     ], 403);
-        // }
-
         $data = $request->validated();
 
         $validationError = $this->eventRepository->validateEventTimeAndVenue(
@@ -312,12 +306,6 @@ class EventController extends Controller
                 'message' => 'Không tồn tại sự kiện nào'
             ], 404);
         }
-
-        // if ($event->status_id != "PENDING") {
-        //     return response()->json([
-        //         'message' => 'Sự kiện đã được xác nhận không thể hủy'
-        //     ], 403);
-        // }
 
         $event->delete();
 
@@ -391,10 +379,6 @@ class EventController extends Controller
         $ticketCode = $request->input('ticket_code');
         $event = $this->eventRepository->find($eventId);
 
-        // if (!$event) {
-        //     return response()->json(['message' => 'Sự kiện không tồn tại'], 404);
-        // }
-
         $user = EventUser::where('ticket_code', $ticketCode)->first();
         $user->checked_in = 1;
         $user->save();
@@ -405,10 +389,6 @@ class EventController extends Controller
     {
         $ticketCode = $request->input('ticket_code');
         $event = $this->eventRepository->find($eventId);
-
-        // if (!$event) {
-        //     return response()->json(['message' => 'Sự kiện không tồn tại'], 404);
-        // }
 
         $user = EventUser::where('ticket_code', $ticketCode)->first();
         $user->checked_in = 0;

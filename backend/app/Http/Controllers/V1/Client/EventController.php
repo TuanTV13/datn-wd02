@@ -111,7 +111,7 @@ class EventController extends Controller
             $saleStart = Carbon::parse($ticket['sale_start']);
             $saleEnd = Carbon::parse($ticket['sale_end']);
 
-            if ($now->between($saleStart, $saleEnd)) {
+            if ($now->between($saleStart, $saleEnd) && $ticket->quantity > 0) {
                 $availableTickets[] = $ticket;
             }
         }

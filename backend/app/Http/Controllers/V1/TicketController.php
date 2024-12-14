@@ -119,9 +119,11 @@ class TicketController extends Controller
 
     public function create(StoreTicketRequest $request)
     {
+
         DB::beginTransaction();
         $data = $request->validated();
         $data['sold_quantity'] = $data['quantity'];
+        $data['status'] = 'confirmed';
 
         $ticketType = $request->ticket_type;
         $zoneName = $request->name;

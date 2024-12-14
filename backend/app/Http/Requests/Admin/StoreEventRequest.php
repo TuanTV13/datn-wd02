@@ -51,7 +51,6 @@ class StoreEventRequest extends FormRequest
             ],
 
             'speakers' => 'nullable',
-
         ];
     }
 
