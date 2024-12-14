@@ -15,6 +15,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -151,13 +152,6 @@ class EventController extends Controller
                 $data['description'] = $this->processImageInDescription($data['description']);
             }
 
-            if ($request->has('speakers')) {
-                $data['speakers'] = $this->handleSpeakers($request);
-            }
-
-            // $speakers = $request->input('spes')
-            // $data['speakers'] = $this->handleSpeakers($speakers);
-
             // Kiểm tra và xử lý display_header
             if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'] ?? 0)) {
                 return $validateEventHeader;
@@ -246,21 +240,6 @@ class EventController extends Controller
             Log::error("Error uploading image from URL: " . $e->getMessage());
             return false;
         }
-    }
-
-    private function handleSpeakers($request)
-    {
-        if ($request->has('speakers')) {
-            $speakers = $request->input('speakers');
-
-            if (!is_array($speakers)) {
-                $speakers = [$speakers];
-            }
-
-            return json_encode($speakers);
-        }
-
-       return null;
     }
 
     private function validateEventDisplayHeader($data)

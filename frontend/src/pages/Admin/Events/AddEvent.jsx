@@ -32,28 +32,77 @@ const AddEvent = () => {
     event_type: "",
     thumbnail: null,
     thumbnailUrl: '',
-    speakers: [{ name: '', email: '', phone: '', image_url: '' }],
+    speakers: [{ name: '', email: '', phone: '', image_url: '', speaker_image: null }],
   });
+  
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        // Tạo đối tượng FormData để gửi ảnh lên server
+        const formData = new FormData();
+        formData.append('file', file);
+        console.log(file);
+  
+        // Gọi API để tải ảnh lên
+        const response = await fetch('http://127.0.0.1:8000/api/v1/upload', {
+          method: 'POST',
+          body: formData,
+        });
+  
+        const result = await response.json();
+        console.log('API Response:', result);  // Kiểm tra xem có trả về image_url không
+  
+        if (result.url) {
+          // Cập nhật tất cả các diễn giả trong formData với URL ảnh trả về
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            speakers: prevFormData.speakers.map((speaker) => ({
+              ...speaker,
+              image_url: result.url,  // Lưu URL ảnh cho tất cả các diễn giả
+              speaker_image: file,    // Lưu thông tin file ảnh cho tất cả các diễn giả
+            })),
+          }));
+        } else {
+          console.error("Không thể tải ảnh lên.", result.url);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải ảnh lên:', error);
+      }
+    }
+  };
+  
+  
+
+  const handleDeleteImage = () => {
+    // Xóa ảnh đã chọn và URL ảnh
+    setSpeaker((prevSpeaker) => ({
+      ...prevSpeaker,
+      image_url: '',
+      speaker_image: null,
+    }));
+  };
 
   const handleAddSpeaker = () => {
     setFormData(prevData => {
       // Thêm một đối tượng diễn giả mới vào mảng speakers
-      const updatedSpeakers = [...prevData.speakers, { name: '', email: '', phone: '', image_url: '' }];
+      const updatedSpeakers = [...prevData.speakers, { name: '', email: '', phone: '', image_url: '', speaker_image: null }];
       return { ...prevData, speakers: updatedSpeakers };
     });
   };
-  
+
   // Hàm để thay đổi thông tin diễn giả
   const handleSpeakerChange = (index, key, value) => {
     // Cập nhật mảng diễn giả
     const updatedSpeakers = [...formData.speakers];
     updatedSpeakers[index] = { ...updatedSpeakers[index], [key]: value };
-    
+
     setFormData(prevState => ({
       ...prevState,
       speakers: updatedSpeakers,
     }));
   };
+
   const modules = {
     toolbar: [
       [{ 'header': '1' }, { 'header': '2' }],
@@ -156,18 +205,20 @@ const AddEvent = () => {
     e.preventDefault();
     const dataToSubmit = new FormData();
 
-    console.log("Speakers before submit:", formData.speakers);
-
+    // Kiểm tra xem formData.speakers có phải là mảng không, nếu không sẽ gán thành mảng trống
     const speakers = Array.isArray(formData.speakers) ? formData.speakers : [];
-    const speakersData = speakers.map(speaker => ({
-      name: speaker.name,
-      email: speaker.email,
-      phone: speaker.phone,
-      image_url: speaker.image_url,
-    }));
 
-    dataToSubmit.append("speakers", JSON.stringify(speakersData));
+    // Chuyển mảng speakers thành chuỗi JSON
+    const speakersData = JSON.stringify(
+      speakers.map(speaker => ({
+        name: speaker.name,
+        email: speaker.email,
+        phone: speaker.phone,
+        image_url: speaker.image_url,
+      }))
+    );
 
+    // Duyệt qua formData và thêm các giá trị vào FormData
     Object.entries(formData).forEach(([key, value]) => {
       if (key === "province_name") {
         const province = provinces.find((p) => p.name === value);
@@ -183,6 +234,10 @@ const AddEvent = () => {
       }
     });
 
+    // Thêm speakersData dưới dạng JSON vào FormData
+    dataToSubmit.append("speakers", speakersData);
+
+    // Gửi yêu cầu API
     addEvent(dataToSubmit)
       .then((res) => {
         console.log("Response from API:", res);
@@ -196,16 +251,27 @@ const AddEvent = () => {
       })
       .catch((error) => {
         console.error("API Error:", error.response ? error.response : error);
-        if (error.response && error.response.data && error.response.data.errors) {
-          const errors = error.response.data.errors;
-          Object.values(errors).forEach((message) => {
-            toast.error(message);
+        if (error.errors ) {
+          const errors = error.errors;
+        
+          // Lặp qua từng lỗi trong errors
+          Object.values(errors).forEach((messages) => {
+            // Nếu lỗi là một mảng, lặp qua từng phần tử của mảng
+            if (Array.isArray(messages)) {
+              messages.forEach((msg) => {
+                toast.error(msg); // Hiển thị từng thông báo lỗi
+              });
+            } else {
+              // Nếu lỗi không phải là mảng, hiển thị trực tiếp
+              toast.error(messages);
+            }
           });
         } else {
           toast.error("Có lỗi xảy ra khi thêm sự kiện.");
         }
       });
   };
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-4xl font-bold mb-3 text-left">Thêm sự kiện mới</h2>
@@ -220,7 +286,6 @@ const AddEvent = () => {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
               className="form-control"
               placeholder="Vui lòng nhập tên sự kiện"
 
@@ -236,7 +301,6 @@ const AddEvent = () => {
             <select
               value={formData.category_id}
               onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-              required
               className="form-control"
             >
               <option value="">Chọn danh mục</option>
@@ -262,7 +326,6 @@ const AddEvent = () => {
                   link_online: value === "online" ? formData.link_online : "",
                 });
               }}
-              required
               className="form-control"
             >
               <option value="">Chọn loại sự kiện</option>
@@ -284,7 +347,6 @@ const AddEvent = () => {
               value={formData.link_online}
               onChange={(e) => setFormData({ ...formData, link_online: e.target.value })}
               className="form-control"
-              required
             />
           </div>
         )}
@@ -297,7 +359,6 @@ const AddEvent = () => {
             <select
               value={formData.province_name}
               onChange={(e) => handleProvinceChange(e.target.value)}
-              required
               className="form-control"
             >
               <option value="">Chọn tỉnh</option>
@@ -316,7 +377,6 @@ const AddEvent = () => {
             <select
               value={formData.district_name}
               onChange={(e) => handleDistrictChange(e.target.value)}
-              required
               className="form-control"
             >
               <option value="">Chọn huyện</option>
@@ -338,7 +398,6 @@ const AddEvent = () => {
             <select
               value={formData.ward_name}
               onChange={(e) => handleWardChange(e.target.value)}
-              required
               className="form-control"
             >
               <option value="">Chọn xã</option>
@@ -359,7 +418,6 @@ const AddEvent = () => {
               type="text"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              required
               className="form-control"
             />
           </div>
@@ -375,7 +433,6 @@ const AddEvent = () => {
               type="datetime-local"
               value={formData.start_time}
               onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-              required
               className="form-control"
             />
           </div>
@@ -387,7 +444,6 @@ const AddEvent = () => {
               type="datetime-local"
               value={formData.end_time}
               onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-              required
               className="form-control"
             />
           </div>
@@ -498,27 +554,11 @@ const AddEvent = () => {
                     Ảnh đại diện diễn giả: <span className="text-red-500">*</span>
                   </label>                  <input
                     type="file"
+                    onChange={handleImageChange}
                     className="form-control"
                     accept="image/*"
                   />
-                  {speaker.speaker_image && (
-                    <div className="mt-4 flex flex-col items-center">
-                      <img
-                        src={speaker.image_url}
-                        alt="Speaker Preview"
-                        className="w-48 h-48 object-cover rounded-lg mb-2"
-                      />
-                      <p className="text-sm text-gray-500">{speaker.image_url}</p>
-
-                      {/* Nút xóa ảnh */}
-                      <button
-                        type="button"
-                        className="mt-2 text-sm text-red-500 hover:text-red-700"
-                      >
-                        Xóa ảnh
-                      </button>
-                    </div>
-                  )}
+                  
                 </div>
                 <div className="form-group col-span-1">
                   {/* Dấu trừ nhỏ (xóa diễn giả) */}
@@ -563,7 +603,17 @@ const AddEvent = () => {
       <ToastContainer />
 
       <Modal
-        title="Thêm vé hoặc voucher"
+        title={
+          <div className="flex justify-between items-center">
+          <span>Thêm vé hoặc mã giảm giá</span>
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="text-xl font-semibold text-gray-500 hover:text-gray-700"
+          >
+
+          </button>
+        </div>
+        }
         width={1000}
         visible={isModalOpen}
         footer={[
