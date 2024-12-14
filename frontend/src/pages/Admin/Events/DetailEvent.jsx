@@ -76,7 +76,7 @@ const DetailEvents = () => {
     return () => clearInterval(interval);
   }, []);
 
-  
+
 
   const handleStatusChange = async (currentStatus) => {
     const token = localStorage.getItem("access_token");
@@ -84,7 +84,7 @@ const DetailEvents = () => {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     };
-  
+
     // Xác định trạng thái tiếp theo
     const nextStatusMap = {
       pending: "confirmed",
@@ -93,7 +93,7 @@ const DetailEvents = () => {
       ongoing: "completed",
     };
     const nextStatus = nextStatusMap[currentStatus];
-  
+
     try {
       // Gửi API để cập nhật trạng thái
       const response = await axios.put(
@@ -101,7 +101,7 @@ const DetailEvents = () => {
         { status: nextStatus },
         { headers }
       );
-  
+
       // Cập nhật trạng thái mới vào UI
       setEventDetails((prevDetails) => ({
         ...prevDetails,
@@ -110,7 +110,7 @@ const DetailEvents = () => {
           status: nextStatus,
         },
       }));
-  
+
       // Hiển thị thông báo thành công
       setReload(!reload);
       toast.success("Cập nhật trạng thái thành công!", {
@@ -134,12 +134,12 @@ const DetailEvents = () => {
       console.error(err);
     }
   };
-    // Tính toán thời gian để hiển thị nút phù hợp
-    const getTimeDifference = (startTime) => {
-      const eventStartTime = new Date(startTime);
-      return (eventStartTime - currentTime) / 1000 / 60 / 60; // Chuyển đổi thành giờ
-    };
-   
+  // Tính toán thời gian để hiển thị nút phù hợp
+  const getTimeDifference = (startTime) => {
+    const eventStartTime = new Date(startTime);
+    return (eventStartTime - currentTime) / 1000 / 60 / 60; // Chuyển đổi thành giờ
+  };
+
   const getNextStatusLabel = (status) => {
     if (status === "pending") {
       return "Thay đổi thành Đang chuẩn bị";
@@ -152,46 +152,46 @@ const DetailEvents = () => {
     }
     return "";
   };
-  
+
   const handleCheckIn = async (id, ticketCode) => {
-   
-      try {
-        // Lấy token từ localStorage
-        const token = localStorage.getItem("access_token");
 
-        // Tạo headers với token
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json", // Nếu bạn gửi JSON
-        };
+    try {
+      // Lấy token từ localStorage
+      const token = localStorage.getItem("access_token");
 
-        const response = await fetch(
-          `http://127.0.0.1:8000/api/v1/events/${id}/checkin`,
-          {
-            method: "PUT",
-            headers: headers,
-            body: JSON.stringify({ ticket_code: ticketCode }),
-          }
-        );
+      // Tạo headers với token
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json", // Nếu bạn gửi JSON
+      };
 
-        if (!response.ok) {
-          const error = await response.json();
-          // Xử lý lỗi tại đây
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/v1/events/${id}/checkin`,
+        {
+          method: "PUT",
+          headers: headers,
+          body: JSON.stringify({ ticket_code: ticketCode }),
         }
+      );
 
-        const data = await response.json();
-        
-        toast.success("Thay đổi trạng thái check-in thành công!")
-        setReload(!reload);
-      } catch (error) {
-        toast.error("Thay đổi trạng thái check-in thất bại!")
-        if (error.status === 401) {
-        }
-        localStorage.clear();
-        window.location = "/auth";
-        console.error("Error:", error);
+      if (!response.ok) {
+        const error = await response.json();
+        // Xử lý lỗi tại đây
       }
-   
+
+      const data = await response.json();
+
+      toast.success("Thay đổi trạng thái check-in thành công!")
+      setReload(!reload);
+    } catch (error) {
+      toast.error("Thay đổi trạng thái check-in thất bại!")
+      if (error.status === 401) {
+      }
+      localStorage.clear();
+      window.location = "/auth";
+      console.error("Error:", error);
+    }
+
   };
 
   const handleCancelCheckIn = async (id, ticketCode) => {
@@ -280,73 +280,96 @@ const DetailEvents = () => {
       </h1>
 
       <p className="text-lg font-medium text-gray-700 mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md border-l-4">
-      <span className="flex items-center text-gray-800">
-        <span className="mr-2 text-xl">📌</span>
-        Trạng thái:{" "}
-        <span className="font-bold text-indigo-600">
-          {data.event.status === "pending" && " Đang chờ"}
-          {data.event.status === "confirmed" && " Đang chuẩn bị"}
-          {data.event.status === "checkin" && " Đang check-in"}
-          {data.event.status === "ongoing" && " Đang diễn ra"}
-          {data.event.status === "completed" && " Đã kết thúc"}
-        </span>
-      </span>
+  <span className="flex items-center text-gray-800">
+    <span className="mr-2 text-xl">📌</span>
+    Trạng thái:{" "}
+    <span className="font-bold text-indigo-600">
+      {data.event.status === "pending" && " Đang chờ"}
+      {data.event.status === "confirmed" && " Đang chuẩn bị"}
+      {data.event.status === "checkin" && " Đang check-in"}
+      {data.event.status === "ongoing" && " Đang diễn ra"}
+      {data.event.status === "completed" && " Đã kết thúc"}
+    </span>
+  </span>
 
-      {/* Hiển thị nút nếu trạng thái chưa hoàn tất */}
-      {data.event.status !== "completed" && (
-        <>
-          {/* Không hiển thị gì nếu trước 2 tiếng sự kiện bắt đầu */}
-          {timeDifference > 2 && (
-            <Button
-              type="primary"
-              className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-              onClick={() => handleStatusChange(data.event.status)}
-            >
-              {getNextStatusLabel(data.event.status)}
-            </Button>
-          )}
-
-          {/* Hiển thị nút chuyển sang check-in hoặc diễn ra trong vòng 2 giờ trước khi sự kiện bắt đầu */}
-          {timeDifference <= 2 && timeDifference > 0 && (
-            <Button
-              type="primary"
-              className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-              onClick={() => handleStatusChange(data.event.status)}
-            >
-               {getNextStatusLabel(data.event.status)}
-            </Button>
-          )}
-
-          {/* Hiển thị nút chuyển sang "Hoàn thành" khi sự kiện đang diễn ra */}
-          {timeDifference <= 0 && timeDifference > -2 && data.event.status === "ongoing" && (
-            <Button
-              type="primary"
-              className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-              onClick={() => handleStatusChange(data.event.status)}
-            >
-              Hoàn thành
-            </Button>
-          )}
-        </>
+  {/* Hiển thị nút nếu trạng thái chưa hoàn tất */}
+  {data.event.status !== "completed" && (
+    <>
+      {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
+      {data.event.status == "pending" && timeDifference < 10 && (
+        <Button
+          type="primary"
+          className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+          onClick={() => {
+            setSelectedStatus(getNextStatusLabel(data.event.status));
+            setShowConfirmPopup(true);
+          }}
+        >
+          {getNextStatusLabel(data.event.status)}
+        </Button>
       )}
-    </p>
+      {data.event.status == "confirmed" && timeDifference < 4 && (
+        <Button
+          type="primary"
+          className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+          onClick={() => {
+            setSelectedStatus(getNextStatusLabel(data.event.status));
+            setShowConfirmPopup(true);
+          }}
+        >
+          {getNextStatusLabel(data.event.status)}
+        </Button>
+      )}
+
+      {/* Hiển thị nút chuyển sang check-in trong vòng 2 giờ trước khi sự kiện bắt đầu */}
+      {timeDifference <= 2 && timeDifference > 0 && data.event.status == "checkin" && (
+        <Button
+          type="primary"
+          className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+          onClick={() => {
+            setSelectedStatus("checkin");
+            setShowConfirmPopup(true);
+          }}
+        >
+          {getNextStatusLabel(data.event.status)}
+        </Button>
+      )}
+
+      {/* Hiển thị nút chuyển sang "Hoàn thành" khi sự kiện đang diễn ra */}
+      {data.event.status === "ongoing" && (
+        <Button
+          type="primary"
+          className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+          onClick={() => {
+            setSelectedStatus("completed");
+            setShowConfirmPopup(true);
+          }}
+        >
+          {getNextStatusLabel(data.event.status)}
+        </Button>
+      )}
+    </>
+  )}
+</p>
+
+
 
       {/* Group the buttons in one row, with different colors */}
       <div className="flex space-x-4 justify-center mb-8">
         <button
-        onClick={() => setIsModalOpen(true)}
-        className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300">
+          onClick={() => setIsModalOpen(true)}
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300">
           Quản lý vé và voucher
         </button>
-      
+
         <button
           onClick={() => { }}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
         >
           Thêm địa chỉ IP check-in
         </button>
-        
-       
+
+
         <button
           onClick={() => setShowUpdateEvent(!showUpdateEvent)}
           className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
@@ -356,7 +379,7 @@ const DetailEvents = () => {
       </div>
       {showUpdateEvent && <UpdateEvent />}
 
-     {showConfirmPopup && (
+      {showConfirmPopup && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
     <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
       {/* Nút đóng */}
@@ -397,6 +420,7 @@ const DetailEvents = () => {
     </div>
   </div>
 )}
+
 
 
       <hr />
@@ -459,7 +483,7 @@ const DetailEvents = () => {
             Link trực tuyến:
           </p>
           <p className="text-lg text-gray-700 font-medium">
-          <a href={data.event.link_online || "#"}>{data.event.link_online || "Không có"}</a>
+            <a href={data.event.link_online || "#"}>{data.event.link_online || "Không có"}</a>
 
           </p>
         </div>
@@ -490,7 +514,7 @@ const DetailEvents = () => {
         </div>
       </div>
 
-      
+
 
       <br />
       <br />
@@ -560,8 +584,8 @@ const DetailEvents = () => {
         </div>
       </div>
 
-      
-    
+
+
 
       {/* Popup hiển thị Người dùng */}
       {showUsers && (
@@ -594,9 +618,8 @@ const DetailEvents = () => {
                         <td className="border border-gray-300 px-4 py-2">{user.ticket_code}</td>
                         <td className="border border-gray-300 px-4 py-2 text-center">{user.name}</td>
                         <td
-                          className={`border border-gray-300 px-4 py-2 ${
-                            user.pivot.checked_in === 1 ? "text-green-500" : "text-red-500"
-                          }`}
+                          className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1 ? "text-green-500" : "text-red-500"
+                            }`}
                         >
                           {user.pivot.checked_in === 1 ? "Đã check-in" : "Chưa check-in"}
                         </td>
@@ -610,11 +633,10 @@ const DetailEvents = () => {
                                 action: user.pivot.checked_in === 1 ? "cancel" : "checkin",
                               })
                             }
-                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-                              user.pivot.checked_in === 1
-                                ? "bg-red-500 text-white hover:bg-red-600"
-                                : "bg-green-500 text-white hover:bg-green-600"
-                            }`}
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${user.pivot.checked_in === 1
+                              ? "bg-red-500 text-white hover:bg-red-600"
+                              : "bg-green-500 text-white hover:bg-green-600"
+                              }`}
                           >
                             {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
                           </button>
@@ -680,14 +702,25 @@ const DetailEvents = () => {
           </div>
         </div>
       )}
-   
 
-    <Modal
-  title="Quản lý vé và voucher"
+
+<Modal
+  title={
+    <div className="flex justify-between items-center">
+      <span>Quản lý vé và voucher</span>
+      <button
+        onClick={() => setIsModalOpen(false)}
+        className="text-xl font-semibold text-gray-500 hover:text-gray-700"
+      >
+       
+      </button>
+    </div>
+  }
   width={1000}
   open={isModalOpen}
   footer={[
     <Button
+      key="close"
       type="primary"
       onClick={() => {
         setIsModalOpen(false);
@@ -697,6 +730,7 @@ const DetailEvents = () => {
       Đóng
     </Button>,
   ]}
+  onCancel={() => setIsModalOpen(false)} // Đóng khi click ngoài modal
 >
   <div className="flex justify-center gap-3">
     <Button
@@ -717,9 +751,8 @@ const DetailEvents = () => {
         setShowUsersStatistics(false); // Ẩn thống kê người mua vé
       }}
     >
-      Thêm voucher   
+      Thêm voucher
     </Button>
- 
     <Button
       onClick={() => {
         setShowStatistics(true); // Hiển thị thống kê vé
@@ -727,9 +760,7 @@ const DetailEvents = () => {
         setShowUsersStatistics(false); // Ẩn thống kê người mua vé
       }}
     >
-
-      
-      Thống kê vé 
+      Thống kê vé
     </Button>
     <Button
       onClick={() => {
@@ -738,7 +769,7 @@ const DetailEvents = () => {
         setShowStatistics(false); // Ẩn thống kê vé
       }}
     >
-      Thống kê người dùng 
+      Thống kê người dùng
     </Button>
   </div>
 
@@ -830,9 +861,8 @@ const DetailEvents = () => {
                   <td className="border border-gray-300 px-4 py-2">{user.ticket_code}</td>
                   <td className="border border-gray-300 px-4 py-2 text-center">{user.name}</td>
                   <td
-                    className={`border border-gray-300 px-4 py-2 ${
-                      user.pivot.checked_in === 1 ? "text-green-500" : "text-red-500"
-                    }`}
+                    className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1 ? "text-green-500" : "text-red-500"
+                      }`}
                   >
                     {user.pivot.checked_in === 1 ? "Đã check-in" : "Chưa check-in"}
                   </td>
@@ -846,11 +876,10 @@ const DetailEvents = () => {
                           action: user.pivot.checked_in === 1 ? "cancel" : "checkin",
                         })
                       }
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-                        user.pivot.checked_in === 1
-                          ? "bg-red-500 text-white hover:bg-red-600"
-                          : "bg-green-500 text-white hover:bg-green-600"
-                      }`}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${user.pivot.checked_in === 1
+                        ? "bg-red-500 text-white hover:bg-red-600"
+                        : "bg-green-500 text-white hover:bg-green-600"
+                        }`}
                     >
                       {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
                     </button>
@@ -872,40 +901,41 @@ const DetailEvents = () => {
       </div>
     </div>
   )}
-   {modalData.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <h2 className="text-xl font-semibold mb-4">Xác nhận</h2>
-            <p className="mb-4">
-              Bạn có chắc muốn{" "}
-              <strong>
-                {modalData.action === "checkin" ? "Check-in" : "Hủy check-in"}
-              </strong>{" "}
-              cho vé <strong>{modalData.ticketCode}</strong> không?
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setModalData({ show: false })}
-                className="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => {
-                  modalData.action === "checkin"
-                    ? handleCheckIn(modalData.id, modalData.ticketCode)
-                    : handleCancelCheckIn(modalData.id, modalData.ticketCode);
-                  setModalData({ show: false });
-                }}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Xác nhận
-              </button>
-            </div>
-          </div>
+  {modalData.show && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h2 className="text-xl font-semibold mb-4">Xác nhận</h2>
+        <p className="mb-4">
+          Bạn có chắc muốn{" "}
+          <strong>
+            {modalData.action === "checkin" ? "Check-in" : "Hủy check-in"}
+          </strong>{" "}
+          cho vé <strong>{modalData.ticketCode}</strong> không?
+        </p>
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={() => setModalData({ show: false })}
+            className="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
+          >
+            Hủy
+          </button>
+          <button
+            onClick={() => {
+              modalData.action === "checkin"
+                ? handleCheckIn(modalData.id, modalData.ticketCode)
+                : handleCancelCheckIn(modalData.id, modalData.ticketCode);
+              setModalData({ show: false });
+            }}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            Xác nhận
+          </button>
         </div>
-      )}
+      </div>
+    </div>
+  )}
 </Modal>
+
 
 
 

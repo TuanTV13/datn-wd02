@@ -14,6 +14,12 @@ const UpdateEvent = () => {
     location: "",
     users: [],
   });
+  const [dataaa, setDataaa] = useState({
+    start_time: "",
+    end_time: "",
+    location: "",
+   
+  });
   const [loading, setLoading] = useState(false); // Quản lý trạng thái đang tải
   const token = localStorage.getItem("access_token");
 
@@ -21,6 +27,31 @@ const UpdateEvent = () => {
     Authorization: `Bearer ${token}`,
     "Content-Type": "multipart/form-data",
   };
+  useEffect(() => {
+    // Lấy thông tin sự kiện từ API
+    axios
+      .get(`http://127.0.0.1:8000/api/v1/events/${id}/show`, { headers })
+      .then((response) => {
+        const event = response.data.data.event;
+        setDataaa({
+          start_time: event.start_time,
+          end_time: event.end_time,
+          location: event.location,
+          users: event.users,
+        });
+
+        console.log(response);
+      })
+      .catch((error) => {
+        if (error.status === 401) {
+          localStorage.clear();
+          window.location = "/auth";
+        }
+        console.error("Lỗi khi lấy sự kiện:", error);
+        toast.error("Lỗi khi lấy sự kiện. Vui lòng thử lại!");
+      });
+
+  }, [id]);
 
   useEffect(() => {
     // Lấy thông tin sự kiện từ API
@@ -34,7 +65,7 @@ const UpdateEvent = () => {
           location: event.location,
           users: event.users,
         });
-  
+
         console.log(response);
       })
       .catch((error) => {
@@ -47,7 +78,7 @@ const UpdateEvent = () => {
       });
 
   }, [id]);
-  
+
   // Hàm định dạng lại thời gian
   const formatDate = (date) => {
     const newDate = new Date(date);
@@ -89,8 +120,9 @@ const UpdateEvent = () => {
             "Content-Type": "application/json", // Đặt Content-Type cho JSON
           },
         }
+        
       );
-
+      toast.success("Cập nhật sự kiện thành công!");
       for (const user of formData.users) {
         const templateParams = {
           from_name: "event",
@@ -106,8 +138,8 @@ const UpdateEvent = () => {
           "HcRPgJ1iOPe4OPPG1"
         );
       }
-      toast.success("Cập nhật sự kiện thành công!");
-      navigate("/admin/event-list");
+     
+      
     } catch (error) {
       console.error("Lỗi khi cập nhật sự kiện:", error);
       toast.error(error.response.data.message);
@@ -121,22 +153,24 @@ const UpdateEvent = () => {
       <h2 className="text-3xl font-bold mb-4 text-center">Cập nhật sự kiện</h2>
       <hr />
       <br />
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 border-r">
-          <h3 className="text-xl font-semibold">Thông tin sự kiện</h3>
-          <p>
-            <strong>Địa điểm:</strong> {formData.location}
-          </p>
-          <p>
-            <strong>Thời gian bắt đầu:</strong>{" "}
-            {new Date(formData.start_time).toLocaleString()}
-          </p>
-          <p>
-            <strong>Thời gian kết thúc:</strong>{" "}
-            {new Date(formData.end_time).toLocaleString()}
-          </p>
+      <div className="grid grid-cols-10 gap-4">
+        <div className="col-span-4 p-4 border-r">
+          <h3 className="text-2xl font-semibold text-gray-800">Thông tin sự kiện</h3>
+          <div className="mt-4 space-y-2">
+            <p className="text-lg text-gray-700">
+              <strong className="text-gray-900">Địa điểm:</strong> {dataaa.location}
+            </p>
+            <p className="text-lg text-gray-700">
+              <strong className="text-gray-900">Thời gian bắt đầu:</strong>{" "}
+              {new Date(dataaa.start_time).toLocaleString()}
+            </p>
+            <p className="text-lg text-gray-700">
+              <strong className="text-gray-900">Thời gian kết thúc:</strong>{" "}
+              {new Date(dataaa.end_time).toLocaleString()}
+            </p>
+          </div>
         </div>
-        <div className="p-4">
+        <div className="col-span-6 p-4 ">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="form-group">
               <label className="form-label">Địa điểm:</label>
@@ -156,7 +190,7 @@ const UpdateEvent = () => {
                   type="datetime-local"
                   value={formData.start_time}
                   onChange={handleChange}
-                  required
+                 
                   className="form-control"
                 />
               </div>
@@ -167,7 +201,7 @@ const UpdateEvent = () => {
                   type="datetime-local"
                   value={formData.end_time}
                   onChange={handleChange}
-                  required
+                 
                   className="form-control"
                 />
               </div>
