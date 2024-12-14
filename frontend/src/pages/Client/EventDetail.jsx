@@ -460,8 +460,9 @@ const EventDetail = () => {
                   <input
                     type="number"
                     min="1"
-                    max={Math.min(10, selectedVIPTicket.quantity - selectedVIPTicket.sold_quantity)}
-                    value={vipTicketQuantity}
+                    max="10"
+                    // max={Math.min(10, selectedVIPTicket.quantity - selectedVIPTicket.sold_quantity)}
+                    value={vipTicketQuantity || 1}
                     onChange={(e) => setVIPTicketQuantity(e.target.value)}
                     className="border p-2 rounded w-full"
                   />
@@ -498,7 +499,8 @@ const EventDetail = () => {
                   <input
                     type="number"
                     min="1"
-                    max={Math.min(10, selectedRegularTicket.quantity - selectedRegularTicket.sold_quantity)}
+                    max="10"
+                    // max={Math.min(10, selectedRegularTicket.quantity - selectedRegularTicket.sold_quantity)}
                     value={regularTicketQuantity}
                     onChange={(e) => setRegularTicketQuantity(e.target.value)}
                     className="border p-2 rounded w-full"

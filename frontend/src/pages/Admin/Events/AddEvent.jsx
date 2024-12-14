@@ -29,14 +29,41 @@ const AddEvent = () => {
     event_type: "",
     thumbnail: null,
     thumbnailUrl: '',
+    speakers: [{ name: '', email: '', phone: '', image_url: '' }],
   });
+
+  const handleAddSpeaker = () => {
+    setFormData(prevData => {
+      const updatedSpeakers = Array.isArray(prevData.speakers) ?
+        [...prevData.speakers, { name: '', email: '', phone: '', image_url: '' }] :
+        [{ name: '', email: '', phone: '', image_url: '' }];
+
+      return { ...prevData, speakers: updatedSpeakers };
+    });
+  };
+
+  const handleSpeakerChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedSpeakers = [...formData.speakers];
+    updatedSpeakers[index] = { ...updatedSpeakers[index], [name]: value };
+
+    setFormData(prevState => ({
+      ...prevState,
+      speakers: updatedSpeakers,
+    }));
+  };
+
+  const handleRemoveSpeaker = (index) => {
+    const updatedSpeakers = formData.speakers.filter((_, i) => i !== index);
+    setFormData({ ...formData, speakers: updatedSpeakers });
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setFormData({
       ...formData,
       thumbnail: file,
-      thumbnailUrl: URL.createObjectURL(file), // Tạo URL tạm thời để hiển thị ảnh
+      thumbnailUrl: URL.createObjectURL(file),
     });
   };
 
@@ -48,13 +75,11 @@ const AddEvent = () => {
     });
   };
 
-
   const [categories, setCategories] = useState([]);
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
 
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTicketForm, setIsTicketForm] = useState(true);
   const [eventId, setEventId] = useState(undefined);
@@ -116,6 +141,19 @@ const AddEvent = () => {
     e.preventDefault();
     const dataToSubmit = new FormData();
 
+    console.log("Speakers before submit:", formData.speakers);
+
+    const speakers = Array.isArray(formData.speakers) ? formData.speakers : [];
+
+    const speakersData = speakers.map(speaker => ({
+      name: speaker.name,
+      email: speaker.email,
+      phone: speaker.phone,
+      image_url: speaker.image_url,
+    }));
+
+    dataToSubmit.append("speakers", JSON.stringify(speakersData));
+
     Object.entries(formData).forEach(([key, value]) => {
       if (key === "province_name") {
         const province = provinces.find((p) => p.name === value);
@@ -133,27 +171,27 @@ const AddEvent = () => {
 
     addEvent(dataToSubmit)
       .then((res) => {
-        setEventId(res.id);
-        toast.success("Thêm sự kiện thành công!");
-        setIsModalOpen(true); // Mở modal sau khi lưu sự kiện thành công
+        console.log("Response from API:", res);
+        if (res && res.id) {
+          setEventId(res.id);
+          toast.success("Thêm sự kiện thành công!");
+          setIsModalOpen(true);
+        } else {
+          console.error("Không có id trong phản hồi từ API");
+        }
       })
       .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.errors
-        ) {
+        console.error("API Error:", error.response ? error.response : error);
+        if (error.response && error.response.data && error.response.data.errors) {
           const errors = error.response.data.errors;
           Object.values(errors).forEach((message) => {
             toast.error(message);
           });
         } else {
-          console.error("Lỗi khi thêm sự kiện:", error);
-          toast.error(error.message);
+          toast.error("Có lỗi xảy ra khi thêm sự kiện.");
         }
       });
   };
-
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-3xl font-bold mb-4 text-center">Thêm sự kiện mới</h2>
@@ -353,8 +391,6 @@ const AddEvent = () => {
           )}
         </div>
 
-
-
         {/* Mô tả sự kiện */}
         <div className="form-group">
           <label className="form-label text-xl font-semibold mb-2">Mô tả:</label>
@@ -371,6 +407,98 @@ const AddEvent = () => {
           </div>
         </div>
 
+        {/* Thêm Diễn giả */}
+        <div className="container mx-auto p-0">
+          <div className="border-1 border-gray-300 rounded-lg p-6">
+            <h3 className="text-2xl font-semibold col-span-4 mb-4">Thông tin diễn giả</h3>
+
+            {/* Lặp qua các diễn giả */}
+            {formData.speakers.map((speaker, index) => (
+              <div key={index} className="grid grid-cols-9 gap-4 mb-4 flex items-center justify-between">
+                <div className="form-group col-span-2">
+                  <label className="form-label text-l mb-2">Tên diễn giả:</label>
+                  <input
+                    type="text"
+                    value={speaker.name}
+                    onChange={(e) => handleSpeakerChange(index, 'name', e.target.value)}
+                    className="form-control"
+                    placeholder="Nhập tên diễn giả"
+                  />
+                </div>
+
+                <div className="form-group col-span-2">
+                  <label className="form-label text-l mb-2">Email diễn giả:</label>
+                  <input
+                    type="email"
+                    value={speaker.email}
+                    onChange={(e) => handleSpeakerChange(index, 'email', e.target.value)}
+                    className="form-control"
+                    placeholder="Nhập email diễn giả"
+                  />
+                </div>
+
+                <div className="form-group col-span-2">
+                  <label className="form-label text-l mb-2">Số điện thoại diễn giả:</label>
+                  <input
+                    type="tel"
+                    value={speaker.phone}
+                    onChange={(e) => handleSpeakerChange(index, 'phone', e.target.value)}
+                    className="form-control"
+                    placeholder="Nhập số điện thoại diễn giả"
+                  />
+                </div>
+
+                <div className="form-group col-span-2">
+                  <label className="form-label text-l mb-2">Ảnh diễn giả:</label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    accept="image/*"
+                  />
+                  {speaker.speaker_image && (
+                    <div className="mt-4 flex flex-col items-center">
+                      <img
+                        src={speaker.image_url}
+                        alt="Speaker Preview"
+                        className="w-48 h-48 object-cover rounded-lg mb-2"
+                      />
+                      <p className="text-sm text-gray-500">{speaker.image_url}</p>
+
+                      {/* Nút xóa ảnh */}
+                      <button
+                        type="button"
+                        className="mt-2 text-sm text-red-500 hover:text-red-700"
+                      >
+                        Xóa ảnh
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group col-span-1">
+                  {/* Dấu trừ nhỏ (xóa diễn giả) */}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSpeaker(index)}
+                    className="text-lg text-red-600 hover:text-red-800 pr-2"
+                  >
+                    −
+                  </button>
+
+                  {/* Dấu cộng nhỏ (thêm diễn giả) */}
+                  <button
+                    type="button"
+                    onClick={handleAddSpeaker}
+                    className="text-lg text-blue-600 hover:text-blue-800 mt-4 ml-auto"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+
+          </div>
+        </div>
         <div className="flex justify-between">
           <button
             type="submit"

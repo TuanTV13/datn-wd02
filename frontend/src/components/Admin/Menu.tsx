@@ -209,7 +209,7 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
         className="flex items-center gap-2 px-6 mb-10 cursor-pointer"
       >
         <MdLogout />
-        <p className={`w-full truncate ${collapsed && "hidden"}`}>Đăng xuất</p>
+        <p className={`w-full truncate ${collapsed}`}>Đăng xuất</p>
       </div>
     </div>
   );
