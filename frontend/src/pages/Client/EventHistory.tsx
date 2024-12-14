@@ -18,13 +18,11 @@ const EventHistory = ({ id }: { id: number }) => {
           },
         });
         setParticipationHistory(response.data.data || []);
-        // console.log(response.data.data)
       } catch (error) {
         if (error.status === 401) {
           localStorage.clear();
           window.location = "/auth";
         }
-        console.log(error);
       }
     };
     fetchParticipationHistory();

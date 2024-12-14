@@ -21,14 +21,33 @@ const AddEvent = () => {
     district_name: "",
     ward_name: "",
     name: "",
-    link_online: "abc",
+    link_online: "",
     description: "",
     start_time: "",
     end_time: "",
-    location: "abc",
+    location: "",
     event_type: "",
     thumbnail: null,
+    thumbnailUrl: '',
   });
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData({
+      ...formData,
+      thumbnail: file,
+      thumbnailUrl: URL.createObjectURL(file), // Tạo URL tạm thời để hiển thị ảnh
+    });
+  };
+
+  const handleRemoveImage = () => {
+    setFormData({
+      ...formData,
+      thumbnail: null,
+      thumbnailUrl: '',
+    });
+  };
+
 
   const [categories, setCategories] = useState([]);
   const [provinces, setProvinces] = useState([]);
@@ -140,22 +159,79 @@ const AddEvent = () => {
       <h2 className="text-3xl font-bold mb-4 text-center">Thêm sự kiện mới</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Danh mục và Tỉnh */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div className="form-group">
-            <label className="form-label">Tên sự kiện:</label>
+            <label className="form-label text-xl font-semibold mb-2">Tên sự kiện:</label>
             <input
               type="text"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
               className="form-control"
+              placeholder="Vui lòng nhập tên sự kiện"
+
             />
+          </div>
+        </div>
+        {/* Ảnh và Loại sự kiện */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="form-group">
+            <label className="form-label text-xl font-semibold mb-2">Danh mục:</label>
+            <select
+              value={formData.category_id}
+              onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+              required
+              className="form-control"
+            >
+              <option value="">Chọn danh mục</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Tỉnh:</label>
+            <label className="form-label text-xl font-semibold mb-2">Loại sự kiện:</label>
+            <select
+              value={formData.event_type}
+              onChange={(e) => {
+                const value = e.target.value;
+                setFormData({
+                  ...formData,
+                  event_type: value,
+                  link_online: value === "online" ? formData.link_online : "",
+                });
+              }}
+              required
+              className="form-control"
+            >
+              <option value="">Chọn loại sự kiện</option>
+              <option value="online">Trực tuyến</option>
+              <option value="offline">Trực tiếp</option>
+            </select>
+          </div>
+        </div>
+        {/* Link sự kiện cho loại trực tuyến */}
+        {formData.event_type === "online" && (
+          <div className="form-group">
+            <label className="form-label text-xl font-semibold mb-2">Link sự kiện:</label>
+            <input
+              placeholder="Nhập url online sự kiện"
+              type="url"
+              name="link_online"
+              value={formData.link_online}
+              onChange={(e) => setFormData({ ...formData, link_online: e.target.value })}
+              className="form-control"
+              required
+            />
+          </div>
+        )}
+        {/* Huyện và Xã + Địa điểm */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="form-group">
+            <label className="form-label text-xl font-semibold mb-2">Tỉnh:</label>
             <select
               value={formData.province_name}
               onChange={(e) => handleProvinceChange(e.target.value)}
@@ -170,30 +246,9 @@ const AddEvent = () => {
               ))}
             </select>
           </div>
-        </div>
 
-        {/* Huyện và Xã */}
-        <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
-            <label className="form-label">Danh mục:</label>
-            <select
-              value={formData.category_id}
-              onChange={(e) =>
-                setFormData({ ...formData, category_id: e.target.value })
-              }
-              required
-              className="form-control"
-            >
-              <option value="">Chọn danh mục</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Huyện:</label>
+            <label className="form-label text-xl font-semibold mb-2">Huyện:</label>
             <select
               value={formData.district_name}
               onChange={(e) => handleDistrictChange(e.target.value)}
@@ -210,23 +265,10 @@ const AddEvent = () => {
           </div>
         </div>
 
-        {/* Tên sự kiện và Mô tả */}
+        {/* Xã và Địa điểm */}
         <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
-            <label className="form-label">Thời gian bắt đầu:</label>
-            <input
-              type="datetime-local"
-              value={formData.start_time}
-              onChange={(e) =>
-                setFormData({ ...formData, start_time: e.target.value })
-              }
-              required
-              className="form-control"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Xã:</label>
+            <label className="form-label text-xl font-semibold mb-2">Xã:</label>
             <select
               value={formData.ward_name}
               onChange={(e) => handleWardChange(e.target.value)}
@@ -241,88 +283,94 @@ const AddEvent = () => {
               ))}
             </select>
           </div>
+
+          <div className="form-group">
+            <label className="form-label text-xl font-semibold mb-2">Địa điểm:</label>
+            <input
+              placeholder="Nhập địa điểm cụ thể"
+              type="text"
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              required
+              className="form-control"
+            />
+          </div>
         </div>
 
-        {/* Thời gian bắt đầu và Thời gian kết thúc */}
+        {/* Các trường khác */}
         <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
-            <label className="form-label">Thời gian kết thúc:</label>
+            <label className="form-label text-xl font-semibold mb-2">Thời gian bắt đầu:</label>
+            <input
+              type="datetime-local"
+              value={formData.start_time}
+              onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+              required
+              className="form-control"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label text-xl font-semibold mb-2">Thời gian kết thúc:</label>
             <input
               type="datetime-local"
               value={formData.end_time}
-              onChange={(e) =>
-                setFormData({ ...formData, end_time: e.target.value })
-              }
-              required
-              className="form-control"
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">
-              {formData.event_type === "online" ? "Link" : "Địa điểm:"}
-            </label>
-            <input
-              type="text"
-              value={
-                formData.event_type === "online"
-                  ? formData.link_online
-                  : formData.location
-              }
-              onChange={(e) =>
-                formData.event_type === "online"
-                  ? setFormData({ ...formData, link_online: e.target.value })
-                  : setFormData({ ...formData, location: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
               required
               className="form-control"
             />
           </div>
         </div>
-
-        {/* Địa điểm và Loại sự kiện */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="form-group">
-            <label className="form-label">Ảnh sự kiện:</label>
-            <input
-              type="file"
-              onChange={(e) =>
-                setFormData({ ...formData, thumbnail: e.target.files[0] })
-              }
-              required
-              className="form-control"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Loại sự kiện:</label>
-            <select
-              value={formData.event_type}
-              onChange={(e) =>
-                setFormData({ ...formData, event_type: e.target.value })
-              }
-              required
-              className="form-control"
-            >
-              <option value="">Chọn loại sự kiện</option>
-              <option value="online">Trực tuyến</option>
-              <option value="offline">Trực tiếp</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Ảnh sự kiện */}
 
         <div className="form-group">
-          <label className="form-label">Mô tả:</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            required
+          <label className="form-label text-xl font-semibold mb-2">Ảnh sự kiện:</label>
+          <input
+            type="file"
+            onChange={handleFileChange}
             className="form-control"
+            accept="image/*"
           />
+
+          {/* Hiển thị ảnh và đường dẫn nếu ảnh được chọn */}
+          {formData.thumbnail && (
+            <div className="mt-4 flex flex-col items-center">
+              <img
+                src={formData.thumbnailUrl}
+                alt="Thumbnail Preview"
+                className="w-48 h-48 object-cover rounded-lg mb-2"
+              />
+              <p className="text-sm text-gray-500">{formData.thumbnail.name}</p>
+              <p className="text-sm text-gray-500">{formData.thumbnailUrl}</p>
+
+              {/* Nút xóa */}
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="mt-2 text-sm text-red-500 hover:text-red-700"
+              >
+                Xóa ảnh
+              </button>
+            </div>
+          )}
         </div>
+
+
+
+        {/* Mô tả sự kiện */}
+        <div className="form-group">
+          <label className="form-label text-xl font-semibold mb-2">Mô tả:</label>
+          <div className="relative">
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              required
+              rows="5" // Số dòng hiển thị ban đầu của textarea
+              className="form-control p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg resize-none"
+              placeholder="Nhập mô tả chi tiết về sự kiện..."
+            />
+            <div className="absolute right-2 top-2 text-gray-500 text-xs">{formData.description.length}/1000</div>
+          </div>
+        </div>
+
         <div className="flex justify-between">
           <button
             type="submit"
@@ -345,10 +393,6 @@ const AddEvent = () => {
         title="Thêm vé hoặc voucher"
         width={1000}
         visible={isModalOpen}
-        // onCancel={() => {
-        //   setIsModalOpen(false);
-        //   navigate("/admin/detail-event/" + eventId);
-        // }}
         footer={[
           <Button
             type="primary"
@@ -362,7 +406,6 @@ const AddEvent = () => {
         ]}
       >
         <div className="flex justify-center gap-3">
-          {" "}
           <Button
             key="ticket"
             onClick={() => {
@@ -387,6 +430,7 @@ const AddEvent = () => {
         )}
       </Modal>
     </div>
+
   );
 };
 

@@ -26,7 +26,6 @@ const LoginForm = ({ toggleForm, showForgotPasswordForm }) => {
 
     try {
       const response = await login(data.email, data.password);
-      console.log(response);
       if (response.access_token) {
         setErrorMessage("Đăng nhập thành công!");
         setShowErrorModal(true);

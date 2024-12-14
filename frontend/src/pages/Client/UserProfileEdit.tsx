@@ -49,7 +49,6 @@ const UserProfileEdit = () => {
       .then((response) => {
         navigate("/profile");
         notification.success({ message: "Cập nhật profile thành công" });
-        console.log("User updated successfully:", response.data);
       })
       .catch((error) => {
         if (error?.response?.status === 401) navigate("/auth");

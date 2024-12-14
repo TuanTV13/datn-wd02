@@ -55,8 +55,8 @@ class EventController extends Controller
         $ticketCode = strtoupper($request->input('ticket_code'));
 
         $transaction = $this->transactionRepository->findByTicketCode($ticketCode, $eventId);
-        $userId = $transaction->user_id;
-        $ticketId = $transaction->ticket_id;
+        // $userId = $transaction->user_id;
+        // $ticketId = $transaction->ticket_id;
 
         if (!$transaction) {
             return response()->json([

@@ -24,7 +24,6 @@ const ListTicketDelete = () => {
   }, []);
 
   const handleRestore = (id: number) => {
-    console.log(id)
     onRestore(id); // Hàm khôi phục vé
   };
   return (

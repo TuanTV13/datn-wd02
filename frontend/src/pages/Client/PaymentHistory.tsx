@@ -22,13 +22,11 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
           }
         );
         setTransactions(response.data.data || []);
-        console.log(response);
       } catch (err) {
         if (err.status === 401) {
           localStorage.clear();
           window.location = "/auth";
         }
-        console.log("hh", err);
       }
     };
 

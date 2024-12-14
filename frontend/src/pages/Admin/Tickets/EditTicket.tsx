@@ -56,7 +56,6 @@ const EditTicket = () => {
   // Xử lý cập nhật ticket
   const onSubmit = (data: Tickets) => {
     const seatId = ticket?.price[0]?.seat_zone_id;
-    console.log(data);
     // Nếu seatId tồn tại, xử lý dữ liệu vé
     if (seatId) {
       const formattedPrice = data.price.map((item: any) => ({
@@ -77,7 +76,6 @@ const EditTicket = () => {
           .replace("T", " "),
         id,
       };
-      console.log("Dữ liệu gửi lên:", formattedData);
       onEdit(formattedData, seatId);
     }
   };
