@@ -8,10 +8,10 @@ const NotificationContent = () => {
   return (
     <div className="py-2 overflow-y-auto max-h-80 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
       <ul>
-        <li>Thông báo1</li>
+        {/* <li>Thông báo1</li>
         <li>Thông báo2</li>
         <li>Thông báo3</li>
-        <li>Thông báo4</li>
+        <li>Thông báo4</li> */}
       </ul>
     </div>
   );

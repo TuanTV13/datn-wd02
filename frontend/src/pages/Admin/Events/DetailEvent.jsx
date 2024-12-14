@@ -260,7 +260,7 @@ const DetailEvents = () => {
           Thay đổi trạng thái
         </button>
         <button
-          onClick={() => {}}
+          onClick={() => { }}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
         >
           Thêm địa chỉ IP check-in
@@ -329,11 +329,10 @@ const DetailEvents = () => {
               </button>
               <button
                 onClick={() => setShowConfirmPopup(true)}
-                className={`px-5 py-2 text-sm text-white rounded-lg transition-all ${
-                  selectedStatus
-                    ? "bg-blue-500 hover:bg-blue-600"
-                    : "bg-blue-300 cursor-not-allowed"
-                }`}
+                className={`px-5 py-2 text-sm text-white rounded-lg transition-all ${selectedStatus
+                  ? "bg-blue-500 hover:bg-blue-600"
+                  : "bg-blue-300 cursor-not-allowed"
+                  }`}
                 disabled={!selectedStatus}
               >
                 Lưu
@@ -430,8 +429,8 @@ const DetailEvents = () => {
             {data.event.event_type === "offline"
               ? "Trực tiếp"
               : data.event.event_type === "online"
-              ? "Trực tuyến"
-              : "Không xác định"}
+                ? "Trực tuyến"
+                : "Không xác định"}
           </p>
         </div>
 
@@ -440,7 +439,8 @@ const DetailEvents = () => {
             Link trực tuyến:
           </p>
           <p className="text-lg text-gray-700 font-medium">
-            {data.event.link_online ? data.link_online : "Không có"}
+          <a href={data.event.link_online || "#"}>{data.event.link_online || "Không có"}</a>
+
           </p>
         </div>
 
@@ -457,7 +457,7 @@ const DetailEvents = () => {
             Số lượng vé đã bán:
           </p>
           <p className="text-lg text-gray-700 font-medium">
-            {data.event.tickets.length}
+            {data.totalTickets}
           </p>
         </div>
         <div className="p-4 bg-gradient-to-r from-red-50 via-red-100 to-red-200 border border-red-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
@@ -606,7 +606,13 @@ const DetailEvents = () => {
 
             <hr className="my-6" />
 
-            <h2 className="text-2xl font-semibold mb-4 text-center">Biểu đồ</h2>
+            <h2 className="text-3xl font-semibold mb-2 text-center">Biểu đồ tỉ lệ vé bán</h2>
+            <h4 className="text-xl mb-2 text-center">Tổng vé đã bán: {data.totalTickets}</h4>
+            <div className="flex justify-center space-x-4">
+              <h4 className="text-xl mb-4 text-center">Số lượng vé VIP đã bán: {data.vipTickets}</h4>
+              <div className="h-6 w-px bg-gray-300"></div> {/* Dấu ngăn giữa */}
+              <h4 className="text-xl mb-4 text-center">Số lượng vé thường đã bán: {data.normalTickets}</h4>
+            </div>
             <div className="flex justify-center mb-6">
               <div className="w-1/3 max-w-sm">
                 <Pie data={chartData} />
@@ -648,10 +654,10 @@ const DetailEvents = () => {
                       STT
                     </th>
                     <th className="border border-gray-300 px-4 py-2 text-left">
-                      ID người dùng
+                      Mã vé
                     </th>
                     <th className="border border-gray-300 px-4 py-2 text-left">
-                      Mã vé
+                      Khách hàng
                     </th>
                     <th className="border border-gray-300 px-4 py-2 text-left">
                       Trạng thái check-in
@@ -668,18 +674,17 @@ const DetailEvents = () => {
                         <td className="border border-gray-300 px-4 py-2 text-center">
                           {index + 1}
                         </td>
-                        <td className="border border-gray-300 px-4 py-2 text-center">
-                          {user.pivot.user_id}
-                        </td>
                         <td className="border border-gray-300 px-4 py-2">
                           {user.ticket_code}
                         </td>
+                        <td className="border border-gray-300 px-4 py-2 text-center">
+                          {user.name}
+                        </td>
                         <td
-                          className={`border border-gray-300 px-4 py-2 ${
-                            user.pivot.checked_in === 1
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
+                          className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1
+                            ? "text-green-500"
+                            : "text-red-500"
+                            }`}
                         >
                           {user.pivot.checked_in === 1
                             ? "Đã check-in"
@@ -689,7 +694,6 @@ const DetailEvents = () => {
                           <td className="border border-gray-300 px-4 py-2 text-center">
                             <button
                               onClick={() => {
-                                // Kiểm tra trạng thái của user để gọi hàm phù hợp
                                 if (user.pivot.checked_in === 1) {
                                   handleCancelCheckIn(
                                     user.id,
@@ -699,11 +703,10 @@ const DetailEvents = () => {
                                   handleCheckIn(user.id, user.ticket_code);
                                 }
                               }}
-                              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-                                user.pivot.checked_in === 1
-                                  ? "bg-red-500 text-white hover:bg-red-600"
-                                  : "bg-green-500 text-white hover:bg-green-600"
-                              }`}
+                              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${user.pivot.checked_in === 1
+                                ? "bg-red-500 text-white hover:bg-red-600"
+                                : "bg-green-500 text-white hover:bg-green-600"
+                                }`}
                             >
                               {user.pivot.checked_in === 1
                                 ? "Hủy check-in"
