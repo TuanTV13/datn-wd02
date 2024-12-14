@@ -280,7 +280,7 @@ const EventDetail = () => {
 
           <div className="mt-4 text-center">
             <p className="text-lg">
-              Địa điểm: {`${event.ward}, ${event.district}, ${event.province}`}
+              Địa điểm: {`${event.location}, ${event.ward}, ${event.district}, ${event.province}`}
             </p>
           </div>
           {statusInfo && (
@@ -354,74 +354,78 @@ const EventDetail = () => {
 
       {/* Hiển thị Popup nếu showPopup là true */}
       {showPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-[700px]">
-            <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
-            {event.tickets.map((ticket) => (
-  <div
-    key={ticket.id}
-    className={`border p-4 rounded-lg mb-4 cursor-pointer hover:shadow-2xl transition-transform transform ${
-      selectedTicket?.id === ticket.id
-        ? "bg-blue-200 border-blue-600 shadow-2xl"
-        : "hover:bg-gray-100 hover:border-gray-300"
-    }`}
-    onClick={() => handleBuyTicketClick(ticket)}
-  >
-    <h3 className="text-xl font-bold text-indigo-700 mb-3">Loại vé: {ticket.ticket_type}</h3>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg w-[700px]">
+      <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
+      {event.tickets.length > 0 ? (
+        event.tickets.map((ticket) => (
+          <div
+            key={ticket.id}
+            className={`border p-4 rounded-lg mb-4 cursor-pointer hover:shadow-2xl transition-transform transform ${
+              selectedTicket?.id === ticket.id
+                ? "bg-blue-200 border-blue-600 shadow-2xl"
+                : "hover:bg-gray-100 hover:border-gray-300"
+            }`}
+            onClick={() => handleBuyTicketClick(ticket)}
+          >
+            <h3 className="text-xl font-bold text-indigo-700 mb-3">Loại vé: {ticket.ticket_type}</h3>
 
-    {/* Dropdown chọn zone */}
-    <div className="mt-3">
-      <label className="block text-sm font-medium text-gray-700 mb-2">Chọn khu vực:</label>
-      <select
-  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-indigo-500 transition duration-300 ease-in-out"
-  onChange={(e) => handleZoneChange(ticket, parseInt(e.target.value))}
-  value={selectedZones[ticket.id]?.zone?.id || ""}
->
-  <option value="" disabled>Chọn Khu vực</option>
-  {ticket.price.map((priceItem) => (
-    <option key={priceItem.zone.id} value={priceItem.zone.id}>
-      {priceItem.zone.name}
-    </option>
-  ))}
-</select>
+            {/* Dropdown chọn zone */}
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Chọn khu vực:</label>
+              <select
+                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-indigo-500 transition duration-300 ease-in-out"
+                onChange={(e) => handleZoneChange(ticket, parseInt(e.target.value))}
+                value={selectedZones[ticket.id]?.zone?.id || ""}
+              >
+                <option value="" disabled>Chọn Khu vực</option>
+                {ticket.price.map((priceItem) => (
+                  <option key={priceItem.zone.id} value={priceItem.zone.id}>
+                    {priceItem.zone.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
+            {/* Hiển thị thông tin giá và số lượng nếu zone đã chọn */}
+            {selectedZones[ticket.id] && selectedZones[ticket.id].zone ? (
+              <div className="mt-4 p-4 border-t border-gray-300 bg-blue-50 rounded-md shadow-sm">
+                <p className="text-sm text-gray-800 font-medium">
+                  Giá: <span className="font-bold text-green-600">{selectedZones[ticket.id].price} VND</span>
+                </p>
+                <p className="text-sm text-gray-800 font-medium">
+                  Số lượng còn lại: <span className="font-bold text-red-600">{selectedZones[ticket.id].sold_quantity}</span>
+                </p>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-gray-500">Chọn zone để xem thông tin giá và số lượng</p>
+            )}
+          </div>
+        ))
+      ) : (
+        <p className="text-center text-gray-700 mt-4">Hiện tại không có vé nào để mua.</p>
+      )}
+
+      <div className="mt-4 flex justify-between">
+        <button
+          onClick={handleClosePopup}
+          className="bg-gray-500 text-white py-2 px-4 rounded"
+        >
+          Đóng
+        </button>
+        {event.tickets.length > 0 && (
+          <button
+            onClick={handleConfirmPurchase}
+            className="bg-blue-500 text-white py-2 px-4 rounded"
+          >
+            Xác nhận
+          </button>
+        )}
+      </div>
     </div>
-
-    {/* Hiển thị thông tin giá và số lượng nếu zone đã chọn */}
-    {selectedZones[ticket.id] && selectedZones[ticket.id].zone ? (
-  <div className="mt-4 p-4 border-t border-gray-300 bg-blue-50 rounded-md shadow-sm">
-    <p className="text-sm text-gray-800 font-medium">
-      Giá: <span className="font-bold text-green-600">{selectedZones[ticket.id].price} VND</span>
-    </p>
-    <p className="text-sm text-gray-800 font-medium">
-      Số lượng còn lại: <span className="font-bold text-red-600">{selectedZones[ticket.id].sold_quantity}</span>
-    </p>
   </div>
-) : (
-  <p className="mt-4 text-sm text-gray-500">Chọn zone để xem thông tin giá và số lượng</p>
 )}
 
-  </div>
-))}
-
-
-            <div className="mt-4 flex justify-between">
-              <button
-                onClick={handleClosePopup}
-                className="bg-gray-500 text-white py-2 px-4 rounded"
-              >
-                Đóng
-              </button>
-              <button
-                onClick={handleConfirmPurchase}
-                className="bg-blue-500 text-white py-2 px-4 rounded"
-              >
-                Xác nhận
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -16,8 +16,9 @@
       end_time: "",
       location: "",
       event_type: "",
+      
       thumbnail: null,
-      speakers: [], // Danh sách diễn giả
+      
     });
 
     const [categories, setCategories] = useState([]);
@@ -154,250 +155,178 @@
        <h2 className="text-3xl font-bold mb-4 text-center">Thêm sự kiện mới</h2>
         <hr />
         <br />
-       <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Danh mục và Tỉnh */}
-      <div className="grid grid-cols-2 gap-4">
-      <div className="form-group">
-          <label className="form-label">Tên sự kiện:</label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-            className="form-control"
-          />
-        </div>
-        
-    
-        <div className="form-group">
-          <label className="form-label">Tỉnh:</label>
-          <select
-            value={formData.province_name}
-            onChange={(e) => handleProvinceChange(e.target.value)}
-            required
-            className="form-control"
-          >
-            <option value="">Chọn tỉnh</option>
-            {provinces.map((province) => (
-              <option key={province.code} value={province.name}>
-                {province.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-    
-      {/* Huyện và Xã */}
-      <div className="grid grid-cols-2 gap-4">
-      <div className="form-group">
-          <label className="form-label">Danh mục:</label>
-          <select
-            value={formData.category_id}
-            onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-            required
-            className="form-control"
-          >
-            <option value="">Chọn danh mục</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label className="form-label">Huyện:</label>
-          <select
-            value={formData.district_name}
-            onChange={(e) => handleDistrictChange(e.target.value)}
-            required
-            className="form-control"
-          >
-            <option value="">Chọn huyện</option>
-            {districts.map((district) => (
-              <option key={district.code} value={district.name}>
-                {district.name}
-              </option>
-            ))}
-          </select>
-        </div>
-    
-      
-      </div>
-    
-      {/* Tên sự kiện và Mô tả */}
-      <div className="grid grid-cols-2 gap-4">
-      
-      <div className="form-group">
-          <label className="form-label">Thời gian bắt đầu:</label>
-          <input
-            type="datetime-local"
-            value={formData.start_time}
-            onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-            required
-            className="form-control"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label">Xã:</label>
-          <select
-            value={formData.ward_name}
-            onChange={(e) => handleWardChange(e.target.value)}
-            required
-            className="form-control"
-          >
-            <option value="">Chọn xã</option>
-            {wards.map((ward) => (
-              <option key={ward.code} value={ward.name}>
-                {ward.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-    
-      {/* Thời gian bắt đầu và Thời gian kết thúc */}
-      <div className="grid grid-cols-2 gap-4">
-    
-    
-        <div className="form-group">
-          <label className="form-label">Thời gian kết thúc:</label>
-          <input
-            type="datetime-local"
-            value={formData.end_time}
-            onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-            required
-            className="form-control"
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Địa điểm:</label>
-          <input
-            type="text"
-            value={formData.location}
-            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            required
-            className="form-control"
-          />
-        </div>
-      </div>
-    
-      {/* Địa điểm và Loại sự kiện */}
-      <div className="grid grid-cols-2 gap-4">
-        
-        <div className="form-group">
-        <label className="form-label">Ảnh sự kiện:</label>
-        <input
-          type="file"
-          onChange={(e) => setFormData({ ...formData, thumbnail: e.target.files[0] })}
-          required
-          className="form-control"
-        />
-      </div>
-    
-      <div className="form-group">
-    <label className="form-label">Loại sự kiện:</label>
-    <select
-      value={formData.event_type}
-      onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
-      required
-      className="form-control"
-    >
-      <option value="">Chọn loại sự kiện</option>
-      <option value="online">Trực tuyến</option>
-      <option value="offline">Trực tiếp</option>
-    </select>
+        <form onSubmit={handleSubmit} className="space-y-4 p-6  from-blue-50 to-blue-100 ">
+  {/* Danh mục và Tỉnh */}
+  <div className="grid grid-cols-2 gap-6">
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Tên sự kiện:</label>
+      <input
+        type="text"
+        value={formData.name}
+        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      />
+    </div>
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Tỉnh:</label>
+      <select
+        value={formData.province_name}
+        onChange={(e) => handleProvinceChange(e.target.value)}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      >
+        <option value="">Chọn tỉnh</option>
+        {provinces.map((province) => (
+          <option key={province.code} value={province.name}>
+            {province.name}
+          </option>
+        ))}
+      </select>
+    </div>
   </div>
-      </div>
-    
-      {/* Ảnh sự kiện */}
-      
-      <div className="form-group">
-          <label className="form-label">Mô tả:</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            required
-            className="form-control"
-          />
-        </div>
-    
-    
-      {/* <div className="form-group">
-        <h3>Diễn giả:</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Tên diễn giả"
-              value={newSpeaker.name}
-              onChange={(e) => setNewSpeaker({ ...newSpeaker, name: e.target.value })}
-              className="form-control"
-            />
-          </div>
-    
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Hồ sơ"
-              value={newSpeaker.profile}
-              onChange={(e) => setNewSpeaker({ ...newSpeaker, profile: e.target.value })}
-              className="form-control"
-            />
-          </div>
-        </div>
-    
-        <div className="grid grid-cols-2 gap-4">
-          <div className="form-group">
-            <input
-              type="email"
-              placeholder="Email"
-              value={newSpeaker.email}
-              onChange={(e) => setNewSpeaker({ ...newSpeaker, email: e.target.value })}
-              className="form-control"
-            />
-          </div>
-    
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Số điện thoại"
-              value={newSpeaker.phone}
-              onChange={(e) => setNewSpeaker({ ...newSpeaker, phone: e.target.value })}
-              className="form-control"
-            />
-          </div>
-        </div>
-    
-        <div className="form-group">
-          <input
-            type="text"
-            placeholder="URL hình ảnh"
-            value={newSpeaker.image_url}
-            onChange={(e) => setNewSpeaker({ ...newSpeaker, image_url: e.target.value })}
-            className="form-control"
-          />
-        </div>
-    
-        <button type="button" className="btn btn-primary" onClick={handleAddSpeaker}>
-          Thêm diễn giả
-        </button>
-      </div> */}
-    
-    <div className="flex justify-between">
-      <button type="submit"  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300" >
-       Lưu sự kiện
-      </button>
-      <button
-              type="button"
-              onClick={() => navigate("/admin/event-list")}
-              className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-300"
-            >
-              Quay lại danh sách
-            </button>
-      </div>
-    </form>
+
+  {/* Huyện và Xã */}
+  <div className="grid grid-cols-2 gap-6">
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Danh mục:</label>
+      <select
+        value={formData.category_id}
+        onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      >
+        <option value="">Chọn danh mục</option>
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
+          </option>
+        ))}
+      </select>
+    </div>
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Huyện:</label>
+      <select
+        value={formData.district_name}
+        onChange={(e) => handleDistrictChange(e.target.value)}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      >
+        <option value="">Chọn huyện</option>
+        {districts.map((district) => (
+          <option key={district.code} value={district.name}>
+            {district.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+  {/* Các trường khác */}
+  <div className="grid grid-cols-2 gap-6">
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Thời gian bắt đầu:</label>
+      <input
+        type="datetime-local"
+        value={formData.start_time}
+        onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      />
+    </div>
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Xã:</label>
+      <select
+        value={formData.ward_name}
+        onChange={(e) => handleWardChange(e.target.value)}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      >
+        <option value="">Chọn xã</option>
+        {wards.map((ward) => (
+          <option key={ward.code} value={ward.name}>
+            {ward.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+  <div className="grid grid-cols-2 gap-6">
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Thời gian kết thúc:</label>
+      <input
+        type="datetime-local"
+        value={formData.end_time}
+        onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      />
+    </div>
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Địa điểm:</label>
+      <input
+        type="text"
+        value={formData.location}
+        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      />
+    </div>
+  </div>
+
+  <div className="grid grid-cols-2 gap-6">
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Ảnh sự kiện:</label>
+      <input
+        type="file"
+        onChange={(e) => setFormData({ ...formData, thumbnail: e.target.files[0] })}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      />
+    </div>
+    <div className="form-group">
+      <label className="form-label text-gray-700 font-semibold">Loại sự kiện:</label>
+      <select
+        value={formData.event_type}
+        onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
+        required
+        className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+      >
+        <option value="">Chọn loại sự kiện</option>
+        <option value="online">Trực tuyến</option>
+        <option value="offline">Trực tiếp</option>
+      </select>
+    </div>
+  </div>
+
+  <div className="form-group">
+    <label className="form-label text-gray-700 font-semibold">Mô tả:</label>
+    <textarea
+      value={formData.description}
+      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+      required
+      className="form-control px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+    />
+  </div>
+
+  <div className="flex justify-between">
+    <button
+      type="submit"
+      className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+    >
+      Lưu sự kiện
+    </button>
+    <button
+      type="button"
+      onClick={() => navigate("/admin/event-list")}
+      className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-300"
+    >
+      Quay lại danh sách
+    </button>
+  </div>
+</form>
+
     <ToastContainer />
      </div>
     

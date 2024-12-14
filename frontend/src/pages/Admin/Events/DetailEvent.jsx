@@ -16,7 +16,8 @@ const DetailEvents = () => {
   const [showStatusPopup, setShowStatusPopup] = useState(false); // Popup trạng thái
   const [selectedStatus, setSelectedStatus] = useState(""); // Lưu trạng thái được chọn
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
-
+  const [showConfirmCheckinPopup, setShowConfirmCheckinPopup] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const { id } = useParams();
  
   useEffect(() => {
@@ -92,76 +93,92 @@ const DetailEvents = () => {
     }
   };
  
-const handleCheckIn = async (id, ticketCode) => {
- if (window.confirm('xac nhan')) {
-  try {
-    // Lấy token từ localStorage
-    const token = localStorage.getItem("access_token");
-
-    // Tạo headers với token
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json', // Nếu bạn gửi JSON
-    };
-
-    const response = await fetch(`http://127.0.0.1:8000/api/v1/events/${id}/checkin`, {
-      method: 'PUT',
-      headers: headers,
-      body: JSON.stringify({ ticket_code: ticketCode }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.log('Error:', error);
-      // Xử lý lỗi tại đây
-    }
-
-    const data = await response.json();
-    console.log('Check-in successful:', data);
-    // Xử lý kết quả thành công nếu cần
-    setUsers(prevUsers => 
-      prevUsers.map(user => 
-        user.id === id ? { ...user, pivot: { ...user.pivot, checked_in: 1 } } : user
-      )
-    );
-    
-  } catch (error) {
-    console.error('Error:', error);
-  }
- }
-};
-
-const handleCancelCheckIn = async (id, ticketCode) => {
-  try {
-    // Lấy token từ localStorage
-    const token = localStorage.getItem("access_token");
-
-    // Tạo headers với token
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-
-    const response = await fetch(`http://127.0.0.1:8000/api/v1/events/${id}/cancelcheckin`, {
-      method: 'PUT',
-      headers: headers,
-      body: JSON.stringify({ ticket_code: ticketCode }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to cancel check-in');
-    }
-
-    const data = await response.json();
-    console.log('Cancel check-in successful:', data);
-    // Xử lý kết quả thành công nếu cần
+  const handleCheckIn = async (id, ticketCode) => {
    
-    
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
+      try {
+        const token = localStorage.getItem("access_token");
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        };
+  
+        const response = await fetch(`http://127.0.0.1:8000/api/v1/events/${id}/checkin`, {
+          method: 'PUT',
+          headers: headers,
+          body: JSON.stringify({ ticket_code: ticketCode }),
+        });
+  
+        if (!response.ok) {
+          const error = await response.json();
+          console.log('Error:', error);
+          return;
+        }
+  
+        const data = await response.json();
+        console.log('Check-in successful:', data);
+        toast.success(data.message)
+        // Gọi lại hàm fetchEventDetails để tải lại thông tin người dùng
+       
+  
 
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error(error.message)
+      }
+    
+  };
+  
+  const handleCancelCheckIn = async (id, ticketCode) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+  
+      const response = await fetch(`http://127.0.0.1:8000/api/v1/events/${id}/cancelcheckin`, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify({ ticket_code: ticketCode }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to cancel check-in');
+      }
+  
+      const data = await response.json();
+      console.log('Cancel check-in successful:', data);
+      toast.success(data.message)
+      // Gọi lại hàm fetchEventDetails để tải lại thông tin người dùng
+      
+  
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(error.message)
+    }
+  };
+  const openConfirmPopup = (user) => {
+    setSelectedUser(user);
+    setShowConfirmCheckinPopup(true);
+  };
+  
+  // Hàm đóng popup xác nhận
+  const closeConfirmPopup = () => {
+    setShowConfirmCheckinPopup(false);
+    setSelectedUser(null);
+  };
+  
+  // Hàm xử lý xác nhận
+  const handleConfirm = async () => {
+    if (selectedUser) {
+      if (selectedUser.pivot.checked_in === 1) {
+        await handleCancelCheckIn(selectedUser.id, selectedUser.ticket_code);
+      } else {
+        await handleCheckIn(selectedUser.id, selectedUser.ticket_code);
+      }
+      closeConfirmPopup();
+    }
+  };
   
   if (loading) return <div className="text-center py-10 text-gray-700">Đang tải...</div>;
   if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
@@ -352,7 +369,7 @@ const handleCancelCheckIn = async (id, ticketCode) => {
 
   <div className="p-4 bg-gradient-to-r from-indigo-50 via-indigo-100 to-indigo-200 border border-indigo-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
     <p className="text-lg text-gray-800 font-semibold">Link trực tuyến:</p>
-    <p className="text-lg text-gray-700 font-medium">{data.event.link_online ? data.link_online : "Không có"}</p>
+    <p className="text-lg text-gray-700 font-medium">{data.event.link_online}</p>
   </div>
 
   <div className="p-4 bg-gradient-to-r from-red-50 via-red-100 to-red-200 border border-red-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
@@ -520,96 +537,111 @@ const handleCancelCheckIn = async (id, ticketCode) => {
 
       {/* Popup hiển thị Người dùng */}
       {showUsers && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-  onClick={(e) => {
-    // Kiểm tra nếu click không nằm trong nội dung popup
-    if (e.target === e.currentTarget) {
-      setShowUsers(false);
-    }
-  }}>
-    <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[80vh] overflow-auto">
-      <h2 className="text-2xl font-semibold mb-4 text-center">Người đã mua vé</h2>
-      <div className="overflow-x-auto">
-        <table className="table-auto w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2 text-left">STT</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">ID người dùng</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Mã vé</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Trạng thái check-in</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users && users.length > 0 ? (
-              users.map((user, index) => (
-                <tr key={user.id} className="hover:bg-gray-100">
-                  <td className="border border-gray-300 px-4 py-2 text-center">
-                    {index + 1}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2 text-center">
-                    {user.pivot.user_id}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {user.ticket_code}
-                  </td>
-                  <td
-                    className={`border border-gray-300 px-4 py-2 ${
-                      user.pivot.checked_in === 1 ? "text-green-500" : "text-red-500"
-                    }`}
-                  >
-                    {user.pivot.checked_in === 1 ? "Đã check-in" : "Chưa check-in"}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2 text-center">
-                  <td className="border border-gray-300 px-4 py-2 text-center">
-  <button
-    onClick={() => {
-      // Kiểm tra trạng thái của user để gọi hàm phù hợp
-      if (user.pivot.checked_in === 1) {
-        handleCancelCheckIn(user.id, user.ticket_code);
-      } else {
-        handleCheckIn(user.id, user.ticket_code);
-      }
-    }}
-    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-      user.pivot.checked_in === 1
-        ? "bg-red-500 text-white hover:bg-red-600"
-        : "bg-green-500 text-white hover:bg-green-600"
-    }`}
-  >
-    {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
-  </button>
-</td>
-
-
-                  </td>
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowUsers(false);
+          }
+        }}
+      >
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[80vh] overflow-auto">
+          <h2 className="text-2xl font-semibold mb-4 text-center">Người đã mua vé</h2>
+          <div className="overflow-x-auto">
+            <table className="table-auto w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="border border-gray-300 px-4 py-2 text-left">STT</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Mã vé</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Tên người dùng</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Trạng thái check-in</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Thao tác</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="border border-gray-300 px-4 py-2 text-center text-gray-500"
-                >
-                  Chưa có người mua vé
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {users && users.length > 0 ? (
+                  users.map((user, index) => (
+                    <tr key={user.id} className="hover:bg-gray-100">
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        {index + 1}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {user.ticket_code}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {user.name}
+                      </td>
+                      <td
+                        className={`border border-gray-300 px-4 py-2 ${
+                          user.pivot.checked_in === 1 ? "text-green-500" : "text-red-500"
+                        }`}
+                      >
+                        {user.pivot.checked_in === 1 ? "Đã check-in" : "Chưa check-in"}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">
+                        <button
+                          onClick={() => openConfirmPopup(user)}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
+                            user.pivot.checked_in === 1
+                              ? "bg-red-500 text-white hover:bg-red-600"
+                              : "bg-green-500 text-white hover:bg-green-600"
+                          }`}
+                        >
+                          {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="border border-gray-300 px-4 py-2 text-center text-gray-500"
+                    >
+                      Chưa có người mua vé
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="text-right mt-4">
+            <button
+              onClick={() => setShowUsers(false)}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
       </div>
-      <div className="text-right mt-4">
-        <button
-          onClick={() => setShowUsers(false)}
-          className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
-        >
-          Đóng
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+    )}
 
+    {/* Popup xác nhận */}
+    {showConfirmCheckinPopup && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+          <h3 className="text-lg font-semibold mb-4 text-center">Xác nhận hành động</h3>
+          <p className="mb-4 text-center">
+            Bạn có chắc chắn muốn {selectedUser && selectedUser.pivot.checked_in === 1 ? "hủy check-in" : "check-in"} cho người này?
+          </p>
+          <div className="flex justify-end">
+            <button
+              onClick={closeConfirmPopup}
+              className="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400 transition-colors duration-200"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleConfirm}
+              className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+            >
+              Xác nhận
+            </button>
+          </div>
+        </div>
+      </div>
+    )}  
     </div>
   );
 };
