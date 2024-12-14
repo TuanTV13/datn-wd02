@@ -23,7 +23,7 @@ class StoreEventRequest extends FormRequest
             'district' => 'required|string',
             'ward' => 'required|string',
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'required',
             'location' => 'required|string|max:255',
             'event_type' => 'required|in:online,offline',
             'link_online' => 'nullable|string|max:255',
