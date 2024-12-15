@@ -177,6 +177,24 @@ const AddTicket = (props: any) => {
               <span className="text-red-500">Ngày kết thúc không hợp lệ</span>
             )}
           </div>
+
+          <div>
+            <label
+              htmlFor="purchase_limit"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Giới hạn lượt mua của mỗi người
+            </label>
+            <input
+              type="number"
+              id="purchase_limit"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              {...register("purchase_limit", { required: true, min: 0 })}
+            />
+            {errors.purchase_limit && (
+              <span className="text-red-500">Giới hạn không hợp lệ</span>
+            )}
+          </div>
         </div>
 
         {/* Các nút thao tác */}

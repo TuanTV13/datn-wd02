@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(Event::class)->constrained()->onDelete('cascade');
             $table->enum('status', TicketStatus::getValues())->default(TicketStatus::PENDING);
             $table->enum('ticket_type', EnumsTicketType::getValues());
+            $table->integer('purchase_limit')->nullable();
             // $table->decimal('price', 10, 2);
             // $table->bigInteger('quantity');
             // $table->bigInteger('available_quantity')->nullable();

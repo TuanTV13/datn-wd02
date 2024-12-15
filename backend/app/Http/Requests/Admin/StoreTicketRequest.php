@@ -30,6 +30,7 @@ class StoreTicketRequest extends FormRequest
             'name' => 'required|string|max:100',
             'sale_start' => 'required|date|after_or_equal:today',
             'sale_end' => 'required|date|after:sale_start',
+            'purchase_limit' => 'integer|required|min:0',
             // 'description' => 'nullable|string'
         ];
     }

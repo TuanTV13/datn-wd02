@@ -23,7 +23,7 @@ class VNPayService
         $vnp_Amount = $totalAmount * 100;  // VNPay yêu cầu số tiền tính bằng đồng
         $vnp_Locale = 'vn';
         $vnp_IpAddr = request()->ip();
-        $vnp_BankCode = "NCB";
+        $vnp_BankCode = "QR";
 
         // Dữ liệu đầu vào cho VNPay
         $inputData = [

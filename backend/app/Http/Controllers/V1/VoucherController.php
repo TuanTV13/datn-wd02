@@ -111,9 +111,9 @@ class VoucherController extends Controller
                 return $this->jsonResponse(false, 'Không tìm thấy mã giảm giá.', [], 404);
             }
 
-            if (!in_array($voucher->status, ['draft', 'pending'])) {
-                return $this->jsonResponse(false, 'Không thể xóa mã giảm giá.', [], 400);
-            }
+            // if (!in_array($voucher->status, ['draft', 'pending'])) {
+            //     return $this->jsonResponse(false, 'Không thể xóa mã giảm giá.', [], 400);
+            // }
 
             // Xóa mã giảm giá
             $this->voucherRepository->delete($voucher->id);

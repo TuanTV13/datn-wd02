@@ -44,15 +44,12 @@ const SearchEvent = () => {
 
   const fetchEventsByDate = async (startTime: string, endTime: string) => {
     try {
-      console.log("Calling API with:", { startTime, endTime }); // Debug
       const response = await api.post("/clients/events/filter", {
         start_time: startTime,
         end_time: endTime,
       });
-      console.log("API Response:", response);
       setFilteredEvents(response.data.data.data);
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -147,9 +144,7 @@ const SearchEvent = () => {
           setAllEvents(response.data.data.data); // Lưu lại tất cả sự kiện ban đầu
         })
         .catch((err) => {
-          console.log(
-            err.response?.data?.message || "Đã xảy ra lỗi khi tìm kiếm sự kiện"
-          );
+
         });
     }
   }, [searchTerm]);

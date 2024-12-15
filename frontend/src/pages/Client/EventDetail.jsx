@@ -20,6 +20,7 @@ const EventDetail = () => {
   const [checkInMode, setCheckInMode] = useState("code"); // 'code' hoặc 'qr'
   const [selectedZones, setSelectedZones] = useState({});
   const [quantity, setQuantity] = useState(1);
+  const [qrCodeData, setQrCodeData] = useState(null);
   // Hàm để cập nhật zone đã chọn
   const handleZoneChange = (ticket, zoneId) => {
     // Tìm zone được chọn trong ticket.price
@@ -63,7 +64,6 @@ const EventDetail = () => {
         requestData
       )
       .then((response) => {
-        console.log("Check-in thành công:", response.data);
         notification.error({ message: "Check-in thành công" });
         setCheckInPopup(false); // Đóng popup sau khi check-in thành công
       })
@@ -71,7 +71,7 @@ const EventDetail = () => {
         console.error("Lỗi khi check-in:", error);
         if (error.response && error.response.data) {
           notification.error({
-            message: `Lỗi: ${error.response.data.message || "Không thể thực hiện check-in"
+            message: `Lỗi: ${error.response.data.error || "Không thể thực hiện check-in"
               }`,
           });
         } else {
@@ -150,7 +150,6 @@ const EventDetail = () => {
         totalPrice: totalAmount,
       };
 
-      console.log(ticketData)
       // Điều hướng sang trang checkout và truyền dữ liệu
       navigate('/checkout', { state: ticketData });
     } else {
@@ -168,7 +167,6 @@ const EventDetail = () => {
 
   const handleConfirmPurchase = () => {
     if (selectedTicket && selectedZones) {
-      console.log("Selected Zones:", selectedZones); // Kiểm tra giá trị của selectedZones
       const ticketId = selectedTicket.ticket.id;
       const ticketType = selectedTicket.ticket.ticket_type;
       // Lấy thông tin zone được chọn
@@ -207,25 +205,34 @@ const EventDetail = () => {
   };
 
   const handleQrCodeScan = (data) => {
-    if (data) {
-      setQrCodeData(data);
-      console.log("Dữ liệu mã QR:", data);
-      // Gửi dữ liệu mã QR để xử lý check-in
+    if (data && data.text) {  // Kiểm tra nếu dữ liệu có trường text
+      console.log("Dữ liệu quét được:", data);  // In ra dữ liệu quét để kiểm tra
+  
+      const ticket_code = data.text;  // Lấy mã vé từ trường text
+  
+      setQrCodeData(ticket_code);  // Cập nhật ticketCode vào state
+  
+      // Gửi dữ liệu mã QR (ticketCode) để xử lý check-in
       axios
         .put(
           `http://127.0.0.1:8000/api/v1/clients/events/${event.id}/checkin`,
-          { code: data }
+          { ticket_code: ticket_code }  // Gửi ticketCode lên API
         )
         .then((response) => {
-          console.log("Check-in thành công:", response.data);
-          setCheckInPopup(false); // Đóng popup sau khi check-in
+          setCheckInPopup(false);  // Đóng popup sau khi check-in thành công
+          toast.success("Check-in thành công!");  // Thông báo check-in thành công
+          console.log("Check-in thành công:", response);
         })
         .catch((error) => {
-          console.error("Lỗi khi check-in:", error);
+          toast.error(error)
+          console.error("Lỗi khi check-in:", error);  // Xử lý lỗi nếu có
         });
+    } else {
+      console.log("Không nhận được dữ liệu từ mã QR.");  // Trường hợp không nhận được dữ liệu
     }
   };
-
+  
+  
   const handleQrCodeError = (err) => {
     console.error("Lỗi quét mã QR:", err);
   };
@@ -240,10 +247,10 @@ const EventDetail = () => {
     <div className="container pt-40">
       {/* Ảnh nền sự kiện */}
       <div
-        className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden"
+        className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden "
         style={{ backgroundImage: `url('${event.thumbnail}')` }}
       >
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+        <div className="absolute inset-0 bg-black opacity-50"></div>
 
         <div
           className="absolute inset-0 text-white p-8 flex flex-col items-center justify-center"
@@ -255,72 +262,72 @@ const EventDetail = () => {
           >
             {event.name}
           </h1>
-
           {checkInPopup && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white p-6 rounded-lg w-[400px]">
-                <h2 className="text-2xl font-bold mb-4">Check-in</h2>
-                <div className="flex space-x-4 mb-4">
-                  <button
-                    className={`px-4 py-2 rounded ${checkInMode === "code"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-700"
-                      }`}
-                    onClick={() => handleSwitchCheckInMode("code")}
-                  >
-                    Nhập mã vé
-                  </button>
-                  <button
-                    className={`px-4 py-2 rounded ${checkInMode === "qr"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-700"
-                      }`}
-                    onClick={() => handleSwitchCheckInMode("qr")}
-                  >
-                    Quét mã QR
-                  </button>
-                </div>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg w-[600px]">
+      <h2 className="text-2xl font-bold mb-4">Check-in</h2>
+      <div className="flex space-x-4 mb-4 justify-center">
+        <button
+          className={`px-4 py-2 rounded ${checkInMode === "code"
+            ? "bg-blue-500 text-white"
+            : "bg-gray-200 text-gray-700"
+            }`}
+          onClick={() => handleSwitchCheckInMode("code")}
+        >
+          Nhập mã vé
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${checkInMode === "qr"
+            ? "bg-blue-500 text-white"
+            : "bg-gray-200 text-gray-700"
+            }`}
+          onClick={() => handleSwitchCheckInMode("qr")}
+        >
+          Quét mã QR
+        </button>
+      </div>
 
-                {checkInMode === "code" && (
-                  <div>
-                    <input
-                      id="ticket_code"
-                      type="text"
-                      placeholder="Nhập mã vé"
-                      className="w-full p-2 border rounded mb-4 text-black"
-                    />
-                    <button
-                      onClick={handleCheckInSubmit}
-                      className="w-full bg-blue-500 text-white py-2 rounded"
-                    >
-                      Xác nhận
-                    </button>
-                  </div>
-                )}
+      {checkInMode === "code" && (
+        <div>
+          <input
+            id="ticket_code"
+            type="text"
+            placeholder="Nhập mã vé"
+            className="w-full p-2 border rounded mb-4 text-black"
+          />
+        </div>
+      )}
 
-                {checkInMode === "qr" && (
-                  <div>
-                    <QrReader
-                      delay={300}
-                      style={{ width: "100%" }}
-                      onError={handleQrCodeError}
-                      onScan={handleQrCodeScan}
-                    />
-                    <button className="w-full bg-blue-500 text-white py-2 rounded">
-                      Xác nhận
-                    </button>
-                  </div>
-                )}
+      {checkInMode === "qr" && (
+        <div>
+          <QrReader
+            delay={300}
+            style={{ width: "100%" }}
+            onError={handleQrCodeError}
+            onScan={handleQrCodeScan}
+          />
+        </div>
+      )}
 
-                <button
-                  onClick={handleCloseCheckInPopup}
-                  className="w-full bg-gray-500 text-white py-2 rounded mt-4"
-                >
-                  Đóng
-                </button>
-              </div>
-            </div>
-          )}
+      {/* Nút xác nhận và đóng trên cùng một hàng */}
+      <div className="flex space-x-4 mt-4">
+        <button
+          onClick={handleCheckInSubmit}
+          className="w-[48%] bg-blue-500 text-white py-2 rounded"
+        >
+          Xác nhận
+        </button>
+        <button
+          onClick={handleCloseCheckInPopup}
+          className="w-[48%] bg-gray-500 text-white py-2 rounded"
+        >
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
           {event.status !== "completed" && event.status !== "ongoing" && (
             <>
               <p className="mt-4 text-lg">
@@ -350,7 +357,7 @@ const EventDetail = () => {
           )}
           <div className="mt-4 text-center">
             <p className="text-lg">
-              Địa điểm: {`${event.ward}, ${event.district}, ${event.province}`}
+              Địa điểm: {`${event.location}`}, {`${event.ward}, ${event.district}, ${event.province}`}
             </p>
           </div>
           {statusInfo && (
@@ -404,7 +411,7 @@ const EventDetail = () => {
         ></div>
       </div>
       {/* Sự kiện tương tự */}
-      <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
+      {/* <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4">Sự kiện tương tự</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {similarEvents.map((event) => (
@@ -428,7 +435,7 @@ const EventDetail = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Hiển thị Popup nếu showPopup là true */}
       {showPopup && (
@@ -465,8 +472,9 @@ const EventDetail = () => {
                   <input
                     type="number"
                     min="1"
-                    max={Math.min(10, selectedVIPTicket.quantity - selectedVIPTicket.sold_quantity)}
-                    value={vipTicketQuantity}
+                    max="10"
+                    // max={Math.min(10, selectedVIPTicket.quantity - selectedVIPTicket.sold_quantity)}
+                    value={vipTicketQuantity || 1}
                     onChange={(e) => setVIPTicketQuantity(e.target.value)}
                     className="border p-2 rounded w-full"
                   />
@@ -503,7 +511,8 @@ const EventDetail = () => {
                   <input
                     type="number"
                     min="1"
-                    max={Math.min(10, selectedRegularTicket.quantity - selectedRegularTicket.sold_quantity)}
+                    max="10"
+                    // max={Math.min(10, selectedRegularTicket.quantity - selectedRegularTicket.sold_quantity)}
                     value={regularTicketQuantity}
                     onChange={(e) => setRegularTicketQuantity(e.target.value)}
                     className="border p-2 rounded w-full"
