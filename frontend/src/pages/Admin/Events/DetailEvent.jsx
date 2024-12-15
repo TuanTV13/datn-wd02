@@ -11,19 +11,18 @@ import AddDiscountCode from "../Voucher/AddDiscountCode";
 import UpdateEvent from "./UpdateEvent";
 import AddSpeakerModal from "../../../components/Admin/AddSpeakerModal";
 ChartJS.register(ArcElement, Tooltip, Legend);
-
+import QrReader from "react-qr-scanner"; // Import thư viện
 const DetailEvents = () => {
-  const [isVisible, setIsVisible] = useState(false);
   const [eventDetails, setEventDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showTickets, setShowTickets] = useState(false); 
-  const [showUsers, setShowUsers] = useState(false); 
-  const [showUpdateEvent, setShowUpdateEvent] = useState(false); 
-  const [showStatusPopup, setShowStatusPopup] = useState(false); 
-  const [selectedStatus, setSelectedStatus] = useState(""); 
+  const [showUsers, setShowUsers] = useState(false);
+  const [showUpdateEvent, setShowUpdateEvent] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
-
+  const [qrCodeData, setQrCodeData] = useState(null);
+  const [checkInMode, setCheckInMode] = useState("code"); // 'code' hoặc 'qr'
+   const [checkInPopup, setCheckInPopup] = useState(false); // Khởi tạo trạng thái của popup
   const [modalData, setModalData] = useState({
     show: false,
     id: null,
@@ -34,7 +33,7 @@ const DetailEvents = () => {
   const { id } = useParams();
 
 
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTicketForm, setIsTicketForm] = useState(true);
   const [eventId, setEventId] = useState(id);
@@ -42,7 +41,8 @@ const DetailEvents = () => {
   const [showStatistics, setShowStatistics] = useState(false);
   const [showAddSpeaker, setShowAddSpeaker] = useState(false);
 
-  const [showUsersStatistics, setShowUsersStatistics] = useState(false); 
+  const [showUsersStatistics, setShowUsersStatistics] = useState(false);
+ 
   useEffect(() => {
     const toggleVisibility = () => {
       if (window.pageYOffset > 300) {
@@ -92,10 +92,10 @@ const DetailEvents = () => {
     fetchEventDetails();
   }, [id, reload]);
   useEffect(() => {
-    
+
     const interval = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); 
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -107,7 +107,7 @@ const DetailEvents = () => {
       "Content-Type": "application/json",
     };
 
-    
+
     const nextStatusMap = {
       pending: "confirmed",
       confirmed: "checkin",
@@ -117,14 +117,14 @@ const DetailEvents = () => {
     const nextStatus = nextStatusMap[currentStatus];
 
     try {
-      
+
       const response = await axios.put(
         `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
         { status: nextStatus },
         { headers }
       );
       setReload(!reload);
-      
+
       toast.success("Cập nhật trạng thái thành công!", {
         position: "top-right",
         autoClose: 3000,
@@ -134,7 +134,7 @@ const DetailEvents = () => {
         draggable: true,
       });
     } catch (err) {
-      
+
       toast.error("Cập nhật trạng thái thất bại!", {
         position: "top-right",
         autoClose: 3000,
@@ -151,10 +151,10 @@ const DetailEvents = () => {
     setSelectedStatus(status);
     setShowConfirmPopup(true);
   };
-  
+
   const getTimeDifference = (startTime) => {
     const eventStartTime = new Date(startTime);
-    return (eventStartTime - currentTime) / 1000 / 60 / 60; 
+    return (eventStartTime - currentTime) / 1000 / 60 / 60;
   };
 
   const getNextStatusLabel = (status) => {
@@ -169,52 +169,86 @@ const DetailEvents = () => {
     }
     return "";
   };
+  const handleCheckInSubmit = () => {
+    const ticketCode = document.getElementById("ticket_code").value; // Lấy mã vé người dùng nhập
 
-  const handleCheckIn = async (id, ticketCode) => {
-    try {
+    if (!ticketCode) {
+      // Hiển thị thông báo lỗi nếu mã vé không được nhập
+      toast.error({ message: "Vui lòng nhập mã vé" });
+      return; // Dừng lại và không gửi yêu cầu API
+    }
+
+    // Tạo đối tượng dữ liệu để gửi lên API
+    const requestData = {
+      ticket_code: ticketCode,
+    };
+
+    axios
+      .put(
+        `http://127.0.0.1:8000/api/v1/clients/events/${event.id}/checkin`,
+        requestData
+      )
+      .then((response) => {
+        notification.error({ message: "Check-in thành công" });
+        setCheckInPopup(false); // Đóng popup sau khi check-in thành công
+        setReload(!reload);
+        toast.success(" Check-in thành công!");
+      })
+      .catch((error) => {
+        console.error("Lỗi khi check-in:", error);
+        toast.error(error.response.data.error)
       
-      const token = localStorage.getItem("access_token");
+      });
+  };
+  
+  const handleCheckIn = () => {
+    setCheckInPopup(true);
+    setCheckInMode("code"); // Mặc định vào chế độ nhập mã vé
+  };
+  const handleCloseCheckInPopup = () => {
+    setCheckInPopup(false);
+  };
+  const handleSwitchCheckInMode = (mode) => {
+    setCheckInMode(mode);
+  };
+  const handleQrCodeScan = (data) => {
+    if (data && data.text) {
+      // Kiểm tra nếu dữ liệu có trường text
+      console.log("Dữ liệu quét được:", data); // In ra dữ liệu quét để kiểm tra
 
-      
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json", 
-      };
+      const ticket_code = data.text; // Lấy mã vé từ trường text
 
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/v1/events/${id}/checkin`,
-        {
-          method: "PUT",
-          headers: headers,
-          body: JSON.stringify({ ticket_code: ticketCode }),
-        }
-      );
+      setQrCodeData(ticket_code); // Cập nhật ticketCode vào state
 
-      if (!response.ok) {
-        const error = await response.json();
-        
-      }
-
-      const data = await response.json();
-
-      toast.success("Thay đổi trạng thái check-in thành công!");
-      setReload(!reload);
-    } catch (error) {
-      toast.error("Thay đổi trạng thái check-in thất bại!");
-      if (error.status === 401) {
-      }
-      localStorage.clear();
-      window.location = "/auth";
-      console.error("Error:", error);
+      // Gửi dữ liệu mã QR (ticketCode) để xử lý check-in
+      axios
+        .put(
+          `http://127.0.0.1:8000/api/v1/clients/events/${event.id}/checkin`,
+          { ticket_code: ticket_code } // Gửi ticketCode lên API
+        )
+        .then((response) => {
+          setCheckInPopup(false); // Đóng popup sau khi check-in thành công
+          toast.success("Check-in thành công!"); // Thông báo check-in thành công
+          console.log("Check-in thành công:", response);
+        })
+        .catch((error) => {
+          toast.error(error);
+          console.error("Lỗi khi check-in:", error); // Xử lý lỗi nếu có
+        });
+    } else {
+      console.log("Không nhận được dữ liệu từ mã QR."); // Trường hợp không nhận được dữ liệu
     }
   };
 
+  const handleQrCodeError = (err) => {
+    console.error("Lỗi quét mã QR:", err);
+  };
   const handleCancelCheckIn = async (id, ticketCode) => {
     try {
-      
+
       const token = localStorage.getItem("access_token");
 
-      
+
       const headers = {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -236,7 +270,7 @@ const DetailEvents = () => {
       const data = await response.json();
       toast.success("Thay đổi trạng thái check-in thành công!");
       setReload(!reload);
-      
+
     } catch (error) {
       toast.error("Thay đổi trạng thái check-in thất bại!");
       if (error.status === 401) {
@@ -260,11 +294,11 @@ const DetailEvents = () => {
 
   const { data } = eventDetails;
 
-  
+
   const speakers = data.speakers || [];
   const tickets = data.event.tickets || [];
   const users = data.event.users || [];
-  
+
   const { vipPercentage, normalPercentage } = data;
 
   const chartData = {
@@ -279,9 +313,9 @@ const DetailEvents = () => {
   };
   const timeDifference = getTimeDifference(data.event.start_time);
   return (
-    
+
     <div className="bg-white rounded-lg shadow p-6">
-{/*       
+      {/*       
       {isVisible && (
         <button
           onClick={scrollToTop}
@@ -304,13 +338,13 @@ const DetailEvents = () => {
       </h2>
       <hr className="border-t-2 border-gray-300 mb-6" />
 
-      {}
+      { }
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6 p-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-transparent bg-clip-text shadow-xl rounded-lg">
         {data.event.name}
       </h1>
 
       <p className="text-lg font-medium text-gray-700 mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md border-l-4">
-        
+
         <span className="flex items-center text-gray-800">
           <span className="mr-2 text-xl">📌</span>
           Trạng thái:{" "}
@@ -323,7 +357,7 @@ const DetailEvents = () => {
           </span>
         </span>
 
-        {}
+        { }
         {data.event.status !== "completed" && (
           <>
             {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
@@ -347,7 +381,7 @@ const DetailEvents = () => {
             )}
 
             {/* Hiển thị nút chuyển sang check-in trong vòng 2 giờ trước khi sự kiện bắt đầu */}
-            { data.event.status === "checkin" && (
+            {data.event.status === "checkin" && (
               <Button
                 type="primary"
                 className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
@@ -370,7 +404,7 @@ const DetailEvents = () => {
           </>
         )}
       </p>
-
+    
       {showConfirmPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
@@ -438,7 +472,7 @@ const DetailEvents = () => {
       </div>
       {showUpdateEvent && <UpdateEvent />}
 
-     
+
 
 
 
@@ -492,8 +526,8 @@ const DetailEvents = () => {
             {data.event.event_type === "offline"
               ? "Trực tiếp"
               : data.event.event_type === "online"
-              ? "Trực tuyến"
-              : "Không xác định"}
+                ? "Trực tuyến"
+                : "Không xác định"}
           </p>
         </div>
 
@@ -563,14 +597,7 @@ const DetailEvents = () => {
       <div className="flex justify-between">
         {" "}
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
-        <Button
-          type="primary"
-          onClick={() => {
-            setShowAddSpeaker(true);
-          }}
-        >
-          Thêm diễn giả
-        </Button>
+
       </div>
       <div className="mb-6 flex justify-center">
         <div
@@ -661,11 +688,10 @@ const DetailEvents = () => {
                           {user.name}
                         </td>
                         <td
-                          className={`border border-gray-300 px-4 py-2 ${
-                            user.pivot.checked_in === 1
+                          className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1
                               ? "text-green-500"
                               : "text-red-500"
-                          }`}
+                            }`}
                         >
                           {user.pivot.checked_in === 1
                             ? "Đã check-in"
@@ -684,11 +710,10 @@ const DetailEvents = () => {
                                     : "checkin",
                               })
                             }
-                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-                              user.pivot.checked_in === 1
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${user.pivot.checked_in === 1
                                 ? "bg-red-500 text-white hover:bg-red-600"
                                 : "bg-green-500 text-white hover:bg-green-600"
-                            }`}
+                              }`}
                           >
                             {user.pivot.checked_in === 1
                               ? "Hủy check-in"
@@ -723,7 +748,7 @@ const DetailEvents = () => {
       )}
 
       {/* Modal xác nhận */}
-      {modalData.show && (
+      {/* {modalData.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
             <h2 className="text-xl font-semibold mb-4">Xác nhận</h2>
@@ -755,79 +780,79 @@ const DetailEvents = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
+     
 
+      <Modal
+        title={
+          <div className="flex justify-between items-center">
+            <span>Quản lý vé và voucher</span>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="text-xl font-semibold text-gray-500 hover:text-gray-700"
+            >
 
-<Modal
-  title={
-    <div className="flex justify-between items-center">
-      <span>Quản lý vé và voucher</span>
-      <button
-        onClick={() => setIsModalOpen(false)}
-        className="text-xl font-semibold text-gray-500 hover:text-gray-700"
+            </button>
+          </div>
+        }
+        width={1000}
+        open={isModalOpen}
+        footer={[
+          <Button
+            key="close"
+            type="primary"
+            onClick={() => {
+              setIsModalOpen(false);
+              navigate("/admin/detail-event/" + eventId);
+            }}
+          >
+            Đóng
+          </Button>,
+        ]}
+        onCancel={() => setIsModalOpen(false)}
       >
-      
-      </button>
-    </div>
-  }
-  width={1000}
-  open={isModalOpen}
-  footer={[
-    <Button
-      key="close"
-      type="primary"
-      onClick={() => {
-        setIsModalOpen(false);
-        navigate("/admin/detail-event/" + eventId);
-      }}
-    >
-      Đóng
-    </Button>,
-  ]}
-  onCancel={() => setIsModalOpen(false)} 
->
-  <div className="flex justify-center gap-3">
-    <Button
-      key="ticket"
-      onClick={() => {
-        setIsTicketForm(true); 
-        setShowStatistics(false); 
-        setShowUsersStatistics(false); 
-      }}
-    >
-      Thêm vé
-    </Button>
-    <Button
-      key="voucher"
-      onClick={() => {
-        setIsTicketForm(false); 
-        setShowStatistics(false); 
-        setShowUsersStatistics(false); 
-      }}
-    >
-      Thêm voucher
-    </Button>
-    <Button
-      onClick={() => {
-        setShowStatistics(true); 
-        setIsTicketForm(false); 
-        setShowUsersStatistics(false); 
-      }}
-    >
-      Thống kê vé
-    </Button>
-    <Button
-      onClick={() => {
-        setShowUsersStatistics(true); 
-        setIsTicketForm(false); 
-        setShowStatistics(false); 
-      }}
-    >
-      Thống kê người dùng
-    </Button>
-  </div>
+        <div className="flex justify-center gap-3">
+          <Button
+            key="ticket"
+            onClick={() => {
+              setIsTicketForm(true);
+              setShowStatistics(false);
+              setShowUsersStatistics(false);
+            }}
+          >
+            Thêm vé
+          </Button>
+          <Button
+            key="voucher"
+            onClick={() => {
+              setIsTicketForm(false);
+              setShowStatistics(false);
+              setShowUsersStatistics(false);
+            }}
+          >
+            Thêm voucher
+          </Button>
+          <Button
+            onClick={() => {
+              setShowStatistics(true);
+              setIsTicketForm(false);
+              setShowUsersStatistics(false);
+            }}
+          >
+            Thống kê vé
+          </Button>
+          <Button
+            onClick={() => {
+              setShowUsersStatistics(true);
+              setIsTicketForm(false);
+              setShowStatistics(false);
+            }}
+          >
+            Thống kê người dùng
+          </Button>
+        </div>
 
-        {}
+        { }
         {isTicketForm && !showStatistics && !showUsersStatistics && (
           <AddTicket eventId={eventId} />
         )}
@@ -955,39 +980,34 @@ const DetailEvents = () => {
                           {user.name}
                         </td>
                         <td
-                          className={`border border-gray-300 px-4 py-2 ${
-                            user.pivot.checked_in === 1
+                          className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1
                               ? "text-green-500"
                               : "text-red-500"
-                          }`}
+                            }`}
                         >
                           {user.pivot.checked_in === 1
                             ? "Đã check-in"
                             : "Chưa check-in"}
                         </td>
                         <td className="border border-gray-300 px-4 py-2 text-center">
-                          <button
-                            onClick={() =>
-                              setModalData({
+                        <button
+                          onClick={() =>
+                            user.pivot.checked_in === 1
+                              ? setModalData({
                                 show: true,
                                 id: user.id,
                                 ticketCode: user.ticket_code,
-                                action:
-                                  user.pivot.checked_in === 1
-                                    ? "cancel"
-                                    : "checkin",
+                                action: "cancel",
                               })
-                            }
-                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-                              user.pivot.checked_in === 1
-                                ? "bg-red-500 text-white hover:bg-red-600"
-                                : "bg-green-500 text-white hover:bg-green-600"
+                              : setCheckInPopup(user.id, user.ticket_code)
+                          }
+                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${user.pivot.checked_in === 1
+                            ? "bg-red-500 text-white hover:bg-red-600"
+                            : "bg-green-500 text-white hover:bg-green-600"
                             }`}
-                          >
-                            {user.pivot.checked_in === 1
-                              ? "Hủy check-in"
-                              : "Check-in"}
-                          </button>
+                        >
+                          {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
+                        </button>
                         </td>
                       </tr>
                     ))
@@ -1039,8 +1059,75 @@ const DetailEvents = () => {
             </div>
           </div>
         )}
+          {checkInPopup && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white p-6 rounded-lg w-[600px]">
+                <h2 className="text-2xl font-bold mb-4">Check-in</h2>
+                <div className="flex space-x-4 mb-4 justify-center">
+                  <button
+                    className={`px-4 py-2 rounded ${
+                      checkInMode === "code"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                    onClick={() => handleSwitchCheckInMode("code")}
+                  >
+                    Nhập mã vé
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded ${
+                      checkInMode === "qr"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                    onClick={() => handleSwitchCheckInMode("qr")}
+                  >
+                    Quét mã QR
+                  </button>
+                </div>
+
+                {checkInMode === "code" && (
+                  <div>
+                    <input
+                      id="ticket_code"
+                      type="text"
+                      placeholder="Nhập mã vé"
+                      className="w-full p-2 border rounded mb-4 text-black"
+                    />
+                  </div>
+                )}
+
+                {checkInMode === "qr" && (
+                  <div>
+                    <QrReader
+                      delay={300}
+                      style={{ width: "100%" }}
+                      onError={handleQrCodeError}
+                      onScan={handleQrCodeScan}
+                    />
+                  </div>
+                )}
+
+                {/* Nút xác nhận và đóng trên cùng một hàng */}
+                <div className="flex space-x-4 mt-4">
+                  <button
+                    onClick={handleCheckInSubmit}
+                    className="w-[48%] bg-blue-500 text-white py-2 rounded"
+                  >
+                    Xác nhận
+                  </button>
+                  <button
+                    onClick={handleCloseCheckInPopup}
+                    className="w-[48%] bg-gray-500 text-white py-2 rounded"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
       </Modal>
-      
+
     </div>
   );
 };

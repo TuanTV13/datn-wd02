@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import emailjs from "emailjs-com";
 
 const UpdateEvent = () => {
+  const [reload, setReload] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const [formData, setFormData] = useState({
@@ -170,7 +171,7 @@ const UpdateEvent = () => {
         }
       );
       console.log(formattedData);
-      
+      setReload(reload);
       toast.success("Cập nhật sự kiện thành công!");
      
     } catch (error) {
