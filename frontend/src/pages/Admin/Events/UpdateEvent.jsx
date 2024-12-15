@@ -7,7 +7,7 @@ import emailjs from "emailjs-com";
 
 const UpdateEvent = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Lấy id từ URL
+  const { id } = useParams(); 
   const [formData, setFormData] = useState({
     start_time: "",
     end_time: "",
@@ -20,7 +20,7 @@ const UpdateEvent = () => {
     location: "",
    
   });
-  const [loading, setLoading] = useState(false); // Quản lý trạng thái đang tải
+  const [loading, setLoading] = useState(false); 
   const token = localStorage.getItem("access_token");
 
   const headers = {
@@ -28,7 +28,7 @@ const UpdateEvent = () => {
     "Content-Type": "multipart/form-data",
   };
   useEffect(() => {
-    // Lấy thông tin sự kiện từ API
+    
     axios
       .get(`http://127.0.0.1:8000/api/v1/events/${id}/show`, { headers })
       .then((response) => {
@@ -54,7 +54,7 @@ const UpdateEvent = () => {
   }, [id]);
 
   useEffect(() => {
-    // Lấy thông tin sự kiện từ API
+    
     axios
       .get(`http://127.0.0.1:8000/api/v1/events/${id}/show`, { headers })
       .then((response) => {
@@ -79,10 +79,10 @@ const UpdateEvent = () => {
 
   }, [id]);
 
-  // Hàm định dạng lại thời gian
+ 
   const formatDate = (date) => {
     const newDate = new Date(date);
-    return newDate.toISOString().slice(0, 19); // YYYY-MM-DDTHH:mm:ss
+    return newDate.toISOString().slice(0, 19); 
   };
 
   const handleChange = (e) => {
@@ -97,13 +97,13 @@ const UpdateEvent = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Kiểm tra dữ liệu trước khi gửi
+    
     if (!formData.start_time || !formData.end_time || !formData.location) {
       setLoading(false);
       return;
     }
 
-    // Định dạng dữ liệu gửi đi
+    
     const formattedData = {
       start_time: formatDate(formData.start_time),
       end_time: formatDate(formData.end_time),
@@ -113,11 +113,11 @@ const UpdateEvent = () => {
     try {
       const result = await axios.put(
         `http://127.0.0.1:8000/api/v1/events/${id}/update`,
-        formattedData, // Gửi dữ liệu dạng JSON
+        formattedData, 
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", // Đặt Content-Type cho JSON
+            "Content-Type": "application/json", 
           },
         }
         
@@ -129,7 +129,7 @@ const UpdateEvent = () => {
           from_email: "doquang227@gmail.com",
           message:
             "Event bạn đang tham gia vừa cập nhật hãy truy cập lại web để theo giõi",
-          to_email: user.email, // Nhập email của người nhận ở đây
+          to_email: user.email, 
         };
         await emailjs.send(
           "service_oc42a4h",

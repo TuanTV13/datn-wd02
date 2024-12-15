@@ -531,7 +531,7 @@ const EventDetail = () => {
                   <input
                     type="number"
                     min="1"
-                    max={selectedRegularTicket.purchase_limmit}
+                    max={selectedRegularTicket.purchase_limit}
                     // max={Math.min(10, selectedRegularTicket.quantity - selectedRegularTicket.sold_quantity)}
                     value={regularTicketQuantity}
                     onChange={(e) => setRegularTicketQuantity(e.target.value)}

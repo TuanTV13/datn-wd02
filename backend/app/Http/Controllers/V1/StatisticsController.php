@@ -18,6 +18,7 @@ class StatisticsController extends Controller
         $this->eventRepository = $eventRepository;
     }
 
+// Top sự kiện trong khoảng thời gian -> trả về tổng doanh thu và % của từng sự kiện
     public function topRevenueEvents(Request $request)
     {
         $limit = $request->input('limit', 5);
@@ -36,6 +37,7 @@ class StatisticsController extends Controller
         try {
             $topEvents = $this->eventRepository->getTopRevenueEvents($limit, $startDate, $endDate);
 
+
             return response()->json([
                 'status' => 'success',
                 'data' => $topEvents
@@ -47,7 +49,7 @@ class StatisticsController extends Controller
             ], 400);
         }
     }
-
+// Số sự kiện hoàn thành trong khoảng thời gian
     public function getEventStatisticsByTime(Request $request)
     {
         $timeFrame = $request->input('time_frame', 'month');
@@ -115,6 +117,9 @@ class StatisticsController extends Controller
             ],
         ]);
     }
+     /**
+     * Thống kê sự kiện theo thể loại (chỉ lấy sự kiện có trạng thái confirmed)
+     */
 
     public function getEventCountTotalAmountAndPercentageByEventType()
     {
@@ -138,7 +143,7 @@ class StatisticsController extends Controller
                 return $item;
             });
     }
-
+// Top sự kiện theo số lượng người tham gia
     public function topParticipantsEvents(Request $request)
     {
         $limit = $request->input('limit', 5);
@@ -162,7 +167,7 @@ class StatisticsController extends Controller
 
 
         try {
-
+        // Lấy các sự kiện top theo số người tham gia và trạng thái hoàn thành
             $topEvents = DB::table('events')
                 ->join('transactions', 'events.id', '=', 'transactions.event_id')
                 ->select(
@@ -191,7 +196,7 @@ class StatisticsController extends Controller
         }
     }
 
-
+    // Thống kê sự kiện đã được tổ chức (confirmed) và bị hủy bỏ (canceled)
         public function getEventStatusStatistics(Request $request)
     {
 
@@ -205,6 +210,7 @@ class StatisticsController extends Controller
                 $startDate = $dates['start'];
                 $endDate = $dates['end'];
             } else {
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Vui lòng cung cấp ngày bắt đầu (start_date) và ngày kết thúc (end_date) hoặc chọn khoảng thời gian (time_period).'
@@ -232,6 +238,7 @@ class StatisticsController extends Controller
         }
     }
 
+
     private function getConfirmedEventCount($startDate, $endDate)
     {
         return DB::table('events')
@@ -239,6 +246,7 @@ class StatisticsController extends Controller
             ->whereBetween('event_date', [$startDate, $endDate])
             ->count();
     }
+
 
     private function getCanceledEventCount($startDate, $endDate)
     {
@@ -316,7 +324,6 @@ class StatisticsController extends Controller
 
 public function getEventCountTotalAmountAndPercentageByProvince()
 {
-
     $totalRevenue = DB::table('events')
         ->join('transactions', 'events.id', '=', 'transactions.event_id')
         ->where('events.status', '!=', 'pending')
@@ -367,7 +374,3 @@ public function getEventCountTotalAmountAndPercentageByProvince()
 
         }
     }
-
-
-
-
