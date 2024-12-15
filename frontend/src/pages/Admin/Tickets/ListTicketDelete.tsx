@@ -12,9 +12,10 @@ const ListTicketDelete = () => {
     
     const fetchDeletedTickets = async () => {
       try {
-        const response = await api.post("/tickets/block");
-        setTicketDelete(response.data);
-        setTicketDelete(response.data?.message);
+        const response = await api.get("/tickets/list/block");
+        setTicketDelete(response.data.data);
+        // setTicketDelete(response.data?.data);
+        console.log(response.data.data)
       } catch (error) {
         console.error("Error fetching deleted tickets:", error);
       }
@@ -58,18 +59,16 @@ const ListTicketDelete = () => {
           <thead className="bg-gray-100 items-center text-center">
             <tr>
               <th className="p-4 border border-gray-300">STT</th>
-              <th className="p-4 border border-gray-300">Mã vé</th>
-              <th className="p-4 border border-gray-300">Tên sự kiện</th>
               <th className="p-4 border border-gray-300">Loại vé</th>
+              <th className="p-4 border border-gray-300">Sự kiện</th>
               <th className="p-4 border border-gray-300">Số lượng</th>
-              <th className="p-4 border border-gray-300">Trạng thái</th>
               <th className="p-4 border border-gray-300">Giá</th>
-              <th className="p-4 border border-gray-300">
+              {/* <th className="p-4 border border-gray-300">
                 Thời gian bắt đầu bán
               </th>
               <th className="p-4 border border-gray-300">
                 Thời gian kết thúc bán
-              </th>
+              </th> */}
               <th className="p-4 border border-gray-300">Thao tác</th>
             </tr>
           </thead>
@@ -78,25 +77,18 @@ const ListTicketDelete = () => {
               ticketDelete.map((item, index) => (
                 <tr key={item.id}>
                   <td className="p-4 border border-gray-300">{index + 1}</td>
-                  <td className="p-4 border border-gray-300">{item.id}</td>
+                  
                   <td className="p-4 border border-gray-300">
-                    {item.price[0].event?.name}
+                    {item.ticket.ticket_type}
                   </td>
                   <td className="p-4 border border-gray-300">
-                    {item.ticket_type}
+                    {item.event.name}
                   </td>
                   <td className="p-4 border border-gray-300">
-                    {item.price[0].quantity}
-                  </td>
-                  <td className="p-4 border border-gray-300">{item.status}</td>
-                  <td className="p-4 border border-gray-300">
-                    {item.price[0].price}
+                    {item.quantity}
                   </td>
                   <td className="p-4 border border-gray-300">
-                    {item.price[0].sale_start}
-                  </td>
-                  <td className="p-4 border border-gray-300">
-                    {item.price[0].sale_end}
+                    {item.price}
                   </td>
                   <td className="p-4 border border-gray-300">
                     <button
