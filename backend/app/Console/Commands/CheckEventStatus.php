@@ -17,7 +17,7 @@ class CheckEventStatus extends Command
     public function handle()
     {
         $now = Carbon::now();
-        $addHourLater = $now->copy()->addHour();
+        $addHourLater = $now->copy()->addHour(2);
 
         $events = Event::whereIn('status', ['confirmed', 'checkin', 'ongoing'])
             ->whereBetween('start_time', [$now, $addHourLater])

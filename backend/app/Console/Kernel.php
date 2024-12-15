@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('send:email')->everyMinute();
 
         $schedule->command('transactions:clear-pending')->everyMinute();
-        $schedule->command('app:check-event-i-p-command')->everyMinute();
+        // $schedule->command('app:check-event-i-p-command')->everyMinute();
     }
 
     /**

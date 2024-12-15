@@ -26,7 +26,8 @@ const EventList = () => {
   const [deletingEventId, setDeletingEventId] = useState(null);
   const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false);
   const [isGridView, setIsGridView] = useState(true); // State to toggle between grid and table view
-
+  const [searchTimeRange, setSearchTimeRange] = useState([]); //
+  
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -54,6 +55,8 @@ const EventList = () => {
         if (response && response.data && Array.isArray(response.data.data)) {
           setCategories(response.data.data);
         }
+        console.log(response.data.data);
+        
       } catch (error) {
         console.error("Lỗi khi tải danh mục:", error);
       }
@@ -82,7 +85,23 @@ const EventList = () => {
     });
     setFilteredEvents(filtered);
   }, [searchName, searchCategory, searchStatus, searchDateRange, list]);
-
+  // useEffect(() => {
+  //   const filtered = list.filter((event) => {
+  //     const matchesName = event.name.toLowerCase().includes(searchName.toLowerCase());
+  //     const matchesCategory = searchCategory ? event.category_id === searchCategory : true;
+  //     const matchesStatus = searchStatus ? event.status === searchStatus : true;
+  
+  //     // Lọc theo khoảng thời gian
+  //     const matchesTime =
+  //       (!searchTimeRange.length ||
+  //         (new Date(event.start_time) >= searchTimeRange[0] &&
+  //          new Date(event.end_time) <= searchTimeRange[1]));
+  
+  //     return matchesName && matchesCategory && matchesStatus && matchesTime;
+  //   });
+  //   setFilteredEvents(filtered);
+  // }, [searchName, searchCategory, searchStatus, searchTimeRange, list]);
+  
   const onDelete = async (id) => {
     setDeletingEventId(id);
     setConfirmModalIsOpen(true);
@@ -94,10 +113,8 @@ const EventList = () => {
       const updatedList = list.filter((event) => event.id !== deletingEventId);
       setList(updatedList);
       setFilteredEvents(updatedList);
-      notification.success({ message: "Xóa sự kiện thành công!" });
       toast.success("Xóa sự kiện thành công!");
     } catch (error) {
-      console.error("Lỗi khi xóa sự kiện:", error);
       notification.error({ message: "Xóa sự kiện không thành công!" });
     }
     setDeletingEventId(null);
@@ -155,6 +172,22 @@ const EventList = () => {
       ),
     },
     {
+      title: "Thời gian bắt đầu",
+      dataIndex: "start_time",
+      key: "start_time",
+      render: (start_time) => (
+        <span>{new Date(start_time).toLocaleString()}</span>
+      ),
+    },
+    {
+      title: "Thời gian kết thúc",
+      dataIndex: "end_time",
+      key: "end_time",
+      render: (end_time) => (
+        <span>{new Date(end_time).toLocaleString()}</span>
+      ),
+    },
+    {
       title: "Hành động",
       key: "action",
       render: (text, event) => (
@@ -176,6 +209,7 @@ const EventList = () => {
       ),
     },
   ];
+  
 
   return (
     <div>
@@ -205,7 +239,7 @@ const EventList = () => {
             }
             options={[
               { label: "Chọn danh mục", value: "" },
-              categories.map((category) => ({
+              ...categories.map((category) => ({
                 label: category.name,
                 value: category.id,
               })),
@@ -238,13 +272,12 @@ const EventList = () => {
               { label: "Đang chờ xác nhận", value: "pending" },
             ]}
           />
-          <RangePicker
-            value={searchDateRange}
-            onChange={(dates) => setSearchDateRange(dates)}
-            className="flex-1"
-            format="YYYY-MM-DD"
-            placeholder={["Ngày bắt đầu", "Ngày kết thúc"]}
-          />
+          {/* Input tìm kiếm thời gian */}
+      <RangePicker
+        className="flex-1"
+        placeholder={['Ngày bắt đầu', 'Ngày kết thúc']}
+        onChange={(dates) => setSearchTimeRange(dates ? [dates[0].toDate(), dates[1].toDate()] : [])}
+      />
         </div>
 
         <button
@@ -299,6 +332,8 @@ const EventList = () => {
                       ? `Sẽ diễn ra vào ${new Date(
                           event.start_time
                         ).toLocaleDateString()}`
+                      : event.status =="checkin"
+                      ? `Đang trong thời gian check-in`
                       : `Sự kiện đã kết thúc vào ${new Date(
                           event.end_time
                         ).toLocaleDateString()}`}

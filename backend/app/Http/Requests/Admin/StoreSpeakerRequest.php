@@ -24,12 +24,10 @@ class StoreSpeakerRequest extends FormRequest
         return [
             'name' => 'required|string|max:50',
             'profile' => 'nullable|string|max:255',
-            'email' => 'required|email|unique:speakers,email|max:50',
-            'phone' => 'required|string|unique:speakers,phone|max:20',
+            'email' => 'required|email|max:50',
+            'phone' => 'required|string|max:20',
             'image_url' => 'nullable|url|max:2048',
-            'event_id' => 'required|exists:events,id',
-            'start_time' => 'required|date_format:Y-m-d H:i:s',
-            'end_time' => 'required|date_format:Y-m-d H:i:s|after:start_time',
+            'event_id' => 'required|exists:events,id'
         ];
     }
 
@@ -58,11 +56,11 @@ class StoreSpeakerRequest extends FormRequest
             'image_url.max' => 'URL hình ảnh không được vượt quá :max ký tự.',
             'event_id.required' => 'ID sự kiện là bắt buộc.',
             'event_id.exists' => 'ID sự kiện không hợp lệ. Vui lòng chọn một sự kiện tồn tại.',
-            'start_time.required' => 'Thời gian bắt đầu là bắt buộc.',
-            'start_time.date_format' => 'Thời gian bắt đầu phải theo định dạng Y-m-d H:i:s.',
-            'end_time.required' => 'Thời gian kết thúc là bắt buộc.',
-            'end_time.date_format' => 'Thời gian kết thúc phải theo định dạng Y-m-d H:i:s.',
-            'end_time.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
+            // 'start_time.required' => 'Thời gian bắt đầu là bắt buộc.',
+            // 'start_time.date_format' => 'Thời gian bắt đầu phải theo định dạng Y-m-d H:i:s.',
+            // 'end_time.required' => 'Thời gian kết thúc là bắt buộc.',
+            // 'end_time.date_format' => 'Thời gian kết thúc phải theo định dạng Y-m-d H:i:s.',
+            // 'end_time.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
         ];
     }
 }
