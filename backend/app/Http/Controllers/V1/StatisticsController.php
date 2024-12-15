@@ -143,7 +143,7 @@ class StatisticsController extends Controller
                 return $item;
             });
     }
-
+// Top sự kiện theo số lượng người tham gia
     public function topParticipantsEvents(Request $request)
     {
         $limit = $request->input('limit', 5);
