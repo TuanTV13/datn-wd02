@@ -196,15 +196,27 @@ const AddEvent = () => {
         }
       })
       .catch((error) => {
-        console.error("API Error:", error.response ? error.response : error);
-        if (error.response && error.response.data && error.response.data.errors) {
-          const errors = error.response.data.errors;
-          Object.values(errors).forEach((message) => {
-            toast.error(message);
+        
+        if (error.errors ) {
+          const errors = error.errors;
+        
+          // Lặp qua từng lỗi trong errors
+          Object.values(errors).forEach((messages) => {
+            // Nếu lỗi là một mảng, lặp qua từng phần tử của mảng
+            if (Array.isArray(messages)) {
+              messages.forEach((msg) => {
+                toast.error(msg); // Hiển thị từng thông báo lỗi
+              });
+            } else {
+              // Nếu lỗi không phải là mảng, hiển thị trực tiếp
+              toast.error(messages);
+            }
           });
         } else {
           toast.error("Có lỗi xảy ra khi thêm sự kiện.");
         }
+        
+        
       });
   };
   return (
@@ -221,7 +233,8 @@ const AddEvent = () => {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
+              
+              
               className="form-control"
               placeholder="Vui lòng nhập tên sự kiện"
 
@@ -237,7 +250,8 @@ const AddEvent = () => {
             <select
               value={formData.category_id}
               onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-              required
+              
+              
               className="form-control"
             >
               <option value="">Chọn danh mục</option>
@@ -263,7 +277,8 @@ const AddEvent = () => {
                   link_online: value === "online" ? formData.link_online : "",
                 });
               }}
-              required
+              
+              
               className="form-control"
             >
               <option value="">Chọn loại sự kiện</option>
@@ -285,7 +300,8 @@ const AddEvent = () => {
               value={formData.link_online}
               onChange={(e) => setFormData({ ...formData, link_online: e.target.value })}
               className="form-control"
-              required
+              
+              
             />
           </div>
         )}
@@ -298,7 +314,8 @@ const AddEvent = () => {
             <select
               value={formData.province_name}
               onChange={(e) => handleProvinceChange(e.target.value)}
-              required
+              
+              
               className="form-control"
             >
               <option value="">Chọn tỉnh</option>
@@ -317,7 +334,8 @@ const AddEvent = () => {
             <select
               value={formData.district_name}
               onChange={(e) => handleDistrictChange(e.target.value)}
-              required
+              
+              
               className="form-control"
             >
               <option value="">Chọn huyện</option>
@@ -339,7 +357,8 @@ const AddEvent = () => {
             <select
               value={formData.ward_name}
               onChange={(e) => handleWardChange(e.target.value)}
-              required
+              
+              
               className="form-control"
             >
               <option value="">Chọn xã</option>
@@ -360,7 +379,8 @@ const AddEvent = () => {
               type="text"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              required
+              
+              
               className="form-control"
             />
           </div>
@@ -376,7 +396,8 @@ const AddEvent = () => {
               type="datetime-local"
               value={formData.start_time}
               onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-              required
+              
+              
               className="form-control"
             />
           </div>
@@ -388,7 +409,8 @@ const AddEvent = () => {
               type="datetime-local"
               value={formData.end_time}
               onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-              required
+              
+              
               className="form-control"
             />
           </div>
@@ -564,7 +586,17 @@ const AddEvent = () => {
       <ToastContainer />
 
       <Modal
-        title="Thêm vé hoặc voucher"
+        title={
+          <div className="flex justify-between items-center">
+          <span>Thêm vé hoặc mã giảm giágiá</span>
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="text-xl font-semibold text-gray-500 hover:text-gray-700"
+          >
+
+          </button>
+        </div>
+        }
         width={1000}
         visible={isModalOpen}
         footer={[

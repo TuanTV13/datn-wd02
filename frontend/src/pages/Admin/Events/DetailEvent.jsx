@@ -33,12 +33,14 @@ const DetailEvents = () => {
   const { id } = useParams();
 
   // Modal state
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTicketForm, setIsTicketForm] = useState(true);
   const [eventId, setEventId] = useState(id);
   const [reload, setReload] = useState(false);
   const [showStatistics, setShowStatistics] = useState(false);
   const [showUsersStatistics, setShowUsersStatistics] = useState(false); // Add this state
+
   useEffect(() => {
     const fetchEventDetails = async () => {
       const token = localStorage.getItem("access_token");
@@ -101,18 +103,8 @@ const DetailEvents = () => {
         { status: nextStatus },
         { headers }
       );
-
-      // Cập nhật trạng thái mới vào UI
-      setEventDetails((prevDetails) => ({
-        ...prevDetails,
-        event: {
-          ...prevDetails.event,
-          status: nextStatus,
-        },
-      }));
-
-      // Hiển thị thông báo thành công
       setReload(!reload);
+      // Hiển thị thông báo thành công
       toast.success("Cập nhật trạng thái thành công!", {
         position: "top-right",
         autoClose: 3000,
@@ -133,6 +125,11 @@ const DetailEvents = () => {
       });
       console.error(err);
     }
+  };
+
+  const handleShowPopup = (status) => {
+    setSelectedStatus(status);
+    setShowConfirmPopup(true);
   };
   // Tính toán thời gian để hiển thị nút phù hợp
   const getTimeDifference = (startTime) => {
@@ -280,80 +277,108 @@ const DetailEvents = () => {
       </h1>
 
       <p className="text-lg font-medium text-gray-700 mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md border-l-4">
-  <span className="flex items-center text-gray-800">
-    <span className="mr-2 text-xl">📌</span>
-    Trạng thái:{" "}
-    <span className="font-bold text-indigo-600">
-      {data.event.status === "pending" && " Đang chờ"}
-      {data.event.status === "confirmed" && " Đang chuẩn bị"}
-      {data.event.status === "checkin" && " Đang check-in"}
-      {data.event.status === "ongoing" && " Đang diễn ra"}
-      {data.event.status === "completed" && " Đã kết thúc"}
-    </span>
-  </span>
+        <span className="flex items-center text-gray-800">
+          <span className="mr-2 text-xl">📌</span>
+          Trạng thái:{" "}
+          <span className="font-bold text-indigo-600">
+            {data.event.status === "pending" && " Đang chờ"}
+            {data.event.status === "confirmed" && " Đang chuẩn bị"}
+            {data.event.status === "checkin" && " Đang check-in"}
+            {data.event.status === "ongoing" && " Đang diễn ra"}
+            {data.event.status === "completed" && " Đã kết thúc"}
+          </span>
+        </span>
 
-  {/* Hiển thị nút nếu trạng thái chưa hoàn tất */}
-  {data.event.status !== "completed" && (
-    <>
-      {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
-      {data.event.status == "pending" && timeDifference < 10 && (
-        <Button
-          type="primary"
-          className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-          onClick={() => {
-            setSelectedStatus(getNextStatusLabel(data.event.status));
-            setShowConfirmPopup(true);
-          }}
-        >
-          {getNextStatusLabel(data.event.status)}
-        </Button>
+        {/* Hiển thị nút nếu trạng thái chưa hoàn tất */}
+        {data.event.status !== "completed" && (
+          <>
+            {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
+            {data.event.status === "pending" && timeDifference < 10 && (
+              <Button
+                type="primary"
+                className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                onClick={() => handleShowPopup(data.event.status)}
+              >
+                {getNextStatusLabel(data.event.status)}
+              </Button>
+            )}
+            {data.event.status === "confirmed" && timeDifference < 4 && (
+              <Button
+                type="primary"
+                className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                onClick={() => handleShowPopup(data.event.status)}
+              >
+                {getNextStatusLabel(data.event.status)}
+              </Button>
+            )}
+
+            {/* Hiển thị nút chuyển sang check-in trong vòng 2 giờ trước khi sự kiện bắt đầu */}
+            {timeDifference <= 2 && timeDifference > 0 && data.event.status === "checkin" && (
+              <Button
+                type="primary"
+                className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                onClick={() => handleShowPopup(data.event.status)}
+              >
+                {getNextStatusLabel(data.event.status)}
+              </Button>
+            )}
+
+            {/* Hiển thị nút chuyển sang "Hoàn thành" khi sự kiện đang diễn ra */}
+            {data.event.status === "ongoing" && (
+              <Button
+                type="primary"
+                className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                onClick={() => handleShowPopup(data.event.status)}
+              >
+                {getNextStatusLabel(data.event.status)}
+              </Button>
+            )}
+          </>
+        )}
+      </p>
+
+      {showConfirmPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
+            <button
+              onClick={() => setShowConfirmPopup(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+            <h3 className="text-xl font-semibold mb-4 text-gray-700 text-center">
+              Xác nhận thay đổi trạng thái
+            </h3>
+            <p className="text-gray-600 mb-6 text-center">
+              Bạn có chắc chắn muốn thay đổi trạng thái sự kiện từ{" "}
+              <span className="font-bold text-blue-500">
+                {getNextStatusLabel(data.event.status)}
+              </span>{" "}
+              sang{" "}
+              <span className="font-bold text-blue-500">
+                {getNextStatusLabel(selectedStatus)}
+              </span>?
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => setShowConfirmPopup(false)}
+                className="px-6 py-2 text-sm text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  handleStatusChange(selectedStatus);
+                  setShowConfirmPopup(false);
+                }}
+                className="px-6 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-all"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-      {data.event.status == "confirmed" && timeDifference < 4 && (
-        <Button
-          type="primary"
-          className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-          onClick={() => {
-            setSelectedStatus(getNextStatusLabel(data.event.status));
-            setShowConfirmPopup(true);
-          }}
-        >
-          {getNextStatusLabel(data.event.status)}
-        </Button>
-      )}
-
-      {/* Hiển thị nút chuyển sang check-in trong vòng 2 giờ trước khi sự kiện bắt đầu */}
-      {timeDifference <= 2 && timeDifference > 0 && data.event.status == "checkin" && (
-        <Button
-          type="primary"
-          className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-          onClick={() => {
-            setSelectedStatus("checkin");
-            setShowConfirmPopup(true);
-          }}
-        >
-          {getNextStatusLabel(data.event.status)}
-        </Button>
-      )}
-
-      {/* Hiển thị nút chuyển sang "Hoàn thành" khi sự kiện đang diễn ra */}
-      {data.event.status === "ongoing" && (
-        <Button
-          type="primary"
-          className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-          onClick={() => {
-            setSelectedStatus("completed");
-            setShowConfirmPopup(true);
-          }}
-        >
-          {getNextStatusLabel(data.event.status)}
-        </Button>
-      )}
-    </>
-  )}
-</p>
-
-
-
       {/* Group the buttons in one row, with different colors */}
       <div className="flex space-x-4 justify-center mb-8">
         <button
@@ -379,47 +404,7 @@ const DetailEvents = () => {
       </div>
       {showUpdateEvent && <UpdateEvent />}
 
-      {showConfirmPopup && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
-      {/* Nút đóng */}
-      <button
-        onClick={() => setShowConfirmPopup(false)}
-        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-      >
-        <i className="fas fa-times"></i>
-      </button>
-      {/* Tiêu đề */}
-      <h3 className="text-xl font-semibold mb-4 text-gray-700 text-center">
-        Xác nhận thay đổi trạng thái
-      </h3>
-      {/* Nội dung */}
-      <p className="text-gray-600 mb-6 text-center">
-        Bạn có chắc chắn muốn thay đổi trạng thái vé sang{" "}
-        <span className="font-bold text-blue-500">{selectedStatus}</span>{" "}
-        không?
-      </p>
-      {/* Nút hành động */}
-      <div className="flex justify-center space-x-4">
-        <button
-          onClick={() => setShowConfirmPopup(false)}
-          className="px-6 py-2 text-sm text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
-        >
-          Hủy
-        </button>
-        <button
-          onClick={() => {
-            setShowConfirmPopup(false);
-            handleChangeStatus();
-          }}
-          className="px-6 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-all"
-        >
-          Xác nhận
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+     
 
 
 
@@ -712,7 +697,7 @@ const DetailEvents = () => {
         onClick={() => setIsModalOpen(false)}
         className="text-xl font-semibold text-gray-500 hover:text-gray-700"
       >
-       
+      
       </button>
     </div>
   }
