@@ -49,7 +49,7 @@ class StatisticsController extends Controller
             ], 400);
         }
     }
-
+// Số sự kiện hoàn thành trong khoảng thời gian
     public function getEventStatisticsByTime(Request $request)
     {
         $timeFrame = $request->input('time_frame', 'month');
@@ -117,6 +117,9 @@ class StatisticsController extends Controller
             ],
         ]);
     }
+     /**
+     * Thống kê sự kiện theo thể loại (chỉ lấy sự kiện có trạng thái confirmed)
+     */
 
     public function getEventCountTotalAmountAndPercentageByEventType()
     {
