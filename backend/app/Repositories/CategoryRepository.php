@@ -26,7 +26,7 @@ class CategoryRepository
 
     public function find($id)
     {
-        return $this->category->find($id);
+        return $this->category->with('events')->find($id);
     }
 
     public function update($id, array $data)
