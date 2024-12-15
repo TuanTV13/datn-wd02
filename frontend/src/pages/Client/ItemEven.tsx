@@ -158,7 +158,7 @@ const ItemEven = () => {
               .map((event) => (
                 <div
                   key={event.id}
-                  className="w-full mb-8 lg:w-[300px] lg:h-[540px] border border-transparent hover:border-[#007BFF] rounded-xl p-6 bg-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:bg-gradient-to-r hover:from-[#c6e1fe] hover:to-[#F5F5F5] flex flex-col"
+                  className="w-full mb-6 lg:w-[300px] lg:h-[540px] border border-transparent hover:border-[#007BFF] rounded-xl p-6 bg-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:bg-gradient-to-r hover:from-[#c6e1fe] hover:to-[#F5F5F5] flex flex-col"
                 >
                   <Link
                     to={`/event-detail/${event.id}`}
@@ -170,7 +170,7 @@ const ItemEven = () => {
                       className="h-[180px] w-full rounded-xl object-cover transition-all duration-300 hover:rounded-none hover:scale-105"
                     />
                   </Link>
-                  <div className="text-sm text-gray-700 mb-3 flex-1">
+                  <div className="text-sm text-gray-700 flex-1">
                     <p className="line-clamp-1">{event.location}</p>
                     <p className="mt-2 text-lg font-semibold line-clamp-1">
                       <Link
@@ -200,10 +200,7 @@ const ItemEven = () => {
                     </p>
                   </div>
 
-                  <div className="text-xs mb-2 mt-2">
-                    <p className="text-gray-500 hover:text-[#070707]">
-                      <Link to={"/event-detail/" + event.id}>Xem chi tiết</Link>
-                    </p>
+                  <div className="text-xs mb-2">
                     <button
                       onClick={() => handleShowPopup(event.id)}
                       className="mt-2 w-[100px] h-[30px] bg-blue-400 hover:bg-blue-700 text-white font-semibold rounded-md mx-auto block"
@@ -321,9 +318,6 @@ const ItemEven = () => {
                     </p>
                   </div>
                   <div className="text-xs mb-2 mt-2">
-                    <p className="text-gray-500 hover:text-[#070707]">
-                      <Link to={"/event-detail/" + event.id}>Xem chi tiết</Link>
-                    </p>
                     <button
                       onClick={() => handleShowPopup(event.id)}
                       className="mt-2 w-[100px] h-[30px] bg-blue-400 hover:bg-blue-700 text-white font-semibold rounded-md mx-auto block"
@@ -434,9 +428,6 @@ const ItemEven = () => {
                   </p>
                 </div>
                 <div className="text-xs mb-2 mt-2">
-                  <p className="text-gray-500 hover:text-[#070707]">
-                    <Link to={"/event-detail/" + event.id}>Xem chi tiết</Link>
-                  </p>
                   <button
                     onClick={() => handleShowPopup(event.id)}
                     className="mt-2 w-[100px] h-[30px] bg-blue-400 hover:bg-blue-700 text-white font-semibold rounded-md mx-auto block"
@@ -516,7 +507,7 @@ const ItemEven = () => {
                   .filter((ticket) => ticket.ticket.ticket_type === "VIP")
                   .map((ticket) => (
                     <option key={ticket.id} value={ticket.id}>
-                      Khu vực: {ticket.zone.name || "N/A"} - Giá:{" "}
+                      Khu vực: {ticket?.zone.name || "N/A"} - Giá:{" "}
                       {new Intl.NumberFormat("vi-VN", {
                         style: "currency",
                         currency: "VND",

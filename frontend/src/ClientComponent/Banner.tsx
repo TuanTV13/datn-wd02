@@ -185,6 +185,7 @@ const Banner = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-[700px]">
             <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
+            <h2 className="text-2xl font-bold mb-4 text-blue-500">Sự kiện: {event?.name}</h2>
 
             {/* Nhóm vé VIP */}
             <div className="mb-6">
