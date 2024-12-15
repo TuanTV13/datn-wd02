@@ -104,10 +104,7 @@ class EventController extends Controller
     }
     public function changeStatus($id, Request $request)
     {
-<<<<<<< HEAD
 
-=======
->>>>>>> 3d245122794420d8eb6f3cbd84c7f7525afcf625
         $event = $this->eventRepository->find($id);
 
         $users = $event->users()
@@ -123,8 +120,7 @@ class EventController extends Controller
 
         $event->update(['status' => $request->input('status')]);
 
-<<<<<<< HEAD
-=======
+
         if ($request->input('status') === 'checkin') {
             event(new EventUpcoming($users, $event));
         }
@@ -132,7 +128,6 @@ class EventController extends Controller
             event(new EventCompleted($users, $event));
         }
 
->>>>>>> 3d245122794420d8eb6f3cbd84c7f7525afcf625
         return response()->json([
             'message' => 'Thanh cong'
         ], 200);
