@@ -26,23 +26,23 @@ const EditTicket = () => {
   }, []);
 
   const { events } = useContext(EventCT);
-  // Lấy tên sự kiện từ danh sách sự kiện
+  
   const getEventName = (eventId: number) => {
     const event = events.find((e) => e.id === eventId);
     return event ? event.name : "Không xác định";
   };
   const [ticketTypesList] = useState(Object.values(TicketType));
-  // Lấy thông tin ticket khi component được render
+  
   useEffect(() => {
     (async () => {
       const data = await getTicketsId(`${id}`);
       if (data) {
-        // Định dạng ngày trước khi gán vào form
+        
         const formattedData = {
           ...data,
           price: data.price.map((item: any) => ({
             ...item,
-            price: Number(item.price), // Đảm bảo giá trị là number
+            price: Number(item.price), 
           })),
           sale_start: dayjs(data.price[0].sale_start).format("YYYY-MM-DD"),
           sale_end: dayjs(data.price[0].sale_end).format("YYYY-MM-DD"),
@@ -53,14 +53,14 @@ const EditTicket = () => {
     })();
   }, [id, reset]);
 
-  // Xử lý cập nhật ticket
+  
   const onSubmit = (data: Tickets) => {
     const seatId = ticket?.price[0]?.seat_zone_id;
-    // Nếu seatId tồn tại, xử lý dữ liệu vé
+    
     if (seatId) {
       const formattedPrice = data.price.map((item: any) => ({
         ...item,
-        price: parseFloat(item.price) || 0, // Chuyển giá trị sang số
+        price: parseFloat(item.price) || 0, 
       }));
       const formattedData = {
         ...data,
@@ -145,7 +145,7 @@ const EditTicket = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="md:col-span-7">
             <h2 className="text-2xl font-bold text-center mb-4">Cập nhật vé</h2>
             <div className="grid grid-cols-1 gap-6">
-              {/* Trường giá vé */}
+              
               <div className="mb-3">
                 <label
                   htmlFor="ticket-price"
@@ -167,7 +167,7 @@ const EditTicket = () => {
                 )}
               </div>
 
-              {/* Trường số lượng vé */}
+              
               <div className="mb-3">
                 <label
                   htmlFor="quantity"
@@ -186,7 +186,7 @@ const EditTicket = () => {
                 )}
               </div>
 
-              {/* Trường ngày bắt đầu */}
+              
               <div className="mb-3">
                 <label
                   htmlFor="sale_start"
@@ -207,7 +207,7 @@ const EditTicket = () => {
                 )}
               </div>
 
-              {/* Trường ngày kết thúc */}
+             
               <div className="mb-3">
                 <label
                   htmlFor="sale_end"
