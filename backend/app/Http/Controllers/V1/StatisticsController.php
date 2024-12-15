@@ -18,7 +18,7 @@ class StatisticsController extends Controller
         $this->eventRepository = $eventRepository;
     }
 
-    // Top sự kiện trong khoảng thời gian -> trả về tổng doanh thu và % của từng sự kiện
+   
     public function topRevenueEvents(Request $request)
     {
         $limit = $request->input('limit', 5);
@@ -37,12 +37,7 @@ class StatisticsController extends Controller
         try {
             $topEvents = $this->eventRepository->getTopRevenueEvents($limit, $startDate, $endDate);
 
-            // if (!empty($topEvents)) {
-            //     return  response()->json([
-            //         'status' => 'message',
-            //         'message' => 'Không có dữ liệu trong khoảng thời gian trên.'
-            //     ], 400);
-            // }
+        
 
             return response()->json([
                 'status' => 'success',
