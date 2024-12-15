@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 const EventDetail = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
-  const [checkInPopup, setCheckInPopup] = useState(false); // Khởi tạo trạng thái của popup
+ 
   const [selectedVIPTicket, setSelectedVIPTicket] = useState(null);
   const [vipTicketQuantity, setVIPTicketQuantity] = useState(1);
   const [selectedRegularTicket, setSelectedRegularTicket] = useState(null);
@@ -17,10 +17,10 @@ const EventDetail = () => {
   const [ticketQuantity, setTicketQuantity] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [similarEvents, setSimilarEvents] = useState([]);
-  const [checkInMode, setCheckInMode] = useState("code"); // 'code' hoặc 'qr'
+const [reload, setReload] = useState(false);
   const [selectedZones, setSelectedZones] = useState({});
   const [quantity, setQuantity] = useState(1);
-  const [qrCodeData, setQrCodeData] = useState(null);
+ 
   // Hàm để cập nhật zone đã chọn
   const handleZoneChange = (ticket, zoneId) => {
     // Tìm zone được chọn trong ticket.price
@@ -263,73 +263,6 @@ const EventDetail = () => {
           >
             {event.name}
           </h1>
-          {checkInPopup && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white p-6 rounded-lg w-[600px]">
-                <h2 className="text-2xl font-bold mb-4">Check-in</h2>
-                <div className="flex space-x-4 mb-4 justify-center">
-                  <button
-                    className={`px-4 py-2 rounded ${
-                      checkInMode === "code"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                    onClick={() => handleSwitchCheckInMode("code")}
-                  >
-                    Nhập mã vé
-                  </button>
-                  <button
-                    className={`px-4 py-2 rounded ${
-                      checkInMode === "qr"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                    onClick={() => handleSwitchCheckInMode("qr")}
-                  >
-                    Quét mã QR
-                  </button>
-                </div>
-
-                {checkInMode === "code" && (
-                  <div>
-                    <input
-                      id="ticket_code"
-                      type="text"
-                      placeholder="Nhập mã vé"
-                      className="w-full p-2 border rounded mb-4 text-black"
-                    />
-                  </div>
-                )}
-
-                {checkInMode === "qr" && (
-                  <div>
-                    <QrReader
-                      delay={300}
-                      style={{ width: "100%" }}
-                      onError={handleQrCodeError}
-                      onScan={handleQrCodeScan}
-                    />
-                  </div>
-                )}
-
-                {/* Nút xác nhận và đóng trên cùng một hàng */}
-                <div className="flex space-x-4 mt-4">
-                  <button
-                    onClick={handleCheckInSubmit}
-                    className="w-[48%] bg-blue-500 text-white py-2 rounded"
-                  >
-                    Xác nhận
-                  </button>
-                  <button
-                    onClick={handleCloseCheckInPopup}
-                    className="w-[48%] bg-gray-500 text-white py-2 rounded"
-                  >
-                    Đóng
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {event.status !== "completed" && event.status !== "ongoing" && (
             <>
@@ -348,15 +281,7 @@ const EventDetail = () => {
                   Mua vé
                 </button>
               )}
-              {event.status === "checkin" && (
-                <button
-
-                  onClick={handleCheckIn}
-                  className="w-[150px] h-[50px] bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md mt-4"
-                >
-                  Check-in
-                </button>
-              )}
+             
             </>
           )}
           <div className="mt-4 text-center">

@@ -20,12 +20,12 @@ const CategoryEven = () => {
     useContext(CategoryCT);
   const { provinces } = useContext(EventCT);
 
-  // Function to toggle category menu
+  
   const toggleCategory = () => {
     setIsCategoryOpen(!isCategoryOpen);
   };
 
-  // Function to toggle location menu
+  
   const toggleLocation = () => {
     setIsLocationOpen(!isLocationOpen);
   };
@@ -37,10 +37,10 @@ const CategoryEven = () => {
     navigate(`/event-category/${id}`);
   };
 
-  // const [filteredEvents, setEvents] = useState(events); // Sự kiện đã lọc
+  
   const location = useLocation();
-  const [start_time, setStart_time] = useState(""); // Ngày bắt đầu
-  const [end_time, setEnd_time] = useState(""); // Ngày kết thúc
+  const [start_time, setStart_time] = useState(""); 
+  const [end_time, setEnd_time] = useState(""); 
 
   const fetchEventsByDate = async (startTime: string, endTime: string) => {
     try {
@@ -61,14 +61,14 @@ const CategoryEven = () => {
       params.set("start_time", start_time);
       params.set("end_time", end_time);
       navigate(`?${params.toString()}`);
-      fetchEventsByDate(start_time, end_time); // Lấy sự kiện theo khoảng thời gian đã chọn
+      fetchEventsByDate(start_time, end_time); 
     } else {
       notification.error({
         message: "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!",
       });
     }
   };
-  // Lấy query params từ URL khi tải trang
+  
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const startTime = params.get("start_time");
@@ -92,7 +92,7 @@ const CategoryEven = () => {
   };
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Lọc danh mục dựa trên giá trị của ô input
+  
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -108,9 +108,9 @@ const CategoryEven = () => {
     navigate(`?${params.toString()}`);
     try {
       const data = await fetchEventsByProvince(Inputlocation);
-      setEvents(data); // Cập nhật danh sách sự kiện
+      setEvents(data); 
     } catch (err) {
-      setEvents([]); // Xóa danh sách sự kiện cũ
+      setEvents([]); 
     }
   };
   const [Inputlocation, setLocation] = useState("");
@@ -126,9 +126,9 @@ const CategoryEven = () => {
   const [filteredEvents, setFilteredEvents] = useState(events);
   const [allEvents, setAllEvents] = useState(events);
   useEffect(() => {
-    // Khi trang tải lại, lấy lại sự kiện ban đầu
-    setAllEvents(events); // Lưu lại tất cả sự kiện ban đầu
-    setFilteredEvents(events); // Hiển thị tất cả sự kiện khi chưa có bộ lọc
+    
+    setAllEvents(events); 
+    setFilteredEvents(events); 
   }, [events]);
 
   const stripHtmlTags = (html: string) => {
@@ -139,12 +139,12 @@ const CategoryEven = () => {
 
   const [totalPages, setTotalPages] = useState(Math.ceil(events.length / 5));
   useEffect(() => {
-    setTotalPages(Math.ceil(filteredEvents.length / 5)); // Cập nhật lại tổng số trang khi có sự kiện lọc
+    setTotalPages(Math.ceil(filteredEvents.length / 5)); 
   }, [filteredEvents]);
-  const eventsPerPage = 5; // Số sự kiện trên mỗi trang
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const eventsPerPage = 5; 
+  const [currentPage, setCurrentPage] = useState(1); 
 
-  // Tính các sự kiện cần hiển thị dựa trên trang hiện tại
+  
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = filteredEvents.slice(
@@ -152,7 +152,7 @@ const CategoryEven = () => {
     indexOfLastEvent
   );
 
-  // Hàm xử lý thay đổi trang
+  
   const handlePageChange = (direction: any) => {
     setCurrentPage((prevPage) => {
       if (direction === "next" && prevPage < totalPages) {
