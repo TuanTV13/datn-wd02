@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import QrReader from "react-qr-scanner"; // Import thư viện
@@ -71,8 +71,9 @@ const EventDetail = () => {
         console.error("Lỗi khi check-in:", error);
         if (error.response && error.response.data) {
           notification.error({
-            message: `Lỗi: ${error.response.data.error || "Không thể thực hiện check-in"
-              }`,
+            message: `Lỗi: ${
+              error.response.data.error || "Không thể thực hiện check-in"
+            }`,
           });
         } else {
           notification.error({ message: "Có lỗi xảy ra. Vui lòng thử lại." });
@@ -126,12 +127,13 @@ const EventDetail = () => {
         seat_zone: selectedVIPTicket?.zone?.name,
         original_price: selectedVIPTicket?.price,
       });
-      totalAmount += vipTicketTotalPrice; 
+      totalAmount += vipTicketTotalPrice;
     }
 
     // Kiểm tra nếu có vé Thường được chọn và số lượng hợp lệ
     if (selectedRegularTicket && regularTicketQuantity > 0) {
-      const regularTicketTotalPrice = selectedRegularTicket.price * regularTicketQuantity;
+      const regularTicketTotalPrice =
+        selectedRegularTicket.price * regularTicketQuantity;
       tickets.push({
         ticket_id: selectedRegularTicket.ticket.id,
         ticket_type: "Thường",
@@ -140,7 +142,7 @@ const EventDetail = () => {
         seat_zone: selectedRegularTicket?.zone?.name,
         original_price: selectedRegularTicket?.price,
       });
-      totalAmount += regularTicketTotalPrice; 
+      totalAmount += regularTicketTotalPrice;
     }
     // Kiểm tra nếu có ít nhất một vé đã được chọn
     if (tickets.length > 0) {
@@ -151,12 +153,11 @@ const EventDetail = () => {
       };
 
       // Điều hướng sang trang checkout và truyền dữ liệu
-      navigate('/checkout', { state: ticketData });
+      navigate("/checkout", { state: ticketData });
     } else {
-      alert('Vui lòng chọn ít nhất một loại vé.');
+      alert("Vui lòng chọn ít nhất một loại vé.");
     }
   };
-
 
   const handleClosePopup = () => {
     setShowPopup(false);
@@ -205,34 +206,34 @@ const EventDetail = () => {
   };
 
   const handleQrCodeScan = (data) => {
-    if (data && data.text) {  // Kiểm tra nếu dữ liệu có trường text
-      console.log("Dữ liệu quét được:", data);  // In ra dữ liệu quét để kiểm tra
-  
-      const ticket_code = data.text;  // Lấy mã vé từ trường text
-  
-      setQrCodeData(ticket_code);  // Cập nhật ticketCode vào state
-  
+    if (data && data.text) {
+      // Kiểm tra nếu dữ liệu có trường text
+      console.log("Dữ liệu quét được:", data); // In ra dữ liệu quét để kiểm tra
+
+      const ticket_code = data.text; // Lấy mã vé từ trường text
+
+      setQrCodeData(ticket_code); // Cập nhật ticketCode vào state
+
       // Gửi dữ liệu mã QR (ticketCode) để xử lý check-in
       axios
         .put(
           `http://127.0.0.1:8000/api/v1/clients/events/${event.id}/checkin`,
-          { ticket_code: ticket_code }  // Gửi ticketCode lên API
+          { ticket_code: ticket_code } // Gửi ticketCode lên API
         )
         .then((response) => {
-          setCheckInPopup(false);  // Đóng popup sau khi check-in thành công
-          toast.success("Check-in thành công!");  // Thông báo check-in thành công
+          setCheckInPopup(false); // Đóng popup sau khi check-in thành công
+          toast.success("Check-in thành công!"); // Thông báo check-in thành công
           console.log("Check-in thành công:", response);
         })
         .catch((error) => {
-          toast.error(error)
-          console.error("Lỗi khi check-in:", error);  // Xử lý lỗi nếu có
+          toast.error(error);
+          console.error("Lỗi khi check-in:", error); // Xử lý lỗi nếu có
         });
     } else {
-      console.log("Không nhận được dữ liệu từ mã QR.");  // Trường hợp không nhận được dữ liệu
+      console.log("Không nhận được dữ liệu từ mã QR."); // Trường hợp không nhận được dữ liệu
     }
   };
-  
-  
+
   const handleQrCodeError = (err) => {
     console.error("Lỗi quét mã QR:", err);
   };
@@ -263,70 +264,72 @@ const EventDetail = () => {
             {event.name}
           </h1>
           {checkInPopup && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded-lg w-[600px]">
-      <h2 className="text-2xl font-bold mb-4">Check-in</h2>
-      <div className="flex space-x-4 mb-4 justify-center">
-        <button
-          className={`px-4 py-2 rounded ${checkInMode === "code"
-            ? "bg-blue-500 text-white"
-            : "bg-gray-200 text-gray-700"
-            }`}
-          onClick={() => handleSwitchCheckInMode("code")}
-        >
-          Nhập mã vé
-        </button>
-        <button
-          className={`px-4 py-2 rounded ${checkInMode === "qr"
-            ? "bg-blue-500 text-white"
-            : "bg-gray-200 text-gray-700"
-            }`}
-          onClick={() => handleSwitchCheckInMode("qr")}
-        >
-          Quét mã QR
-        </button>
-      </div>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white p-6 rounded-lg w-[600px]">
+                <h2 className="text-2xl font-bold mb-4">Check-in</h2>
+                <div className="flex space-x-4 mb-4 justify-center">
+                  <button
+                    className={`px-4 py-2 rounded ${
+                      checkInMode === "code"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                    onClick={() => handleSwitchCheckInMode("code")}
+                  >
+                    Nhập mã vé
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded ${
+                      checkInMode === "qr"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                    onClick={() => handleSwitchCheckInMode("qr")}
+                  >
+                    Quét mã QR
+                  </button>
+                </div>
 
-      {checkInMode === "code" && (
-        <div>
-          <input
-            id="ticket_code"
-            type="text"
-            placeholder="Nhập mã vé"
-            className="w-full p-2 border rounded mb-4 text-black"
-          />
-        </div>
-      )}
+                {checkInMode === "code" && (
+                  <div>
+                    <input
+                      id="ticket_code"
+                      type="text"
+                      placeholder="Nhập mã vé"
+                      className="w-full p-2 border rounded mb-4 text-black"
+                    />
+                  </div>
+                )}
 
-      {checkInMode === "qr" && (
-        <div>
-          <QrReader
-            delay={300}
-            style={{ width: "100%" }}
-            onError={handleQrCodeError}
-            onScan={handleQrCodeScan}
-          />
-        </div>
-      )}
+                {checkInMode === "qr" && (
+                  <div>
+                    <QrReader
+                      delay={300}
+                      style={{ width: "100%" }}
+                      onError={handleQrCodeError}
+                      onScan={handleQrCodeScan}
+                    />
+                  </div>
+                )}
 
-      {/* Nút xác nhận và đóng trên cùng một hàng */}
-      <div className="flex space-x-4 mt-4">
-        <button
-          onClick={handleCheckInSubmit}
-          className="w-[48%] bg-blue-500 text-white py-2 rounded"
-        >
-          Xác nhận
-        </button>
-        <button
-          onClick={handleCloseCheckInPopup}
-          className="w-[48%] bg-gray-500 text-white py-2 rounded"
-        >
-          Đóng
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+                {/* Nút xác nhận và đóng trên cùng một hàng */}
+                <div className="flex space-x-4 mt-4">
+                  <button
+                    onClick={handleCheckInSubmit}
+                    className="w-[48%] bg-blue-500 text-white py-2 rounded"
+                  >
+                    Xác nhận
+                  </button>
+                  <button
+                    onClick={handleCloseCheckInPopup}
+                    className="w-[48%] bg-gray-500 text-white py-2 rounded"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {event.status !== "completed" && event.status !== "ongoing" && (
             <>
@@ -357,7 +360,8 @@ const EventDetail = () => {
           )}
           <div className="mt-4 text-center">
             <p className="text-lg">
-              Địa điểm: {`${event.location}`}, {`${event.ward}, ${event.district}, ${event.province}`}
+              Địa điểm: {`${event.location}`},{" "}
+              {`${event.ward}, ${event.district}, ${event.province}`}
             </p>
           </div>
           {statusInfo && (
@@ -370,10 +374,11 @@ const EventDetail = () => {
         </div>
       </div>
       <br />
+      {event.speakers && event.speakers.length > 0 && (
       <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
+        
 
-        {event.speakers && event.speakers.length > 0 && (
+        
           <div className="flex flex-wrap justify-center mt-8 gap-6">
             {event.speakers.map((speaker, index) => (
               <div key={index} className="flex flex-col items-center w-48">
@@ -395,8 +400,8 @@ const EventDetail = () => {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        
+      </div>)}
       {/* Mô tả sự kiện */}
       <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4">Mô tả sự kiện</h2>
@@ -410,6 +415,8 @@ const EventDetail = () => {
           }}
         ></div>
       </div>
+      <br />
+      <br />
       {/* Sự kiện tương tự */}
       {/* <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4">Sự kiện tương tự</h2>
@@ -449,7 +456,9 @@ const EventDetail = () => {
               <select
                 value={selectedVIPTicket?.id || ""} // Giữ vé VIP đã chọn
                 onChange={(e) => {
-                  const selected = event.tickets.find(ticket => ticket.id === parseInt(e.target.value));
+                  const selected = event.tickets.find(
+                    (ticket) => ticket.id === parseInt(e.target.value)
+                  );
                   setSelectedVIPTicket(selected);
                   setVIPTicketQuantity(1); // Đặt lại số lượng vé VIP khi chọn vé mới
                 }}
@@ -460,7 +469,8 @@ const EventDetail = () => {
                   .filter((ticket) => ticket?.ticket?.ticket_type === "VIP")
                   .map((ticket) => (
                     <option key={ticket.id} value={ticket.id}>
-                      Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND - Số lượng còn lại: {ticket.sold_quantity}
+                      Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND -
+                      Số lượng còn lại: {ticket.sold_quantity}
                     </option>
                   ))}
               </select>
@@ -468,7 +478,9 @@ const EventDetail = () => {
               {/* Hiển thị input số lượng khi vé VIP được chọn */}
               {selectedVIPTicket && (
                 <div className="mt-4">
-                  <label className="block text-sm font-bold mb-2">Số lượng</label>
+                  <label className="block text-sm font-bold mb-2">
+                    Số lượng
+                  </label>
                   <input
                     type="number"
                     min="1"
@@ -484,11 +496,15 @@ const EventDetail = () => {
 
             {/* Nhóm vé Thường */}
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-indigo-700 mb-4">Vé Thường</h3>
+              <h3 className="text-xl font-bold text-indigo-700 mb-4">
+                Vé Thường
+              </h3>
               <select
                 value={selectedRegularTicket?.id || ""} // Giữ vé Thường đã chọn
                 onChange={(e) => {
-                  const selected = event.tickets.find(ticket => ticket.id === parseInt(e.target.value));
+                  const selected = event.tickets.find(
+                    (ticket) => ticket.id === parseInt(e.target.value)
+                  );
                   setSelectedRegularTicket(selected);
                   setRegularTicketQuantity(1); // Đặt lại số lượng vé Thường khi chọn vé mới
                 }}
@@ -499,7 +515,8 @@ const EventDetail = () => {
                   .filter((ticket) => ticket?.ticket?.ticket_type === "Thường")
                   .map((ticket) => (
                     <option key={ticket.id} value={ticket.id}>
-                      Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND - Số lượng còn lại: {ticket.sold_quantity}
+                      Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND -
+                      Số lượng còn lại: {ticket.sold_quantity}
                     </option>
                   ))}
               </select>
@@ -507,7 +524,9 @@ const EventDetail = () => {
               {/* Hiển thị input số lượng khi vé Thường được chọn */}
               {selectedRegularTicket && (
                 <div className="mt-4">
-                  <label className="block text-sm font-bold mb-2">Số lượng</label>
+                  <label className="block text-sm font-bold mb-2">
+                    Số lượng
+                  </label>
                   <input
                     type="number"
                     min="1"

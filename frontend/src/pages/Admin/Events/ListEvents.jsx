@@ -55,6 +55,8 @@ const EventList = () => {
         if (response && response.data && Array.isArray(response.data.data)) {
           setCategories(response.data.data);
         }
+        console.log(response.data.data);
+        
       } catch (error) {
         console.error("Lỗi khi tải danh mục:", error);
       }
@@ -83,22 +85,22 @@ const EventList = () => {
     });
     setFilteredEvents(filtered);
   }, [searchName, searchCategory, searchStatus, searchDateRange, list]);
-  useEffect(() => {
-    const filtered = list.filter((event) => {
-      const matchesName = event.name.toLowerCase().includes(searchName.toLowerCase());
-      const matchesCategory = searchCategory ? event.category_id === searchCategory : true;
-      const matchesStatus = searchStatus ? event.status === searchStatus : true;
+  // useEffect(() => {
+  //   const filtered = list.filter((event) => {
+  //     const matchesName = event.name.toLowerCase().includes(searchName.toLowerCase());
+  //     const matchesCategory = searchCategory ? event.category_id === searchCategory : true;
+  //     const matchesStatus = searchStatus ? event.status === searchStatus : true;
   
-      // Lọc theo khoảng thời gian
-      const matchesTime =
-        (!searchTimeRange.length ||
-          (new Date(event.start_time) >= searchTimeRange[0] &&
-           new Date(event.end_time) <= searchTimeRange[1]));
+  //     // Lọc theo khoảng thời gian
+  //     const matchesTime =
+  //       (!searchTimeRange.length ||
+  //         (new Date(event.start_time) >= searchTimeRange[0] &&
+  //          new Date(event.end_time) <= searchTimeRange[1]));
   
-      return matchesName && matchesCategory && matchesStatus && matchesTime;
-    });
-    setFilteredEvents(filtered);
-  }, [searchName, searchCategory, searchStatus, searchTimeRange, list]);
+  //     return matchesName && matchesCategory && matchesStatus && matchesTime;
+  //   });
+  //   setFilteredEvents(filtered);
+  // }, [searchName, searchCategory, searchStatus, searchTimeRange, list]);
   
   const onDelete = async (id) => {
     setDeletingEventId(id);
@@ -237,7 +239,7 @@ const EventList = () => {
             }
             options={[
               { label: "Chọn danh mục", value: "" },
-              categories.map((category) => ({
+              ...categories.map((category) => ({
                 label: category.name,
                 value: category.id,
               })),

@@ -36,6 +36,7 @@ import AddRating from "./pages/Admin/Rating/AddRating";
 import SearchEvent from "./pages/Client/SearchEvent";
 import ListTicketDelete from "./pages/Admin/Tickets/ListTicketDelete";
 import Dashboard from "./pages/Admin/Dashboard/Dashboard";
+import OrderList from "./pages/Client/OrderList";
 
 function App() {
   const route = useRoutes([
@@ -56,6 +57,7 @@ function App() {
         { path: "profile/edit", element: <UserProfileEdit /> },
         { path: "change-password", element: <UserChangePassword /> },
         { path: "search", element: <SearchEvent /> },
+        { path: "order-detail/:id", element: <OrderList /> },
       ],
     },
     {
