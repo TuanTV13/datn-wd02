@@ -48,13 +48,22 @@ const AddDiscountCode = (props) => {
     e.preventDefault();
     setLoading(true);
 
+    if (!formData.event_id && !props.eventId) {
+      notification.error({
+        message: "Lỗi",
+        description: "Vui lòng chọn sự kiện.",
+      });
+      setLoading(false);
+      return;
+    }
+
     // Chuyển đổi ngày theo định dạng yyyy-mm-dd
     const startTime = formData.startDate;
     const endTime = formData.endDate;
 
     const requestData = {
       creator_id: 3,
-      event_id: props.eventId,
+      event_id: props.eventId || formData.event_id,
       code: formData.code,
       discount_type: formData.discountType,
       discount_value: formData.discountValue,
@@ -80,10 +89,11 @@ const AddDiscountCode = (props) => {
       setLoading(false);
       if (!props.eventId) navigate("/admin/discount-code-list");
     } catch (error) {
+      console.log(error)
       setLoading(false);
       notification.error({
         message: "Lỗi",
-        description: "Có lỗi xảy ra khi thêm mã giảm giá.",
+        description: `${error.response?.data?.message}`,
       });
     }
   };
@@ -128,7 +138,9 @@ const AddDiscountCode = (props) => {
                 id="event_id"
                 required
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                {...register("event_id", { required: true })}
+                // {...register("event_id", { required: true })}
+                value={formData.event_id}
+                onChange={(e) => handleSelectChange(e.target.value, "event_id")}
               >
                 <option value="">Chọn sự kiện</option>
                 {events?.map((event) => (
