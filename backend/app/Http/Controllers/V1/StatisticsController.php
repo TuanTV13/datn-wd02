@@ -18,7 +18,7 @@ class StatisticsController extends Controller
         $this->eventRepository = $eventRepository;
     }
 
-
+// Top sự kiện trong khoảng thời gian -> trả về tổng doanh thu và % của từng sự kiện
     public function topRevenueEvents(Request $request)
     {
         $limit = $request->input('limit', 5);
