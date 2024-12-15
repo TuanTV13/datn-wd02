@@ -193,8 +193,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/top-participants', [StatisticsController::class, 'topParticipantsEvents']);
             // Route để lấy thống kê số sự kiện đã xác nhận và bị hủy bỏ trong khoảng thời gian
             Route::get('/event-status-statistics', [StatisticsController::class, 'getEventStatusStatistics']);
-
-            
+             // Route để lấy doanh thu và số lượng người tham gia của các sự kiện trong khoảng thời gian
             Route::get('/event-revenue-participants', [StatisticsController::class, 'getEventRevenueAndParticipants']);
         });
 
