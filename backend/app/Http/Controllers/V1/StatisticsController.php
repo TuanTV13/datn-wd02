@@ -167,7 +167,7 @@ class StatisticsController extends Controller
 
 
         try {
-
+        // Lấy các sự kiện top theo số người tham gia và trạng thái hoàn thành
             $topEvents = DB::table('events')
                 ->join('transactions', 'events.id', '=', 'transactions.event_id')
                 ->select(
