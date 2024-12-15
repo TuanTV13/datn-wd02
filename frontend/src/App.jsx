@@ -30,13 +30,13 @@ import UserProfile from "./pages/Client/UserProfile";
 import AddDiscountCode from "./pages/Admin/Voucher/AddDiscountCode";
 import DiscountCodeList from "./pages/Admin/Voucher/DiscountCodeList";
 import ExpiringVoucherForm from "./pages/Admin/Voucher/ExpiringVouchers";
-import Order from "./pages/Client/Order";
 import RatingList from "./pages/Admin/Rating/RatingList";
 import AddRating from "./pages/Admin/Rating/AddRating";
 import SearchEvent from "./pages/Client/SearchEvent";
 import ListTicketDelete from "./pages/Admin/Tickets/ListTicketDelete";
 import Dashboard from "./pages/Admin/Dashboard/Dashboard";
 import OrderList from "./pages/Client/OrderList";
+import Contact from "./pages/Client/Contact";
 
 function App() {
   const route = useRoutes([
@@ -50,7 +50,7 @@ function App() {
         { path: "event-category/:id", element: <CategoryEvent /> },
         { path: "cart", element: <Cart /> },
         { path: "checkout", element: <CheckOut /> },
-        { path: "order", element: <Order /> },
+        { path: "contact", element: <Contact /> },
         { path: "event-history", element: <EventHistory /> },
         { path: "payment-history", element: <PaymentHistory /> },
         { path: "profile", element: <UserProfile /> },

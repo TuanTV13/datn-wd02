@@ -260,11 +260,9 @@ const Header = () => {
             <li className="relative">
               <Link to={`/event-list`}>Sự kiện</Link>
             </li>
-
             <li>
-              <Link to={``}>Blog</Link>
+              <Link to={``}>Giới thiệu</Link>
             </li>
-
             <li className="relative" ref={menuRef}>
               <Link
                 to={``}
@@ -283,24 +281,14 @@ const Header = () => {
                       className="block px-4 py-2"
                       onClick={closeMenu} // Đóng menu khi chọn mục
                     >
-                      Liên hệ
-                    </Link>
-                  </li>
-                  <li className="flex hover:bg-gray-300">
-                    <Link
-                      to={``}
-                      className="block px-4 py-2"
-                      onClick={closeMenu} // Đóng menu khi chọn mục
-                    >
                       Hướng dẫn đặt vé
                     </Link>
                   </li>
                 </ul>
               )}
             </li>
-
-            <li>
-              <Link to={``}>Giới thiệu</Link>
+            <li className="relative">
+              <Link to={`contact`}>Liên hệ</Link>
             </li>
           </ul>
         </div>
