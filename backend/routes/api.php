@@ -104,7 +104,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('tickets', [TicketController::class, 'index']);
-    Route::prefix('tickets')->group(function () {
+    Route::prefix('tickets')->middleware(['check.jwt', 'check.permission:manage-tickets'])->group(function () {
         Route::get('{id}', [TicketController::class, 'show']); // chi tiết vé
         Route::post('/block', [TicketController::class, 'listBlock']);
         Route::get('block/{id}', [TicketController::class, 'getBlockById']); // danh sách vé bị khóa

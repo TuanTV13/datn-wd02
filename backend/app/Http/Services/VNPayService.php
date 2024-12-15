@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Http\Services;
 
@@ -62,7 +62,7 @@ class VNPayService
         // Tạo URL thanh toán
         $vnp_Url = $vnp_Url . "?" . $query;
         if (isset($vnp_HashSecret)) {
-            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);// Băm dữ liệu
+            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret); // Băm dữ liệu
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
 
