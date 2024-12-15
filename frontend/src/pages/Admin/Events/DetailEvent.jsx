@@ -8,6 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { Button, Modal } from "antd";
 import AddTicket from "../Tickets/AddTicket";
 import AddDiscountCode from "../Voucher/AddDiscountCode";
+import UpdateEvent from "./UpdateEvent";
+import AddSpeakerModal from "../../../components/Admin/AddSpeakerModal";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DetailEvents = () => {
@@ -16,17 +18,31 @@ const DetailEvents = () => {
   const [error, setError] = useState(null);
   const [showTickets, setShowTickets] = useState(false); // Quản lý popup vé
   const [showUsers, setShowUsers] = useState(false); // Quản lý popup người dùng
+  const [showUpdateEvent, setShowUpdateEvent] = useState(false); // Quản lý popup người dùng
   const [showStatusPopup, setShowStatusPopup] = useState(false); // Popup trạng thái
   const [selectedStatus, setSelectedStatus] = useState(""); // Lưu trạng thái được chọn
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
-
+  // const [showConfirmCheckinPopup, setShowConfirmCheckinPopup] = useState(false);
+  // const [selectedUser, setSelectedUser] = useState(null);
+  const [modalData, setModalData] = useState({
+    show: false,
+    id: null,
+    ticketCode: "",
+    action: "",
+  });
+  const [currentTime, setCurrentTime] = useState(new Date());
   const { id } = useParams();
 
   // Modal state
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTicketForm, setIsTicketForm] = useState(true);
   const [eventId, setEventId] = useState(id);
   const [reload, setReload] = useState(false);
+  const [showStatistics, setShowStatistics] = useState(false);
+  const [showAddSpeaker, setShowAddSpeaker] = useState(false);
+
+  const [showUsersStatistics, setShowUsersStatistics] = useState(false); // Add this state
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -42,8 +58,11 @@ const DetailEvents = () => {
           { headers }
         );
         setEventDetails(response.data);
-        console.log(response.data);
       } catch (err) {
+        if (err.status === 401) {
+          localStorage.clear();
+          window.location = "/auth";
+        }
         setError("Lỗi khi tải chi tiết sự kiện");
         console.error(err);
       } finally {
@@ -53,39 +72,50 @@ const DetailEvents = () => {
 
     fetchEventDetails();
   }, [id, reload]);
+  useEffect(() => {
+    // Cập nhật thời gian mỗi phút
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Kiểm tra mỗi phút
 
-  const handleChangeStatus = async () => {
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleStatusChange = async (currentStatus) => {
     const token = localStorage.getItem("access_token");
     const headers = {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     };
 
+    // Xác định trạng thái tiếp theo
+    const nextStatusMap = {
+      pending: "confirmed",
+      confirmed: "checkin",
+      checkin: "ongoing",
+      ongoing: "completed",
+    };
+    const nextStatus = nextStatusMap[currentStatus];
+
     try {
-      await axios.put(
+      // Gửi API để cập nhật trạng thái
+      const response = await axios.put(
         `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
-        { status: selectedStatus },
+        { status: nextStatus },
         { headers }
       );
+      setReload(!reload);
+      // Hiển thị thông báo thành công
       toast.success("Cập nhật trạng thái thành công!", {
         position: "top-right",
-        autoClose: 3000, // Thời gian tự động đóng (ms)
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
       });
-      setShowStatusPopup(false);
-
-      // Fetch lại dữ liệu sự kiện
-      setLoading(true);
-      const response = await axios.get(
-        `http://127.0.0.1:8000/api/v1/events/${id}/show`,
-        { headers }
-      );
-      setEventDetails(response.data);
-      setLoading(false);
     } catch (err) {
+      // Hiển thị thông báo lỗi
       toast.error("Cập nhật trạng thái thất bại!", {
         position: "top-right",
         autoClose: 3000,
@@ -98,47 +128,65 @@ const DetailEvents = () => {
     }
   };
 
+  const handleShowPopup = (status) => {
+    setSelectedStatus(status);
+    setShowConfirmPopup(true);
+  };
+  // Tính toán thời gian để hiển thị nút phù hợp
+  const getTimeDifference = (startTime) => {
+    const eventStartTime = new Date(startTime);
+    return (eventStartTime - currentTime) / 1000 / 60 / 60; // Chuyển đổi thành giờ
+  };
+
+  const getNextStatusLabel = (status) => {
+    if (status === "pending") {
+      return "Thay đổi thành Đang chuẩn bị";
+    } else if (status === "confirmed") {
+      return "Thay đổi thành Đang check-in";
+    } else if (status === "checkin") {
+      return "Thay đổi thành Đang diễn ra";
+    } else if (status === "ongoing") {
+      return "Kết thúc";
+    }
+    return "";
+  };
+
   const handleCheckIn = async (id, ticketCode) => {
-    if (window.confirm("xac nhan")) {
-      try {
-        // Lấy token từ localStorage
-        const token = localStorage.getItem("access_token");
+    try {
+      // Lấy token từ localStorage
+      const token = localStorage.getItem("access_token");
 
-        // Tạo headers với token
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json", // Nếu bạn gửi JSON
-        };
+      // Tạo headers với token
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json", // Nếu bạn gửi JSON
+      };
 
-        const response = await fetch(
-          `http://127.0.0.1:8000/api/v1/events/${id}/checkin`,
-          {
-            method: "PUT",
-            headers: headers,
-            body: JSON.stringify({ ticket_code: ticketCode }),
-          }
-        );
-
-        if (!response.ok) {
-          const error = await response.json();
-          console.log("Error:", error);
-          // Xử lý lỗi tại đây
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/v1/events/${id}/checkin`,
+        {
+          method: "PUT",
+          headers: headers,
+          body: JSON.stringify({ ticket_code: ticketCode }),
         }
+      );
 
-        const data = await response.json();
-        console.log("Check-in successful:", data);
-        // Xử lý kết quả thành công nếu cần
-        // setUsers((prevUsers) =>
-        //   prevUsers.map((user) =>
-        //     user.id === id
-        //       ? { ...user, pivot: { ...user.pivot, checked_in: 1 } }
-        //       : user
-        //   )
-        // );
-        setReload(!reload);
-      } catch (error) {
-        console.error("Error:", error);
+      if (!response.ok) {
+        const error = await response.json();
+        // Xử lý lỗi tại đây
       }
+
+      const data = await response.json();
+
+      toast.success("Thay đổi trạng thái check-in thành công!");
+      setReload(!reload);
+    } catch (error) {
+      toast.error("Thay đổi trạng thái check-in thất bại!");
+      if (error.status === 401) {
+      }
+      localStorage.clear();
+      window.location = "/auth";
+      console.error("Error:", error);
     }
   };
 
@@ -167,9 +215,15 @@ const DetailEvents = () => {
       }
 
       const data = await response.json();
-      console.log("Cancel check-in successful:", data);
+      toast.success("Thay đổi trạng thái check-in thành công!");
+      setReload(!reload);
       // Xử lý kết quả thành công nếu cần
     } catch (error) {
+      toast.error("Thay đổi trạng thái check-in thất bại!");
+      if (error.status === 401) {
+        localStorage.clear();
+        window.location = "/auth";
+      }
       console.error("Error:", error);
     }
   };
@@ -208,8 +262,17 @@ const DetailEvents = () => {
       },
     ],
   };
+  const timeDifference = getTimeDifference(data.event.start_time);
   return (
     <div className="bg-white rounded-lg shadow p-6">
+      <AddSpeakerModal
+        show={showAddSpeaker}
+        onClose={() => {
+          setShowAddSpeaker(false);
+          setReload(!reload);
+        }}
+        eventId={id}
+      />
       <h2 className="text-4xl font-bold mb-6 text-center text-gradient bg-clip-text text-transparent bg-gradient-to-r from-teal-400 via-blue-500 to-purple-600">
         Chi tiết sự kiện
       </h2>
@@ -220,109 +283,68 @@ const DetailEvents = () => {
         {data.event.name}
       </h1>
 
-      <p className="text-lg font-medium text-gray-700 mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md border-l-4 ">
+      <p className="text-lg font-medium text-gray-700 mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md border-l-4">
+        
         <span className="flex items-center text-gray-800">
           <span className="mr-2 text-xl">📌</span>
           Trạng thái:{" "}
           <span className="font-bold text-indigo-600">
-            {" "}
-            {data.event.status}
+            {data.event.status === "pending" && " Đang chờ"}
+            {data.event.status === "confirmed" && " Đang chuẩn bị"}
+            {data.event.status === "checkin" && " Đang check-in"}
+            {data.event.status === "ongoing" && " Đang diễn ra"}
+            {data.event.status === "completed" && " Đã kết thúc"}
           </span>
         </span>
-        <Button
-          type="primary"
-          className="h-12 px-6 py-2  to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Thêm vé và voucher
-        </Button>
+
+        {/* Hiển thị nút nếu trạng thái chưa hoàn tất */}
+        {data.event.status !== "completed" && (
+          <>
+            {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
+            {data.event.status === "pending" && timeDifference < 10 && (
+              <Button
+                type="primary"
+                className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                onClick={() => handleShowPopup(data.event.status)}
+              >
+                {getNextStatusLabel(data.event.status)}
+              </Button>
+            )}
+            {data.event.status === "confirmed" && timeDifference < 4 && (
+              <Button
+                type="primary"
+                className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                onClick={() => handleShowPopup(data.event.status)}
+              >
+                {getNextStatusLabel(data.event.status)}
+              </Button>
+            )}
+
+            {/* Hiển thị nút chuyển sang check-in trong vòng 2 giờ trước khi sự kiện bắt đầu */}
+            {timeDifference <= 2 && timeDifference > 0 && data.event.status === "checkin" && (
+              <Button
+                type="primary"
+                className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                onClick={() => handleShowPopup(data.event.status)}
+              >
+                {getNextStatusLabel(data.event.status)}
+              </Button>
+            )}
+
+            {/* Hiển thị nút chuyển sang "Hoàn thành" khi sự kiện đang diễn ra */}
+            {data.event.status === "ongoing" && (
+              <Button
+                type="primary"
+                className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                onClick={() => handleShowPopup(data.event.status)}
+              >
+                {getNextStatusLabel(data.event.status)}
+              </Button>
+            )}
+          </>
+        )}
       </p>
 
-      {/* Group the buttons in one row, with different colors */}
-      <div className="flex space-x-4 justify-center mb-8">
-        <button
-          onClick={() => setShowStatusPopup(true)}
-          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
-        >
-          Thay đổi trạng thái
-        </button>
-        <button
-          onClick={() => {}}
-          className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
-        >
-          Thêm địa chỉ IP check-in
-        </button>
-        <button
-          onClick={() => setShowTickets(true)}
-          className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
-        >
-          Xem thông tin Vé
-        </button>
-        <button
-          onClick={() => setShowUsers(true)}
-          className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
-        >
-          Xem Người mua vé
-        </button>
-      </div>
-
-      {showStatusPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 ">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full h-[400px] max-h-[100vh] relative">
-            <button
-              onClick={() => setShowStatusPopup(false)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-            >
-              <i className="fas fa-times"></i>
-            </button>
-            <h3 className="text-2xl font-semibold mb-6 text-center text-gray-700">
-              Thay đổi trạng thái vé
-            </h3>
-            <div className="mb-4">
-              <label
-                htmlFor="status-select"
-                className="block text-gray-600 mb-2"
-              >
-                Chọn trạng thái:
-              </label>
-              <select
-                id="status-select"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-              >
-                <option value="" disabled>
-                  -- Chọn trạng thái --
-                </option>
-                <option value="confirmed">Confirmed</option>
-                <option value="checkin">Check-in</option>
-                <option value="ongoing">Ongoing</option>
-                <option value="completed">Completed</option>
-                <option value="canceled">Canceled</option>
-              </select>
-            </div>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowStatusPopup(false)}
-                className="px-5 py-2 text-sm text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => setShowConfirmPopup(true)}
-                className={`px-5 py-2 text-sm text-white rounded-lg transition-all ${
-                  selectedStatus
-                    ? "bg-blue-500 hover:bg-blue-600"
-                    : "bg-blue-300 cursor-not-allowed"
-                }`}
-                disabled={!selectedStatus}
-              >
-                Lưu
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {showConfirmPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
@@ -336,9 +358,14 @@ const DetailEvents = () => {
               Xác nhận thay đổi trạng thái
             </h3>
             <p className="text-gray-600 mb-6 text-center">
-              Bạn có chắc chắn muốn thay đổi trạng thái vé sang{" "}
-              <span className="font-bold text-blue-500">{selectedStatus}</span>{" "}
-              không?
+              Bạn có chắc chắn muốn thay đổi trạng thái sự kiện từ{" "}
+              <span className="font-bold text-blue-500">
+                {getNextStatusLabel(data.event.status)}
+              </span>{" "}
+              sang{" "}
+              <span className="font-bold text-blue-500">
+                {getNextStatusLabel(selectedStatus)}
+              </span>?
             </p>
             <div className="flex justify-center space-x-4">
               <button
@@ -349,8 +376,8 @@ const DetailEvents = () => {
               </button>
               <button
                 onClick={() => {
+                  handleStatusChange(selectedStatus);
                   setShowConfirmPopup(false);
-                  handleChangeStatus();
                 }}
                 className="px-6 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-all"
               >
@@ -360,6 +387,34 @@ const DetailEvents = () => {
           </div>
         </div>
       )}
+      {/* Group the buttons in one row, with different colors */}
+      <div className="flex space-x-4 justify-center mb-8">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300">
+          Quản lý vé và voucher
+        </button>
+
+        <button
+          onClick={() => { }}
+          className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
+        >
+          Thêm địa chỉ IP check-in
+        </button>
+
+
+        <button
+          onClick={() => setShowUpdateEvent(!showUpdateEvent)}
+          className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
+        >
+          Cập nhật sự kiện{" "}
+        </button>
+      </div>
+      {showUpdateEvent && <UpdateEvent />}
+
+     
+
+
 
       <hr />
       <br />
@@ -421,7 +476,9 @@ const DetailEvents = () => {
             Link trực tuyến:
           </p>
           <p className="text-lg text-gray-700 font-medium">
-            {data.event.link_online ? data.link_online : "Không có"}
+            <a href={data.event.link_online || "#"}>
+              {data.event.link_online || "Không có"}
+            </a>
           </p>
         </div>
 
@@ -438,7 +495,7 @@ const DetailEvents = () => {
             Số lượng vé đã bán:
           </p>
           <p className="text-lg text-gray-700 font-medium">
-            {data.event.tickets.length}
+            {data.totalTickets}
           </p>
         </div>
         <div className="p-4 bg-gradient-to-r from-red-50 via-red-100 to-red-200 border border-red-300 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex justify-between items-center">
@@ -450,8 +507,6 @@ const DetailEvents = () => {
           </p>
         </div>
       </div>
-
-      {/* Nút hiển thị thông tin Vé và Người dùng */}
 
       <br />
       <br />
@@ -479,8 +534,18 @@ const DetailEvents = () => {
       </style>
 
       {/* Danh sách speakers */}
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
-
+      <div className="flex justify-between">
+        {" "}
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
+        <Button
+          type="primary"
+          onClick={() => {
+            setShowAddSpeaker(true);
+          }}
+        >
+          Thêm diễn giả
+        </Button>
+      </div>
       <div className="mb-6 flex justify-center">
         <div
           className="grid gap-4 justify-center w-70"
@@ -521,111 +586,17 @@ const DetailEvents = () => {
         </div>
       </div>
 
-      {/* Popup hiển thị Vé */}
-      {/* Popup hiển thị Vé */}
-      {showTickets && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-          onClick={(e) => {
-            // Kiểm tra nếu click không nằm trong nội dung popup
-            if (e.target === e.currentTarget) {
-              setShowTickets(false);
-            }
-          }}
-        >
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[90vh] overflow-auto">
-            <h2 className="text-2xl font-semibold mb-4 text-center">
-              Thông tin Vé
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {tickets.length > 0 ? (
-                tickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    className="p-4 bg-gray-50 rounded-lg shadow-md mb-4"
-                  >
-                    <p className="font-semibold text-gray-800">
-                      Loại vé: {ticket.ticket_type}
-                    </p>
-                    {ticket.price && ticket.price.length > 0 ? (
-                      ticket.price.map((priceItem) => (
-                        <div
-                          key={priceItem.id}
-                          className="mt-2 p-3 border rounded-lg bg-white shadow-sm"
-                        >
-                          <p className="text-gray-600">
-                            Giá:{" "}
-                            <span className="font-semibold">
-                              {priceItem.price} VND
-                            </span>
-                          </p>
-                          <p className="text-gray-600">
-                            Số lượng:{" "}
-                            <span className="font-semibold">
-                              {priceItem.quantity}
-                            </span>
-                          </p>
-                          <p className="text-gray-600">
-                            Khu vực:{" "}
-                            <span className="font-semibold">
-                              {priceItem.zone?.name || "Không xác định"}
-                            </span>
-                          </p>
-                          <p className="text-gray-600">
-                            Ngày mở bán:{" "}
-                            {new Date(priceItem.sale_start).toLocaleString()}
-                          </p>
-                          <p className="text-gray-600">
-                            Ngày kết thúc bán:{" "}
-                            {new Date(priceItem.sale_end).toLocaleString()}
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500">Chưa có thông tin giá vé.</p>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 col-span-2 text-center">
-                  Chưa có thông tin vé.
-                </p>
-              )}
-            </div>
-
-            <hr className="my-6" />
-
-            <h2 className="text-2xl font-semibold mb-4 text-center">Biểu đồ</h2>
-            <div className="flex justify-center mb-6">
-              <div className="w-1/3 max-w-sm">
-                <Pie data={chartData} />
-              </div>
-            </div>
-
-            <div className="text-right mt-4">
-              <button
-                onClick={() => setShowTickets(false)}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Popup hiển thị Người dùng */}
       {showUsers && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-40"
           onClick={(e) => {
-            // Kiểm tra nếu click không nằm trong nội dung popup
             if (e.target === e.currentTarget) {
               setShowUsers(false);
             }
           }}
         >
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[80vh] overflow-auto">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-7xl w-full h-auto max-h-[80vh] overflow-auto relative">
             <h2 className="text-2xl font-semibold mb-4 text-center">
               Người đã mua vé
             </h2>
@@ -637,10 +608,10 @@ const DetailEvents = () => {
                       STT
                     </th>
                     <th className="border border-gray-300 px-4 py-2 text-left">
-                      ID người dùng
+                      Mã vé
                     </th>
                     <th className="border border-gray-300 px-4 py-2 text-left">
-                      Mã vé
+                      Khách hàng
                     </th>
                     <th className="border border-gray-300 px-4 py-2 text-left">
                       Trạng thái check-in
@@ -657,11 +628,11 @@ const DetailEvents = () => {
                         <td className="border border-gray-300 px-4 py-2 text-center">
                           {index + 1}
                         </td>
-                        <td className="border border-gray-300 px-4 py-2 text-center">
-                          {user.pivot.user_id}
-                        </td>
                         <td className="border border-gray-300 px-4 py-2">
                           {user.ticket_code}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 text-center">
+                          {user.name}
                         </td>
                         <td
                           className={`border border-gray-300 px-4 py-2 ${
@@ -675,30 +646,28 @@ const DetailEvents = () => {
                             : "Chưa check-in"}
                         </td>
                         <td className="border border-gray-300 px-4 py-2 text-center">
-                          <td className="border border-gray-300 px-4 py-2 text-center">
-                            <button
-                              onClick={() => {
-                                // Kiểm tra trạng thái của user để gọi hàm phù hợp
-                                if (user.pivot.checked_in === 1) {
-                                  handleCancelCheckIn(
-                                    user.id,
-                                    user.ticket_code
-                                  );
-                                } else {
-                                  handleCheckIn(user.id, user.ticket_code);
-                                }
-                              }}
-                              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-                                user.pivot.checked_in === 1
-                                  ? "bg-red-500 text-white hover:bg-red-600"
-                                  : "bg-green-500 text-white hover:bg-green-600"
-                              }`}
-                            >
-                              {user.pivot.checked_in === 1
-                                ? "Hủy check-in"
-                                : "Check-in"}
-                            </button>
-                          </td>
+                          <button
+                            onClick={() =>
+                              setModalData({
+                                show: true,
+                                id: user.id,
+                                ticketCode: user.ticket_code,
+                                action:
+                                  user.pivot.checked_in === 1
+                                    ? "cancel"
+                                    : "checkin",
+                              })
+                            }
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
+                              user.pivot.checked_in === 1
+                                ? "bg-red-500 text-white hover:bg-red-600"
+                                : "bg-green-500 text-white hover:bg-green-600"
+                            }`}
+                          >
+                            {user.pivot.checked_in === 1
+                              ? "Hủy check-in"
+                              : "Check-in"}
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -726,45 +695,323 @@ const DetailEvents = () => {
           </div>
         </div>
       )}
-      <Modal
-        title="Thêm vé hoặc voucher"
-        width={1000}
-        open={isModalOpen}
-        footer={[
-          <Button
-            type="primary"
-            onClick={() => {
-              setIsModalOpen(false);
-              navigate("/admin/detail-event/" + eventId);
-            }}
-          >
-            Lưu
-          </Button>,
-        ]}
-      >
-        <div className="flex justify-center gap-3">
-          {" "}
-          <Button
-            key="ticket"
-            onClick={() => {
-              setIsTicketForm(true);
-            }}
-          >
-            Thêm vé
-          </Button>
-          <Button
-            key="voucher"
-            onClick={() => {
-              setIsTicketForm(false);
-            }}
-          >
-            Thêm voucher
-          </Button>
+
+      {/* Modal xác nhận */}
+      {modalData.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-xl font-semibold mb-4">Xác nhận</h2>
+            <p className="mb-4">
+              Bạn có chắc muốn{" "}
+              <strong>
+                {modalData.action === "checkin" ? "Check-in" : "Hủy check-in"}
+              </strong>{" "}
+              cho vé <strong>{modalData.ticketCode}</strong> không?
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setModalData({ show: false })}
+                className="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  modalData.action === "checkin"
+                    ? handleCheckIn(modalData.id, modalData.ticketCode)
+                    : handleCancelCheckIn(modalData.id, modalData.ticketCode);
+                  setModalData({ show: false });
+                }}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
         </div>
-        {isTicketForm ? (
+      )}
+
+
+<Modal
+  title={
+    <div className="flex justify-between items-center">
+      <span>Quản lý vé và voucher</span>
+      <button
+        onClick={() => setIsModalOpen(false)}
+        className="text-xl font-semibold text-gray-500 hover:text-gray-700"
+      >
+      
+      </button>
+    </div>
+  }
+  width={1000}
+  open={isModalOpen}
+  footer={[
+    <Button
+      key="close"
+      type="primary"
+      onClick={() => {
+        setIsModalOpen(false);
+        navigate("/admin/detail-event/" + eventId);
+      }}
+    >
+      Đóng
+    </Button>,
+  ]}
+  onCancel={() => setIsModalOpen(false)} // Đóng khi click ngoài modal
+>
+  <div className="flex justify-center gap-3">
+    <Button
+      key="ticket"
+      onClick={() => {
+        setIsTicketForm(true); // Hiển thị form thêm vé
+        setShowStatistics(false); // Ẩn thống kê vé
+        setShowUsersStatistics(false); // Ẩn thống kê người mua vé
+      }}
+    >
+      Thêm vé
+    </Button>
+    <Button
+      key="voucher"
+      onClick={() => {
+        setIsTicketForm(false); // Hiển thị form thêm voucher
+        setShowStatistics(false); // Ẩn thống kê vé
+        setShowUsersStatistics(false); // Ẩn thống kê người mua vé
+      }}
+    >
+      Thêm voucher
+    </Button>
+    <Button
+      onClick={() => {
+        setShowStatistics(true); // Hiển thị thống kê vé
+        setIsTicketForm(false); // Ẩn form thêm vé hoặc voucher
+        setShowUsersStatistics(false); // Ẩn thống kê người mua vé
+      }}
+    >
+      Thống kê vé
+    </Button>
+    <Button
+      onClick={() => {
+        setShowUsersStatistics(true); // Hiển thị thống kê người mua vé
+        setIsTicketForm(false); // Ẩn form thêm vé hoặc voucher
+        setShowStatistics(false); // Ẩn thống kê vé
+      }}
+    >
+      Thống kê người dùng
+    </Button>
+  </div>
+
+        {/* Hiển thị form Thêm vé hoặc Thêm voucher nếu isTicketForm là true */}
+        {isTicketForm && !showStatistics && !showUsersStatistics && (
           <AddTicket eventId={eventId} />
-        ) : (
+        )}
+        {!isTicketForm && !showStatistics && !showUsersStatistics && (
           <AddDiscountCode eventId={eventId} />
+        )}
+
+        {/* Hiển thị thống kê vé khi showStatistics là true */}
+        {showStatistics && (
+          <div className="mt-6 max-h-[600px] overflow-y-auto">
+            <h3 className="text-2xl font-semibold text-center">Thống kê vé </h3>
+            <br />
+            <hr />
+            <br />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {tickets?.length > 0 ? (
+                tickets?.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="p-4 bg-gray-50 rounded-lg shadow-md mb-4"
+                  >
+                    <p className="font-semibold text-gray-800">
+                      Loại vé: {ticket.ticket.ticket_type}
+                    </p>
+                    <div className="mt-2 p-3 border rounded-lg bg-white shadow-sm">
+                      <p className="text-gray-600">
+                        Giá:{" "}
+                        <span className="font-semibold">
+                          {ticket.price} VND
+                        </span>
+                      </p>
+                      <p className="text-gray-600">
+                        Số lượng:{" "}
+                        <span className="font-semibold">{ticket.quantity}</span>
+                      </p>
+                      <p className="text-gray-600">
+                        Khu vực:{" "}
+                        <span className="font-semibold">
+                          {ticket.zone?.name || "Không xác định"}
+                        </span>
+                      </p>
+                      <p className="text-gray-600">
+                        Ngày mở bán:{" "}
+                        {new Date(ticket.sale_start).toLocaleString()}
+                      </p>
+                      <p className="text-gray-600">
+                        Ngày kết thúc bán:{" "}
+                        {new Date(ticket.sale_end).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 col-span-2 text-center">
+                  Chưa có thông tin vé.
+                </p>
+              )}
+            </div>
+
+            <hr className="my-6" />
+            <h2 className="text-3xl font-semibold mb-2 text-center">
+              Biểu đồ tỉ lệ vé bán
+            </h2>
+            <h4 className="text-xl mb-2 text-center">
+              Tổng vé đã bán: {data.totalTickets}
+            </h4>
+            <div className="flex justify-center space-x-4">
+              <h4 className="text-xl mb-4 text-center">
+                Số lượng vé VIP đã bán: {data.vipTickets}
+              </h4>
+              <div className="h-6 w-px bg-gray-300"></div>
+              <h4 className="text-xl mb-4 text-center">
+                Số lượng vé thường đã bán: {data.normalTickets}
+              </h4>
+            </div>
+            <div className="flex justify-center mb-6">
+              <div className="w-1/3 max-w-sm">
+                <Pie data={chartData} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Hiển thị thống kê người dùng đã mua vé khi showUsersStatistics là true */}
+        {showUsersStatistics && (
+          <div className="mt-6 max-h-[600px] overflow-y-auto">
+            <h3 className="text-2xl font-semibold text-center">
+              Người dùng đã mua vé
+            </h3>
+            <br />
+            <hr />
+            <br />
+            <div className="overflow-x-auto">
+              <table className="table-auto w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border border-gray-300 px-4 py-2 text-left">
+                      STT
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">
+                      Mã vé
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">
+                      Khách hàng
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">
+                      Trạng thái check-in
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">
+                      Thao tác
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users && users.length > 0 ? (
+                    users.map((user, index) => (
+                      <tr key={user.id} className="hover:bg-gray-100">
+                        <td className="border border-gray-300 px-4 py-2 text-center">
+                          {index + 1}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {user.ticket_code}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 text-center">
+                          {user.name}
+                        </td>
+                        <td
+                          className={`border border-gray-300 px-4 py-2 ${
+                            user.pivot.checked_in === 1
+                              ? "text-green-500"
+                              : "text-red-500"
+                          }`}
+                        >
+                          {user.pivot.checked_in === 1
+                            ? "Đã check-in"
+                            : "Chưa check-in"}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 text-center">
+                          <button
+                            onClick={() =>
+                              setModalData({
+                                show: true,
+                                id: user.id,
+                                ticketCode: user.ticket_code,
+                                action:
+                                  user.pivot.checked_in === 1
+                                    ? "cancel"
+                                    : "checkin",
+                              })
+                            }
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
+                              user.pivot.checked_in === 1
+                                ? "bg-red-500 text-white hover:bg-red-600"
+                                : "bg-green-500 text-white hover:bg-green-600"
+                            }`}
+                          >
+                            {user.pivot.checked_in === 1
+                              ? "Hủy check-in"
+                              : "Check-in"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="border border-gray-300 px-4 py-2 text-center text-gray-500"
+                      >
+                        Chưa có người mua vé
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {modalData.show && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+              <h2 className="text-xl font-semibold mb-4">Xác nhận</h2>
+              <p className="mb-4">
+                Bạn có chắc muốn{" "}
+                <strong>
+                  {modalData.action === "checkin" ? "Check-in" : "Hủy check-in"}
+                </strong>{" "}
+                cho vé <strong>{modalData.ticketCode}</strong> không?
+              </p>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => setModalData({ show: false })}
+                  className="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={() => {
+                    modalData.action === "checkin"
+                      ? handleCheckIn(modalData.id, modalData.ticketCode)
+                      : handleCancelCheckIn(modalData.id, modalData.ticketCode);
+                    setModalData({ show: false });
+                  }}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  Xác nhận
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </Modal>
     </div>

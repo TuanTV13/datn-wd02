@@ -12,6 +12,7 @@ import {
   verifyTicket,
 } from "../api_service/ServiceTicket";
 import { Events } from "../interfaces/Event";
+import { message } from "antd";
 
 type Props = {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ interface TypeTickets {
   onDel: (id: number, seatId: number) => void;
   onAdd: (data: Tickets) => void;
   onEdit: (data: Tickets, seatId: number) => void;
-  onRestore: (id: number, seatId: number) => void;
+  onRestore: (id: number) => void;
   onVerify: (id: number) => void;
   tickets: Tickets[];
   events: Events[];
@@ -68,10 +69,15 @@ const TicketsContext = ({ children }: Props) => {
     try {
       // Gửi thẳng lên backend
       const newTicket = await addTicket(ticket);
-      setTickets([...tickets, newTicket]);
-      toast.success("Thêm thành công");
-      navigate("/admin/ticket-list");
-      window.location.reload();
+      if (newTicket) {
+        setTickets([...tickets, newTicket]);
+        toast.success("Thêm thành công");
+        navigate("/admin/ticket-list");
+        window.location.reload();
+      } else {
+        // Handle unexpected server response
+        toast.error("Vé đã tồn tại");
+      }
     } catch (error) {
       console.error("Error adding ticket:", error);
       console.log(error);
@@ -96,16 +102,16 @@ const TicketsContext = ({ children }: Props) => {
     }
   };
 
-  const onRestore = async (id: number, seatId: number) => {
+  const onRestore = async (id: number) => {
     if (confirm("Bạn có muốn khôi phục vé không?")) {
       try {
-        const restoredTicket = await restoreTicket(id, seatId);
+        const restoredTicket = await restoreTicket(id);
         setTickets([...tickets, restoredTicket]);
         toast.success("Khôi phục thành công");
         navigate("/admin/ticket-list");
         window.location.reload();
       } catch (error) {
-        console.error("Error restoring ticket:", error);
+        console.log("Error restoring ticket:", error);
         toast.error("Lỗi khi khôi phục vé");
       }
     }

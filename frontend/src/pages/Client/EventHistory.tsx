@@ -2,28 +2,31 @@ import React, { useEffect, useState } from "react";
 import api from "../../api_service/api";
 import { EventUser } from "../../interfaces/EventUser";
 
-const EventHistory = ({id}: {id: number}) => {
-
-  const [participationHistory, setParticipationHistory] = useState<EventUser[]>([])
+const EventHistory = ({ id }: { id: number }) => {
+  const [participationHistory, setParticipationHistory] = useState<EventUser[]>(
+    []
+  );
   useEffect(() => {
     const fetchParticipationHistory = async () => {
       try {
-        const token = localStorage.getItem("access_token")
-        const id = localStorage.getItem("user_id")
+        const token = localStorage.getItem("access_token");
+        const id = localStorage.getItem("user_id");
         const response = await api.get(`/clients/${id}/participation-history`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-          }
-        })
-        setParticipationHistory(response.data.data || [])
-        // console.log(response.data.data)
+          },
+        });
+        setParticipationHistory(response.data.data || []);
       } catch (error) {
-        console.log(error)
+        if (error.status === 401) {
+          localStorage.clear();
+          window.location = "/auth";
+        }
       }
-    }
-    fetchParticipationHistory()
-  }, [])
+    };
+    fetchParticipationHistory();
+  }, []);
 
   const eventsPerPage = 6; // Số sự kiện trên mỗi trang
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
@@ -34,7 +37,10 @@ const EventHistory = ({id}: {id: number}) => {
   // Tính các sự kiện cần hiển thị dựa trên trang hiện tại
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = participationHistory.slice(indexOfFirstEvent, indexOfLastEvent);
+  const currentEvents = participationHistory.slice(
+    indexOfFirstEvent,
+    indexOfLastEvent
+  );
 
   // Hàm xử lý thay đổi trang
   const handlePageChange = (direction: any) => {
@@ -57,11 +63,21 @@ const EventHistory = ({id}: {id: number}) => {
             <thead>
               <tr className="bg-gray-200 text-gray-700">
                 <th className="border border-gray-400 p-2 text-center">STT</th>
-                <th className="border border-gray-400 p-2 text-center">Tên sự kiện</th>
-                <th className="border border-gray-400 p-2 text-center">Thời gian</th>
-                <th className="border border-gray-400 p-2 text-center">Địa điểm</th>
-                <th className="border border-gray-400 p-2 text-center">Hình ảnh</th>
-                <th className="border border-gray-400 p-2 text-center">Trạng thái</th>
+                <th className="border border-gray-400 p-2 text-center">
+                  Tên sự kiện
+                </th>
+                <th className="border border-gray-400 p-2 text-center">
+                  Thời gian
+                </th>
+                <th className="border border-gray-400 p-2 text-center">
+                  Địa điểm
+                </th>
+                <th className="border border-gray-400 p-2 text-center">
+                  Hình ảnh
+                </th>
+                <th className="border border-gray-400 p-2 text-center">
+                  Trạng thái
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -71,9 +87,15 @@ const EventHistory = ({id}: {id: number}) => {
                     <td className="border border-gray-400 p-2 text-center">
                       {indexOfFirstEvent + index + 1}
                     </td>
-                    <td className="border border-gray-400 p-2 text-center">{item.name}</td>
-                    <td className="border border-gray-400 p-2 text-center">{item.start_time}</td>
-                    <td className="border border-gray-400 p-2 text-center">{item.location}</td>
+                    <td className="border border-gray-400 p-2 text-center">
+                      {item.name}
+                    </td>
+                    <td className="border border-gray-400 p-2 text-center">
+                      {item.start_time}
+                    </td>
+                    <td className="border border-gray-400 p-2 text-center">
+                      {item.location}
+                    </td>
                     <td className="border border-gray-400 p-2 text-center">
                       <img
                         src={item.thumbnail}
@@ -81,12 +103,17 @@ const EventHistory = ({id}: {id: number}) => {
                         className="w-12 h-auto mx-auto"
                       />
                     </td>
-                    <td className="border border-gray-400 p-2 text-center">{item.status}</td>
+                    <td className="border border-gray-400 p-2 text-center">
+                      {item.status}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="border border-gray-400 p-2 text-center">
+                  <td
+                    colSpan={6}
+                    className="border border-gray-400 p-2 text-center"
+                  >
                     Không có sự kiện nào.
                   </td>
                 </tr>
@@ -118,7 +145,6 @@ const EventHistory = ({id}: {id: number}) => {
       </div>
     </div>
   );
-  
 };
 
 export default EventHistory;

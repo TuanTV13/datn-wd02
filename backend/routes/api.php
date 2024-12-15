@@ -15,6 +15,7 @@ use App\Http\Controllers\V1\FeedbackController;
 use App\Http\Controllers\V1\StatisticsController;
 use App\Http\Controllers\V1\TicketController;
 use App\Http\Controllers\V1\TransactionController;
+use App\Http\Controllers\V1\UploadImageController;
 use App\Http\Controllers\V1\UserController;
 use App\Http\Controllers\V1\VoucherController;
 use App\Http\Services\Payments\ZaloPayService;
@@ -37,6 +38,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('v1/upload', [UploadImageController::class, 'upload']);
 
 Route::prefix('v1/role')->middleware(['check.jwt'])->group(function () {
     Route::get('/{id}/permissions', [RolePermissionController::class, 'getPermissionsByRole']);
@@ -68,6 +71,7 @@ Route::prefix('v1')->group(function () {
         Route::get('trashed', [EventController::class, 'trashed']);
         Route::get('{event}/show', [EventController::class, 'show']);
         Route::put('{event}/update', [EventController::class, 'update']);
+        Route::put('{event}/addSpeaker', [EventController::class, 'addSpeaker']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
@@ -100,7 +104,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('tickets', [TicketController::class, 'index']);
-    Route::prefix('tickets')->group(function () {
+    Route::prefix('tickets')->middleware(['check.jwt', 'check.permission:manage-tickets'])->group(function () {
         Route::get('{id}', [TicketController::class, 'show']); // chi tiết vé
         Route::post('/block', [TicketController::class, 'listBlock']);
         Route::get('block/{id}', [TicketController::class, 'getBlockById']); // danh sách vé bị khóa
@@ -114,11 +118,12 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('transactions')->middleware(['check.jwt'])->group(function () {
         Route::get('/', [TransactionController::class, 'index']);
-        Route::get('{id}/detail', [TransactionController::class, 'show']);
         Route::put('{id}/verified', [TransactionController::class, 'verified']);
         Route::put('{id}/failed', [TransactionController::class, 'failed']);
     });
-
+    Route::prefix('transactions')->middleware([])->group(function () {
+        Route::get('{id}/detail', [TransactionController::class, 'show']);
+    });
     Route::post('/apply-discount', [PaymentController::class, 'applyDiscount']);
     Route::post('vouchers/apply/{totalPrice}', [VoucherController::class, 'apply']);
     Route::get('vouchers', [VoucherController::class, 'index']);
@@ -166,7 +171,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('{id}/participation-history', [HistoryController::class, 'getEventParticipationHistory'])->middleware('check.permission:view-participation-history');
         Route::get('{userId}/event/{eventID}/participation-history', [HistoryController::class, 'showParticipationHistory'])->middleware('check.permission:view-participation-history');
-        Route::get('{id}/transaction-history', [HistoryController::class, 'getTransactionHistory'])->middleware('check.permission:view-transaction-history');
+        Route::get('{id}/transaction-history', [HistoryController::class, 'getTransactionHistory']);
 
 
         Route::get('/statistics/category', [StatisticsController::class, 'getStatisticsByCategory']);

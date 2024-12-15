@@ -1,20 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Input, Select, Modal, Table, Button } from "antd";
+import {
+  Input,
+  Select,
+  Modal,
+  Table,
+  Button,
+  DatePicker,
+  notification,
+} from "antd";
 import { getEvents, deleteEvent } from "../../../api_service/event";
 import axios from "axios";
 import { toast } from "react-toastify";
+
+const { RangePicker } = DatePicker;
 
 const EventList = () => {
   const [list, setList] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [searchName, setSearchName] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
+  const [searchStatus, setSearchStatus] = useState(""); // New state for status filter
+  const [searchDateRange, setSearchDateRange] = useState([null, null]); // New state for date range filter
   const [categories, setCategories] = useState([]);
   const [deletingEventId, setDeletingEventId] = useState(null);
   const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false);
   const [isGridView, setIsGridView] = useState(true); // State to toggle between grid and table view
-
+  const [searchTimeRange, setSearchTimeRange] = useState([]); //
+  
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -42,6 +55,8 @@ const EventList = () => {
         if (response && response.data && Array.isArray(response.data.data)) {
           setCategories(response.data.data);
         }
+        console.log(response.data.data);
+        
       } catch (error) {
         console.error("Lỗi khi tải danh mục:", error);
       }
@@ -57,11 +72,36 @@ const EventList = () => {
       const matchesCategory = searchCategory
         ? event.category_id === searchCategory
         : true;
-      return matchesName && matchesCategory;
+      const matchesStatus = searchStatus ? event.status === searchStatus : true;
+
+      const matchesDateRange =
+        !searchDateRange[0] ||
+        (new Date(event.start_time) >= new Date(searchDateRange[0]) &&
+          new Date(event.end_time) <= new Date(searchDateRange[1]));
+
+      return (
+        matchesName && matchesCategory && matchesStatus && matchesDateRange
+      );
     });
     setFilteredEvents(filtered);
-  }, [searchName, searchCategory, list]);
-
+  }, [searchName, searchCategory, searchStatus, searchDateRange, list]);
+  // useEffect(() => {
+  //   const filtered = list.filter((event) => {
+  //     const matchesName = event.name.toLowerCase().includes(searchName.toLowerCase());
+  //     const matchesCategory = searchCategory ? event.category_id === searchCategory : true;
+  //     const matchesStatus = searchStatus ? event.status === searchStatus : true;
+  
+  //     // Lọc theo khoảng thời gian
+  //     const matchesTime =
+  //       (!searchTimeRange.length ||
+  //         (new Date(event.start_time) >= searchTimeRange[0] &&
+  //          new Date(event.end_time) <= searchTimeRange[1]));
+  
+  //     return matchesName && matchesCategory && matchesStatus && matchesTime;
+  //   });
+  //   setFilteredEvents(filtered);
+  // }, [searchName, searchCategory, searchStatus, searchTimeRange, list]);
+  
   const onDelete = async (id) => {
     setDeletingEventId(id);
     setConfirmModalIsOpen(true);
@@ -75,8 +115,7 @@ const EventList = () => {
       setFilteredEvents(updatedList);
       toast.success("Xóa sự kiện thành công!");
     } catch (error) {
-      console.error("Lỗi khi xóa sự kiện:", error);
-      toast.error("Xóa sự kiện không thành công!");
+      notification.error({ message: "Xóa sự kiện không thành công!" });
     }
     setDeletingEventId(null);
     setConfirmModalIsOpen(false);
@@ -119,7 +158,7 @@ const EventList = () => {
       render: (text) => (text === "online" ? "Trực tuyến" : "Trực tiếp"),
     },
     {
-      title: "Tr ạng thái",
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (status) => (
@@ -130,6 +169,22 @@ const EventList = () => {
         >
           {getStatusColor(status).text}
         </span>
+      ),
+    },
+    {
+      title: "Thời gian bắt đầu",
+      dataIndex: "start_time",
+      key: "start_time",
+      render: (start_time) => (
+        <span>{new Date(start_time).toLocaleString()}</span>
+      ),
+    },
+    {
+      title: "Thời gian kết thúc",
+      dataIndex: "end_time",
+      key: "end_time",
+      render: (end_time) => (
+        <span>{new Date(end_time).toLocaleString()}</span>
       ),
     },
     {
@@ -154,6 +209,7 @@ const EventList = () => {
       ),
     },
   ];
+  
 
   return (
     <div>
@@ -181,10 +237,13 @@ const EventList = () => {
             filterOption={(input, option) =>
               input && option?.label.toLowerCase().includes(input.toLowerCase())
             }
-            options={categories.map((category) => ({
-              label: category.name,
-              value: category.id,
-            }))}
+            options={[
+              { label: "Chọn danh mục", value: "" },
+              ...categories.map((category) => ({
+                label: category.name,
+                value: category.id,
+              })),
+            ]}
             notFoundContent={searchCategory ? "Không tìm thấy danh mục" : null}
             onDropdownVisibleChange={(open) => {
               if (!searchCategory) {
@@ -197,6 +256,28 @@ const EventList = () => {
               </div>
             )}
           />
+          <Select
+            placeholder="Chọn trạng thái"
+            value={searchStatus}
+            onChange={(value) => setSearchStatus(value)}
+            className="flex-1"
+            allowClear
+            options={[
+              { label: "Chọn trạng thái", value: "" },
+              { label: "Đang chuẩn bị", value: "confirmed" },
+              { label: "Đang check-in", value: "checkin" },
+              { label: "Đang diễn ra", value: "ongoing" },
+              { label: "Đã kết thúc", value: "completed" },
+              { label: "Đã hủy", value: "canceled" },
+              { label: "Đang chờ xác nhận", value: "pending" },
+            ]}
+          />
+          {/* Input tìm kiếm thời gian */}
+      <RangePicker
+        className="flex-1"
+        placeholder={['Ngày bắt đầu', 'Ngày kết thúc']}
+        onChange={(dates) => setSearchTimeRange(dates ? [dates[0].toDate(), dates[1].toDate()] : [])}
+      />
         </div>
 
         <button
@@ -251,6 +332,8 @@ const EventList = () => {
                       ? `Sẽ diễn ra vào ${new Date(
                           event.start_time
                         ).toLocaleDateString()}`
+                      : event.status =="checkin"
+                      ? `Đang trong thời gian check-in`
                       : `Sự kiện đã kết thúc vào ${new Date(
                           event.end_time
                         ).toLocaleDateString()}`}

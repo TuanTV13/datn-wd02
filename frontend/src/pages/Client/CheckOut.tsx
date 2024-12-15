@@ -6,7 +6,7 @@ import { notification } from "antd";
 const CheckOut = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const ticketData = location.state;
   const searchParams = new URLSearchParams(location.search);
   const ticketType = searchParams.get("ticketType");
   const ticketId = searchParams.get("ticketId");
@@ -20,6 +20,11 @@ const CheckOut = () => {
     email: "",
     phone: "",
   });
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
 
   const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [voucherCode, setVoucherCode] = useState("");
@@ -27,6 +32,26 @@ const CheckOut = () => {
     initialTotalPrice * Number(quantity)
   );
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
+  const validateForm = () => {
+    const newErrors = {
+      name: "",
+      email: "",
+      phone: "",
+    };
+
+    if (!userInfo.name.trim()) newErrors.name = "Vui lòng nhập họ và tên.";
+    if (!userInfo.email.trim())
+      newErrors.email = "Vui lòng nhập địa chỉ email.";
+    else if (!/\S+@\S+\.\S+/.test(userInfo.email))
+      newErrors.email = "Email không hợp lệ.";
+    if (!userInfo.phone.trim())
+      newErrors.phone = "Vui lòng nhập số điện thoại.";
+    else if (!/^\d{10,11}$/.test(userInfo.phone))
+      newErrors.phone = "Số điện thoại không hợp lệ.";
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every((error) => error === "");
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -48,11 +73,14 @@ const CheckOut = () => {
           });
         })
         .catch((error) => {
+          if (error.status === 401) {
+            localStorage.clear();
+            window.location = "/auth";
+          }
           if (error?.response?.status === 401) navigate("/auth");
         });
     }
   }, []);
-  console.log(userInfo);
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setUserInfo((prevState) => ({
@@ -96,6 +124,10 @@ const CheckOut = () => {
         });
       }
     } catch (error) {
+      if (error.status === 401) {
+        localStorage.clear();
+        window.location = "/auth";
+      }
       console.error("Error applying voucher:", error);
       notification.error({ message: "Có lỗi xảy ra khi áp dụng mã giảm giá." });
     }
@@ -105,110 +137,89 @@ const CheckOut = () => {
     setPaymentMethod(e.target.value);
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsProcessing(true); // Bắt đầu xử lý
+    if (!isLoggedIn && !validateForm()) {
+      notification.error({ message: "Vui lòng nhập đầy đủ thông tin." });
+      return;
+    }
 
+    setIsProcessing(true);
     const token = localStorage.getItem("access_token");
 
-    if (token) {
-      // Dữ liệu thanh toán gửi đến backend
-      const paymentData = {
-        ticket_id: ticketId,
-        seat_zone_id: seatZoneId,
-        payment_method: paymentMethod,
-        name: userInfo.name,
-        email: userInfo.email,
-        phone: userInfo.phone,
-        discount_code: voucherCode || null,
-        amount: totalPrice,
-      };
-      try {
-        const response = await fetch(
-          "http://127.0.0.1:8000/api/v1/clients/payment/process",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(paymentData),
-          }
-        );
-        const data = await response.json();
-        if (response.ok) {
-          window.location.href = data.payment_url;
-        } else {
-          notification.error({
-            message: data.message || "Thanh toán không thành công.",
-          });
-        }
-      } catch (error) {
-        console.error("Error during payment process:", error);
-        notification.success({
-          message: "Có lỗi xảy ra trong quá trình thanh toán.",
-        });
-      }
-    } else {
-      // Nếu chưa đăng nhập, yêu cầu người dùng nhập thông tin
-      const userDetails = {
-        name: e.target.name.value,
-        email: e.target.email.value,
-        phone: e.target.phone.value,
-      };
+    const tickets = ticketData.tickets.map((ticket) => ({
+      ticket_id: ticket.ticket_id,
+      ticket_type: ticket.ticket_type,
+      quantity: ticket.quantity,
+      seat_zone_id: ticket.seat_zone_id,
+      seat_zone: ticket.seat_zone,
+      original_price: parseFloat(ticket.original_price).toFixed(2),
+    }));
 
-      // Kiểm tra xem người dùng đã nhập đủ thông tin chưa
-      if (!userDetails.name || !userDetails.email || !userDetails.phone) {
+    const paymentData = {
+      tickets,
+      payment_method: paymentMethod,
+      name: userInfo.name,
+      email: userInfo.email,
+      phone: userInfo.phone,
+      discount_code: voucherCode || null,
+      amount: parseFloat(ticketData.totalPrice).toFixed(2),
+    };
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/v1/clients/payment/process",
+        paymentData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        }
+      );
+      if (response.data.status === "success") {
+        window.location.href = response.data.payment_url;
+      } else {
         notification.error({
-          message: "Vui lòng điền đầy đủ các trường yêu cầu.",
-        });
-        setIsProcessing(false);
-        return;
-      }
-      // Lưu thông tin người dùng để sử dụng sau
-      setUserInfo(userDetails); // Giả sử bạn có state để lưu thông tin người dùng
-
-      // Chuẩn bị dữ liệu thanh toán với thông tin người dùng nhập
-      const paymentData = {
-        ticket_id: ticketId,
-        seat_zone_id: seatZoneId,
-        payment_method: paymentMethod,
-        name: userDetails.name,
-        email: userDetails.email,
-        phone: userDetails.phone,
-        discount_code: voucherCode || null,
-        amount: totalPrice,
-      };
-
-      console.log(paymentData);
-      try {
-        const response = await fetch(
-          "http://127.0.0.1:8000/api/v1/clients/payment/process",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(paymentData),
-          }
-        );
-        const data = await response.json();
-        if (response.ok) {
-          window.location.href = data.payment_url;
-        } else {
-          notification.error({
-            message: data.message || "Thanh toán không thành công.",
-          });
-        }
-      } catch (error) {
-        console.error("Lỗi trong quá trình thanh toán:", error);
-        notification.success({
-          message: "Có lỗi xảy ra trong quá trình thanh toán.",
+          message: response.data.message || "Thanh toán không thành công.",
         });
       }
+    } catch (error) {
+      notification.error({
+        message:
+          error.response?.data?.message || "Có lỗi xảy ra trong thanh toán.",
+      });
+    } finally {
+      setIsProcessing(false); // End processing
     }
+
+      setIsProcessing(false);
+    }
+
+
+   // Tạo state để lưu số lượng vé của từng ticket
+   const [quantities, setQuantities] = useState(
+    ticketData.tickets.reduce((acc, ticket) => {
+      acc[ticket.ticket_id] = ticket.quantity; // khởi tạo số lượng từ ticket data
+      return acc;
+    }, {})
+  );
+
+  // Hàm tăng số lượng
+  const increaseQuantity = (ticket_id) => {
+    setQuantities((prevQuantities) => ({
+      ...prevQuantities,
+      [ticket_id]: prevQuantities[ticket_id] + 1,
+    }));
   };
 
+  // Hàm giảm số lượng
+  const decreaseQuantity = (ticket_id) => {
+    setQuantities((prevQuantities) => ({
+      ...prevQuantities,
+      [ticket_id]: Math.max(1, prevQuantities[ticket_id] - 1), // tránh giảm số lượng < 1
+    }));
+  };
   return (
     <div className="mt-36 mx-4">
       {isProcessing && (
@@ -264,13 +275,15 @@ const CheckOut = () => {
               </span>
               <input
                 type="text"
-                required
                 name="name"
                 className="h-12 border px-4 text-sm"
                 placeholder="Vui lòng nhập họ và tên"
                 value={userInfo.name}
                 onChange={handleInputChange}
               />
+              {errors.name && (
+                <p className="error-text text-red-500">{errors.name}</p>
+              )}
             </div>
 
             {/* Phone and Email */}
@@ -285,13 +298,15 @@ const CheckOut = () => {
                 <input
                   id="phone"
                   type="text"
-                  required
                   className="h-12 rounded-lg border px-4 text-sm"
                   placeholder="+84"
                   name="phone"
                   value={userInfo.phone}
                   onChange={handleInputChange}
                 />
+                {errors.phone && (
+                  <p className="error-text text-red-500">{errors.phone}</p>
+                )}
               </div>
               <div className="flex flex-col gap-y-2">
                 <label
@@ -302,7 +317,6 @@ const CheckOut = () => {
                 </label>
                 <input
                   id="email"
-                  required
                   type="text"
                   className="h-12 border rounded-lg px-4 text-sm"
                   placeholder="abc@gmail.com"
@@ -310,6 +324,9 @@ const CheckOut = () => {
                   value={userInfo.email}
                   onChange={handleInputChange}
                 />
+                {errors.email && (
+                  <p className="error-text text-red-500">{errors.email}</p>
+                )}
               </div>
             </div>
 
@@ -364,34 +381,53 @@ const CheckOut = () => {
         </div>
 
         {/* Right Section */}
-        <div>
+        <div className="shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105">
           <div className="border rounded-2xl flex flex-col gap-y-5 lg:p-6 px-5 py-[22px]">
             <div className="flex flex-col gap-y-[17px] border-b pb-5">
-              <section className="flex justify-between text-sm">
-                <span className="text-[#9D9EA2]">Tên đơn hàng</span>
-                <p>Vé {ticketType}</p>
-              </section>
-              <section className="flex justify-between text-sm">
-                <span className="text-[#9D9EA2]">Giá vé</span>
-                <p>{initialTotalPrice}</p>
-              </section>
-              <section className="flex justify-between text-sm">
-                <span className="text-[#9D9EA2]">Số vé</span>
-                <p>{quantity}</p>
-              </section>
-              <section className="flex justify-between text-sm">
-                <span className="text-[#9D9EA2]">Khu vực</span>
-                <p>{zoneName}</p>
-              </section>
+              <div>
+                <section className="grid grid-cols-5 gap-4 text-sm font-semibold py-2 border-b">
+                  <span className="text-[#9D9EA2]">Vé</span>
+                  <p className="text-center">Loại vé</p>
+                  <p className="text-center">Khu vực</p>
+                  <p className="text-center">Số lượng</p>
+                  <p className="text-right">Giá gốc</p>
+                </section>
+                {ticketData.tickets.map((ticket) => (
+                  <section className="flex justify-between text-sm items-center mt-2">
+                    <span className="w-1/5 text-[#9D9EA2]">
+                      Vé {ticket.ticket_id}
+                    </span>
+                    <p className="w-1/5 text-center mb-1">
+                      {ticket.ticket_type}
+                    </p>
+                    <p className="w-1/5 text-center mb-1">{ticket.seat_zone}</p>
+                    <p className="w-1/5 text-center mb-1">{ticket.quantity}</p>
+                    <p className="w-1/5 text-right mb-1">
+                      {" "}
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(ticket.original_price)}
+                    </p>
+                  </section>
+                ))}
+              </div>
+
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Tổng cộng</span>
-                <p>{totalPrice} VDN</p>
+                {/* <p>{ticketData.totalPrice} VND</p> */}
+                <p>
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(ticketData.totalPrice)}{" "}
+                </p>
               </section>
             </div>
 
             <div className="border-b flex flex-col gap-y-3">
               <label className="text-sm text-[#9D9EA2]">Áp dụng voucher</label>
-              <div className="lg:flex items-center grid grid-cols-[50%_45%] justify-between gap-x-3 *:h-12">
+              <div className="lg:flex items-center gap-x-3">
                 <input
                   type="text"
                   placeholder="Coupon code"
@@ -413,7 +449,14 @@ const CheckOut = () => {
               type="submit"
               className="bg-[#007BFF] px-10 h-14 rounded-[100px] text-white flex gap-x-4 place-items-center justify-center"
             >
-              <span>Đặt vé</span>|<span>{totalPrice} VDN</span>
+              {/* <span>Đặt vé</span>|<span>{ticketData.totalPrice} VND</span> */}
+              <span>Đặt vé</span>|
+              <span>
+                {new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(ticketData.totalPrice)}{" "}
+              </span>
             </button>
           </div>
         </div>

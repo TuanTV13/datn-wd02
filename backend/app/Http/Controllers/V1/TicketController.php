@@ -6,13 +6,19 @@ use App\Enums\EventStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreTicketRequest;
 use App\Http\Requests\Admin\UpdateTicketRequest;
+use App\Models\EventUser;
 use App\Models\Ticket;
 use App\Repositories\EventRepository;
 use App\Repositories\TicketRepository;
+// use Barryvdh\DomPDF\Facade\Pdf;
+use PDF;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TicketController extends Controller
 {
@@ -122,6 +128,38 @@ class TicketController extends Controller
         DB::beginTransaction();
         $data = $request->validated();
         $data['sold_quantity'] = $data['quantity'];
+        $data['status'] = 'confirmed';
+
+        
+        $event = $this->eventRepository->find($request->event_id);
+
+        if ($event->status == 'ongoing') {
+            return response()->json([
+                'message' => 'Sự kiện đâng diễn ra không thể tạo thêm vé.',
+            ], 400);
+        }
+        if ($event->status == 'canceled') {
+            return response()->json([
+                'message' => 'Sự kiện đã bị hủy không thể tạo thêm vé.',
+            ], 400);
+        }
+        if ($event->status == 'completed') {
+            return response()->json([
+                'message' => 'Sự kiện đã hoàn thành không thể tạo thêm vé.',
+            ], 400);
+        }
+        if ($event->status == 'checkin') {
+            return response()->json([
+                'message' => 'Sự kiện đâng được checkin không thể tạo thêm vé.',
+            ], 400);
+        }
+
+        if (strtotime($request->sale_end) >= strtotime($event->start_time)) {
+            return response()->json([
+                'message' => 'Thời gian kết thúc bán vé phải trước thời gian bắt đầu sự kiện. Thời gian bắt đầu sự kiện là: '. $event->start_time,
+            ], 400);
+        }
+
 
         $ticketType = $request->ticket_type;
         $zoneName = $request->name;
@@ -151,7 +189,9 @@ class TicketController extends Controller
                     'seat_zone_id' => $zone->id,
                     'price' => $request->price,
                     'quantity' => $request->quantity,
+                    'purchase_limit' => $request->purchase_limit,
                     'sold_quantity' => $data['sold_quantity'],
+                    'purchase_limit' => $request->purchase_limit,
                     'sale_start' => $request->sale_start,
                     'sale_end' => $request->sale_end
                 ]);
@@ -170,7 +210,9 @@ class TicketController extends Controller
                     'seat_zone_id' => $zone->id,
                     'price' => $request->price,
                     'quantity' => $request->quantity,
+                    'purchase_limit' => $request->purchase_limit,
                     'sold_quantity' => $data['sold_quantity'],
+                    'purchase_limit' => $request->purchase_limit,
                     'sale_start' => $request->sale_start,
                     'sale_end' => $request->sale_end
                 ]);
@@ -209,6 +251,7 @@ class TicketController extends Controller
                 'price' => $request->price,
                 'quantity' => $request->quantity,
                 'sold_quantity' => $data['sold_quantity'],
+                'purchase_limit' => $request->purchase_limit,
                 'sale_start' => $request->sale_start,
                 'sale_end' => $request->sale_end
             ]);
@@ -248,10 +291,10 @@ class TicketController extends Controller
 
         try {
 
-            $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
+            // $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
 
-            $ticketPrice->delete();
-
+            // $ticketPrice->delete();
+            $ticket->delete();
             return response()->json([
                 'message' => 'Vé đã được khóa'
             ], 201);
@@ -264,7 +307,7 @@ class TicketController extends Controller
         }
     }
 
-    public function restoreTicket($id, $seatId)
+    public function restoreTicket($id)
     {
         $ticket = $this->ticketRepository->findTrashed($id);
 
@@ -273,9 +316,8 @@ class TicketController extends Controller
                 'message' => 'Không tìm thấy vé hoặc vé không bị hủy'
             ], 404);
         }
-        $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
 
-        $ticketPrice->restore();
+        $ticket->restore();
 
         return response()->json([
             'message' => 'Khôi phục vé thành công'
@@ -294,4 +336,47 @@ class TicketController extends Controller
 
         return response()->json(['message' => 'Ticket not found'], 404);
     }
+
+    // public function generatePdf($ticket_code)
+    // {
+    //         // Tạo URL cho hình ảnh QR
+    // $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?data=' . urlencode($ticket_code) . '&size=200x200';
+
+    // // Tải ảnh và chuyển nó thành Base64
+    // $imageContent = Http::get($qrImageUrl)->body();
+    // $base64Image = base64_encode($imageContent);
+    //     // Lấy thông tin vé dựa trên mã vé
+    //     $ticket = EventUser::where('ticket_code', $ticket_code)->firstOrFail();
+    //     Log::info($ticket);
+
+    //     // Tạo dữ liệu cần thiết cho PDF
+    //     $data = [
+    //         'ticket' => $ticket,
+    //         'user' => $ticket->user,  // Lấy thông tin người dùng liên quan (nếu cần)
+    //         'event' => $ticket->event,  // Thông tin sự kiện (nếu cần)
+    //     ];
+
+    //     // Tạo PDF từ Blade view
+    //     // $pdf = Pdf::loadView('emails.qr_pdf', $data);
+    //     $pdf = PDF::loadHTML(view('emails.qr_pdf', compact('ticket', 'base64Image')));
+
+    //     // Trả về file PDF cho người dùng tải về
+    //     // return $pdf->download('qrcode_' . $ticket->ticket_code . '.pdf');
+    //     return $pdf->stream('qrcode_' . $ticket->ticket_code . '.pdf');
+    // }
+
+    public function generatePdf($ticketCode)
+    {    
+        // Lấy thông tin vé từ database
+        $ticket = EventUser::where('ticket_code', $ticketCode)->first();
+    
+        // Tạo PDF
+        $pdf = App::make('dompdf.wrapper');
+        $pdf->loadHTML(view('emails.qr_pdf', [
+            'ticket' => $ticket,
+        ])->render());
+    
+        return $pdf->stream();
+    }
+    
 }

@@ -14,6 +14,7 @@ const ListTicketDelete = () => {
       try {
         const response = await api.post("/tickets/block");
         setTicketDelete(response.data);
+        setTicketDelete(response.data?.message);
       } catch (error) {
         console.error("Error fetching deleted tickets:", error);
       }
@@ -25,7 +26,6 @@ const ListTicketDelete = () => {
   const handleRestore = (id: number) => {
     onRestore(id); // Hàm khôi phục vé
   };
-
   return (
     <div>
       <div className="bg-white rounded-lg shadow">
@@ -49,7 +49,7 @@ const ListTicketDelete = () => {
             <button className="bg-gray-200 px-4 py-2 rounded-[10px]">
               Bộ lọc
             </button>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-[10px]">
+            <button className="bg-green-500 text-white px-4 py-2 rounded-[10px]">
               Xuất PDF
             </button>
           </div>
@@ -80,21 +80,23 @@ const ListTicketDelete = () => {
                   <td className="p-4 border border-gray-300">{index + 1}</td>
                   <td className="p-4 border border-gray-300">{item.id}</td>
                   <td className="p-4 border border-gray-300">
-                    {item.event?.name}
+                    {item.price[0].event?.name}
                   </td>
                   <td className="p-4 border border-gray-300">
                     {item.ticket_type}
                   </td>
                   <td className="p-4 border border-gray-300">
-                    {item.quantity}
+                    {item.price[0].quantity}
                   </td>
                   <td className="p-4 border border-gray-300">{item.status}</td>
-                  <td className="p-4 border border-gray-300">{item.price}</td>
                   <td className="p-4 border border-gray-300">
-                    {item.sale_start}
+                    {item.price[0].price}
                   </td>
                   <td className="p-4 border border-gray-300">
-                    {item.sale_end}
+                    {item.price[0].sale_start}
+                  </td>
+                  <td className="p-4 border border-gray-300">
+                    {item.price[0].sale_end}
                   </td>
                   <td className="p-4 border border-gray-300">
                     <button
@@ -114,7 +116,7 @@ const ListTicketDelete = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="10" className="text-center py-4">
+                <td colSpan={10} className="text-center py-4">
                   Không có vé nào đã xóa.
                 </td>
               </tr>

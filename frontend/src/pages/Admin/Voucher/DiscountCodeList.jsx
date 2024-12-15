@@ -167,7 +167,6 @@ const DiscountCodeList = () => {
   };
 
   const handleExportPDFAndExcel = () => {
-    console.log("Xuất PDF và Excel");
 
     const ws = XLSX.utils.json_to_sheet(listVoucher);
     const wb = XLSX.utils.book_new();
@@ -177,11 +176,9 @@ const DiscountCodeList = () => {
   };
 
   const handleView = (key) => {
-    console.log("Xem mã giảm giá có key: ", key);
   };
 
   const handleExportExcel = (key) => {
-    console.log("Xuất excel mã giảm giá có key: ", key);
   };
 
   const handleEdit = (key) => {
@@ -189,7 +186,6 @@ const DiscountCodeList = () => {
   };
 
   const handleLock = (key) => {
-    console.log("Khóa mã giảm giá có key: ", key);
   };
 
   const handleDelete = (key) => {
@@ -218,8 +214,7 @@ const DiscountCodeList = () => {
   };
 
   const handleSearch = () => {
-    console.log("Search text: ", searchText);
-    console.log("Status: ", statusFilter);
+    
   };
 
   return (

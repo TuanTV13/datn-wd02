@@ -30,7 +30,7 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
     const path = location.pathname;
 
     if (path === "/admin") return "1";
-    if (path === "/admin/report") return "6";
+    if (path === "/admin/report") return "1";
 
     if (path.startsWith("/admin/user-list")) return "2.1";
     if (path.startsWith("/admin/add-user")) return "2.2";
@@ -74,17 +74,17 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
                   <TfiDashboard />
                 </Tooltip>
               ),
-              label: <Link to="/admin">Bảng điều khiển</Link>,
+              label: <Link to="/admin/report">Bảng điều khiển</Link>,
             },
-            {
-              key: "6",
-              icon: (
-                <Tooltip title={!collapsed ? "" : "Bảng điều khiển"}>
-                  <MdPieChartOutlined />{" "}
-                </Tooltip>
-              ),
-              label: <Link to="/admin/report">Bảng Thống Kê</Link>,
-            },
+            // {
+            //   key: "6",
+            //   icon: (
+            //     <Tooltip title={!collapsed ? "" : "Bảng điều khiển"}>
+            //       <MdPieChartOutlined />{" "}
+            //     </Tooltip>
+            //   ),
+            //   label: <Link to="/admin/report">Bảng Thống Kê</Link>,
+            // },
             {
               key: "2",
               icon: (
@@ -209,7 +209,7 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
         className="flex items-center gap-2 px-6 mb-10 cursor-pointer"
       >
         <MdLogout />
-        <p className={`w-full truncate ${collapsed && "hidden"}`}>Đăng xuất</p>
+        <p className={`w-full truncate ${collapsed}`}>Đăng xuất</p>
       </div>
     </div>
   );

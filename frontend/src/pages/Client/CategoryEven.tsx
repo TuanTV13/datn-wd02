@@ -10,7 +10,7 @@ import {
 import { EventCT } from "../../Contexts/ClientEventContext";
 import api from "../../api_service/api";
 import { fetchEventsByProvince } from "../../api_service/ClientEvent";
-import { notification } from "antd";
+import { Empty, notification } from "antd";
 
 const CategoryEven = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -34,7 +34,6 @@ const CategoryEven = () => {
   const navigate = useNavigate();
   const handleCategoryClick = async (id: number | string) => {
     await fetchEventsByCategory(id);
-    console.log(events);
     navigate(`/event-category/${id}`);
   };
 
@@ -45,15 +44,12 @@ const CategoryEven = () => {
 
   const fetchEventsByDate = async (startTime: string, endTime: string) => {
     try {
-      console.log("Calling API with:", { startTime, endTime }); // Debug
       const response = await api.post("/clients/events/filter", {
         start_time: startTime,
         end_time: endTime,
       });
-      console.log("API Response:", response);
       setEvents(response.data.data.data);
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -67,7 +63,7 @@ const CategoryEven = () => {
       navigate(`?${params.toString()}`);
       fetchEventsByDate(start_time, end_time); // Lấy sự kiện theo khoảng thời gian đã chọn
     } else {
-      notification.success({
+      notification.error({
         message: "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc!",
       });
     }
@@ -403,7 +399,7 @@ const CategoryEven = () => {
               ))
             ) : (
               <p className="text-center text-gray-500 mt-4">
-                Không tìm thấy sự kiện nào phù hợp.
+                <Empty />{" "}
               </p>
             )}
             <div className="flex items-center justify-center mt-4 space-x-2">

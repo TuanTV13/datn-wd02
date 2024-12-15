@@ -63,7 +63,7 @@ const ListClient = () => {
         "Quận/Huyện": client.district_id,
         "Phường/Xã": client.ward_id,
         "Ngày xác thực email": client.email_verified_at,
-        "Giới tính": client.gender,
+        // "Giới tính": client.gender,
         "Trạng thái": client.status,
       })
     );
@@ -98,7 +98,6 @@ const ListClient = () => {
     axiosInstance
       .get("http://localhost:8000/api/v1/users/trashed")
       .then((res) => {
-        console.log(res);
         setDeletedClients(res.data.data);
         if (res.data.data.length <= 0 && !showDeletedClients) {
           notification.error({ message: "Không có người dùng nào được xóa" });
@@ -364,14 +363,7 @@ const ListClient = () => {
                     {selectedClient.email_verified_at}
                   </td>
                 </tr>
-                <tr>
-                  <td className="p-4 border border-gray-300">
-                    <strong>Giới tính:</strong>
-                  </td>
-                  <td className="p-4 border border-gray-300">
-                    {selectedClient.gender}
-                  </td>
-                </tr>
+
                 <tr>
                   <td className="p-4 border border-gray-300">
                     <strong>Trạng thái:</strong>

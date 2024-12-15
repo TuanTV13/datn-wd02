@@ -2,18 +2,24 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Events\EventCompleted;
+use App\Events\EventUpcoming;
 use App\Events\EventUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
+use App\Http\Requests\Admin\StoreSpeakerRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
 use App\Http\Services\CheckEventIPService;
+use App\Models\Event;
 use App\Models\EventUser;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -98,8 +104,16 @@ class EventController extends Controller
     }
     public function changeStatus($id, Request $request)
     {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3d245122794420d8eb6f3cbd84c7f7525afcf625
         $event = $this->eventRepository->find($id);
+
+        $users = $event->users()
+            ->select('users.id', 'users.name', 'users.email')
+            ->get()
+            ->unique('email');
 
         if (!$event) {
             return response()->json([
@@ -109,6 +123,16 @@ class EventController extends Controller
 
         $event->update(['status' => $request->input('status')]);
 
+<<<<<<< HEAD
+=======
+        if ($request->input('status') === 'checkin') {
+            event(new EventUpcoming($users, $event));
+        }
+        if ($request->input('status') === 'completed') {
+            event(new EventCompleted($users, $event));
+        }
+
+>>>>>>> 3d245122794420d8eb6f3cbd84c7f7525afcf625
         return response()->json([
             'message' => 'Thanh cong'
         ], 200);
@@ -116,12 +140,12 @@ class EventController extends Controller
 
     public function create(StoreEventRequest $request)
     {
-        // Log::info('Thông tin vé', ['data' => $request->all()]);
         DB::beginTransaction();
 
         try {
             $data = $request->validated();
 
+            // Kiểm tra thời gian và địa điểm sự kiện
             $validationError = $this->eventRepository->validateEventTimeAndVenue(
                 $data['start_time'],
                 $data['end_time'],
@@ -133,36 +157,98 @@ class EventController extends Controller
                 return $validationError;
             }
 
-            if ($request->has('speakers') && is_string($request->speakers)) {
-                $data['speakers'] = json_decode($request->speakers, true);
-            } elseif ($request->has('speakers') && is_array($request->speakers)) {
-                $data['speakers'] = json_encode($request->speakers);
-            } else {
-                $data['speakers'] = null;
+            if (isset($data['description'])) {
+                $data['description'] = $this->processImageInDescription($data['description']);
             }
 
-            $data['display_header'] ??= 0;
-            if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
+            // Kiểm tra và xử lý display_header
+            if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'] ?? 0)) {
                 return $validateEventHeader;
             }
 
+            if ($request->hasFile('thumbnail')) {
+                $thumbnailUrl = $this->uploadThumbnail($request->file('thumbnail'));
+                if (!$thumbnailUrl) {
+                    return response()->json(['error' => 'Lỗi khi upload ảnh'], 500);
+                }
+                $data['thumbnail'] = $thumbnailUrl;
+            }
+
+            // Tạo sự kiện
             $event = $this->eventRepository->create($data);
+
+            DB::commit();
+            // Log::info("message" . $request->all());
+            return response()->json([
+                'message' => 'Tạo sự kiện thành công, vui lòng kiểm tra',
+                'data' => $event
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error("error" . $e->getMessage());
-
+            Log::error("Error creating event: " . $e->getMessage());
             return response()->json([
                 'message' => 'Lỗi khi tạo sự kiện',
                 'error' => $e->getMessage()
             ]);
         }
+    }
 
-        DB::commit();
+    private function uploadThumbnail($file)
+    {
+        try {
+            $uploadResult = Cloudinary::upload($file->getRealPath());
 
-        return response()->json([
-            'message' => 'Tạo sự kiện thành công, vui lòng kiểm tra',
-            'data' => $event
-        ]);
+            if (!$uploadResult || !$uploadResult->getSecurePath()) {
+                throw new \RuntimeException('Không thể lấy URL của ảnh từ Cloudinary');
+            }
+
+            return $uploadResult->getSecurePath();
+        } catch (\Exception $e) {
+            Log::error("Error uploading thumbnail: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function processImageInDescription($description)
+    {
+        // Sử dụng regex để tìm tất cả các thẻ <img>
+        preg_match_all('/<img[^>]+src="([^">]+)"/', $description, $matches);
+
+        if (!empty($matches[1])) {
+            foreach ($matches[1] as $imageUrl) {
+                // Gọi hàm uploadThumbnail để tải ảnh lên Cloudinary
+                $uploadedUrl = $this->uploadThumbnailFromUrl($imageUrl);
+                if ($uploadedUrl) {
+                    // Thay thế URL của ảnh trong mô tả với URL từ Cloudinary
+                    $description = str_replace($imageUrl, $uploadedUrl, $description);
+                }
+            }
+        }
+
+        return $description;
+    }
+
+    private function uploadThumbnailFromUrl($imageUrl)
+    {
+        try {
+            // Tải ảnh từ URL và upload lên Cloudinary
+            $imageData = file_get_contents($imageUrl);
+            $tempFile = tmpfile();
+            fwrite($tempFile, $imageData);
+            $tempFilePath = stream_get_meta_data($tempFile)['uri'];
+
+            $uploadResult = Cloudinary::upload($tempFilePath);
+
+            // Đảm bảo URL ảnh được lấy từ Cloudinary
+            if (!$uploadResult || !$uploadResult->getSecurePath()) {
+                throw new \RuntimeException('Không thể lấy URL của ảnh từ Cloudinary');
+            }
+
+            return $uploadResult->getSecurePath();
+        } catch (\Exception $e) {
+            Log::error("Error uploading image from URL: " . $e->getMessage());
+            return false;
+        }
     }
 
     private function validateEventDisplayHeader($data)
@@ -204,6 +290,48 @@ class EventController extends Controller
 
     //     return ['status' => true];
     // }
+
+    public function addSpeaker(StoreSpeakerRequest $request, $eventId)
+    {
+        // Tìm sự kiện bằng ID
+        $event =  $this->eventRepository->find($eventId);
+
+        if (!$event) {
+            return response()->json(['message' => 'Event not found'], 404);
+        }
+
+        // Kiểm tra nếu 'speakers' là một mảng, nếu chưa thì khởi tạo là mảng rỗng
+        $speakers = is_string($event->speakers) ? json_decode($event->speakers, true) : $event->speakers;
+        if (!is_array($speakers)) {
+            $speakers = [];
+        }
+
+        // Tạo thông tin diễn giả mới từ dữ liệu yêu cầu
+        $newSpeaker = [
+            'name' => $request->input('name'),
+            'profile' => $request->input('profile', null),  // Nếu không có profile thì set là null
+            'email' => $request->input('email'),
+            'phone' => $request->input('phone'),
+            'image_url' => $request->input('image_url', null),
+            // 'start_time' => $request->input('start_time'),
+            // 'end_time' => $request->input('end_time'),
+        ];
+
+        // Thêm diễn giả mới vào mảng speakers
+        $speakers[] = $newSpeaker;
+
+        // Cập nhật lại mảng speakers trong sự kiện
+        $event->speakers = $speakers;
+        // Lưu sự kiện với mảng speakers đã được cập nhật
+        $event->save();
+
+        // Trả về thông tin sự kiện cùng diễn giả mới
+        return response()->json([
+            'message' => 'Speaker added successfully',
+            'event' => $event,
+            'new_speaker' => $newSpeaker
+        ], 201);
+    }
 
     public function update($eventId, UpdateEventRequest $request)
     {

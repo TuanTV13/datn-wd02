@@ -9,7 +9,7 @@ import { EventCT } from "../../Contexts/ClientEventContext";
 import { CategoryCT } from "../../Contexts/CategoryContext";
 import api from "../../api_service/api";
 import { fetchEventsByProvince } from "../../api_service/ClientEvent";
-import { notification } from "antd";
+import { Checkbox, notification } from "antd";
 
 const EventListing = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -41,15 +41,12 @@ const EventListing = () => {
 
   const fetchEventsByDate = async (startTime: string, endTime: string) => {
     try {
-      console.log("Calling API with:", { startTime, endTime }); // Debug
       const response = await api.post("/clients/events/filter", {
         start_time: startTime,
         end_time: endTime,
       });
-      console.log("API Response:", response);
       setFilteredEvents(response.data.data.data);
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -110,7 +107,6 @@ const EventListing = () => {
       const data = await fetchEventsByProvince(Inputlocation);
       setFilteredEvents(data); // Cập nhật danh sách sự kiện
     } catch (err) {
-      console.log(err);
     }
   };
   const [Inputlocation, setLocation] = useState("");
@@ -138,6 +134,7 @@ const EventListing = () => {
   }, [filteredEvents]);
   const eventsPerPage = 5; // Số sự kiện trên mỗi trang
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [categoryId, setCategoryId] = useState<any[]>([]);
 
   // Tính các sự kiện cần hiển thị dựa trên trang hiện tại
   const indexOfLastEvent = currentPage * eventsPerPage;
@@ -146,6 +143,16 @@ const EventListing = () => {
     indexOfFirstEvent,
     indexOfLastEvent
   );
+
+  useEffect(() => {
+    if (categoryId.length > 0) {
+      setFilteredEvents([
+        ...allEvents.filter((v) => categoryId.includes(v.category_id)),
+      ]);
+    } else {
+      setFilteredEvents([...allEvents]);
+    }
+  }, [categoryId]);
 
   // Hàm xử lý thay đổi trang
   const handlePageChange = (direction: any) => {
@@ -162,153 +169,154 @@ const EventListing = () => {
     <div className="lg:mx-10 mt-36">
       <div className="flex flex-col lg:flex-row">
         {/* <!-- Sidebar --> */}
-        <div className="w-full lg:w-1/4 p-4 bg-white rounded-[30px]  mb-4 lg:mb-0 border">
-          <h2 className="text-4xl font-semibold mb-4">Bộ lọc</h2>
-          <div className="mb-9 ">
+        <div className="w-full lg:w-1/4 bg-white shadow-lg rounded-2xl p-6 border h-fit border-gray-100">
+          <h2 className="text-3xl font-bold text-gray-800 mb-6">Bộ lọc</h2>
+
+          {/* Category Filter */}
+          <div className="mb-6">
             <div
-              className="flex justify-between lg:text-2xl font-medium mb-1 hover:text-[#007BFF] cursor-pointer"
+              className="flex justify-between items-center cursor-pointer text-xl font-semibold text-gray-700 hover:text-blue-600 transition-colors"
               onClick={toggleCategory}
             >
               Danh mục
               <svg
                 xmlns="http://www.w3.org/2000/svg"
+                className={`h-6 w-6 transform transition-transform ${
+                  isCategoryOpen ? "rotate-180" : ""
+                }`}
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
                 stroke="currentColor"
-                className="size-5"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
                 />
               </svg>
             </div>
-            {isCategoryOpen && (
-              <>
-                {/* Ô input */}
+
+              <div className="mt-4">
                 <input
                   type="text"
-                  className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Tìm kiếm danh mục..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <ul
-                  className="ml-2 text-gray-400 lg:text-base overflow-y-auto"
-                  style={{ maxHeight: "150px" }} // Giới hạn chiều cao
-                >
+                <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
                   {filteredCategories.map((category) => (
                     <li
                       key={category.id}
-                      className="cursor-pointer hover:text-[#007BFF]"
-                      onClick={() => handleCategoryClick(category.id)}
+                      className="px-2 py-1 hover:bg-blue-50 rounded cursor-pointer text-gray-600 hover:text-blue-600"
+                      // onClick={() => handleCategoryClick(category.id)}
                     >
+                      <Checkbox
+                        onChange={(e) => {
+                          e.target.checked
+                            ? setCategoryId([...categoryId, category.id])
+                            : setCategoryId([
+                                ...categoryId.filter((v) => v !== category.id),
+                              ]);
+                        }}
+                      />
                       {category.name}
                     </li>
                   ))}
-                  {filteredCategories.length === 0 && (
-                    <li className="text-gray-500">Không tìm thấy danh mục</li>
-                  )}
                 </ul>
-              </>
-            )}
+              </div>
           </div>
 
-          <div className="mb-9 ">
+          {/* Location Filter */}
+          <div className="mb-6">
             <div
-              className="flex justify-between lg:text-2xl font-medium mb-1 hover:text-[#007BFF] cursor-pointer"
+              className="flex justify-between items-center cursor-pointer text-xl font-semibold text-gray-700 hover:text-blue-600 transition-colors"
               onClick={toggleLocation}
             >
               Địa điểm
               <svg
                 xmlns="http://www.w3.org/2000/svg"
+                className={`h-6 w-6 transform transition-transform ${
+                  isLocationOpen ? "rotate-180" : ""
+                }`}
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
                 stroke="currentColor"
-                className="size-5"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
                 />
               </svg>
             </div>
+
             {isLocationOpen && (
-              <>
-                {/* Ô input */}
+              <div className="mt-4">
                 <input
                   type="text"
-                  id="location"
-                  className="mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Tìm kiếm địa điểm..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                   value={Inputlocation}
                   onChange={(e) => setLocation(e.target.value)}
                 />
-                <ul
-                  className="ml-2 text-gray-400 lg:text-base overflow-y-auto"
-                  style={{ maxHeight: "150px" }}
-                >
-                  {filteredProvince?.map((province) => (
+                <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                  {filteredProvince.map((province) => (
                     <li
-                      onClick={() => handleProvinceClick(province.name)}
                       key={province.id}
-                      className={`cursor-pointer hover:text-[#007BFF] ${
+                      className={`px-2 py-1 rounded cursor-pointer ${
                         selectedProvince === province.name
-                          ? "text-blue-500 font-semibold"
-                          : ""
+                          ? "bg-blue-100 text-blue-600"
+                          : "hover:bg-blue-50 text-gray-600 hover:text-blue-600"
                       }`}
+                      onClick={() => handleProvinceClick(province.name)}
                     >
                       {province.name}
                     </li>
                   ))}
-                  {filteredProvince.length === 0 && (
-                    <li className="text-gray-500">
-                      Không tìm thấy tỉnh/thành phố
-                    </li>
-                  )}
                 </ul>
-              </>
+              </div>
             )}
           </div>
 
-          {/* Bộ lọc ngày */}
-          <div className="mb-9">
-            <label className="flex flex-col space-y-2">
-              <span className="text-lg">Từ ngày:</span>
-              <input
-                type="date"
-                id="start_time"
-                value={start_time}
-                onChange={(e) => setStart_time(e.target.value)}
-                className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </label>
-            <label className="flex flex-col space-y-2 mt-4">
-              <span className="text-lg">Đến ngày:</span>
-              <input
-                type="date"
-                id="end_time"
-                value={end_time}
-                onChange={(e) => setEnd_time(e.target.value)}
-                className="cursor-pointer mt-1 mb-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </label>
-            <button
-              onClick={handleApplyFilters}
-              className="mt-4 px-4 py-2 rounded-md bg-[#007BFF] text-[#ffff] hover:bg-blue-200 hover:text-[#007BFF]"
-            >
-              Apply
-            </button>
-            <button
-              className="mt-4 ml-2 px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
-              onClick={clearFilters}
-            >
-              Clear
-            </button>
+          {/* Date Filter */}
+          <div className="mb-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-2">Từ ngày:</label>
+                <input
+                  type="date"
+                  value={start_time}
+                  onChange={(e) => setStart_time(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Đến ngày:</label>
+                <input
+                  type="date"
+                  value={end_time}
+                  onChange={(e) => setEnd_time(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleApplyFilters}
+                  className="flex-1 bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
+                >
+                  Áp dụng
+                </button>
+                <button
+                  onClick={clearFilters}
+                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 transition-colors"
+                >
+                  Xóa
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         {/* <!-- Main Content --> */}
