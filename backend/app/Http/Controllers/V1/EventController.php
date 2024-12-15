@@ -104,6 +104,7 @@ class EventController extends Controller
     }
     public function changeStatus($id, Request $request)
     {
+
         $event = $this->eventRepository->find($id);
 
         $users = $event->users()
@@ -118,6 +119,7 @@ class EventController extends Controller
         }
 
         $event->update(['status' => $request->input('status')]);
+
 
         if ($request->input('status') === 'checkin') {
             event(new EventUpcoming($users, $event));
@@ -356,7 +358,7 @@ class EventController extends Controller
         }
 
         try {
-            // Cập nhật sự kiện
+
             $event->update($data);
             event(new EventUpdate($event));
 

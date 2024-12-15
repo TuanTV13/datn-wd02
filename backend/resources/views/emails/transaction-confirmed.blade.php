@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác nhận giao dịch: {{ $transaction->id }}</title>
+
+    <!-- Thêm liên kết Lightbox CSS và JS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 </head>
 
 <body style="font-family: 'Arial', sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; color: #333;">
@@ -50,9 +54,10 @@
                     <th style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">STT</th>
                     <th style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">Mã vé</th>
                     <th style="padding: 10px; border: 1px solid #ddd;">Loại vé</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">Ví trí</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Vị trí</th>
                     <th style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">QR Code</th>
                     <th style="padding: 10px; border: 1px solid #ddd; white-space: nowrap;">Giá tiền</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Xuất file PDF</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,17 +68,26 @@
                         <td style="padding: 10px; border: 1px solid #ddd;">{{ $ticket['ticket_type'] }}</td>
                         <td style="padding: 10px; border: 1px solid #ddd;">{{ $ticket['seat_zone'] }}</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
-                            <img src="{{ $ticket['qr_code_url'] }}" alt="QR Code" style="width: 50px; height: 50px;">
+                            <a href="{{ $ticket['qr_code_url'] }}" data-lightbox="ticket-{{ $ticket['ticket_code'] }}" data-title="QR Code for Ticket {{ $ticket['ticket_code'] }}">
+                                <img src="{{ $ticket['qr_code_url'] }}" alt="QR Code" style="width: 50px; height: 50px;">
+                            </a>
+                            <br>
                         </td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: right; white-space: nowrap;">
                             {{ number_format($ticket['original_price'], 0, ',', '.') }} VNĐ
+                        </td>
+                        <td style="padding: 8px; text-align: center;">
+                            <a href="{{ route('ticket.pdf', ['ticket_code' => $ticket['ticket_code']]) }}" 
+                               style="background-color: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                               Tải PDF
+                            </a>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr style="background-color: #007BFF; color: #ffffff;">
-                    <td colspan="5" style="padding: 10px; text-align: right; font-weight: bold;">Tổng tiền:</td>
+                    <td colspan="6" style="padding: 10px; text-align: right; font-weight: bold;">Tổng tiền:</td>
                     <td style="padding: 10px; text-align: right; font-weight: bold; white-space: nowrap;">
                         {{ number_format($total_amount, 0, ',', '.') }} VNĐ
                     </td>
@@ -84,8 +98,8 @@
         <p style="margin: 20px 0; font-weight: bold; text-align: center;">Cảm ơn bạn đã tham gia đăng ký sự kiện!</p>
 
         <div style="margin-top: 30px; font-size: 0.9em; color: #666; text-align: center;">
-            <p>Nếu bạn có bất kỳ câu hỏi nào, hãy liên hệ với chúng tôi qua email: <a href="mailto:support@example.com" style="color: #007BFF; text-decoration: none;">support@example.com</a></p>
-            <p>Địa chỉ: 123 Đường ABC, Thành phố XYZ</p>
+            <p>Nếu bạn có bất kỳ câu hỏi nào, hãy liên hệ với chúng tôi qua email: <a href="mailto:support@example.com" style="color: #007BFF; text-decoration: none;">support@eventify.com</a></p>
+            <p>Địa chỉ: Cổng số 1, Tòa nhà FPT Polytechnic, 13 phố Trịnh Văn Bô, phường Phương Canh, quận Nam Từ Liêm, TP Hà Nội</p>
             <p>Số điện thoại: (012) 345-6789</p>
         </div>
     </div>

@@ -111,11 +111,7 @@ class VoucherController extends Controller
                 return $this->jsonResponse(false, 'Không tìm thấy mã giảm giá.', [], 404);
             }
 
-            // if (!in_array($voucher->status, ['draft', 'pending'])) {
-            //     return $this->jsonResponse(false, 'Không thể xóa mã giảm giá.', [], 400);
-            // }
 
-            // Xóa mã giảm giá
             $this->voucherRepository->delete($voucher->id);
 
             return $this->jsonResponse(true, 'Xóa mã giảm giá thành công.');
@@ -216,15 +212,11 @@ class VoucherController extends Controller
             }
             return $this->jsonResponse(false, 'Mã giảm giá này đã hết hạn.', [], 400);
         }
-
-        // if ($voucher->status == 'published' && Carbon::parse($voucher->start_time) > now()) {
-        //     return $this->jsonResponse(false, 'Mã giảm giá chưa được kích hoạt.', [], 400);
-        // }
     }
 
     private function calculateDiscountPrice($voucher, $totalPrice)
     {
-        // $totalPrice = 1000000; // Đang fix cứng khi chưa có thông tin về tổng giá trị đơn hàng
+
 
         return max(
             $voucher->discount_type === 'percent' ? $totalPrice * ((100 - $voucher->discount_value) / 100) : $totalPrice - $voucher->discount_value,

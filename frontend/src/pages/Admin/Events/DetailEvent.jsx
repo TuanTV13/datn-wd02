@@ -17,14 +17,13 @@ const DetailEvents = () => {
   const [eventDetails, setEventDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showTickets, setShowTickets] = useState(false); // Quản lý popup vé
-  const [showUsers, setShowUsers] = useState(false); // Quản lý popup người dùng
-  const [showUpdateEvent, setShowUpdateEvent] = useState(false); // Quản lý popup người dùng
-  const [showStatusPopup, setShowStatusPopup] = useState(false); // Popup trạng thái
-  const [selectedStatus, setSelectedStatus] = useState(""); // Lưu trạng thái được chọn
+  const [showTickets, setShowTickets] = useState(false); 
+  const [showUsers, setShowUsers] = useState(false); 
+  const [showUpdateEvent, setShowUpdateEvent] = useState(false); 
+  const [showStatusPopup, setShowStatusPopup] = useState(false); 
+  const [selectedStatus, setSelectedStatus] = useState(""); 
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
-  // const [showConfirmCheckinPopup, setShowConfirmCheckinPopup] = useState(false);
-  // const [selectedUser, setSelectedUser] = useState(null);
+
   const [modalData, setModalData] = useState({
     show: false,
     id: null,
@@ -34,7 +33,7 @@ const DetailEvents = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const { id } = useParams();
 
-  // Modal state
+
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTicketForm, setIsTicketForm] = useState(true);
@@ -43,8 +42,7 @@ const DetailEvents = () => {
   const [showStatistics, setShowStatistics] = useState(false);
   const [showAddSpeaker, setShowAddSpeaker] = useState(false);
 
-  const [showUsersStatistics, setShowUsersStatistics] = useState(false); // Add this state
-
+  const [showUsersStatistics, setShowUsersStatistics] = useState(false); 
   useEffect(() => {
     const toggleVisibility = () => {
       if (window.pageYOffset > 300) {
@@ -62,7 +60,7 @@ const DetailEvents = () => {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: "smooth", // Cuộn mượt
+      behavior: "smooth",
     });
   };
   useEffect(() => {
@@ -94,10 +92,10 @@ const DetailEvents = () => {
     fetchEventDetails();
   }, [id, reload]);
   useEffect(() => {
-    // Cập nhật thời gian mỗi phút
+    
     const interval = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // Kiểm tra mỗi phút
+    }, 60000); 
 
     return () => clearInterval(interval);
   }, []);
@@ -109,7 +107,7 @@ const DetailEvents = () => {
       "Content-Type": "application/json",
     };
 
-    // Xác định trạng thái tiếp theo
+    
     const nextStatusMap = {
       pending: "confirmed",
       confirmed: "checkin",
@@ -119,14 +117,14 @@ const DetailEvents = () => {
     const nextStatus = nextStatusMap[currentStatus];
 
     try {
-      // Gửi API để cập nhật trạng thái
+      
       const response = await axios.put(
         `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
         { status: nextStatus },
         { headers }
       );
       setReload(!reload);
-      // Hiển thị thông báo thành công
+      
       toast.success("Cập nhật trạng thái thành công!", {
         position: "top-right",
         autoClose: 3000,
@@ -136,7 +134,7 @@ const DetailEvents = () => {
         draggable: true,
       });
     } catch (err) {
-      // Hiển thị thông báo lỗi
+      
       toast.error("Cập nhật trạng thái thất bại!", {
         position: "top-right",
         autoClose: 3000,
@@ -153,10 +151,10 @@ const DetailEvents = () => {
     setSelectedStatus(status);
     setShowConfirmPopup(true);
   };
-  // Tính toán thời gian để hiển thị nút phù hợp
+  
   const getTimeDifference = (startTime) => {
     const eventStartTime = new Date(startTime);
-    return (eventStartTime - currentTime) / 1000 / 60 / 60; // Chuyển đổi thành giờ
+    return (eventStartTime - currentTime) / 1000 / 60 / 60; 
   };
 
   const getNextStatusLabel = (status) => {
@@ -174,13 +172,13 @@ const DetailEvents = () => {
 
   const handleCheckIn = async (id, ticketCode) => {
     try {
-      // Lấy token từ localStorage
+      
       const token = localStorage.getItem("access_token");
 
-      // Tạo headers với token
+      
       const headers = {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json", // Nếu bạn gửi JSON
+        "Content-Type": "application/json", 
       };
 
       const response = await fetch(
@@ -194,7 +192,7 @@ const DetailEvents = () => {
 
       if (!response.ok) {
         const error = await response.json();
-        // Xử lý lỗi tại đây
+        
       }
 
       const data = await response.json();
@@ -213,10 +211,10 @@ const DetailEvents = () => {
 
   const handleCancelCheckIn = async (id, ticketCode) => {
     try {
-      // Lấy token từ localStorage
+      
       const token = localStorage.getItem("access_token");
 
-      // Tạo headers với token
+      
       const headers = {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -238,7 +236,7 @@ const DetailEvents = () => {
       const data = await response.json();
       toast.success("Thay đổi trạng thái check-in thành công!");
       setReload(!reload);
-      // Xử lý kết quả thành công nếu cần
+      
     } catch (error) {
       toast.error("Thay đổi trạng thái check-in thất bại!");
       if (error.status === 401) {
@@ -262,15 +260,11 @@ const DetailEvents = () => {
 
   const { data } = eventDetails;
 
-  // Kiểm tra các trường trước khi sử dụng .map()
+  
   const speakers = data.speakers || [];
   const tickets = data.event.tickets || [];
   const users = data.event.users || [];
-  // const normalPercentage = data.normalPercentage || [];
-  // const normalTickets = data.normalTickets || [];
-  // const totalTickets = data.totalTickets || [];
-  // const vipTickets = data.vipTickets || [];
-  // const vipPercentage = data.vipPercentage || [];
+  
   const { vipPercentage, normalPercentage } = data;
 
   const chartData = {
@@ -287,16 +281,16 @@ const DetailEvents = () => {
   return (
     
     <div className="bg-white rounded-lg shadow p-6">
-       isVisible && (
-      <button
-        onClick={scrollToTop}
-        className="fixed bottom-4 right-4 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
-        aria-label="Scroll to top"
-      >
-        ↑
-      </button>
-    )
-    
+{/*       
+      {isVisible && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-4 right-4 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
+          aria-label="Scroll to top"
+        >
+          ↑
+        </button>
+      )} */}
       <AddSpeakerModal
         show={showAddSpeaker}
         onClose={() => {
@@ -310,7 +304,7 @@ const DetailEvents = () => {
       </h2>
       <hr className="border-t-2 border-gray-300 mb-6" />
 
-      {/* Tiêu đề và thông tin chung */}
+      {}
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6 p-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-transparent bg-clip-text shadow-xl rounded-lg">
         {data.event.name}
       </h1>
@@ -329,11 +323,11 @@ const DetailEvents = () => {
           </span>
         </span>
 
-        {/* Hiển thị nút nếu trạng thái chưa hoàn tất */}
+        {}
         {data.event.status !== "completed" && (
           <>
             {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
-            {data.event.status === "pending"  && (
+            {data.event.status === "pending" && (
               <Button
                 type="primary"
                 className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
@@ -353,7 +347,7 @@ const DetailEvents = () => {
             )}
 
             {/* Hiển thị nút chuyển sang check-in trong vòng 2 giờ trước khi sự kiện bắt đầu */}
-            {timeDifference <= 2 && timeDifference > 0 && data.event.status === "checkin" && (
+            { data.event.status === "checkin" && (
               <Button
                 type="primary"
                 className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
@@ -790,15 +784,15 @@ const DetailEvents = () => {
       Đóng
     </Button>,
   ]}
-  onCancel={() => setIsModalOpen(false)} // Đóng khi click ngoài modal
+  onCancel={() => setIsModalOpen(false)} 
 >
   <div className="flex justify-center gap-3">
     <Button
       key="ticket"
       onClick={() => {
-        setIsTicketForm(true); // Hiển thị form thêm vé
-        setShowStatistics(false); // Ẩn thống kê vé
-        setShowUsersStatistics(false); // Ẩn thống kê người mua vé
+        setIsTicketForm(true); 
+        setShowStatistics(false); 
+        setShowUsersStatistics(false); 
       }}
     >
       Thêm vé
@@ -806,34 +800,34 @@ const DetailEvents = () => {
     <Button
       key="voucher"
       onClick={() => {
-        setIsTicketForm(false); // Hiển thị form thêm voucher
-        setShowStatistics(false); // Ẩn thống kê vé
-        setShowUsersStatistics(false); // Ẩn thống kê người mua vé
+        setIsTicketForm(false); 
+        setShowStatistics(false); 
+        setShowUsersStatistics(false); 
       }}
     >
       Thêm voucher
     </Button>
     <Button
       onClick={() => {
-        setShowStatistics(true); // Hiển thị thống kê vé
-        setIsTicketForm(false); // Ẩn form thêm vé hoặc voucher
-        setShowUsersStatistics(false); // Ẩn thống kê người mua vé
+        setShowStatistics(true); 
+        setIsTicketForm(false); 
+        setShowUsersStatistics(false); 
       }}
     >
       Thống kê vé
     </Button>
     <Button
       onClick={() => {
-        setShowUsersStatistics(true); // Hiển thị thống kê người mua vé
-        setIsTicketForm(false); // Ẩn form thêm vé hoặc voucher
-        setShowStatistics(false); // Ẩn thống kê vé
+        setShowUsersStatistics(true); 
+        setIsTicketForm(false); 
+        setShowStatistics(false); 
       }}
     >
       Thống kê người dùng
     </Button>
   </div>
 
-        {/* Hiển thị form Thêm vé hoặc Thêm voucher nếu isTicketForm là true */}
+        {}
         {isTicketForm && !showStatistics && !showUsersStatistics && (
           <AddTicket eventId={eventId} />
         )}

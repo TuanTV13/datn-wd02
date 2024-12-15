@@ -20,7 +20,7 @@ const AddTicket = (props: any) => {
     if (!eventId) {
       navigate("/admin/ticket-list");
     }
-    onAdd({ ...data, event_id: eventId }); // Xử lý khi người dùng gửi form
+    onAdd({ ...data, event_id: eventId }); 
   };
 
   return (
@@ -31,7 +31,7 @@ const AddTicket = (props: any) => {
       >
         <h2 className="text-2xl font-bold text-center mb-5">Thêm mới vé</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Trường sự kiện */}
+          {}
           {!props.eventId && (
             <div>
               <label
@@ -58,7 +58,7 @@ const AddTicket = (props: any) => {
             </div>
           )}
 
-          {/* Trường loại vé */}
+          
           <div>
             <label
               htmlFor="ticket_type"
@@ -83,7 +83,7 @@ const AddTicket = (props: any) => {
             )}
           </div>
 
-          {/* Trường giá vé */}
+         
           <div>
             <label
               htmlFor="ticket-price"
@@ -102,7 +102,7 @@ const AddTicket = (props: any) => {
             )}
           </div>
 
-          {/* Trường vị trí */}
+          
           <div>
             <label
               htmlFor="name"
@@ -121,7 +121,7 @@ const AddTicket = (props: any) => {
             )}
           </div>
 
-          {/* Trường số lượng vé */}
+         
           <div>
             <label
               htmlFor="quantity"
@@ -140,7 +140,7 @@ const AddTicket = (props: any) => {
             )}
           </div>
 
-          {/* Trường ngày bắt đầu */}
+        
           <div>
             <label
               htmlFor="sale_start"
@@ -159,7 +159,7 @@ const AddTicket = (props: any) => {
             )}
           </div>
 
-          {/* Trường ngày kết thúc */}
+          
           <div>
             <label
               htmlFor="sale_end"
@@ -197,7 +197,7 @@ const AddTicket = (props: any) => {
           </div>
         </div>
 
-        {/* Các nút thao tác */}
+        {}
         <div className="mt-6 flex justify-start space-x-4">
           <button
             type="submit"

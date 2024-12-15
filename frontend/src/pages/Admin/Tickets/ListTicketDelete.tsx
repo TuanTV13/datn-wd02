@@ -6,10 +6,10 @@ import api from "../../../api_service/api";
 
 const ListTicketDelete = () => {
   const { onRestore } = useContext(TicketsCT);
-  const [ticketDelete, setTicketDelete] = useState<Tickets[]>([]); // Dữ liệu vé đã xóa
+  const [ticketDelete, setTicketDelete] = useState<Tickets[]>([]); 
 
   useEffect(() => {
-    // Gọi API POST để lấy danh sách vé đã xóa
+    
     const fetchDeletedTickets = async () => {
       try {
         const response = await api.post("/tickets/block");
@@ -24,7 +24,7 @@ const ListTicketDelete = () => {
   }, []);
 
   const handleRestore = (id: number) => {
-    onRestore(id); // Hàm khôi phục vé
+    onRestore(id); 
   };
   return (
     <div>

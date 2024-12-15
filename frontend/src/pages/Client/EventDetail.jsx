@@ -350,6 +350,7 @@ const EventDetail = () => {
               )}
               {event.status === "checkin" && (
                 <button
+
                   onClick={handleCheckIn}
                   className="w-[150px] h-[50px] bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md mt-4"
                 >
@@ -484,7 +485,7 @@ const EventDetail = () => {
                   <input
                     type="number"
                     min="1"
-                    max="10"
+                    max={selectedVIPTicket.purchase_limit}
                     // max={Math.min(10, selectedVIPTicket.quantity - selectedVIPTicket.sold_quantity)}
                     value={vipTicketQuantity || 1}
                     onChange={(e) => setVIPTicketQuantity(e.target.value)}
@@ -530,7 +531,7 @@ const EventDetail = () => {
                   <input
                     type="number"
                     min="1"
-                    max="10"
+                    max={selectedRegularTicket.purchase_limit}
                     // max={Math.min(10, selectedRegularTicket.quantity - selectedRegularTicket.sold_quantity)}
                     value={regularTicketQuantity}
                     onChange={(e) => setRegularTicketQuantity(e.target.value)}

@@ -40,28 +40,28 @@ const AddEvent = () => {
     const file = e.target.files[0];
     if (file) {
       try {
-        // Tạo đối tượng FormData để gửi ảnh lên server
+        
         const formData = new FormData();
         formData.append('file', file);
         console.log(file);
   
-        // Gọi API để tải ảnh lên
+        
         const response = await fetch('http://127.0.0.1:8000/api/v1/upload', {
           method: 'POST',
           body: formData,
         });
   
         const result = await response.json();
-        console.log('API Response:', result);  // Kiểm tra xem có trả về image_url không
+        console.log('API Response:', result);  
   
         if (result.url) {
-          // Cập nhật tất cả các diễn giả trong formData với URL ảnh trả về
+          
           setFormData((prevFormData) => ({
             ...prevFormData,
             speakers: prevFormData.speakers.map((speaker) => ({
               ...speaker,
-              image_url: result.url,  // Lưu URL ảnh cho tất cả các diễn giả
-              speaker_image: file,    // Lưu thông tin file ảnh cho tất cả các diễn giả
+              image_url: result.url,  
+              speaker_image: file,    
             })),
           }));
         } else {
