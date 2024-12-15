@@ -7,8 +7,10 @@ use App\Events\EventUpcoming;
 use App\Events\EventUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
+use App\Http\Requests\Admin\StoreSpeakerRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
 use App\Http\Services\CheckEventIPService;
+use App\Models\Event;
 use App\Models\EventUser;
 use App\Repositories\EventRepository;
 use App\Repositories\SpeakerRepository;
@@ -281,6 +283,48 @@ class EventController extends Controller
 
     //     return ['status' => true];
     // }
+
+    public function addSpeaker(StoreSpeakerRequest $request, $eventId)
+    {
+        // Tìm sự kiện bằng ID
+        $event =  $this->eventRepository->find($eventId);
+
+        if (!$event) {
+            return response()->json(['message' => 'Event not found'], 404);
+        }
+
+        // Kiểm tra nếu 'speakers' là một mảng, nếu chưa thì khởi tạo là mảng rỗng
+        $speakers = is_string($event->speakers) ? json_decode($event->speakers, true) : $event->speakers;
+        if (!is_array($speakers)) {
+            $speakers = [];
+        }
+
+        // Tạo thông tin diễn giả mới từ dữ liệu yêu cầu
+        $newSpeaker = [
+            'name' => $request->input('name'),
+            'profile' => $request->input('profile', null),  // Nếu không có profile thì set là null
+            'email' => $request->input('email'),
+            'phone' => $request->input('phone'),
+            'image_url' => $request->input('image_url', null),
+            // 'start_time' => $request->input('start_time'),
+            // 'end_time' => $request->input('end_time'),
+        ];
+
+        // Thêm diễn giả mới vào mảng speakers
+        $speakers[] = $newSpeaker;
+
+        // Cập nhật lại mảng speakers trong sự kiện
+        $event->speakers = $speakers;
+        // Lưu sự kiện với mảng speakers đã được cập nhật
+        $event->save();
+
+        // Trả về thông tin sự kiện cùng diễn giả mới
+        return response()->json([
+            'message' => 'Speaker added successfully',
+            'event' => $event,
+            'new_speaker' => $newSpeaker
+        ], 201);
+    }
 
     public function update($eventId, UpdateEventRequest $request)
     {
