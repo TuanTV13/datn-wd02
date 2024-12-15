@@ -18,7 +18,7 @@ const ListTicket = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    // Apply filters whenever filters change
+    
     const applyFilters = () => {
       let filtered = tickets;
 
@@ -67,7 +67,7 @@ const ListTicket = () => {
   ]);
 
   const handleVerify = (id: number) => {
-    onVerify(id); // Call the verify function from context
+    onVerify(id); 
   };
 
   const getEventName = (eventId: number | string) => {
@@ -149,7 +149,7 @@ const ListTicket = () => {
             onChange={(e) => setSelectedTicketType(e.target.value)}
           >
             <option value="">Chọn loại vé</option>
-            {/* Assuming TicketType is a list of all ticket types */}
+            
             {Object.values(TicketType).map((type) => (
               <option key={type} value={type}>
                 {type}
@@ -287,7 +287,7 @@ const ListTicket = () => {
           </tbody>
         </table>
 
-        {/* Pagination */}
+        
         <div className="flex justify-center space-x-2 mt-4 pb-10">
           <LeftOutlined
             className="cursor-pointer"
