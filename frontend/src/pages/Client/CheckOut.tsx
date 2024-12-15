@@ -165,7 +165,7 @@ const CheckOut = () => {
       discount_code: voucherCode || null,
       amount: parseFloat(ticketData.totalPrice).toFixed(2),
     };
-
+console.log("ádfd",paymentData)
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/clients/payment/process",
@@ -177,6 +177,7 @@ const CheckOut = () => {
           },
         }
       );
+      console.log(response.data)
       if (response.data.status === "success") {
         window.location.href = response.data.payment_url;
       } else {
@@ -185,6 +186,7 @@ const CheckOut = () => {
         });
       }
     } catch (error) {
+      console.log(error)
       notification.error({
         message:
           error.response?.data?.message || "Có lỗi xảy ra trong thanh toán.",
@@ -196,30 +198,6 @@ const CheckOut = () => {
       setIsProcessing(false);
     }
 
-
-   // Tạo state để lưu số lượng vé của từng ticket
-   const [quantities, setQuantities] = useState(
-    ticketData.tickets.reduce((acc, ticket) => {
-      acc[ticket.ticket_id] = ticket.quantity; // khởi tạo số lượng từ ticket data
-      return acc;
-    }, {})
-  );
-
-  // Hàm tăng số lượng
-  const increaseQuantity = (ticket_id) => {
-    setQuantities((prevQuantities) => ({
-      ...prevQuantities,
-      [ticket_id]: prevQuantities[ticket_id] + 1,
-    }));
-  };
-
-  // Hàm giảm số lượng
-  const decreaseQuantity = (ticket_id) => {
-    setQuantities((prevQuantities) => ({
-      ...prevQuantities,
-      [ticket_id]: Math.max(1, prevQuantities[ticket_id] - 1), // tránh giảm số lượng < 1
-    }));
-  };
   return (
     <div className="mt-36 mx-4">
       {isProcessing && (

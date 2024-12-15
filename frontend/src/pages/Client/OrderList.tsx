@@ -3,6 +3,7 @@ import axios from "axios";
 import axiosInstance from "../../axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "antd";
+import { jsPDF } from "jspdf";
 
 const OrderList = () => {
   const [transaction, setTransaction] = useState(null); // Trạng thái lưu dữ liệu giao dịch
@@ -15,6 +16,7 @@ const OrderList = () => {
     const fetchTransaction = async () => {
       try {
         const response = await axiosInstance.get(`transactions/${id}/detail`);
+        console.log(response.data)
         setTransaction(response.data); // Lưu dữ liệu vào state
         setLoading(false); // Tắt trạng thái tải
       } catch (err) {
@@ -36,13 +38,39 @@ const OrderList = () => {
 
   // Hàm tạo URL QR Code
   const generateQRCodeUrl = (ticketCode) => {
-    const size = "150x150"; // Kích thước của QR code
-    const color = "000000"; // Màu sắc QR code (đen)
+    const size = "150x150";
+    const color = "000000";
     return `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
       ticketCode
     )}&size=${size}&color=${color}`;
   };
 
+  const printQRCode = async (ticketCode) => {
+    const doc = new jsPDF(); // Tạo instance jsPDF
+    const qrCodeUrl = generateQRCodeUrl(ticketCode);
+
+    // Thêm hình ảnh QR code vào PDF
+    const img = new Image();
+    img.src = qrCodeUrl;
+    img.onload = () => {
+      doc.text("QR Code for Ticket", 20, 20);
+      doc.addImage(img, "PNG", 20, 30, 150, 150); // Vị trí và kích thước ảnh
+      doc.save(`ticket_${ticketCode}.pdf`); // Lưu file PDF
+    };
+  };
+
+  const getStatusColor = (statusId: any) => {
+    switch (statusId) {
+      case "completed":
+        return { text: "Đã hoàn thành", color: "text-gray-500" };
+      case "pending":
+        return { text: "Đang chờ xác nhận", color: "text-gray-300" };
+      case "failed":
+        return { text: "Thanh toán thất bại", color: "text-red-500" };
+      default:
+        return { text: "Trạng thái không xác định", color: "text-gray-300" };
+    }
+  };
   // Nếu dữ liệu tồn tại, hiển thị giao diện
   return (
     <div className="max-w-4xl mt-36 mb-10 mx-auto p-8 bg-gray-50 shadow-lg rounded-lg">
@@ -50,9 +78,16 @@ const OrderList = () => {
         Xác Nhận Giao Dịch: <span>{transaction.transaction_code}</span>
       </h1>
       <p className="mt-2 text-lg">Chào {transaction.user.name}</p>
-      <p className="mt-2 text-green-600 font-semibold">
-        Giao dịch của bạn đã được xác nhận thành công!
-      </p>
+      <div className="flex items-center space-x-2">
+        <span>Giao dịch của bạn đang ở trạng thái: </span>
+        <p
+          className={`font-semibold ${
+            getStatusColor(transaction.status).color
+          }`}
+        >
+          {getStatusColor(transaction.status).text}
+        </p>
+      </div>
 
       {/* Thông tin giao dịch */}
       <div className="mt-6">
@@ -115,14 +150,18 @@ const OrderList = () => {
                   {ticket.seat_zone}
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
-                  {ticket.original_price} VND
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(ticket.original_price)}{" "}
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
                   {/* Hiển thị QR code */}
                   <img
                     src={generateQRCodeUrl(ticket.ticket_code)}
                     alt={`QR Code for ${ticket.ticket_code}`}
-                    className="w-20 h-20"
+                    className="w-20 h-20 cursor-pointer"
+                    onClick={() => printQRCode(ticket.ticket_code)} // Thêm onClick
                   />
                 </td>
               </tr>
@@ -137,7 +176,10 @@ const OrderList = () => {
                 Tổng tiền:
               </td>
               <td className="border border-gray-300 px-4 py-2">
-                {transaction.total_amount} VND
+                {new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(transaction.total_amount)}{" "}
               </td>
             </tr>
           </tfoot>
