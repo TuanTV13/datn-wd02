@@ -88,10 +88,10 @@ class PaymentController extends Controller
         ->where('event_users.ticket_id', $ticket_id)
         ->where('event_users.seat_zone', $zone_name)
         ->count();
-    
+
         // Tính tổng số vé sau khi thêm yêu cầu mới
         $total_tickets = $tickets_bought + $quantity_requested;
-    
+
         // Kiểm tra nếu tổng vé vượt quá giới hạn
         if ($total_tickets > $max_tickets) {
             return response()->json([
@@ -193,7 +193,7 @@ class PaymentController extends Controller
             foreach($validated['tickets'] as $item) {
                 // Kiểm tra giới hạn số vé trước khi tiếp tục
                 $result = $this->checkTicketLimit($ticket->event_id, $user->id, $item['ticket_id'], $item['seat_zone'], $item['seat_zone_id'], $item['quantity']);
-    
+
                 // Nếu có lỗi, trả về ngay lập tức
                 if ($result != null) {
                     if ($result->getStatusCode() == 400) {
@@ -249,7 +249,7 @@ class PaymentController extends Controller
                     ];
                 }
             }
-            
+
             // Dữ liệu giao dịch
             $transactionData = [
                 'user_id' => $user->id,
@@ -394,10 +394,10 @@ class PaymentController extends Controller
         $responseCode = $request->input('vnp_ResponseCode');
         $transaction_id = $request->input('transaction_id');;
 
-        // Ghi log kiểm tra dữ liệu trả về  
+        // Ghi log kiểm tra dữ liệu trả về
         Log::info('VNPay handleReturn called', ['request' => $request->all()]);
 
-        // Kiểm tra mã phản hồi có thành công không  
+        // Kiểm tra mã phản hồi có thành công không
         if ($responseCode == '00') {
             $transaction = Transaction::find($transaction_id);
 
@@ -434,13 +434,13 @@ class PaymentController extends Controller
                 }
             }
 
-            // Gửi sự kiện xác thực giao dịch  
+            // Gửi sự kiện xác thực giao dịch
             event(new TransactionVerified($transaction));
 
             return redirect('http://localhost:5173/order-detail/' . $transaction_id);
         }
 
-        // Kiểm tra giao dịch thất bại hoặc bị hủy  
+        // Kiểm tra giao dịch thất bại hoặc bị hủy
         if ($responseCode == '24') {
             $transaction = Transaction::find($transaction_id);
 

@@ -20,13 +20,13 @@ const EventList = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [searchName, setSearchName] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
-  const [searchStatus, setSearchStatus] = useState(""); // New state for status filter
-  const [searchDateRange, setSearchDateRange] = useState([null, null]); // New state for date range filter
+  const [searchStatus, setSearchStatus] = useState(""); 
+  const [searchDateRange, setSearchDateRange] = useState([null, null]); 
   const [categories, setCategories] = useState([]);
   const [deletingEventId, setDeletingEventId] = useState(null);
   const [confirmModalIsOpen, setConfirmModalIsOpen] = useState(false);
-  const [isGridView, setIsGridView] = useState(true); // State to toggle between grid and table view
-  const [searchTimeRange, setSearchTimeRange] = useState([]); //
+  const [isGridView, setIsGridView] = useState(true); 
+  const [searchTimeRange, setSearchTimeRange] = useState([]); 
   
   useEffect(() => {
     const fetchEvents = async () => {
@@ -85,22 +85,7 @@ const EventList = () => {
     });
     setFilteredEvents(filtered);
   }, [searchName, searchCategory, searchStatus, searchDateRange, list]);
-  // useEffect(() => {
-  //   const filtered = list.filter((event) => {
-  //     const matchesName = event.name.toLowerCase().includes(searchName.toLowerCase());
-  //     const matchesCategory = searchCategory ? event.category_id === searchCategory : true;
-  //     const matchesStatus = searchStatus ? event.status === searchStatus : true;
   
-  //     // Lọc theo khoảng thời gian
-  //     const matchesTime =
-  //       (!searchTimeRange.length ||
-  //         (new Date(event.start_time) >= searchTimeRange[0] &&
-  //          new Date(event.end_time) <= searchTimeRange[1]));
-  
-  //     return matchesName && matchesCategory && matchesStatus && matchesTime;
-  //   });
-  //   setFilteredEvents(filtered);
-  // }, [searchName, searchCategory, searchStatus, searchTimeRange, list]);
   
   const onDelete = async (id) => {
     setDeletingEventId(id);

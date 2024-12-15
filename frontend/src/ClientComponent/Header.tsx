@@ -221,43 +221,6 @@ const Header = () => {
                 </Link>
               </Dropdown>
             )}
-            {isAuthenticated && (
-              <div
-                className="relative h-[24px] lg:ml-3  items-center"
-                ref={notificationRef}
-              >
-                <button
-                  onClick={toggleNotificationPopup}
-                  className="flex items-center"
-                >
-                  <svg
-                    className="w-[27px] h-[27px] fill-[#454444]"
-                    viewBox="0 0 448 512"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M224 0c-17.7 0-32 14.3-32 32V49.9C119.5 61.4 64 124.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-75.8-55.5-138.6-128-150.1V32c0-17.7-14.3-32-32-32zm0 96h8c57.4 0 104 46.6 104 104v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 328 112 281.3 112 233.4V200c0-57.4 46.6-104 104-104h8zm64 352H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"></path>
-                  </svg>
-                  <span className="absolute bg-red-500 top-0 right-0 rounded-full w-[16px] h-[16px] text-xs text-white flex items-center justify-center">
-                    2
-                  </span>
-                </button>
-                {isNotificationOpen && (
-                  <div className="absolute right-0 mt-2 w-[400px] bg-white shadow-lg rounded-lg p-4 z-10">
-                    <p className="text-sm font-medium">
-                      Bạn có 2 thông báo mới
-                    </p>
-                    <ul className="mt-2">
-                      <li className="py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                        Thông báo 1
-                      </li>
-                      <li className="py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                        Thông báo 2
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -297,11 +260,9 @@ const Header = () => {
             <li className="relative">
               <Link to={`/event-list`}>Sự kiện</Link>
             </li>
-
             <li>
-              <Link to={``}>Blog</Link>
+              <Link to={``}>Giới thiệu</Link>
             </li>
-
             <li className="relative" ref={menuRef}>
               <Link
                 to={``}
@@ -320,24 +281,14 @@ const Header = () => {
                       className="block px-4 py-2"
                       onClick={closeMenu} // Đóng menu khi chọn mục
                     >
-                      Liên hệ
-                    </Link>
-                  </li>
-                  <li className="flex hover:bg-gray-300">
-                    <Link
-                      to={``}
-                      className="block px-4 py-2"
-                      onClick={closeMenu} // Đóng menu khi chọn mục
-                    >
                       Hướng dẫn đặt vé
                     </Link>
                   </li>
                 </ul>
               )}
             </li>
-
-            <li>
-              <Link to={``}>Giới thiệu</Link>
+            <li className="relative">
+              <Link to={`contact`}>Liên hệ</Link>
             </li>
           </ul>
         </div>

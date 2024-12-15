@@ -58,14 +58,8 @@ class TicketController extends Controller
     {
         $data = $this->ticketRepository->trashed();
 
-        if ($data->isEmpty()) {
-            return response()->json([
-                'message' => 'Không có vé nào đã bị xóa'
-            ], 404);
-        }
-
         return response()->json([
-            'message' => $data
+            'data' => $data
         ]);
     }
 
@@ -276,25 +270,13 @@ class TicketController extends Controller
     public function delete($id, $seatId)
     {
         $ticket = $this->ticketRepository->find($id);
-
-        if (!$ticket) {
-            return response()->json([
-                'message' => 'Vé không tồn tại'
-            ], 404);
-        }
-
-        // if ($ticket->status_id != 'pending') {
-        //     return response()->json([
-        //         'message' => 'Không thể xóa vé trong trạng thái này'
-        //     ], 403);
-        // }
-
         try {
 
-            // $ticketPrice = $ticket->price()->where('seat_zone_id', $seatId)->first();
+            $ticketPrice = $ticket->price->where('id', $seatId)->first();
 
-            // $ticketPrice->delete();
-            $ticket->delete();
+            $ticketPrice->delete();
+
+            $ticketPrice->zone->delete();
             return response()->json([
                 'message' => 'Vé đã được khóa'
             ], 201);
@@ -309,18 +291,11 @@ class TicketController extends Controller
 
     public function restoreTicket($id)
     {
-        $ticket = $this->ticketRepository->findTrashed($id);
-
-        if (!$ticket) {
-            return response()->json([
-                'message' => 'Không tìm thấy vé hoặc vé không bị hủy'
-            ], 404);
-        }
-
-        $ticket->restore();
+        $ticket = $this->ticketRepository->restore($id);
 
         return response()->json([
-            'message' => 'Khôi phục vé thành công'
+            'message' => 'Khôi phục vé thành công',
+            'data' => $ticket
         ], 200);
     }
 

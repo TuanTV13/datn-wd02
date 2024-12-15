@@ -32,7 +32,7 @@ const AddRating = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Cấu trúc dữ liệu body theo yêu cầu API
+    
     const requestBody = {
       event_id: formData.event_id,
       user_id: localStorage.getItem("user_id"),
@@ -41,15 +41,15 @@ const AddRating = () => {
       suggestions: formData.suggestions,
     };
 
-    // Gọi API để gửi đánh giá
+    
     axiosInstance
       .post("feedbacks/submit", requestBody)
       .then((response) => {
         notification.success({ message: "Gửi đánh giá thành công:" });
         navigate("/admin/rating-list");
-        // Reset form sau khi gửi thành công
+        
         setFormData({
-          event_id: "", // Reset lại event_id
+          event_id: "", 
           user_id: 6,
           rating: 3,
           feedback: "",

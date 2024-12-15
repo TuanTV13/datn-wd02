@@ -26,6 +26,7 @@ class UpdateEventRequest extends FormRequest
         return [
             'ward' => 'string',
             'location' => 'required|string|max:255',
+            'category_id' => 'required',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
             'display_header' => 'boolean',
