@@ -17,6 +17,7 @@ class TicketPrice extends Model
         'quantity',
         'purchase_limit',
         'sold_quantity',
+        'purchase_limit',
         'sale_start',
         'sale_end'
     ];
