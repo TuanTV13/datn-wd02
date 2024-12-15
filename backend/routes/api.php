@@ -71,6 +71,7 @@ Route::prefix('v1')->group(function () {
         Route::get('trashed', [EventController::class, 'trashed']);
         Route::get('{event}/show', [EventController::class, 'show']);
         Route::put('{event}/update', [EventController::class, 'update']);
+        Route::put('{event}/addSpeaker', [EventController::class, 'addSpeaker']);
         Route::delete('{event}/delete', [EventController::class, 'delete']);
         Route::post('{event}/restore', [EventController::class, 'restore']);
         Route::put('{event}/verified', [EventController::class, 'verifiedEvent']);
@@ -117,11 +118,12 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('transactions')->middleware(['check.jwt'])->group(function () {
         Route::get('/', [TransactionController::class, 'index']);
-        Route::get('{id}/detail', [TransactionController::class, 'show']);
         Route::put('{id}/verified', [TransactionController::class, 'verified']);
         Route::put('{id}/failed', [TransactionController::class, 'failed']);
     });
-
+    Route::prefix('transactions')->middleware([])->group(function () {
+        Route::get('{id}/detail', [TransactionController::class, 'show']);
+    });
     Route::post('/apply-discount', [PaymentController::class, 'applyDiscount']);
     Route::post('vouchers/apply/{totalPrice}', [VoucherController::class, 'apply']);
     Route::get('vouchers', [VoucherController::class, 'index']);
