@@ -57,15 +57,25 @@ const AddClient = () => {
       .catch((error) => {
         if (error?.response?.status === 401) navigate("/auth");
 
-        if (Array.isArray(error.response.data.errors)) {
-          toast.error(error.response.data.errors.join(', '));
-        } else if (typeof error.response.data.errors === 'object') {
-          const errorMessages = Object.values(error.response.data.errors).join(', ');
-          toast.error(errorMessages);
+        if (error.response && error.response.data && error.response.data.errors) {
+          const errors = error.response.data.errors;
+          
+          if (typeof errors === 'object') {
+            // Lặp qua từng lỗi và hiển thị toast riêng
+            Object.values(errors).forEach((errorMessages) => {
+              if (Array.isArray(errorMessages)) {
+                errorMessages.forEach((msg) => toast.error(msg));
+              } else {
+                toast.error(errorMessages);
+              }
+            });
+          } else {
+            toast.error("Có lỗi xảy ra.");
+          }
         } else {
           toast.error("Có lỗi xảy ra.");
         }
-
+        
         
         console.log(error);
         
@@ -74,53 +84,48 @@ const AddClient = () => {
 
   return (
     <div className="bg-white rounded-lg p-6 mx-auto shadow">
+  <h2 className="text-2xl font-bold mb-4">Thêm người dùng</h2>
+  <form onSubmit={handleSubmit}>
+    <div className="mb-4">
+      <label className="block text-gray-700">Tên <span className="text-red-500">*</span></label>
+      <input
+        type="text"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        className="border rounded w-full px-3 py-2"
+      />
+    </div>
+    <div className="mb-4">
+      <label className="block text-gray-700">Email <span className="text-red-500">*</span></label>
+      <input
+        type="email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        className="border rounded w-full px-3 py-2"
+      />
+    </div>
+    <div className="mb-4">
+      <label className="block text-gray-700">Số điện thoại <span className="text-red-500">*</span></label>
+      <input
+        type="text"
+        name="phone"
+        value={formData.phone}
+        onChange={handleChange}
+        className="border rounded w-full px-3 py-2"
+      />
+    </div>
   
-  <form onSubmit={handleSubmit} className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-8 rounded-xl shadow-lg max-w-lg mx-auto">
-  <h2 className="text-3xl font-bold text-white text-center mb-6">Thêm người dùng</h2>
-
-  <div className="mb-6">
-    <label className="block text-gray-100 text-lg font-semibold">Tên <span className="text-red-500">*</span></label>
-    <input
-      type="text"
-      name="name"
-      value={formData.name}
-      onChange={handleChange}
-      className="border-2 border-gray-300 rounded-lg w-full px-4 py-3 mt-2 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
-    />
-  </div>
-
-  <div className="mb-6">
-    <label className="block text-gray-100 text-lg font-semibold">Email <span className="text-red-500">*</span></label>
-    <input
-      type="email"
-      name="email"
-      value={formData.email}
-      onChange={handleChange}
-      className="border-2 border-gray-300 rounded-lg w-full px-4 py-3 mt-2 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
-    />
-  </div>
-
-  <div className="mb-6">
-    <label className="block text-gray-100 text-lg font-semibold">Số điện thoại <span className="text-red-500">*</span></label>
-    <input
-      type="text"
-      name="phone"
-      value={formData.phone}
-      onChange={handleChange}
-      className="border-2 border-gray-300 rounded-lg w-full px-4 py-3 mt-2 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
-    />
-  </div>
-
-  <div className="mt-8 flex justify-center">
-    <button
-      type="submit"
-      className="px-8 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-300"
-    >
-      Thêm người dùng
-    </button>
-  </div>
-</form>
-
+    <div className="mt-6 flex justify-end space-x-4">
+      <button
+        type="submit"
+        className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        Thêm người dùng
+      </button>
+    </div>
+  </form>
 </div>
 
   );

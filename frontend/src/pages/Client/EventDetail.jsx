@@ -374,10 +374,11 @@ const EventDetail = () => {
         </div>
       </div>
       <br />
+      {event.speakers && event.speakers.length > 0 && (
       <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
+        
 
-        {event.speakers && event.speakers.length > 0 && (
+        
           <div className="flex flex-wrap justify-center mt-8 gap-6">
             {event.speakers.map((speaker, index) => (
               <div key={index} className="flex flex-col items-center w-48">
@@ -399,8 +400,8 @@ const EventDetail = () => {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        
+      </div>)}
       {/* Mô tả sự kiện */}
       <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4">Mô tả sự kiện</h2>
@@ -414,6 +415,8 @@ const EventDetail = () => {
           }}
         ></div>
       </div>
+      <br />
+      <br />
       {/* Sự kiện tương tự */}
       {/* <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4">Sự kiện tương tự</h2>

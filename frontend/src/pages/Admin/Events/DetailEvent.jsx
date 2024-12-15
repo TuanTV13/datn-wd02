@@ -34,6 +34,7 @@ const DetailEvents = () => {
   const { id } = useParams();
 
   // Modal state
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTicketForm, setIsTicketForm] = useState(true);
   const [eventId, setEventId] = useState(id);
@@ -42,6 +43,7 @@ const DetailEvents = () => {
   const [showAddSpeaker, setShowAddSpeaker] = useState(false);
 
   const [showUsersStatistics, setShowUsersStatistics] = useState(false); // Add this state
+
   useEffect(() => {
     const fetchEventDetails = async () => {
       const token = localStorage.getItem("access_token");
@@ -102,18 +104,8 @@ const DetailEvents = () => {
         { status: nextStatus },
         { headers }
       );
-
-      // Cập nhật trạng thái mới vào UI
-      setEventDetails((prevDetails) => ({
-        ...prevDetails,
-        event: {
-          ...prevDetails.event,
-          status: nextStatus,
-        },
-      }));
-
-      // Hiển thị thông báo thành công
       setReload(!reload);
+      // Hiển thị thông báo thành công
       toast.success("Cập nhật trạng thái thành công!", {
         position: "top-right",
         autoClose: 3000,
@@ -134,6 +126,11 @@ const DetailEvents = () => {
       });
       console.error(err);
     }
+  };
+
+  const handleShowPopup = (status) => {
+    setSelectedStatus(status);
+    setShowConfirmPopup(true);
   };
   // Tính toán thời gian để hiển thị nút phù hợp
   const getTimeDifference = (startTime) => {
@@ -287,6 +284,7 @@ const DetailEvents = () => {
       </h1>
 
       <p className="text-lg font-medium text-gray-700 mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md border-l-4">
+        
         <span className="flex items-center text-gray-800">
           <span className="mr-2 text-xl">📌</span>
           Trạng thái:{" "}
@@ -303,56 +301,42 @@ const DetailEvents = () => {
         {data.event.status !== "completed" && (
           <>
             {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
-            {data.event.status == "pending" && timeDifference < 10 && (
+            {data.event.status === "pending" && timeDifference < 10 && (
               <Button
                 type="primary"
                 className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-                onClick={() => {
-                  setSelectedStatus(getNextStatusLabel(data.event.status));
-                  setShowConfirmPopup(true);
-                }}
+                onClick={() => handleShowPopup(data.event.status)}
               >
                 {getNextStatusLabel(data.event.status)}
               </Button>
             )}
-            {data.event.status == "confirmed" && timeDifference < 4 && (
+            {data.event.status === "confirmed" && timeDifference < 4 && (
               <Button
                 type="primary"
                 className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-                onClick={() => {
-                  setSelectedStatus(getNextStatusLabel(data.event.status));
-                  setShowConfirmPopup(true);
-                }}
+                onClick={() => handleShowPopup(data.event.status)}
               >
                 {getNextStatusLabel(data.event.status)}
               </Button>
             )}
 
             {/* Hiển thị nút chuyển sang check-in trong vòng 2 giờ trước khi sự kiện bắt đầu */}
-            {timeDifference <= 2 &&
-              timeDifference > 0 &&
-              data.event.status == "checkin" && (
-                <Button
-                  type="primary"
-                  className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-                  onClick={() => {
-                    setSelectedStatus("checkin");
-                    setShowConfirmPopup(true);
-                  }}
-                >
-                  {getNextStatusLabel(data.event.status)}
-                </Button>
-              )}
+            {timeDifference <= 2 && timeDifference > 0 && data.event.status === "checkin" && (
+              <Button
+                type="primary"
+                className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                onClick={() => handleShowPopup(data.event.status)}
+              >
+                {getNextStatusLabel(data.event.status)}
+              </Button>
+            )}
 
             {/* Hiển thị nút chuyển sang "Hoàn thành" khi sự kiện đang diễn ra */}
             {data.event.status === "ongoing" && (
               <Button
                 type="primary"
                 className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-                onClick={() => {
-                  setSelectedStatus("completed");
-                  setShowConfirmPopup(true);
-                }}
+                onClick={() => handleShowPopup(data.event.status)}
               >
                 {getNextStatusLabel(data.event.status)}
               </Button>
@@ -361,21 +345,63 @@ const DetailEvents = () => {
         )}
       </p>
 
+      {showConfirmPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
+            <button
+              onClick={() => setShowConfirmPopup(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+            <h3 className="text-xl font-semibold mb-4 text-gray-700 text-center">
+              Xác nhận thay đổi trạng thái
+            </h3>
+            <p className="text-gray-600 mb-6 text-center">
+              Bạn có chắc chắn muốn thay đổi trạng thái sự kiện từ{" "}
+              <span className="font-bold text-blue-500">
+                {getNextStatusLabel(data.event.status)}
+              </span>{" "}
+              sang{" "}
+              <span className="font-bold text-blue-500">
+                {getNextStatusLabel(selectedStatus)}
+              </span>?
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => setShowConfirmPopup(false)}
+                className="px-6 py-2 text-sm text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  handleStatusChange(selectedStatus);
+                  setShowConfirmPopup(false);
+                }}
+                className="px-6 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-all"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Group the buttons in one row, with different colors */}
       <div className="flex space-x-4 justify-center mb-8">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
-        >
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300">
           Quản lý vé và voucher
         </button>
 
         <button
-          onClick={() => {}}
+          onClick={() => { }}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
         >
           Thêm địa chỉ IP check-in
         </button>
+
 
         <button
           onClick={() => setShowUpdateEvent(!showUpdateEvent)}
@@ -386,47 +412,9 @@ const DetailEvents = () => {
       </div>
       {showUpdateEvent && <UpdateEvent />}
 
-      {showConfirmPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
-            {/* Nút đóng */}
-            <button
-              onClick={() => setShowConfirmPopup(false)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-            >
-              <i className="fas fa-times"></i>
-            </button>
-            {/* Tiêu đề */}
-            <h3 className="text-xl font-semibold mb-4 text-gray-700 text-center">
-              Xác nhận thay đổi trạng thái
-            </h3>
-            {/* Nội dung */}
-            <p className="text-gray-600 mb-6 text-center">
-              Bạn có chắc chắn muốn thay đổi trạng thái vé sang{" "}
-              <span className="font-bold text-blue-500">{selectedStatus}</span>{" "}
-              không?
-            </p>
-            {/* Nút hành động */}
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={() => setShowConfirmPopup(false)}
-                className="px-6 py-2 text-sm text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => {
-                  setShowConfirmPopup(false);
-                  handleChangeStatus();
-                }}
-                className="px-6 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 transition-all"
-              >
-                Xác nhận
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+     
+
+
 
       <hr />
       <br />
@@ -743,72 +731,75 @@ const DetailEvents = () => {
         </div>
       )}
 
-      <Modal
-        title={
-          <div className="flex justify-between items-center">
-            <span>Quản lý vé và voucher</span>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="text-xl font-semibold text-gray-500 hover:text-gray-700"
-            ></button>
-          </div>
-        }
-        width={1000}
-        open={isModalOpen}
-        footer={[
-          <Button
-            key="close"
-            type="primary"
-            onClick={() => {
-              setIsModalOpen(false);
-              navigate("/admin/detail-event/" + eventId);
-            }}
-          >
-            Đóng
-          </Button>,
-        ]}
-        onCancel={() => setIsModalOpen(false)} // Đóng khi click ngoài modal
+
+<Modal
+  title={
+    <div className="flex justify-between items-center">
+      <span>Quản lý vé và voucher</span>
+      <button
+        onClick={() => setIsModalOpen(false)}
+        className="text-xl font-semibold text-gray-500 hover:text-gray-700"
       >
-        <div className="flex justify-center gap-3">
-          <Button
-            key="ticket"
-            onClick={() => {
-              setIsTicketForm(true); // Hiển thị form thêm vé
-              setShowStatistics(false); // Ẩn thống kê vé
-              setShowUsersStatistics(false); // Ẩn thống kê người mua vé
-            }}
-          >
-            Thêm vé
-          </Button>
-          <Button
-            key="voucher"
-            onClick={() => {
-              setIsTicketForm(false); // Hiển thị form thêm voucher
-              setShowStatistics(false); // Ẩn thống kê vé
-              setShowUsersStatistics(false); // Ẩn thống kê người mua vé
-            }}
-          >
-            Thêm voucher
-          </Button>
-          <Button
-            onClick={() => {
-              setShowStatistics(true); // Hiển thị thống kê vé
-              setIsTicketForm(false); // Ẩn form thêm vé hoặc voucher
-              setShowUsersStatistics(false); // Ẩn thống kê người mua vé
-            }}
-          >
-            Thống kê vé
-          </Button>
-          <Button
-            onClick={() => {
-              setShowUsersStatistics(true); // Hiển thị thống kê người mua vé
-              setIsTicketForm(false); // Ẩn form thêm vé hoặc voucher
-              setShowStatistics(false); // Ẩn thống kê vé
-            }}
-          >
-            Thống kê người dùng
-          </Button>
-        </div>
+      
+      </button>
+    </div>
+  }
+  width={1000}
+  open={isModalOpen}
+  footer={[
+    <Button
+      key="close"
+      type="primary"
+      onClick={() => {
+        setIsModalOpen(false);
+        navigate("/admin/detail-event/" + eventId);
+      }}
+    >
+      Đóng
+    </Button>,
+  ]}
+  onCancel={() => setIsModalOpen(false)} // Đóng khi click ngoài modal
+>
+  <div className="flex justify-center gap-3">
+    <Button
+      key="ticket"
+      onClick={() => {
+        setIsTicketForm(true); // Hiển thị form thêm vé
+        setShowStatistics(false); // Ẩn thống kê vé
+        setShowUsersStatistics(false); // Ẩn thống kê người mua vé
+      }}
+    >
+      Thêm vé
+    </Button>
+    <Button
+      key="voucher"
+      onClick={() => {
+        setIsTicketForm(false); // Hiển thị form thêm voucher
+        setShowStatistics(false); // Ẩn thống kê vé
+        setShowUsersStatistics(false); // Ẩn thống kê người mua vé
+      }}
+    >
+      Thêm voucher
+    </Button>
+    <Button
+      onClick={() => {
+        setShowStatistics(true); // Hiển thị thống kê vé
+        setIsTicketForm(false); // Ẩn form thêm vé hoặc voucher
+        setShowUsersStatistics(false); // Ẩn thống kê người mua vé
+      }}
+    >
+      Thống kê vé
+    </Button>
+    <Button
+      onClick={() => {
+        setShowUsersStatistics(true); // Hiển thị thống kê người mua vé
+        setIsTicketForm(false); // Ẩn form thêm vé hoặc voucher
+        setShowStatistics(false); // Ẩn thống kê vé
+      }}
+    >
+      Thống kê người dùng
+    </Button>
+  </div>
 
         {/* Hiển thị form Thêm vé hoặc Thêm voucher nếu isTicketForm là true */}
         {isTicketForm && !showStatistics && !showUsersStatistics && (
