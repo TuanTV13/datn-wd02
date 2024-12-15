@@ -505,7 +505,7 @@ class PaymentController extends Controller
         $transaction->update(['status' => 'COMPLETED']);
         event(new TransactionVerified($transaction));
 
-        return redirect('http://localhost:5173/order-detail' + $transactionId);
+        return redirect('http://localhost:5173/order-detail/' + $transactionId);
     }
 
     // Xử lý giao dịch khi bị hủy thanh toán

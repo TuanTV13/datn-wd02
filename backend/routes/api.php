@@ -100,7 +100,10 @@ Route::prefix('v1')->group(function () {
     Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-event-categories'])->group(function () {
         Route::post('create', [CategoryController::class, 'create']);
         Route::put('{id}/update', [CategoryController::class, 'update']);
-        Route::delete('{id}/delete', [CategoryController::class, 'delete']);
+        Route::delete('{id}/delete', [CategoryController::class, 'destroy']);
+        Route::get('{id}', [CategoryController::class, 'show']);
+        Route::get('{id}/restore', [CategoryController::class, 'restore']);
+        Route::get('list/Trashed', [CategoryController::class, 'listTrashed']);
     });
 
     Route::get('tickets', [TicketController::class, 'index']);
@@ -178,34 +181,22 @@ Route::prefix('v1')->group(function () {
 
 
         Route::prefix('statistics')->group(function () {
-            // Route để lấy danh sách các sự kiện có doanh thu cao nhất trong khoảng thời gian
             Route::get('/top-revenue', [StatisticsController::class, 'topRevenueEvents']);
-
-            // Route để lấy thống kê số sự kiện hoàn thành trong khoảng thời gian
             Route::get('/event-statistics', [StatisticsController::class, 'getEventStatisticsByTime']);
-
             // Route để lấy thống kê sự kiện theo thể loại (chỉ sự kiện đã được xác nhận)
             Route::get('/statistics-by-category', [StatisticsController::class, 'getEventCountTotalAmountAndPercentageByEventType']);
-
             // Route để lấy thống kê sự kiện theo tỉnh/thành phố (chỉ sự kiện đã được xác nhận)
             Route::get('/statistics-by-province', [StatisticsController::class, 'getEventCountTotalAmountAndPercentageByProvince']);
-
             // Route để lấy danh sách các sự kiện có số lượng người tham gia cao nhất trong khoảng thời gian
             Route::get('/top-participants', [StatisticsController::class, 'topParticipantsEvents']);
-
-
             // Route để lấy thống kê số sự kiện đã xác nhận và bị hủy bỏ trong khoảng thời gian
             Route::get('/event-status-statistics', [StatisticsController::class, 'getEventStatusStatistics']);
-
-            // Route để lấy doanh thu và số lượng người tham gia của các sự kiện trong khoảng thời gian
+             // Route để lấy doanh thu và số lượng người tham gia của các sự kiện trong khoảng thời gian
             Route::get('/event-revenue-participants', [StatisticsController::class, 'getEventRevenueAndParticipants']);
         });
 
-
-        // Lấy danh sách giao dịch
         Route::get('/transactions', [TransactionController::class, 'getTransactionHistory']);
-
-        // Lấy giao dịch theo ID
+        
         Route::get('/transactions/{id}', [TransactionController::class, 'showTransaction']);
     });
 });

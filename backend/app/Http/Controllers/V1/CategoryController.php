@@ -20,11 +20,20 @@ class CategoryController extends Controller
 
     public function index()
     {
-        // Hiển thị tất cả danh mục sự kiện
         $category = $this->categoryRepository->getAll();
 
         return response()->json([
             'message' => 'Danh sách loại sự kiện',
+            'data' => $category
+        ]);
+    }
+
+    public function show($id)
+    {
+        $category = $this->categoryRepository->find($id);
+
+        return response()->json([
+            'message' => 'Chi tiêt vé',
             'data' => $category
         ]);
     }
@@ -34,7 +43,7 @@ class CategoryController extends Controller
         $data = $request->validated();
 
         try {
-            // Thêm mới danh mục sự kiện
+
             $category = $this->categoryRepository->create($data);
 
             return response()->json([
@@ -56,7 +65,6 @@ class CategoryController extends Controller
         $data = $requets->validated();
 
         try {
-            //Tìm id của danh mục sự kiện
             $category = $this->categoryRepository->find($id);
 
             if (!$category) {
@@ -65,7 +73,6 @@ class CategoryController extends Controller
                 ], 404);
             }
 
-            // Cập nhật danh mục sự kiện
             $category = $this->categoryRepository->update($id, $data);
 
             return response()->json([
@@ -83,7 +90,6 @@ class CategoryController extends Controller
 
     public function destroy($id)
     {
-        // Tìm id của danh mục sự kiện
         $category = $this->categoryRepository->find($id);
 
         if (!$category) {
@@ -92,16 +98,12 @@ class CategoryController extends Controller
             ], 404);
         }
 
-        // Kiểm tra xem danh mục này có sự kiện liên quan không, nếu có thì không cho xóa
         if ($category->events()->count() > 0) {
-            return response()->json([
-                'message' => 'Không thể xóa danh mục sự kiện này vì nó có sự kiện liên quan.',
-            ], 400);
+            $category->events()->update(['category_id' => 8]);
         }
 
         try {
 
-            // Xóa danh mục sự kiện
             $category->delete();
 
             return response()->json([
@@ -114,5 +116,24 @@ class CategoryController extends Controller
                 'message' => 'Lỗi hệ thống khi xóa danh mục sự kiện',
             ], 500);
         }
+    }
+
+    public function listTrashed()
+    {
+        $categories = $this->categoryRepository->listTrashed();
+
+        return response()->json([
+            'data' => $categories
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $category = $this->categoryRepository->restore($id);
+
+        return response()->json([
+            'message' => 'Khôi phục thành công', 
+            'data' => $category
+        ]);
     }
 }
