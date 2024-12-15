@@ -112,7 +112,7 @@ const OrderList = () => {
   const getStatusColor = (statusId: any) => {
     switch (statusId) {
       case "completed":
-        return { text: "Đã hoàn thành", color: "text-gray-500" };
+        return { text: "Đã hoàn thành", color: "text-green-500" };
       case "pending":
         return { text: "Đang chờ xác nhận", color: "text-gray-400" };
       case "failed":
@@ -299,7 +299,7 @@ const OrderList = () => {
             <tr className="font-bold">
               {["pending", "completed"].includes(transaction.status) && (
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="border border-gray-300 px-4 py-2 text-right"
                 >
                   Tổng tiền:
