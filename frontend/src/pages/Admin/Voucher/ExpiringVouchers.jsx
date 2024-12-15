@@ -34,10 +34,8 @@ const ExpiringVoucherForm = () => {
           ...state?.item,
           start_time: moment(new Date()).format("YYYY-MM-DD"),
           code: voucherData.code,
-          status: voucherData.status,
           end_time: voucherData.end_time.format("YYYY-MM-DD"),
           issue_quantity: voucherData.issue_quantity,
-          description: voucherData.description,
         },
         {
           headers: {
@@ -59,7 +57,7 @@ const ExpiringVoucherForm = () => {
           description: "Đã xảy ra lỗi khi cập nhật mã giảm giá.",
         });
       }
-    } catch (error) {
+    } catch (error) {     
       notification.error({
         message: "Lỗi kết nối",
         description: "Không thể kết nối tới máy chủ.",
@@ -70,16 +68,16 @@ const ExpiringVoucherForm = () => {
 
   return (
     <div>
-      <Card className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-        <h2 className="text-2xl font-bold text-center mb-5">
-          Cập nhật voucher sắp hết hạn
+      <Card className="max-w mx-auto p-6 bg-white shadow-md rounded-lg">
+        <h2 className="text-2xl font-bold mb-5">
+          Cập nhật mã giảm giá
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
           {/* Cột hiển thị thông tin voucher hiện tại */}
-          <div className="p-4 border-r">
+          <div className=" border-r">
             <h3 className="text-lg font-semibold">
-              Thông tin voucher hiện tại
+              Thông tin mã giảm giá hiện tại
             </h3>
             <p>
               <strong>Mã giảm giá:</strong> {voucherData.code}
@@ -97,13 +95,10 @@ const ExpiringVoucherForm = () => {
             <p>
               <strong>Số lần sử dụng:</strong> {voucherData.issue_quantity}
             </p>
-            <p>
-              <strong>Mô tả:</strong> {voucherData.description}
-            </p>
           </div>
 
           {/* Cột chứa các trường để sửa */}
-          <div>
+          <div className="lg:col-span-3">
             <label
               htmlFor="code"
               className="block text-sm font-medium text-gray-700"
@@ -119,23 +114,7 @@ const ExpiringVoucherForm = () => {
               }
             />
 
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700 mt-4"
-            >
-              Trạng thái
-            </label>
-            <select
-              id="status"
-              value={voucherData.status}
-              onChange={(e) =>
-                setVoucherData({ ...voucherData, status: e.target.value })
-              }
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="published">Hoạt động</option>
-              <option value="draft">Bản nháp</option>
-            </select>
+            
 
             <label
               htmlFor="end_time"
@@ -171,23 +150,6 @@ const ExpiringVoucherForm = () => {
                 })
               }
               placeholder="Nhập số lần sử dụng"
-            />
-
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mt-4"
-            >
-              Mô tả
-            </label>
-            <textarea
-              id="description"
-              rows={3}
-              value={voucherData.description}
-              onChange={(e) =>
-                setVoucherData({ ...voucherData, description: e.target.value })
-              }
-              placeholder="Mô tả mã giảm giá..."
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>

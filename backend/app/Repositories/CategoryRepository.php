@@ -16,7 +16,7 @@ class CategoryRepository
 
     public function getAll()
     {
-        return $this->category->all();
+        return $this->category->where('id', '!=', 8)->get();;
     }
 
     public function create(array $data)

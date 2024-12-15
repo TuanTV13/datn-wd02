@@ -15,7 +15,7 @@ class VoucherRepository
 
     public function getAll()
     {
-        return $this->voucher->get();
+        return $this->voucher->with('event')->get();
     }
 
     public function findById($id)

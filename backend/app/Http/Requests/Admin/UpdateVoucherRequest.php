@@ -42,12 +42,12 @@ class UpdateVoucherRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            if ($this->event_id) {
-                $event = Event::find($this->event_id);
-                if (!in_array($event->status, ['pending', 'confirmed'])) {
-                    $validator->errors()->add('event_id', 'Sự kiện có trạng thái không hợp lệ.');
-                }
-            }
+            // if ($this->event_id) {
+            //     $event = Event::find($this->event_id);
+            //     if (!in_array($event->status, ['pending', 'confirmed'])) {
+            //         $validator->errors()->add('event_id', 'Sự kiện có trạng thái không hợp lệ.');
+            //     }
+            // }
 
             if ($this->discount_type === 'percent' && $this->discount_value > 100) {
                 $validator->errors()->add('discount_value', 'Giá trị giảm giá loại phần trăm không được lớn hơn 100.');

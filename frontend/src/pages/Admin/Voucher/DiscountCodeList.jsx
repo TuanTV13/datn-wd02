@@ -37,6 +37,7 @@ const DiscountCodeList = () => {
   useEffect(() => {
     axiosInstance.get("/vouchers").then((res) => {
       setListVoucher(res.data.data);
+      console.log(res.data.data)
     });
   }, [reload]);
   const columns = [
@@ -51,9 +52,15 @@ const DiscountCodeList = () => {
       key: "code",
     },
     {
-      title: "Tên voucher cho sự kiện",
-      dataIndex: "eventName",
-      key: "eventName",
+      title: "Sự kiện áp dụng",
+      dataIndex: "event",
+      key: "event",
+      render: (events) => {
+        if (events && events.name) {
+          return events.name;
+        }
+        return "Chưa có sự kiện";
+      }
     },
     {
       title: "Giá trị của voucher",
