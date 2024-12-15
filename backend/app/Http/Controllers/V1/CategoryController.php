@@ -33,7 +33,7 @@ class CategoryController extends Controller
         $category = $this->categoryRepository->find($id);
 
         return response()->json([
-            'message' => 'Chi tiêt sự kiện',
+            'message' => 'Chi tiêt vé',
             'data' => $category
         ]);
     }
@@ -116,5 +116,24 @@ class CategoryController extends Controller
                 'message' => 'Lỗi hệ thống khi xóa danh mục sự kiện',
             ], 500);
         }
+    }
+
+    public function listTrashed()
+    {
+        $categories = $this->categoryRepository->listTrashed();
+
+        return response()->json([
+            'data' => $categories
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $category = $this->categoryRepository->restore($id);
+
+        return response()->json([
+            'message' => 'Khôi phục thành công', 
+            'data' => $category
+        ]);
     }
 }
