@@ -196,7 +196,7 @@ class StatisticsController extends Controller
         }
     }
 
-
+    // Thống kê sự kiện đã được tổ chức (confirmed) và bị hủy bỏ (canceled)
         public function getEventStatusStatistics(Request $request)
     {
 
