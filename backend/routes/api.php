@@ -191,9 +191,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/statistics-by-province', [StatisticsController::class, 'getEventCountTotalAmountAndPercentageByProvince']);
             // Route để lấy danh sách các sự kiện có số lượng người tham gia cao nhất trong khoảng thời gian
             Route::get('/top-participants', [StatisticsController::class, 'topParticipantsEvents']);
-
-
-            
+            // Route để lấy thống kê số sự kiện đã xác nhận và bị hủy bỏ trong khoảng thời gian
             Route::get('/event-status-statistics', [StatisticsController::class, 'getEventStatusStatistics']);
 
             
