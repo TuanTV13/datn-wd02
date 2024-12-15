@@ -43,7 +43,7 @@ class CategoryController extends Controller
         $data = $request->validated();
 
         try {
-            // Thêm mới danh mục sự kiện
+
             $category = $this->categoryRepository->create($data);
 
             return response()->json([

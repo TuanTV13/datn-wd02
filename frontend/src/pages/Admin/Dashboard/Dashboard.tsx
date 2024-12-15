@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Bar, Line, Pie, Doughnut } from "react-chartjs-2"; // Import Doughnut chart
+import { Bar, Line, Pie, Doughnut } from "react-chartjs-2"; 
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,7 +17,6 @@ import axiosInstance from "../../../axios";
 import { DatePicker, Table, Spin, message, Empty } from "antd";
 import dayjs from "dayjs";
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -27,18 +26,17 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement // Đăng ký biểu đồ Doughnut
+  ArcElement 
 );
 
 const Dashboard = () => {
-  const [data, setData] = useState<any>(null); // Dữ liệu trả về từ API tổng doanh thu
-  const [eventCount, setEventCount] = useState<number>(0); // Tổng số sự kiện
-  const [loading, setLoading] = useState(true); // Trạng thái đang tải
-  const [error, setError] = useState<any>(null); // Lỗi khi gọi API
-  const [startDate, setStartDate] = useState<any>(dayjs().subtract(1, "y")); // Ngày bắt đầu
-  const [endDate, setEndDate] = useState<any>(dayjs()); // Ngày kết thúc
+  const [data, setData] = useState<any>(null); 
+  const [eventCount, setEventCount] = useState<number>(0); 
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState<any>(null); 
+  const [startDate, setStartDate] = useState<any>(dayjs().subtract(1, "y")); 
+  const [endDate, setEndDate] = useState<any>(dayjs()); 
 
-  // Gọi API để lấy doanh thu theo ngày bắt đầu và kết thúc
   const fetchRevenueData = async (start_date: string, end_date: string) => {
     setLoading(true);
     try {
@@ -60,7 +58,6 @@ const Dashboard = () => {
     }
   };
 
-  // Gọi API để lấy số lượng sự kiện
   const fetchEventCount = async (start_date: string, end_date: string) => {
     try {
       const response = await axiosInstance.get(
@@ -72,13 +69,12 @@ const Dashboard = () => {
           },
         }
       );
-      setEventCount(response.data.event_count); // Lưu tổng số sự kiện
+      setEventCount(response.data.event_count); 
     } catch (err) {
       message.error("Có lỗi xảy ra khi lấy số lượng sự kiện");
     }
   };
 
-  // Gọi API khi chọn ngày mới
   useEffect(() => {
     if (startDate && endDate) {
       fetchRevenueData(
@@ -92,7 +88,6 @@ const Dashboard = () => {
     }
   }, [startDate, endDate]);
 
-  // Nếu đang tải dữ liệu
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -101,20 +96,18 @@ const Dashboard = () => {
     );
   }
 
-  // Nếu có lỗi khi gọi API
   if (error) {
     return <div>{error}</div>;
   }
 
-  // Dữ liệu cho biểu đồ
   const chartData = {
-    labels: data?.top_events?.map((event: any) => event.name), // Tên sự kiện
+    labels: data?.top_events?.map((event: any) => event.name), 
     datasets: [
       {
         label: "Doanh thu (VNĐ)",
         data: data?.top_events?.map((event: any) =>
           parseFloat(event.total_revenue)
-        ), // Doanh thu của từng sự kiện
+        ), 
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
@@ -122,9 +115,8 @@ const Dashboard = () => {
     ],
   };
 
-  // Dữ liệu cho biểu đồ đường (Line chart)
   const lineChartData = {
-    labels: data?.top_events?.map((event: any) => event.name), // Tên sự kiện
+    labels: data?.top_events?.map((event: any) => event.name), 
     datasets: [
       {
         label: "Doanh thu theo sự kiện",
@@ -138,29 +130,27 @@ const Dashboard = () => {
     ],
   };
 
-  // Dữ liệu cho biểu đồ tròn (Pie chart)
   const pieChartData = {
-    labels: data?.top_events?.map((event: any) => event.name), // Tên sự kiện
+    labels: data?.top_events?.map((event: any) => event.name), 
     datasets: [
       {
         label: "Tỷ lệ doanh thu",
         data: data?.top_events?.map((event: any) =>
           parseFloat(event.total_revenue)
-        ), // Doanh thu của từng sự kiện
+        ), 
         backgroundColor: [
           "#FF5733",
           "#33FF57",
           "#3357FF",
           "#FF33A1",
           "#FFC300",
-        ], // Các màu sắc cho các phần tử
+        ], 
       },
     ],
   };
 
-  // Dữ liệu cho biểu đồ Doughnut (hình tròn phân khúc)
   const doughnutChartData = {
-    labels: data?.top_events?.map((event: any) => event.name), // Tên sự kiện
+    labels: data?.top_events?.map((event: any) => event.name), 
     datasets: [
       {
         label: "Tỷ lệ doanh thu",
@@ -173,12 +163,11 @@ const Dashboard = () => {
           "#3357FF",
           "#FF33A1",
           "#FFC300",
-        ], // Các màu sắc cho các phần tử
+        ], 
       },
     ],
   };
 
-  // Tùy chọn cho biểu đồ
   const chartOptions = {
     responsive: true,
     plugins: {
@@ -194,21 +183,20 @@ const Dashboard = () => {
       x: {
         ticks: {
           font: {
-            size: 10, // Thu nhỏ chữ trên trục X
+            size: 10, 
           },
         },
       },
       y: {
         ticks: {
           font: {
-            size: 10, // Thu nhỏ chữ trên trục Y
+            size: 10, 
           },
         },
       },
     },
   };
 
-  // Columns cho bảng báo cáo doanh thu
   const columns = [
     {
       title: "Tên sự kiện",
@@ -228,7 +216,6 @@ const Dashboard = () => {
     },
   ];
 
-  // Dữ liệu bảng báo cáo
   const tableData = data?.top_events?.map((event: any) => ({
     key: event.id,
     name: event.name,
@@ -240,14 +227,14 @@ const Dashboard = () => {
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Bảng báo cáo doanh thu</h2>
 
-      {/* Hiển thị tổng số sự kiện */}
+      {}
       <div className="mb-4">
         <h3 className="text-xl font-semibold">
           Tổng số sự kiện hoàn thành: {eventCount}
         </h3>
       </div>
 
-      {/* Date Pickers */}
+      {}
       <div className="mb-4">
         <div className="flex items-center space-x-4">
           <div>
@@ -271,14 +258,14 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Tổng doanh thu */}
+      {}
       <div className="mb-6">
         <h3 className="text-xl font-semibold">
           Tổng doanh thu: {data.total_revenue} VNĐ
         </h3>
       </div>
       <div className="grid grid-cols-2 gap-6 mb-6">
-        {/* Biểu đồ cột */}
+        {}
         <div>
           <h3 className="text-xl font-semibold mb-4">
             Biểu đồ doanh thu theo sự kiện
@@ -286,7 +273,7 @@ const Dashboard = () => {
           <Bar data={chartData} options={chartOptions} />
         </div>
 
-        {/* Biểu đồ đường */}
+        {}
         <div>
           <h3 className="text-xl font-semibold mb-4">
             Biểu đồ doanh thu theo sự kiện (Đường)
@@ -294,7 +281,7 @@ const Dashboard = () => {
           <Line data={lineChartData} options={chartOptions} />
         </div>
 
-        {/* Biểu đồ tròn */}
+        {}
         <div>
           <h3 className="text-xl font-semibold mb-4">
             Biểu đồ tỷ lệ doanh thu (Tròn)
@@ -302,7 +289,7 @@ const Dashboard = () => {
           <Pie data={pieChartData} options={chartOptions} />
         </div>
 
-        {/* Biểu đồ Doughnut */}
+        {}
         <div>
           <h3 className="text-xl font-semibold mb-4">
             Biểu đồ tỷ lệ doanh thu (Doughnut)
@@ -310,7 +297,7 @@ const Dashboard = () => {
           <Doughnut data={doughnutChartData} options={chartOptions} />
         </div>
       </div>
-      {/* Bảng báo cáo doanh thu */}
+      {}
       <h2 className="text-xl mb-2">Top 5 sự kiện có doanh thu cao nhất </h2>
       {tableData?.length > 0 ? (
         <Table columns={columns} dataSource={tableData} className="mb-6" />
@@ -318,7 +305,7 @@ const Dashboard = () => {
         <Empty />
       )}
 
-      {/* Các biểu đồ */}
+      {}
     </div>
   );
 };
