@@ -171,9 +171,12 @@ const UpdateEvent = () => {
         }
       );
       console.log(formattedData);
-      setReload(reload);
+  
       toast.success("Cập nhật sự kiện thành công!");
-     
+      
+      // Trigger reload sau khi cập nhật thành công
+      window.location.reload()
+  
     } catch (error) {
       console.error("Lỗi khi cập nhật sự kiện:", error);
       toast.error(error.response ? error.response.data.message : "Lỗi khi cập nhật sự kiện!");
@@ -181,6 +184,7 @@ const UpdateEvent = () => {
       setLoading(false);
     }
   };
+  
   
   return (
     <div className="bg-white rounded-lg shadow p-6">
