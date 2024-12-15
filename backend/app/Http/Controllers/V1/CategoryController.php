@@ -132,7 +132,7 @@ class CategoryController extends Controller
         $category = $this->categoryRepository->restore($id);
 
         return response()->json([
-            'message' => 'Khôi phục thành công', 
+            'message' => 'Khôi phục thành công',
             'data' => $category
         ]);
     }

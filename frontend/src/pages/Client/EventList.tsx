@@ -10,6 +10,7 @@ import { CategoryCT } from "../../Contexts/CategoryContext";
 import api from "../../api_service/api";
 import { fetchEventsByProvince } from "../../api_service/ClientEvent";
 import { Checkbox, notification } from "antd";
+import { toast } from "react-toastify";
 
 const EventListing = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -46,8 +47,7 @@ const EventListing = () => {
         end_time: endTime,
       });
       setFilteredEvents(response.data.data.data);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const handleApplyFilters = () => {
@@ -107,6 +107,7 @@ const EventListing = () => {
       const data = await fetchEventsByProvince(Inputlocation);
       setFilteredEvents(data); // Cập nhật danh sách sự kiện
     } catch (err) {
+      toast.error("Không tìm thấy sự kiện");
     }
   };
   const [Inputlocation, setLocation] = useState("");
@@ -165,6 +166,25 @@ const EventListing = () => {
       return prevPage;
     });
   };
+
+  const getStatusColor = (statusId: any) => {
+    switch (statusId) {
+      case "confirmed":
+        return { text: "Đang chuẩn bị", color: "bg-yellow-500" };
+      case "checkin":
+        return { text: "Đang check-in", color: "bg-green-500" };
+      case "ongoing":
+        return { text: "Đang diễn ra", color: "bg-blue-500" };
+      case "completed":
+        return { text: "Đã kết thúc", color: "bg-gray-500" };
+      case "canceled":
+        return { text: "Đã hủy", color: "bg-red-500" };
+      case "pending":
+        return { text: "Đang chờ xác nhận", color: "bg-gray-300" };
+      default:
+        return { text: "Trạng thái không xác định", color: "bg-gray-300" };
+    }
+  };
   return (
     <div className="lg:mx-10 mt-36">
       <div className="flex flex-col lg:flex-row">
@@ -197,35 +217,36 @@ const EventListing = () => {
               </svg>
             </div>
 
-              <div className="mt-4">
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm danh mục..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
-                  {filteredCategories.map((category) => (
-                    <li
-                      key={category.id}
-                      className="px-2 py-1 hover:bg-blue-50 rounded cursor-pointer text-gray-600 hover:text-blue-600"
-                      // onClick={() => handleCategoryClick(category.id)}
-                    >
-                      <Checkbox
-                        onChange={(e) => {
-                          e.target.checked
-                            ? setCategoryId([...categoryId, category.id])
-                            : setCategoryId([
-                                ...categoryId.filter((v) => v !== category.id),
-                              ]);
-                        }}
-                      />
+            <div className="mt-4">
+              <input
+                type="text"
+                placeholder="Tìm kiếm danh mục..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                {filteredCategories.map((category) => (
+                  <li
+                    key={category.id}
+                    className="px-2 py-1 hover:bg-blue-50 rounded cursor-pointer text-gray-600 hover:text-blue-600"
+                  >
+                    <Checkbox
+                      onChange={(e) => {
+                        e.target.checked
+                          ? setCategoryId([...categoryId, category.id])
+                          : setCategoryId([
+                              ...categoryId.filter((v) => v !== category.id),
+                            ]);
+                      }}
+                    />
+                    <label htmlFor={``} className="ml-2 cursor-pointer">
                       {category.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {/* Location Filter */}
@@ -334,13 +355,19 @@ const EventListing = () => {
                 <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
                   <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
                     <Link to={`/event-detail/${item.id}`}>
-                      <img
-                        alt={item.name}
-                        className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
-                        src={item.thumbnail}
-                      />
+                      <div className="relative">
+                        <img
+                          alt={item.name}
+                          className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
+                          src={item.thumbnail}
+                        />
+                        <span  className={`absolute top-2 left-2 text-white text-sm font-semibold px-3 py-1 rounded ${getStatusColor(item.status).color}`}>
+                        {getStatusColor(item.status).text}
+                        </span>
+                      </div>
                     </Link>
                   </div>
+
                   <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
                     <div className="lg:flex">
                       <div className="flex flex-col justify-between lg:w-2/3">
