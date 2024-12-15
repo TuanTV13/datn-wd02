@@ -246,9 +246,15 @@ class EventController extends Controller
         }
     }
 
-    private function validateEventDisplayHeader($data)
+    private function validateEventDisplayHeader($event, $data)
     {
         $headerEventCount = $this->eventRepository->countHeaderEvents();
+            // Kiểm tra nếu sự kiện hiện tại đã có display_header = 1
+        if ($event->display_header == 1 && $data == 1) {
+            // Nếu không thay đổi giá trị display_header, bỏ qua kiểm tra
+            return null;
+        }
+
         if ($headerEventCount >= 4 && $data == 1) {
             return response()->json([
                 'message' => 'Chỉ có thể hiển thị tối đa 4 sự kiện ở phần đầu trang.',
@@ -351,10 +357,12 @@ class EventController extends Controller
             return $validationError;
         }
 
-        $data['display_header'] ??= 0;
+        if (isset($data['display_header'])) {
+            $data['display_header'] = $data['display_header'] ? 1 : 0;
 
-        if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'])) {
-            return $validateEventHeader;
+            if ($validateEventHeader = $this->validateEventDisplayHeader($event, $data['display_header'])) {
+                return $validateEventHeader;
+            }
         }
 
         try {
