@@ -1,12 +1,34 @@
-import React, { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { HomeCT } from "../../Contexts/HomeContext";
+import api from "../../api_service/api";
 
+interface Tickets {
+  id: number;
+  ticket_type: string;
+  price: number;
+  sold_quantity: number;
+  quantity: number;
+  zone: Zone[];
+  ticket: Ticket;
+}
+interface Event {
+  id: number;
+  name: string;
+  description: string;
+  tickets: Tickets[];
+  status: string;
+}
+interface Zone {
+  id: number;
+  name: string;
+}
+interface Ticket {
+  id: number;
+  status: string;
+  ticket_type: string;
+}
 const ItemEven = () => {
-  // const [showAll, setShowAll] = useState(false);
-  // const toggleShowAll = () => {
-  //   setShowAll(!showAll);
-  // };
   const [filter, setFilter] = useState("Mới nhất");
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [showFeatured, setShowFeatured] = useState(false);
@@ -25,6 +47,82 @@ const ItemEven = () => {
     if (normalizedFilter === "mới nhất") return true;
     return normalizedProvince === normalizedFilter;
   });
+
+  const [event, setEvent] = useState<Event | null>(null);
+  const [selectedVIPTicket, setSelectedVIPTicket] = useState<Tickets | null>(
+    null
+  );
+  const [vipTicketQuantity, setVIPTicketQuantity] = useState(1);
+  const [selectedRegularTicket, setSelectedRegularTicket] =
+    useState<Tickets | null>(null);
+  const [regularTicketQuantity, setRegularTicketQuantity] = useState(1);
+  const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [selectedEventId, setSelectedEventId] = useState(null);
+
+  // Hàm khi nhấn vào nút "Mua vé"
+  const handleShowPopup = (eventId: any) => {
+    setSelectedEventId(eventId);
+    setShowPopup(true); // Hiển thị popup
+  };
+  useEffect(() => {
+    if (selectedEventId) {
+      // Gọi API lấy chi tiết sự kiện
+      api
+        .get(`/clients/events/${selectedEventId}`)
+        .then((response) => {
+          console.log(response.data.data);
+          setEvent(response.data.data); // Lưu chi tiết sự kiện vào state
+        })
+        .catch((error) => {
+          console.error("Error fetching event details", error);
+        });
+    }
+  }, [selectedEventId]);
+  const navigate = useNavigate();
+
+  const handleBuyTicketClick = () => {
+    const tickets = [];
+    let totalAmount = 0;
+
+    if (selectedVIPTicket && vipTicketQuantity > 0) {
+      const vipTicketTotalPrice = selectedVIPTicket.price * vipTicketQuantity;
+      tickets.push({
+        ticket_id: selectedVIPTicket.ticket.id,
+        ticket_type: "VIP",
+        quantity: vipTicketQuantity,
+        seat_zone_id: selectedVIPTicket?.zone?.id,
+        seat_zone: selectedVIPTicket?.zone?.name,
+        original_price: selectedVIPTicket?.price,
+      });
+      totalAmount += vipTicketTotalPrice;
+    }
+
+    if (selectedRegularTicket && regularTicketQuantity > 0) {
+      const regularTicketTotalPrice =
+        selectedRegularTicket.price * regularTicketQuantity;
+      tickets.push({
+        ticket_id: selectedRegularTicket.ticket.id,
+        ticket_type: "Thường",
+        quantity: regularTicketQuantity,
+        seat_zone_id: selectedRegularTicket?.zone?.id,
+        seat_zone: selectedRegularTicket?.zone?.name,
+        original_price: selectedRegularTicket?.price,
+      });
+      totalAmount += regularTicketTotalPrice;
+    }
+
+    if (tickets.length > 0) {
+      const ticketData = { tickets: tickets, totalPrice: totalAmount };
+      console.log(ticketData);
+      navigate("/checkout", { state: ticketData });
+    } else {
+      alert("Vui lòng chọn ít nhất một loại vé.");
+    }
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
   return (
     <div>
       {/* 1 */}
@@ -73,8 +171,8 @@ const ItemEven = () => {
                     />
                   </Link>
                   <div className="text-sm text-gray-700 mb-3 flex-1">
-                    <p>{event.location}</p>
-                    <p className="mt-2 text-lg font-semibold line-clamp-2">
+                    <p className="line-clamp-1">{event.location}</p>
+                    <p className="mt-2 text-lg font-semibold line-clamp-1">
                       <Link
                         to={`/event-detail/${event.id}`}
                         className="text-[#007BFF] hover:underline"
@@ -85,7 +183,7 @@ const ItemEven = () => {
                     <p className="mt-3 text-gray-500 text-sm">
                       Thành phố tổ chức: {event.province}
                     </p>
-                    <p className="mt-2 text-gray-500 text-sm">
+                    <p className="mt-2 text-gray-500 text-sm line-clamp-1">
                       Diễn giả:{" "}
                       {event.speakers &&
                       JSON.parse(event.speakers).length > 0 ? (
@@ -102,10 +200,16 @@ const ItemEven = () => {
                     </p>
                   </div>
 
-                  <div className="text-xs mb-3">
+                  <div className="text-xs mb-2 mt-2">
                     <p className="text-gray-500 hover:text-[#070707]">
-                      <Link to={`/event-detail/${event.id}`}>Xem chi tiết</Link>
+                      <Link to={"/event-detail/" + event.id}>Xem chi tiết</Link>
                     </p>
+                    <button
+                      onClick={() => handleShowPopup(event.id)}
+                      className="mt-2 w-[100px] h-[30px] bg-blue-400 hover:bg-blue-700 text-white font-semibold rounded-md mx-auto block"
+                    >
+                      Mua vé
+                    </button>
                   </div>
 
                   <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-3 mt-4">
@@ -188,7 +292,7 @@ const ItemEven = () => {
                     </Link>
                   </div>
                   <div className="text-xs text-gray-700 mb-4 h-24">
-                    <p className="pt-2">{event.location}</p>
+                    <p className="pt-2 line-clamp-1">{event.location}</p>
                     <p className="mt-1 line-clamp-1">
                       <Link
                         to={"/event-detail/" + event.id}
@@ -197,7 +301,9 @@ const ItemEven = () => {
                         {event.name}
                       </Link>
                     </p>
-                    <p className="mt-2">Thành phố tổ chức: {event.province}</p>
+                    <p className="mt-2 line-clamp-1">
+                      Thành phố tổ chức: {event.province}
+                    </p>
                     <p className="mt-2 line-clamp-1">
                       Diễn giả:{" "}
                       {event.speakers &&
@@ -214,11 +320,18 @@ const ItemEven = () => {
                       )}
                     </p>
                   </div>
-                  <div className="text-xs mb-2">
+                  <div className="text-xs mb-2 mt-2">
                     <p className="text-gray-500 hover:text-[#070707]">
                       <Link to={"/event-detail/" + event.id}>Xem chi tiết</Link>
                     </p>
+                    <button
+                      onClick={() => handleShowPopup(event.id)}
+                      className="mt-2 w-[100px] h-[30px] bg-blue-400 hover:bg-blue-700 text-white font-semibold rounded-md mx-auto block"
+                    >
+                      Mua vé
+                    </button>
                   </div>
+
                   <div className="flex justify-between items-center text-xs text-gray-600 border-t pt-2">
                     <div className="flex items-center space-x-1">
                       <svg
@@ -296,7 +409,7 @@ const ItemEven = () => {
                   </Link>
                 </div>
                 <div className="text-sm text-gray-700 mb-4 h-32">
-                  <p className="pt-2">{event.location}</p>
+                  <p className="pt-2 line-clamp-1">{event.location}</p>
                   <p className="mt-1 line-clamp-1">
                     <Link
                       to={"/event-detail/" + event.id}
@@ -320,10 +433,16 @@ const ItemEven = () => {
                     )}
                   </p>
                 </div>
-                <div className="text-sm mb-4">
+                <div className="text-xs mb-2 mt-2">
                   <p className="text-gray-500 hover:text-[#070707]">
                     <Link to={"/event-detail/" + event.id}>Xem chi tiết</Link>
                   </p>
+                  <button
+                    onClick={() => handleShowPopup(event.id)}
+                    className="mt-2 w-[100px] h-[30px] bg-blue-400 hover:bg-blue-700 text-white font-semibold rounded-md mx-auto block"
+                  >
+                    Mua vé
+                  </button>
                 </div>
                 <div className="flex justify-between items-center text-sm text-gray-600 border-t pt-4">
                   <div className="flex items-center space-x-1">
@@ -370,6 +489,144 @@ const ItemEven = () => {
           )}
         </div>
       </div>
+      {/* Hiển thị Popup nếu showPopup là true */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-[700px]">
+            <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
+
+            {/* Nhóm vé VIP */}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-indigo-700 mb-4">Vé VIP</h3>
+              <select
+                value={selectedVIPTicket?.id || ""}
+                onChange={(e) => {
+                  const selected =
+                    event?.tickets.find(
+                      (ticket) => ticket.id === parseInt(e.target.value)
+                    ) || null;
+                  setSelectedVIPTicket(selected);
+                  setVIPTicketQuantity(1); // Đặt lại số lượng vé VIP khi chọn vé mới
+                }}
+                className="border p-2 rounded w-full"
+              >
+                <option value="">Chọn khu vực</option>
+                {event?.tickets
+                  .filter((ticket) => ticket.ticket.ticket_type === "VIP")
+                  .map((ticket) => (
+                    <option key={ticket.id} value={ticket.id}>
+                      Khu vực: {ticket.zone.name || "N/A"} - Giá:{" "}
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(ticket.price)}
+                      - Số lượng còn lại: {ticket.sold_quantity}
+                    </option>
+                  ))}
+              </select>
+
+              {selectedVIPTicket && (
+                <div className="mt-4">
+                  <label className="block text-sm font-bold mb-2">
+                    Số lượng
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={Math.min(
+                      10,
+                      (selectedVIPTicket.quantity || 0) -
+                        (selectedVIPTicket.sold_quantity || 0)
+                    )}
+                    value={vipTicketQuantity}
+                    onChange={(e) =>
+                      setVIPTicketQuantity(Number(e.target.value))
+                    }
+                    className="border p-2 rounded w-full"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Nhóm vé Thường */}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-indigo-700 mb-4">
+                Vé Thường
+              </h3>
+              <select
+                value={selectedRegularTicket?.id || ""}
+                onChange={(e) => {
+                  const selected =
+                    event?.tickets.find(
+                      (ticket) => ticket.id === parseInt(e.target.value)
+                    ) || null;
+                  setSelectedRegularTicket(selected);
+                  setRegularTicketQuantity(1); // Đặt lại số lượng vé Thường khi chọn vé mới
+                }}
+                className="border p-2 rounded w-full"
+              >
+                <option value="">Chọn khu vực</option>
+                {event?.tickets
+                  .filter((ticket) => ticket.ticket.ticket_type === "Thường")
+                  .map((ticket) => (
+                    <option key={ticket.id} value={ticket.id}>
+                      Khu vực: {ticket.zone.name || "N/A"} - Giá:{" "}
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(ticket.price)}
+                      - Số lượng còn lại: {ticket.sold_quantity}
+                    </option>
+                  ))}
+              </select>
+
+              {selectedRegularTicket && (
+                <div className="mt-4">
+                  <label className="block text-sm font-bold mb-2">
+                    Số lượng
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={Math.min(
+                      10,
+                      selectedRegularTicket.quantity -
+                        selectedRegularTicket.sold_quantity
+                    )}
+                    value={regularTicketQuantity}
+                    onChange={(e) =>
+                      setRegularTicketQuantity(Number(e.target.value))
+                    }
+                    className="border p-2 rounded w-full"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Nút Mua vé và Đóng */}
+            <div className="mt-6 flex justify-end space-x-4">
+              <button
+                onClick={handleClosePopup}
+                className="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600"
+              >
+                Đóng
+              </button>
+
+              <button
+                onClick={handleBuyTicketClick}
+                className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+                disabled={
+                  (!selectedVIPTicket && !selectedRegularTicket) ||
+                  (selectedVIPTicket && vipTicketQuantity < 1) ||
+                  (selectedRegularTicket && regularTicketQuantity < 1)
+                }
+              >
+                Mua vé
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

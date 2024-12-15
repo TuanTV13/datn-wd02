@@ -224,7 +224,7 @@ const Dashboard = () => {
       title: "Tỷ lệ (%)",
       dataIndex: "percentage",
       key: "percentage",
-      render: (percentage: any) => `${percentage.toFixed(2)}%`,
+      render: (percentage: any) => `${percentage.toFixed()}%`,
     },
   ];
 
