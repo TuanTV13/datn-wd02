@@ -15,6 +15,7 @@ class TicketPrice extends Model
         'seat_zone_id',
         'price',
         'quantity',
+        'purchase_limit',
         'sold_quantity',
         'sale_start',
         'sale_end'

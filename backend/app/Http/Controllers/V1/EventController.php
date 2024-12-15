@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Events\EventCompleted;
+use App\Events\EventUpcoming;
 use App\Events\EventUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreEventRequest;
@@ -100,11 +102,12 @@ class EventController extends Controller
     }
     public function changeStatus($id, Request $request)
     {
-        // $status = $request->validate([
-        //     'status' => 'required'
-        // ]);
-
         $event = $this->eventRepository->find($id);
+
+        $users = $event->users()
+            ->select('users.id', 'users.name', 'users.email')
+            ->get()
+            ->unique('email');
 
         if (!$event) {
             return response()->json([
@@ -114,15 +117,12 @@ class EventController extends Controller
 
         $event->update(['status' => $request->input('status')]);
 
-        // if ($event->status == 'pending') {
-        //     $event->status = 'confirmed';
-        //     $event->save();
-
-        //     return response()->json([
-        //         'message' => 'Xác nhận thành công',
-        //         'data' => $event
-        //     ], 200);
-        // }
+        if ($request->input('status') === 'checkin') {
+            event(new EventUpcoming($users, $event));
+        }
+        if ($request->input('status') === 'completed') {
+            event(new EventCompleted($users, $event));
+        }
 
         return response()->json([
             'message' => 'Thanh cong'
