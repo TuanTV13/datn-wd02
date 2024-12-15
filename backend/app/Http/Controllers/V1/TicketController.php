@@ -119,11 +119,41 @@ class TicketController extends Controller
 
     public function create(StoreTicketRequest $request)
     {
-
         DB::beginTransaction();
         $data = $request->validated();
         $data['sold_quantity'] = $data['quantity'];
         $data['status'] = 'confirmed';
+
+        
+        $event = $this->eventRepository->find($request->event_id);
+
+        if ($event->status == 'ongoing') {
+            return response()->json([
+                'message' => 'Sự kiện đâng diễn ra không thể tạo thêm vé.',
+            ], 400);
+        }
+        if ($event->status == 'canceled') {
+            return response()->json([
+                'message' => 'Sự kiện đã bị hủy không thể tạo thêm vé.',
+            ], 400);
+        }
+        if ($event->status == 'completed') {
+            return response()->json([
+                'message' => 'Sự kiện đã hoàn thành không thể tạo thêm vé.',
+            ], 400);
+        }
+        if ($event->status == 'checkin') {
+            return response()->json([
+                'message' => 'Sự kiện đâng được checkin không thể tạo thêm vé.',
+            ], 400);
+        }
+
+        if (strtotime($request->sale_end) >= strtotime($event->start_time)) {
+            return response()->json([
+                'message' => 'Thời gian kết thúc bán vé phải trước thời gian bắt đầu sự kiện. Thời gian bắt đầu sự kiện là: '. $event->start_time,
+            ], 400);
+        }
+
 
         $ticketType = $request->ticket_type;
         $zoneName = $request->name;
@@ -153,6 +183,7 @@ class TicketController extends Controller
                     'seat_zone_id' => $zone->id,
                     'price' => $request->price,
                     'quantity' => $request->quantity,
+                    'purchase_limit' => $request->purchase_limit,
                     'sold_quantity' => $data['sold_quantity'],
                     'sale_start' => $request->sale_start,
                     'sale_end' => $request->sale_end
@@ -172,6 +203,7 @@ class TicketController extends Controller
                     'seat_zone_id' => $zone->id,
                     'price' => $request->price,
                     'quantity' => $request->quantity,
+                    'purchase_limit' => $request->purchase_limit,
                     'sold_quantity' => $data['sold_quantity'],
                     'sale_start' => $request->sale_start,
                     'sale_end' => $request->sale_end

@@ -169,7 +169,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('{id}/participation-history', [HistoryController::class, 'getEventParticipationHistory'])->middleware('check.permission:view-participation-history');
         Route::get('{userId}/event/{eventID}/participation-history', [HistoryController::class, 'showParticipationHistory'])->middleware('check.permission:view-participation-history');
-        Route::get('{id}/transaction-history', [HistoryController::class, 'getTransactionHistory'])->middleware('check.permission:view-transaction-history');
+        Route::get('{id}/transaction-history', [HistoryController::class, 'getTransactionHistory']);
 
 
         Route::get('/statistics/category', [StatisticsController::class, 'getStatisticsByCategory']);
