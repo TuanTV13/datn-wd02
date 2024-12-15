@@ -22,6 +22,7 @@ return new class extends Migration
             $table->decimal('price');
             $table->integer('quantity');
             $table->integer('sold_quantity');
+            $table->integer('purchase_limit')->default(0);
             $table->dateTime('sale_start');
             $table->dateTime('sale_end');
             $table->timestamps();

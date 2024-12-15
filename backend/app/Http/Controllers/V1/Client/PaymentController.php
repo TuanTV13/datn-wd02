@@ -72,6 +72,34 @@ class PaymentController extends Controller
         return response()->json(['message' => 'Đã chọn vé', 'total_amount' => $totalAmount]);
     }
 
+    private function checkTicketLimit($event_id, $user_id, $ticket_id, $zone_name, $seatZoneID, $quantity_requested) {
+        // Lấy số lượng vé tối đa mà sự kiện cho phép
+        $max_tickets = DB::table('ticket_prices')->where('event_id', $event_id)->where('ticket_id', $ticket_id)->where('seat_zone_id', $seatZoneID)->value('purchase_limit');
+
+        // Tính tổng số lượng vé mà người dùng đã mua cho sự kiện này
+        $tickets_bought = DB::table('event_users')
+        ->join('ticket_prices', function($join) use ($seatZoneID) {
+            $join->on('ticket_prices.event_id', '=', 'event_users.event_id')
+                 ->on('ticket_prices.ticket_id', '=', 'event_users.ticket_id')
+                 ->where('ticket_prices.seat_zone_id', '=', $seatZoneID);
+        })
+        ->where('event_users.event_id', $event_id)
+        ->where('event_users.user_id', $user_id)
+        ->where('event_users.ticket_id', $ticket_id)
+        ->where('event_users.seat_zone', $zone_name)
+        ->count();
+    
+        // Tính tổng số vé sau khi thêm yêu cầu mới
+        $total_tickets = $tickets_bought + $quantity_requested;
+    
+        // Kiểm tra nếu tổng vé vượt quá giới hạn
+        if ($total_tickets > $max_tickets) {
+            return response()->json([
+                'message' => "Bạn đã mua quá số lượng vé cho phép cho khu vực chỗ ngồi: {$zone_name} với số lượng tối đa là {$max_tickets}."
+            ], 400);
+        }
+    }
+
     // Thanh toán
     public function processPayment(Request $request, VoucherController $voucherController)
     {
@@ -117,6 +145,10 @@ class PaymentController extends Controller
                 return response()->json(['message' => 'Số lượng vé không đủ'], 400);
             }
 
+            if ($quantity > $ticketZone->purchase_limit) {
+                return response()->json(['message' => 'Số lượng vé vượt quá giới hạn cho phép'], 400);
+            }
+
             $totalAmount += $ticketZone->price * $quantity;
         }
 
@@ -157,6 +189,18 @@ class PaymentController extends Controller
                 'payment_method' => 'required|string|in:cash,paypal,vnpay',
                 'discount_code' => 'nullable|string'
             ]);
+
+            foreach($validated['tickets'] as $item) {
+                // Kiểm tra giới hạn số vé trước khi tiếp tục
+                $result = $this->checkTicketLimit($ticket->event_id, $user->id, $item['ticket_id'], $item['seat_zone'], $item['seat_zone_id'], $item['quantity']);
+    
+                // Nếu có lỗi, trả về ngay lập tức
+                if ($result != null) {
+                    if ($result->getStatusCode() == 400) {
+                        return $result; // Trả về lỗi nếu có
+                    }
+                }
+            }
 
             $discountCode = $request->input('discount_code');  // Mã giảm giá
             $voucher = $this->voucherRepository->findByCode($discountCode); // Tìm kiếm theo discount_code
@@ -205,7 +249,7 @@ class PaymentController extends Controller
                     ];
                 }
             }
-
+            
             // Dữ liệu giao dịch
             $transactionData = [
                 'user_id' => $user->id,
@@ -255,6 +299,7 @@ class PaymentController extends Controller
                 foreach ($tickets as $ticket) {
                     $user->events()->attach($ticket['event_id'], [
                         'ticket_id' => $ticket['ticket_id'],
+                        'seat_zone_id' => $ticket['seat_zone_id'],
                         'ticket_type' => $ticket['ticket_type'],
                         'ticket_code' => $ticket['ticket_code'],
                         'seat_zone' => $ticket['seat_zone'],
@@ -279,6 +324,7 @@ class PaymentController extends Controller
                 foreach ($tickets as $ticket) {
                     $user->events()->attach($ticket['event_id'], [
                         'ticket_id' => $ticket['ticket_id'],
+                        'seat_zone_id' => $ticket['seat_zone_id'],
                         'ticket_type' => $ticket['ticket_type'],
                         'ticket_code' => $ticket['ticket_code'],
                         'seat_zone' => $ticket['seat_zone'],
@@ -459,7 +505,7 @@ class PaymentController extends Controller
         $transaction->update(['status' => 'COMPLETED']);
         event(new TransactionVerified($transaction));
 
-        return redirect('http://localhost:5173/order-detail' + $transactionId);
+        return redirect('http://localhost:5173/order-detail/' + $transactionId);
     }
 
     // Xử lý giao dịch khi bị hủy thanh toán
