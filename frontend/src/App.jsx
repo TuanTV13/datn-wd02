@@ -36,6 +36,7 @@ import SearchEvent from "./pages/Client/SearchEvent";
 import ListTicketDelete from "./pages/Admin/Tickets/ListTicketDelete";
 import Dashboard from "./pages/Admin/Dashboard/Dashboard";
 import OrderList from "./pages/Client/OrderList";
+import CategoryList from "./pages/Admin/Category/CategoryList";
 import Contact from "./pages/Client/Contact";
 
 function App() {
@@ -82,6 +83,8 @@ function App() {
         { path: "expiring-voucher", element: <ExpiringVoucherForm /> },
         { path: "rating-list", element: <RatingList /> },
         { path: "add-rating", element: <AddRating /> },
+        { path: "add-rating", element: <AddRating /> },
+        { path: "category-list", element: <CategoryList /> },
       ],
     },
     {
