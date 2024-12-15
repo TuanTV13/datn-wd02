@@ -181,9 +181,9 @@ Route::prefix('v1')->group(function () {
 
 
         Route::prefix('statistics')->group(function () {
-          // Route để lấy danh sách các sự kiện có doanh thu cao nhất trong khoảng thời gian  
+            // Route để lấy danh sách các sự kiện có doanh thu cao nhất trong khoảng thời gian  
             Route::get('/top-revenue', [StatisticsController::class, 'topRevenueEvents']);
-
+            // Route để lấy thống kê số sự kiện hoàn thành trong khoảng thời gian
             Route::get('/event-statistics', [StatisticsController::class, 'getEventStatisticsByTime']);
 
             Route::get('/statistics-by-category', [StatisticsController::class, 'getEventCountTotalAmountAndPercentageByEventType']);
