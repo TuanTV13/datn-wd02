@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Http\Services;
 
@@ -16,7 +16,7 @@ class VNPayService
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
 
         $vnp_Url = "http://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = "http://127.0.0.1:8000/return-vnpay/" . '?transaction_id=' . $transaction_id;
+        $vnp_Returnurl = 'http://localhost:5173/order-detail/' + $transaction_id;
         $vnp_TxnRef = date("YmdHis");
         $vnp_OrderInfo = "Thanh toán hóa đơn phí dịch vụ";
         $vnp_OrderType = 'billpayment';
@@ -62,7 +62,7 @@ class VNPayService
         // Tạo URL thanh toán
         $vnp_Url = $vnp_Url . "?" . $query;
         if (isset($vnp_HashSecret)) {
-            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);// Băm dữ liệu
+            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret); // Băm dữ liệu
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
 
