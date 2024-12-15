@@ -12,6 +12,7 @@ export interface Events {
   end_time: string;
   location: string;
   event_type: string;
+  status: string
   link_online: string;
   max_attendees: number;
   speakers?:
