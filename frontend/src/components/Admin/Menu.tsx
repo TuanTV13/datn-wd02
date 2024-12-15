@@ -1,7 +1,7 @@
 import { Menu } from "antd";
 import { LuCalendarPlus, LuUsers } from "react-icons/lu";
 import { MdLogout, MdPieChartOutlined } from "react-icons/md";
-import { TfiDashboard } from "react-icons/tfi";
+import { TfiDashboard, TfiList } from "react-icons/tfi";
 import {
   AiOutlineTag,
   AiOutlinePercentage,
@@ -45,6 +45,7 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
     if (path.startsWith("/admin/expiring-vouchers")) return "5.3";
     if (path.startsWith("/admin/voucher-analytics")) return "5.6";
     if (path.startsWith("/admin/review-list")) return "6.1";
+    if (path.startsWith("/admin/category-list")) return "8";
 
     return "1";
   };
@@ -75,6 +76,15 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
                 </Tooltip>
               ),
               label: <Link to="/admin/report">Bảng điều khiển</Link>,
+            },
+            {
+              key: "8",
+              icon: (
+                <Tooltip title={!collapsed ? "" : "Danh mục"}>
+                  <TfiList />
+                </Tooltip>
+              ),
+              label: <Link to="/admin/category-list">Danh mục</Link>,
             },
             // {
             //   key: "6",
