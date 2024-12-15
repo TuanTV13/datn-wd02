@@ -299,7 +299,7 @@ class PaymentController extends Controller
                 foreach ($tickets as $ticket) {
                     $user->events()->attach($ticket['event_id'], [
                         'ticket_id' => $ticket['ticket_id'],
-                        'seat_zone_id' => $ticket['seat_zone_id'],
+                        // 'seat_zone_id' => $ticket['seat_zone_id'],
                         'ticket_type' => $ticket['ticket_type'],
                         'ticket_code' => $ticket['ticket_code'],
                         'seat_zone' => $ticket['seat_zone'],
@@ -324,7 +324,7 @@ class PaymentController extends Controller
                 foreach ($tickets as $ticket) {
                     $user->events()->attach($ticket['event_id'], [
                         'ticket_id' => $ticket['ticket_id'],
-                        'seat_zone_id' => $ticket['seat_zone_id'],
+                        // 'seat_zone_id' => $ticket['seat_zone_id'],
                         'ticket_type' => $ticket['ticket_type'],
                         'ticket_code' => $ticket['ticket_code'],
                         'seat_zone' => $ticket['seat_zone'],
