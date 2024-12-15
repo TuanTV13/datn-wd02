@@ -239,7 +239,7 @@ class EventController extends Controller
         $query = $this->eventRepository->query();
 
         if ($request->has('name') && $request->input('name') !== '') {
-            $query->where('name', 'like', '%' . $request->input('name') . '%');
+            $query->where('name', 'like', '%' . $request->input('name') . '%')->where('status', 'confirmed');
         }
 
         $perPage = $request->input('per_page', 10);
