@@ -301,7 +301,7 @@ const DetailEvents = () => {
         {data.event.status !== "completed" && (
           <>
             {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
-            {data.event.status === "pending" && timeDifference < 10 && (
+            {data.event.status === "pending" && (
               <Button
                 type="primary"
                 className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
