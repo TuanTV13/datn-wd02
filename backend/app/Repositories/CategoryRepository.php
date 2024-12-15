@@ -26,7 +26,7 @@ class CategoryRepository
 
     public function find($id)
     {
-        return $this->category->find($id);
+        return $this->category->with('events')->find($id);
     }
 
     public function update($id, array $data)
@@ -42,5 +42,19 @@ class CategoryRepository
         $category = $this->find($id);
 
         return $category->delete();
+    }
+
+    public function listTrashed()
+    {
+        return $this->category->onlyTrashed()->get();
+    }
+
+    public function restore($id)
+    {
+        $category = $this->category->onlyTrashed()->find($id);
+
+        $category->restore();
+
+        return $category;
     }
 }

@@ -100,7 +100,10 @@ Route::prefix('v1')->group(function () {
     Route::prefix('categories')->middleware(['check.jwt', 'check.permission:manage-event-categories'])->group(function () {
         Route::post('create', [CategoryController::class, 'create']);
         Route::put('{id}/update', [CategoryController::class, 'update']);
-        Route::delete('{id}/delete', [CategoryController::class, 'delete']);
+        Route::delete('{id}/delete', [CategoryController::class, 'destroy']);
+        Route::get('{id}', [CategoryController::class, 'show']);
+        Route::get('{id}/restore', [CategoryController::class, 'restore']);
+        Route::get('list/Trashed', [CategoryController::class, 'listTrashed']);
     });
 
     Route::get('tickets', [TicketController::class, 'index']);
