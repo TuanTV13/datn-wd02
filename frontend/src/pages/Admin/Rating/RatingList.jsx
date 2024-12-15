@@ -22,17 +22,17 @@ import axiosInstance from "../../../axios";
 const RatingList = () => {
   const navigate = useNavigate();
   const [filterValue, setFilterValue] = useState(5);
-  const [searchText, setSearchText] = useState(""); // Lưu giá trị tìm kiếm
-  const [feedbackList, setFeedbackList] = useState([]); // Dữ liệu phản hồi
-  const [filteredData, setFilteredData] = useState([]); // Dữ liệu đã lọc
+  const [searchText, setSearchText] = useState(""); 
+  const [feedbackList, setFeedbackList] = useState([]); 
+  const [filteredData, setFilteredData] = useState([]); 
 
-  // Gọi API để lấy dữ liệu phản hồi
+  
   useEffect(() => {
     axiosInstance
       .get("http://localhost:8000/api/v1/feedbacks")
       .then((res) => {
-        setFeedbackList(res.data.data); // Lưu dữ liệu phản hồi vào state
-        setFilteredData(res.data.data); // Lưu dữ liệu đã lọc
+        setFeedbackList(res.data.data); 
+        setFilteredData(res.data.data); 
       })
       .catch((error) => {
         notification.error({
@@ -42,7 +42,7 @@ const RatingList = () => {
       });
   }, []);
 
-  // Cột của bảng
+  
   const columns = [
     {
       title: "STT",
@@ -96,7 +96,7 @@ const RatingList = () => {
     },
   ];
 
-  // Hàm xóa phản hồi
+  
   const handleDelete = (record) => {
     axiosInstance
       .delete(`/feedbacks/${record.id}/delete`)
@@ -116,21 +116,21 @@ const RatingList = () => {
       });
   };
 
-  // Hàm tìm kiếm dữ liệu
+  
   const handleSearch = () => {
     if (searchText) {
       const filtered = feedbackList.filter(
         (feedback) =>
-          feedback.event_id.toString().includes(searchText) || // Tìm theo mã sự kiện
-          feedback.feedback.toLowerCase().includes(searchText.toLowerCase()) // Tìm theo phản hồi
+          feedback.event_id.toString().includes(searchText) || 
+          feedback.feedback.toLowerCase().includes(searchText.toLowerCase()) 
       );
-      setFilteredData(filtered); // Cập nhật dữ liệu đã lọc
+      setFilteredData(filtered); 
     } else {
-      setFilteredData(feedbackList); // Nếu không có tìm kiếm, hiển thị tất cả dữ liệu
+      setFilteredData(feedbackList); 
     }
   };
 
-  // Hàm xuất Excel
+  
   const handleExportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(filteredData);
     const wb = XLSX.utils.book_new();
@@ -146,17 +146,10 @@ const RatingList = () => {
           <div className="header">
             <h2 className="title">Danh sách phản hồi</h2>
             <div className="action-buttons">
-              {/* <Button
-                type="default"
-                size="large"
-                onClick={() => navigate("/admin/add-rating")} // Điều hướng tới trang thêm mới
-                style={{ marginRight: 10 }}
-              >
-                Thêm mới
-              </Button> */}
+              {}
               <button
                 className="bg-green-500 text-white px-4 py-2 rounded-[10px]"
-                onClick={handleExportExcel} // Xuất Excel
+                onClick={handleExportExcel} 
               >
                 <ExportOutlined /> Xuất Excel
               </button>
@@ -173,8 +166,8 @@ const RatingList = () => {
               placeholder="Tìm kiếm theo mã sự kiện hoặc phản hồi"
               style={{ width: "100%", borderRadius: "8px" }}
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)} // Cập nhật giá trị tìm kiếm
-              onPressEnter={handleSearch} // Tìm kiếm khi nhấn Enter
+              onChange={(e) => setSearchText(e.target.value)} 
+              onPressEnter={handleSearch} 
             />
           </Card>
         </Col>
@@ -192,7 +185,7 @@ const RatingList = () => {
                 borderColor: "#1890ff",
                 boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
               }}
-              onClick={handleSearch} // Tìm kiếm khi nhấn nút
+              onClick={handleSearch} 
             >
               Tìm kiếm
             </Button>
@@ -204,7 +197,7 @@ const RatingList = () => {
         <Col span={24}>
           {filteredData.length > 0 ? (
             <Table
-              dataSource={filteredData} // Hiển thị dữ liệu đã lọc
+              dataSource={filteredData} 
               columns={columns}
               pagination={{ pageSize: filterValue }}
               className="custom-table"
