@@ -43,4 +43,18 @@ class CategoryRepository
 
         return $category->delete();
     }
+
+    public function listTrashed()
+    {
+        return $this->category->onlyTrashed()->get();
+    }
+
+    public function restore($id)
+    {
+        $category = $this->category->onlyTrashed()->find($id);
+
+        $category->restore();
+
+        return $category;
+    }
 }
