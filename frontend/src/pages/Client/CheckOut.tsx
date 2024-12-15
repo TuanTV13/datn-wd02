@@ -195,7 +195,7 @@ const CheckOut = () => {
 
       setIsProcessing(false);
     }
-  };
+
 
    // Tạo state để lưu số lượng vé của từng ticket
    const [quantities, setQuantities] = useState(
@@ -415,7 +415,7 @@ const CheckOut = () => {
 
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Tổng cộng</span>
-                <p>{ticketData.totalPrice} VND</p>
+                {/* <p>{ticketData.totalPrice} VND</p> */}
                 <p>
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
@@ -449,7 +449,7 @@ const CheckOut = () => {
               type="submit"
               className="bg-[#007BFF] px-10 h-14 rounded-[100px] text-white flex gap-x-4 place-items-center justify-center"
             >
-              <span>Đặt vé</span>|<span>{ticketData.totalPrice} VND</span>
+              {/* <span>Đặt vé</span>|<span>{ticketData.totalPrice} VND</span> */}
               <span>Đặt vé</span>|
               <span>
                 {new Intl.NumberFormat("vi-VN", {
