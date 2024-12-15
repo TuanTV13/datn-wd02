@@ -439,7 +439,7 @@ class PaymentController extends Controller
             // Gửi sự kiện xác thực giao dịch  
             event(new TransactionVerified($transaction));
 
-            return response()->json(['message' => 'Thanh toán thành công'], 200);
+            return redirect('http://localhost:5173/order-detail/' . $transaction_id);
         }
 
         // Kiểm tra giao dịch thất bại hoặc bị hủy  
