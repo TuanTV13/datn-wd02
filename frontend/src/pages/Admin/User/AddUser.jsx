@@ -30,20 +30,20 @@ const AddClient = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Cấu trúc dữ liệu body theo yêu cầu API
+    
     const requestBody = {
       name: formData.name,
       email: formData.email,
-      password: "123456789", // Có thể lấy từ một trường mật khẩu nếu có
-      password_confirmation: "123456789", // Xác nhận mật khẩu
+      password: "123456789", 
+      password_confirmation: "123456789", 
       phone: formData.phone,
     };
 
-    // Gọi API để thêm người dùng mới
+    
     axiosInstance
       .post("/users/create", requestBody, {})
       .then((response) => {
-        // Reset form sau khi thêm thành công
+        
         setFormData({
           name: "",
           email: "",
@@ -61,7 +61,7 @@ const AddClient = () => {
           const errors = error.response.data.errors;
           
           if (typeof errors === 'object') {
-            // Lặp qua từng lỗi và hiển thị toast riêng
+            
             Object.values(errors).forEach((errorMessages) => {
               if (Array.isArray(errorMessages)) {
                 errorMessages.forEach((msg) => toast.error(msg));

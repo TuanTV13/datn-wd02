@@ -20,9 +20,9 @@ const ListClient = () => {
   const [clients, setClients] = useState([]);
   const [deletedClients, setDeletedClients] = useState([]);
 
-  // Phân trang
+  
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5); // Số lượng mục trên mỗi trang
+  const [itemsPerPage] = useState(5); 
 
   useEffect(() => {
     axios

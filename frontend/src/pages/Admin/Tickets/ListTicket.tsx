@@ -7,7 +7,7 @@ const ListTicket = () => {
   const { tickets, onDel, onVerify, events } = useContext(TicketsCT);
   const [StatusList] = useState(Object.values(StatusType));
   const [filteredTickets, setFilteredTickets] = useState(tickets);
-
+console.log(filteredTickets)
   // Filters
   const [searchName, setSearchName] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -200,10 +200,10 @@ const ListTicket = () => {
                           {index + 1}.{subIndex + 1}
                         </td>
                         <td className="p-4 border border-gray-300">
-                          {getEventName(priceItem.zone.event_id)}
+                          {getEventName(priceItem.event_id)}
                         </td>
                         <td className="p-4 border border-gray-300">
-                          {priceItem.zone.name}
+                          {/* {priceItem.zone.name} */}
                         </td>
                         <td className="p-4 border border-gray-300">
                           {item.ticket_type}
