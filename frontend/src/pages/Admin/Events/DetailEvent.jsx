@@ -13,6 +13,7 @@ import AddSpeakerModal from "../../../components/Admin/AddSpeakerModal";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DetailEvents = () => {
+  const [isVisible, setIsVisible] = useState(false);
   const [eventDetails, setEventDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,6 +45,26 @@ const DetailEvents = () => {
 
   const [showUsersStatistics, setShowUsersStatistics] = useState(false); // Add this state
 
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", toggleVisibility);
+    return () => window.removeEventListener("scroll", toggleVisibility);
+  }, []);
+
+  // Hàm cuộn lên đầu trang
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth", // Cuộn mượt
+    });
+  };
   useEffect(() => {
     const fetchEventDetails = async () => {
       const token = localStorage.getItem("access_token");
@@ -264,7 +285,18 @@ const DetailEvents = () => {
   };
   const timeDifference = getTimeDifference(data.event.start_time);
   return (
+    
     <div className="bg-white rounded-lg shadow p-6">
+       isVisible && (
+      <button
+        onClick={scrollToTop}
+        className="fixed bottom-4 right-4 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
+        aria-label="Scroll to top"
+      >
+        ↑
+      </button>
+    )
+    
       <AddSpeakerModal
         show={showAddSpeaker}
         onClose={() => {
@@ -301,7 +333,7 @@ const DetailEvents = () => {
         {data.event.status !== "completed" && (
           <>
             {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
-            {data.event.status === "pending" && timeDifference < 10 && (
+            {data.event.status === "pending"  && (
               <Button
                 type="primary"
                 className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
@@ -1014,6 +1046,7 @@ const DetailEvents = () => {
           </div>
         )}
       </Modal>
+      
     </div>
   );
 };
