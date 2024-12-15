@@ -28,6 +28,7 @@ class StoreTicketRequest extends FormRequest
             'quantity' => 'required|integer|min:1',
             'sold_quantity' => 'nullable|integer',
             'name' => 'required|string|max:100',
+            'purchase_limit' => 'nullable|integer|min:0|lte:quantity',
             'sale_start' => 'required|date|after_or_equal:today',
             'sale_end' => 'required|date|after:sale_start',
             'purchase_limit' => 'integer|required|min:0',
