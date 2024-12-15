@@ -107,10 +107,10 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('tickets', [TicketController::class, 'index']);
+    Route::get('tickets/block/{id}', [TicketController::class, 'getBlockById']);
+    Route::get('tickets/list/block', [TicketController::class, 'listBlock']);
     Route::prefix('tickets')->middleware(['check.jwt', 'check.permission:manage-tickets'])->group(function () {
         Route::get('{id}', [TicketController::class, 'show']); // chi tiết vé
-        Route::post('/block', [TicketController::class, 'listBlock']);
-        Route::get('block/{id}', [TicketController::class, 'getBlockById']); // danh sách vé bị khóa
         Route::post('create', [TicketController::class, 'create']);
         Route::put('{id}/update/{seatZoneId}', [TicketController::class, 'update']);
         Route::delete('{id}/delete/{seatZoneId}', [TicketController::class, 'delete']);

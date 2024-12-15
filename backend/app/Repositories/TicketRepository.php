@@ -45,12 +45,24 @@ class TicketRepository
 
     public function findTrashed($id)
     {
-        return $this->ticket->onlyTrashed()->find($id);
+        $prices = new TicketPrice();
+        return $prices->find($id);
+    }
+
+    public function restore($id)
+    {
+        $prices = new TicketPrice();
+        $category = $prices->onlyTrashed()->find($id);
+
+        $category->restore();
+
+        return $category;
     }
 
     public function trashed()
     {
-        return $this->ticket->onlyTrashed()->with(["price", "price.event"])->get();
+        $prices = new TicketPrice();
+        return $prices->onlyTrashed()->with(['ticket', 'event'])->get();
     }
 
     public function findByEventAndType($eventId, $ticketTypeId)
