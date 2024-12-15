@@ -18,7 +18,7 @@ class StatisticsController extends Controller
         $this->eventRepository = $eventRepository;
     }
 
-
+// Top sự kiện trong khoảng thời gian -> trả về tổng doanh thu và % của từng sự kiện
     public function topRevenueEvents(Request $request)
     {
         $limit = $request->input('limit', 5);
@@ -49,7 +49,7 @@ class StatisticsController extends Controller
             ], 400);
         }
     }
-
+// Số sự kiện hoàn thành trong khoảng thời gian
     public function getEventStatisticsByTime(Request $request)
     {
         $timeFrame = $request->input('time_frame', 'month');
@@ -117,6 +117,9 @@ class StatisticsController extends Controller
             ],
         ]);
     }
+     /**
+     * Thống kê sự kiện theo thể loại (chỉ lấy sự kiện có trạng thái confirmed)
+     */
 
     public function getEventCountTotalAmountAndPercentageByEventType()
     {
@@ -140,7 +143,7 @@ class StatisticsController extends Controller
                 return $item;
             });
     }
-
+// Top sự kiện theo số lượng người tham gia
     public function topParticipantsEvents(Request $request)
     {
         $limit = $request->input('limit', 5);
@@ -164,7 +167,7 @@ class StatisticsController extends Controller
 
 
         try {
-
+        // Lấy các sự kiện top theo số người tham gia và trạng thái hoàn thành
             $topEvents = DB::table('events')
                 ->join('transactions', 'events.id', '=', 'transactions.event_id')
                 ->select(
@@ -193,7 +196,7 @@ class StatisticsController extends Controller
         }
     }
 
-
+    // Thống kê sự kiện đã được tổ chức (confirmed) và bị hủy bỏ (canceled)
         public function getEventStatusStatistics(Request $request)
     {
 
