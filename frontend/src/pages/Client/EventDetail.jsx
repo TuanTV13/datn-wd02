@@ -96,13 +96,13 @@ const EventDetail = () => {
   const getStatusTextAndColor = (status) => {
     switch (status) {
       case "confirmed":
-        return { text: "Đang chuẩn bị", color: "bg-yellow-500" };
+        return { text: "Đang chuẩn bị", color: "text-yellow-500" };
       case "checkin":
-        return { text: "Đang check-in", color: "bg-green-500" };
+        return { text: "Đang check-in", color: "text-green-500" };
       case "ongoing":
-        return { text: "Đang diễn ra", color: "bg-blue-500" };
+        return { text: "Đang diễn ra", color: "text-blue-500" };
       case "completed":
-        return { text: "Đã kết thúc", color: "bg-gray-500" };
+        return { text: "Đã kết thúc", color: "text-gray-500" };
       default:
         return null;
     }
@@ -366,19 +366,19 @@ const EventDetail = () => {
             </p>
           </div>
           {statusInfo && (
-            <div
-              className={`mt-4 px-4 py-2 rounded-full text-white ${statusInfo.color}`}
-            >
-              {statusInfo.text}
-            </div>
+           <div className="mt-4 flex items-center text-lg">
+           <span className="mr-2">Trạng thái:</span>
+           <div className={`px-1 py-px rounded-md  font-bold ${statusInfo.color} shadow-sm`}>
+             {statusInfo.text}
+           </div>
+         </div>
+          
           )}
         </div>
       </div>
       <br />
       {event.speakers && event.speakers.length > 0 && (
       <div className="mt-8 p-8 bg-white rounded-lg shadow-md">
-        
-
         
           <div className="flex flex-wrap justify-center mt-8 gap-6">
             {event.speakers.map((speaker, index) => (

@@ -165,7 +165,7 @@ const CheckOut = () => {
       discount_code: voucherCode || null,
       amount: parseFloat(ticketData.totalPrice).toFixed(2),
     };
-
+console.log("ádfd",paymentData)
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/clients/payment/process",
@@ -177,6 +177,7 @@ const CheckOut = () => {
           },
         }
       );
+      console.log(response.data)
       if (response.data.status === "success") {
         window.location.href = response.data.payment_url;
       } else {
@@ -185,6 +186,7 @@ const CheckOut = () => {
         });
       }
     } catch (error) {
+      console.log(error)
       notification.error({
         message:
           error.response?.data?.message || "Có lỗi xảy ra trong thanh toán.",
@@ -195,31 +197,7 @@ const CheckOut = () => {
 
       setIsProcessing(false);
     }
-  
 
-   // Tạo state để lưu số lượng vé của từng ticket
-   const [quantities, setQuantities] = useState(
-    ticketData.tickets.reduce((acc, ticket) => {
-      acc[ticket.ticket_id] = ticket.quantity; // khởi tạo số lượng từ ticket data
-      return acc;
-    }, {})
-  );
-
-  // Hàm tăng số lượng
-  const increaseQuantity = (ticket_id) => {
-    setQuantities((prevQuantities) => ({
-      ...prevQuantities,
-      [ticket_id]: prevQuantities[ticket_id] + 1,
-    }));
-  };
-
-  // Hàm giảm số lượng
-  const decreaseQuantity = (ticket_id) => {
-    setQuantities((prevQuantities) => ({
-      ...prevQuantities,
-      [ticket_id]: Math.max(1, prevQuantities[ticket_id] - 1), // tránh giảm số lượng < 1
-    }));
-  };
   return (
     <div className="mt-36 mx-4">
       {isProcessing && (
@@ -386,6 +364,7 @@ const CheckOut = () => {
             <div className="flex flex-col gap-y-[17px] border-b pb-5">
               <div>
                 <section className="grid grid-cols-5 gap-4 text-sm font-semibold py-2 border-b">
+                  <span className="text-[#9D9EA2]">Vé</span>
                   <p className="text-center">Loại vé</p>
                   <p className="text-center">Khu vực</p>
                   <p className="text-center">Số lượng</p>
@@ -393,6 +372,9 @@ const CheckOut = () => {
                 </section>
                 {ticketData.tickets.map((ticket) => (
                   <section className="flex justify-between text-sm items-center mt-2">
+                    <span className="w-1/5 text-[#9D9EA2]">
+                      Vé {ticket.ticket_id}
+                    </span>
                     <p className="w-1/5 text-center mb-1">
                       {ticket.ticket_type}
                     </p>
@@ -411,6 +393,7 @@ const CheckOut = () => {
 
               <section className="flex justify-between text-sm">
                 <span className="text-[#9D9EA2]">Tổng cộng</span>
+                {/* <p>{ticketData.totalPrice} VND</p> */}
                 <p>
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
@@ -444,6 +427,7 @@ const CheckOut = () => {
               type="submit"
               className="bg-[#007BFF] px-10 h-14 rounded-[100px] text-white flex gap-x-4 place-items-center justify-center"
             >
+              {/* <span>Đặt vé</span>|<span>{ticketData.totalPrice} VND</span> */}
               <span>Đặt vé</span>|
               <span>
                 {new Intl.NumberFormat("vi-VN", {

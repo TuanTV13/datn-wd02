@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Transaction } from "../../interfaces/Transaction";
 import api from "../../api_service/api";
+import { Link } from "react-router-dom";
 
 const PaymentHistory = ({ userId }: { userId: number }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -48,6 +49,18 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
     });
   };
 
+  const getStatusColor = (statusId: any) => {
+    switch (statusId) {
+      case "completed":
+        return { text: "Đã hoàn thành", color: "text-gray-500" };
+      case "pending":
+        return { text: "Đang chờ xác nhận", color: "text-gray-400" };
+      case "failed":
+        return { text: "Thanh toán thất bại", color: "text-red-500" };
+      default:
+        return { text: "Trạng thái không xác định", color: "text-gray-400" };
+    }
+  };
   return (
     <div className="mt-36">
       <div className="p-4 bg-gray-100 rounded-md shadow-md mx-10">
@@ -69,6 +82,7 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
                 <th className="border border-gray-400 p-2 text-center">
                   Trạng thái
                 </th>
+                <th className="border border-gray-400 p-2 text-center"></th>
               </tr>
             </thead>
             <tbody>
@@ -87,8 +101,15 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
                     <td className="border border-gray-400 p-2 text-center">
                       {event.payment_method}
                     </td>
+                    <td
+                      className={`border border-gray-400 p-2 text-center ${
+                        getStatusColor(event.status).color
+                      }`}
+                    >
+                      {getStatusColor(event.status).text}
+                    </td>
                     <td className="border border-gray-400 p-2 text-center">
-                      {event.status}
+                      <Link to={`/order-detail/${event.id}`}>Xem chi tiết</Link>
                     </td>
                   </tr>
                 ))
