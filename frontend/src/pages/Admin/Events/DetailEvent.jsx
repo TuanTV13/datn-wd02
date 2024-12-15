@@ -13,6 +13,7 @@ import AddSpeakerModal from "../../../components/Admin/AddSpeakerModal";
 ChartJS.register(ArcElement, Tooltip, Legend);
 import QrReader from "react-qr-scanner"; // Import thư viện
 const DetailEvents = () => {
+
   const [eventDetails, setEventDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,7 +23,7 @@ const DetailEvents = () => {
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
   const [qrCodeData, setQrCodeData] = useState(null);
   const [checkInMode, setCheckInMode] = useState("code"); // 'code' hoặc 'qr'
-   const [checkInPopup, setCheckInPopup] = useState(false); // Khởi tạo trạng thái của popup
+  const [checkInPopup, setShowCheckInPopup] = useState(false); // Khởi tạo trạng thái của popup
   const [modalData, setModalData] = useState({
     show: false,
     id: null,
@@ -32,7 +33,7 @@ const DetailEvents = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const { id } = useParams();
 
-
+  const [event, setEvent] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTicketForm, setIsTicketForm] = useState(true);
@@ -42,27 +43,11 @@ const DetailEvents = () => {
   const [showAddSpeaker, setShowAddSpeaker] = useState(false);
 
   const [showUsersStatistics, setShowUsersStatistics] = useState(false);
- 
-  useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
 
-    window.addEventListener("scroll", toggleVisibility);
-    return () => window.removeEventListener("scroll", toggleVisibility);
-  }, []);
+
 
   // Hàm cuộn lên đầu trang
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
+
   useEffect(() => {
     const fetchEventDetails = async () => {
       const token = localStorage.getItem("access_token");
@@ -185,28 +170,28 @@ const DetailEvents = () => {
 
     axios
       .put(
-        `http://127.0.0.1:8000/api/v1/clients/events/${event.id}/checkin`,
+        `http://127.0.0.1:8000/api/v1/clients/events/${id}/checkin`,
         requestData
       )
       .then((response) => {
-        notification.error({ message: "Check-in thành công" });
-        setCheckInPopup(false); // Đóng popup sau khi check-in thành công
+
+        setShowCheckInPopup(false); // Đóng popup sau khi check-in thành công
         setReload(!reload);
         toast.success(" Check-in thành công!");
       })
       .catch((error) => {
         console.error("Lỗi khi check-in:", error);
-        toast.error(error.response.data.error)
-      
+        toast.error(error.response.data.message)
+
       });
   };
-  
+
   const handleCheckIn = () => {
-    setCheckInPopup(true);
+    setShowCheckInPopup(true);
     setCheckInMode("code"); // Mặc định vào chế độ nhập mã vé
   };
   const handleCloseCheckInPopup = () => {
-    setCheckInPopup(false);
+    setShowCheckInPopup(false);
   };
   const handleSwitchCheckInMode = (mode) => {
     setCheckInMode(mode);
@@ -223,11 +208,12 @@ const DetailEvents = () => {
       // Gửi dữ liệu mã QR (ticketCode) để xử lý check-in
       axios
         .put(
-          `http://127.0.0.1:8000/api/v1/clients/events/${event.id}/checkin`,
+          `http://127.0.0.1:8000/api/v1/clients/events/${id}/checkin`,
           { ticket_code: ticket_code } // Gửi ticketCode lên API
         )
         .then((response) => {
-          setCheckInPopup(false); // Đóng popup sau khi check-in thành công
+          setShowCheckInPopup(false); // Đóng popup sau khi check-in thành công
+          setReload(!reload);
           toast.success("Check-in thành công!"); // Thông báo check-in thành công
           console.log("Check-in thành công:", response);
         })
@@ -404,7 +390,7 @@ const DetailEvents = () => {
           </>
         )}
       </p>
-    
+
       {showConfirmPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
@@ -689,8 +675,8 @@ const DetailEvents = () => {
                         </td>
                         <td
                           className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1
-                              ? "text-green-500"
-                              : "text-red-500"
+                            ? "text-green-500"
+                            : "text-red-500"
                             }`}
                         >
                           {user.pivot.checked_in === 1
@@ -711,8 +697,8 @@ const DetailEvents = () => {
                               })
                             }
                             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${user.pivot.checked_in === 1
-                                ? "bg-red-500 text-white hover:bg-red-600"
-                                : "bg-green-500 text-white hover:bg-green-600"
+                              ? "bg-red-500 text-white hover:bg-red-600"
+                              : "bg-green-500 text-white hover:bg-green-600"
                               }`}
                           >
                             {user.pivot.checked_in === 1
@@ -781,7 +767,7 @@ const DetailEvents = () => {
           </div>
         </div>
       )} */}
-     
+
 
       <Modal
         title={
@@ -943,25 +929,35 @@ const DetailEvents = () => {
               Người dùng đã mua vé
             </h3>
             <br />
+
             <hr />
             <br />
+            <button
+              onClick={() => setShowCheckInPopup(true)}  // Mở popup mà không cần mã vé
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] bg-green-500 text-white hover:bg-green-600"
+            >
+              Check-in
+            </button>
+            <br />
+            <br />
+
             <div className="overflow-x-auto">
               <table className="table-auto w-full border-collapse border border-gray-300">
                 <thead>
                   <tr className="bg-gray-200">
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       STT
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       Mã vé
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       Khách hàng
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       Trạng thái check-in
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       Thao tác
                     </th>
                   </tr>
@@ -981,8 +977,8 @@ const DetailEvents = () => {
                         </td>
                         <td
                           className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1
-                              ? "text-green-500"
-                              : "text-red-500"
+                            ? "text-green-500"
+                            : "text-red-500"
                             }`}
                         >
                           {user.pivot.checked_in === 1
@@ -990,24 +986,25 @@ const DetailEvents = () => {
                             : "Chưa check-in"}
                         </td>
                         <td className="border border-gray-300 px-4 py-2 text-center">
-                        <button
-                          onClick={() =>
-                            user.pivot.checked_in === 1
-                              ? setModalData({
-                                show: true,
-                                id: user.id,
-                                ticketCode: user.ticket_code,
-                                action: "cancel",
-                              })
-                              : setCheckInPopup(user.id, user.ticket_code)
-                          }
-                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${user.pivot.checked_in === 1
-                            ? "bg-red-500 text-white hover:bg-red-600"
-                            : "bg-green-500 text-white hover:bg-green-600"
-                            }`}
-                        >
-                          {user.pivot.checked_in === 1 ? "Hủy check-in" : "Check-in"}
-                        </button>
+                          {/* Hiển thị nút "Check-in" chỉ khi chưa check-in */}
+
+
+                          {/* Hiển thị nút "Hủy check-in" khi đã check-in */}
+                          {user.pivot.checked_in === 1 && (
+                            <button
+                              onClick={() =>
+                                setModalData({
+                                  show: true,
+                                  id: user.id,
+                                  ticketCode: user.ticket_code,
+                                  action: "cancel",
+                                })
+                              }
+                              className="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] bg-red-500 text-white hover:bg-red-600"
+                            >
+                              Hủy check-in
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -1022,6 +1019,7 @@ const DetailEvents = () => {
                     </tr>
                   )}
                 </tbody>
+
               </table>
             </div>
           </div>
@@ -1059,73 +1057,71 @@ const DetailEvents = () => {
             </div>
           </div>
         )}
-          {checkInPopup && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white p-6 rounded-lg w-[600px]">
-                <h2 className="text-2xl font-bold mb-4">Check-in</h2>
-                <div className="flex space-x-4 mb-4 justify-center">
-                  <button
-                    className={`px-4 py-2 rounded ${
-                      checkInMode === "code"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
+        {checkInPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-lg w-[600px]">
+              <h2 className="text-2xl font-bold mb-4">Check-in</h2>
+              <div className="flex space-x-4 mb-4 justify-center">
+                <button
+                  className={`px-4 py-2 rounded ${checkInMode === "code"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700"
                     }`}
-                    onClick={() => handleSwitchCheckInMode("code")}
-                  >
-                    Nhập mã vé
-                  </button>
-                  <button
-                    className={`px-4 py-2 rounded ${
-                      checkInMode === "qr"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
+                  onClick={() => handleSwitchCheckInMode("code")}
+                >
+                  Nhập mã vé
+                </button>
+                <button
+                  className={`px-4 py-2 rounded ${checkInMode === "qr"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700"
                     }`}
-                    onClick={() => handleSwitchCheckInMode("qr")}
-                  >
-                    Quét mã QR
-                  </button>
+                  onClick={() => handleSwitchCheckInMode("qr")}
+                >
+                  Quét mã QR
+                </button>
+              </div>
+
+              {checkInMode === "code" && (
+                <div>
+                  <input
+                    id="ticket_code"
+                    type="text"
+                    placeholder="Nhập mã vé"
+                    className="w-full p-2 border rounded mb-4 text-black"
+                  />
                 </div>
+              )}
 
-                {checkInMode === "code" && (
-                  <div>
-                    <input
-                      id="ticket_code"
-                      type="text"
-                      placeholder="Nhập mã vé"
-                      className="w-full p-2 border rounded mb-4 text-black"
-                    />
-                  </div>
-                )}
-
-                {checkInMode === "qr" && (
-                  <div>
-                    <QrReader
-                      delay={300}
-                      style={{ width: "100%" }}
-                      onError={handleQrCodeError}
-                      onScan={handleQrCodeScan}
-                    />
-                  </div>
-                )}
-
-                {/* Nút xác nhận và đóng trên cùng một hàng */}
-                <div className="flex space-x-4 mt-4">
-                  <button
-                    onClick={handleCheckInSubmit}
-                    className="w-[48%] bg-blue-500 text-white py-2 rounded"
-                  >
-                    Xác nhận
-                  </button>
-                  <button
-                    onClick={handleCloseCheckInPopup}
-                    className="w-[48%] bg-gray-500 text-white py-2 rounded"
-                  >
-                    Đóng
-                  </button>
+              {checkInMode === "qr" && (
+                <div>
+                  <QrReader
+                    delay={300}
+                    style={{ width: "100%" }}
+                    onError={handleQrCodeError}
+                    onScan={handleQrCodeScan}
+                  />
                 </div>
+              )}
+
+              {/* Nút xác nhận và đóng trên cùng một hàng */}
+              <div className="flex space-x-4 mt-4">
+                <button
+                  onClick={handleCheckInSubmit}
+                  className="w-[48%] bg-blue-500 text-white py-2 rounded"
+                >
+                  Xác nhận
+                </button>
+                <button
+                  onClick={handleCloseCheckInPopup}
+                  className="w-[48%] bg-gray-500 text-white py-2 rounded"
+                >
+                  Đóng
+                </button>
               </div>
             </div>
-          )}
+          </div>
+        )}
       </Modal>
 
     </div>
