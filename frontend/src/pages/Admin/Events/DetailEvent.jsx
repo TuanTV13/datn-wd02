@@ -13,7 +13,8 @@ import AddSpeakerModal from "../../../components/Admin/AddSpeakerModal";
 ChartJS.register(ArcElement, Tooltip, Legend);
 import QrReader from "react-qr-scanner"; // Import thư viện
 const DetailEvents = () => {
-
+  const [showModal, setShowModal] = useState(false);
+  const [subnet, setSubnet] = useState("");
   const [eventDetails, setEventDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,7 +42,7 @@ const DetailEvents = () => {
   const [reload, setReload] = useState(false);
   const [showStatistics, setShowStatistics] = useState(false);
   const [showAddSpeaker, setShowAddSpeaker] = useState(false);
-
+  const token = localStorage.getItem("access_token");
   const [showUsersStatistics, setShowUsersStatistics] = useState(false);
 
 
@@ -84,7 +85,33 @@ const DetailEvents = () => {
 
     return () => clearInterval(interval);
   }, []);
+  const handleAddIp = async () => {
+    if (!subnet) {
+      toast.error("Vui lòng nhập địa chỉ IP subnet.");
+      return;
+    }
 
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/api/v1/events/${id}/add-ip`,
+        { subnet },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast.success("Địa chỉ IP đã được thêm thành công!");
+      setShowModal(false); // Đóng modal sau khi thành công
+    } catch (error) {
+      toast.error("Lỗi khi thêm địa chỉ IP. Vui lòng thử lại!");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleStatusChange = async (currentStatus) => {
     const token = localStorage.getItem("access_token");
     const headers = {
@@ -442,13 +469,48 @@ const DetailEvents = () => {
         </button>
 
         <button
-          onClick={() => { }}
+         onClick={() => setShowModal(true)}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
         >
           Thêm địa chỉ IP check-in
         </button>
 
-
+        {showModal && (
+        <div
+          className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50"
+        >
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full ">
+            <h2 className="text-xl font-semibold mb-4">Thêm địa chỉ IP check-in</h2>
+            <div className="mb-4">
+              <label htmlFor="subnet" className="block text-sm font-medium text-gray-700">Subnet</label>
+              <input
+                type="text"
+                id="subnet"
+                name="subnet"
+                value={subnet}
+                onChange={(e) => setSubnet(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                placeholder="Nhập địa chỉ IP subnet"
+              />
+            </div>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-400 text-white rounded-lg"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleAddIp}
+                className={`px-4 py-2 bg-blue-500 text-white rounded-lg ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={loading}
+              >
+                {loading ? "Đang thêm..." : "Xác nhận"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
         <button
           onClick={() => setShowUpdateEvent(!showUpdateEvent)}
           className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
