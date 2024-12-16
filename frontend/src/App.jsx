@@ -38,6 +38,7 @@ import Dashboard from "./pages/Admin/Dashboard/Dashboard";
 import OrderList from "./pages/Client/OrderList";
 import CategoryList from "./pages/Admin/Category/CategoryList";
 import Contact from "./pages/Client/Contact";
+import TicketingInstructions from "./pages/Client/TicketingInstructions";
 
 function App() {
   const route = useRoutes([
@@ -52,6 +53,7 @@ function App() {
         { path: "cart", element: <Cart /> },
         { path: "checkout", element: <CheckOut /> },
         { path: "contact", element: <Contact /> },
+        { path: "ticketing", element: <TicketingInstructions /> },
         { path: "event-history", element: <EventHistory /> },
         { path: "payment-history", element: <PaymentHistory /> },
         { path: "profile", element: <UserProfile /> },
