@@ -16,30 +16,30 @@ interface SlideType {
 }
 
 interface Tickets {
-    id: number;
-    ticket_type: string;
-    price: number;
-    sold_quantity: number;
-    quantity: number;
-    zone: Zone[];
-    ticket: Ticket;
-  }
-  interface Event {
-    id: number;
-    name: string;
-    description: string;
-    tickets: Tickets[];
-    status: string;
-  }
-  interface Zone {
-    id: number;
-    name: string;
-  }
-  interface Ticket {
-    id: number;
-    status: string;
-    ticket_type: string;
-  }
+  id: number;
+  ticket_type: string;
+  price: number;
+  sold_quantity: number;
+  quantity: number;
+  zone: Zone[];
+  ticket: Ticket;
+}
+interface Event {
+  id: number;
+  name: string;
+  description: string;
+  tickets: Tickets[];
+  status: string;
+}
+interface Zone {
+  id: number;
+  name: string;
+}
+interface Ticket {
+  id: number;
+  status: string;
+  ticket_type: string;
+}
 
 const Banner = () => {
   const { headerEvents } = useContext(HomeCT);
@@ -139,13 +139,13 @@ const Banner = () => {
           <div className="flex justify-center md:justify-start lg:ml-5">
             <Link
               to={`/event-detail/${event.id}`}
-              className="bg-gradient-to-r from-[#6ea2f0] to-[#8542f1] text-white py-2 px-6 rounded-full hover:bg-gradient-to-r hover:from-[#6610F2] hover:to-[#0DCAF0] shadow-lg transition-all duration-300 transform hover:scale-105"
+              className="bg-gradient-to-r from-[#6ea2f0] to-[#8542f1] text-white py-2 px-6 rounded-full hover:bg-gradient-to-r hover:from-[#6610F2] hover:to-[#0DCAF0] shadow-lg transition-all duration-300 transform hover:scale-105 opacity-80"
             >
               Chi tiết sự kiện
             </Link>
             <button
-                onClick={() => handleShowPopup(event.id)}
-              className="ml-4 bg-gradient-to-r from-[#0D6EFD] to-[#6610F2] text-white py-2 px-6 rounded-full hover:bg-gradient-to-r hover:from-[#6610F2] hover:to-[#0DCAF0] shadow-lg transition-all duration-300 transform hover:scale-105"
+              onClick={() => handleShowPopup(event.id)}
+              className="ml-4 bg-gradient-to-r from-[#00c6ff] to-[#0072ff] text-white py-2 px-8 rounded-full hover:bg-gradient-to-r hover:from-[#0072ff] hover:to-[#00c6ff] shadow-xl transition-all duration-300 transform hover:scale-110 border-2 border-white"
             >
               Mua vé
             </button>
@@ -185,7 +185,9 @@ const Banner = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-[700px]">
             <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
-            <h2 className="text-2xl font-bold mb-4 text-blue-500">Sự kiện: {event?.name}</h2>
+            <h2 className="text-2xl font-bold mb-4 text-blue-500">
+              Sự kiện: {event?.name}
+            </h2>
 
             {/* Nhóm vé VIP */}
             <div className="mb-6">

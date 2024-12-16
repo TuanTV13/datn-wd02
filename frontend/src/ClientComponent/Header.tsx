@@ -261,7 +261,7 @@ const Header = () => {
               <Link to={`/event-list`}>Sự kiện</Link>
             </li>
             <li>
-              <Link to={``}>Giới thiệu</Link>
+              <Link to={`/introduce`}>Giới thiệu</Link>
             </li>
             <li className="relative" ref={menuRef}>
               <Link
