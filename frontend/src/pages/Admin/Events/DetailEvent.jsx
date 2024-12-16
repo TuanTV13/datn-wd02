@@ -45,8 +45,6 @@ const DetailEvents = () => {
   const token = localStorage.getItem("access_token");
   const [showUsersStatistics, setShowUsersStatistics] = useState(false);
 
-
-
   // Hàm cuộn lên đầu trang
 
   useEffect(() => {
@@ -78,7 +76,6 @@ const DetailEvents = () => {
     fetchEventDetails();
   }, [id, reload]);
   useEffect(() => {
-
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
@@ -119,7 +116,6 @@ const DetailEvents = () => {
       "Content-Type": "application/json",
     };
 
-
     const nextStatusMap = {
       pending: "confirmed",
       confirmed: "checkin",
@@ -129,7 +125,6 @@ const DetailEvents = () => {
     const nextStatus = nextStatusMap[currentStatus];
 
     try {
-
       const response = await axios.put(
         `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
         { status: nextStatus },
@@ -146,7 +141,6 @@ const DetailEvents = () => {
         draggable: true,
       });
     } catch (err) {
-
       toast.error("Cập nhật trạng thái thất bại!", {
         position: "top-right",
         autoClose: 3000,
@@ -201,15 +195,13 @@ const DetailEvents = () => {
         requestData
       )
       .then((response) => {
-
         setShowCheckInPopup(false); // Đóng popup sau khi check-in thành công
         setReload(!reload);
         toast.success(" Check-in thành công!");
       })
       .catch((error) => {
         console.error("Lỗi khi check-in:", error);
-        toast.error(error.response.data.message)
-
+        toast.error(error.response.data.message);
       });
   };
 
@@ -258,9 +250,7 @@ const DetailEvents = () => {
   };
   const handleCancelCheckIn = async (id, ticketCode) => {
     try {
-
       const token = localStorage.getItem("access_token");
-
 
       const headers = {
         Authorization: `Bearer ${token}`,
@@ -283,7 +273,6 @@ const DetailEvents = () => {
       const data = await response.json();
       toast.success("Thay đổi trạng thái check-in thành công!");
       setReload(!reload);
-
     } catch (error) {
       toast.error("Thay đổi trạng thái check-in thất bại!");
       if (error.status === 401) {
@@ -307,7 +296,6 @@ const DetailEvents = () => {
 
   const { data } = eventDetails;
 
-
   const speakers = data.speakers || [];
   const tickets = data.event.tickets || [];
   const users = data.event.users || [];
@@ -326,7 +314,6 @@ const DetailEvents = () => {
   };
   const timeDifference = getTimeDifference(data.event.start_time);
   return (
-
     <div className="bg-white rounded-lg shadow p-6">
       {/*       
       {isVisible && (
@@ -351,13 +338,12 @@ const DetailEvents = () => {
       </h2>
       <hr className="border-t-2 border-gray-300 mb-6" />
 
-      { }
+      {}
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6 p-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-transparent bg-clip-text shadow-xl rounded-lg">
         {data.event.name}
       </h1>
 
       <p className="text-lg font-medium text-gray-700 mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md border-l-4">
-
         <span className="flex items-center text-gray-800">
           <span className="mr-2 text-xl">📌</span>
           Trạng thái:{" "}
@@ -370,7 +356,7 @@ const DetailEvents = () => {
           </span>
         </span>
 
-        { }
+        {}
         {data.event.status !== "completed" && (
           <>
             {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
@@ -438,7 +424,8 @@ const DetailEvents = () => {
               sang{" "}
               <span className="font-bold text-blue-500">
                 {getNextStatusLabel(selectedStatus)}
-              </span>?
+              </span>
+              ?
             </p>
             <div className="flex justify-center space-x-4">
               <button
@@ -464,53 +451,61 @@ const DetailEvents = () => {
       <div className="flex space-x-4 justify-center mb-8">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300">
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
+        >
           Quản lý vé và voucher
         </button>
 
         <button
-         onClick={() => setShowModal(true)}
+          onClick={() => setShowModal(true)}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
         >
           Thêm địa chỉ IP check-in
         </button>
 
         {showModal && (
-        <div
-          className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50"
-        >
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full ">
-            <h2 className="text-xl font-semibold mb-4">Thêm địa chỉ IP check-in</h2>
-            <div className="mb-4">
-              <label htmlFor="subnet" className="block text-sm font-medium text-gray-700">Subnet</label>
-              <input
-                type="text"
-                id="subnet"
-                name="subnet"
-                value={subnet}
-                onChange={(e) => setSubnet(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                placeholder="Nhập địa chỉ IP subnet"
-              />
-            </div>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-400 text-white rounded-lg"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleAddIp}
-                className={`px-4 py-2 bg-blue-500 text-white rounded-lg ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                disabled={loading}
-              >
-                {loading ? "Đang thêm..." : "Xác nhận"}
-              </button>
+          <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full ">
+              <h2 className="text-xl font-semibold mb-4">
+                Thêm địa chỉ IP check-in
+              </h2>
+              <div className="mb-4">
+                <label
+                  htmlFor="subnet"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Subnet
+                </label>
+                <input
+                  type="text"
+                  id="subnet"
+                  name="subnet"
+                  value={subnet}
+                  onChange={(e) => setSubnet(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Nhập địa chỉ IP subnet"
+                />
+              </div>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 bg-gray-400 text-white rounded-lg"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleAddIp}
+                  className={`px-4 py-2 bg-blue-500 text-white rounded-lg ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loading}
+                >
+                  {loading ? "Đang thêm..." : "Xác nhận"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
         <button
           onClick={() => setShowUpdateEvent(!showUpdateEvent)}
           className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
@@ -519,10 +514,6 @@ const DetailEvents = () => {
         </button>
       </div>
       {showUpdateEvent && <UpdateEvent />}
-
-
-
-
 
       <hr />
       <br />
@@ -574,8 +565,8 @@ const DetailEvents = () => {
             {data.event.event_type === "offline"
               ? "Trực tiếp"
               : data.event.event_type === "online"
-                ? "Trực tuyến"
-                : "Không xác định"}
+              ? "Trực tuyến"
+              : "Không xác định"}
           </p>
         </div>
 
@@ -645,7 +636,14 @@ const DetailEvents = () => {
       <div className="flex justify-between">
         {" "}
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Diễn giả</h2>
-
+        <Button
+          type="primary"
+          onClick={() => {
+            setShowAddSpeaker(true);
+          }}
+        >
+          Thêm diễn giả
+        </Button>
       </div>
       <div className="mb-6 flex justify-center">
         <div
@@ -736,10 +734,11 @@ const DetailEvents = () => {
                           {user.name}
                         </td>
                         <td
-                          className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1
-                            ? "text-green-500"
-                            : "text-red-500"
-                            }`}
+                          className={`border border-gray-300 px-4 py-2 ${
+                            user.pivot.checked_in === 1
+                              ? "text-green-500"
+                              : "text-red-500"
+                          }`}
                         >
                           {user.pivot.checked_in === 1
                             ? "Đã check-in"
@@ -758,10 +757,11 @@ const DetailEvents = () => {
                                     : "checkin",
                               })
                             }
-                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${user.pivot.checked_in === 1
-                              ? "bg-red-500 text-white hover:bg-red-600"
-                              : "bg-green-500 text-white hover:bg-green-600"
-                              }`}
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
+                              user.pivot.checked_in === 1
+                                ? "bg-red-500 text-white hover:bg-red-600"
+                                : "bg-green-500 text-white hover:bg-green-600"
+                            }`}
                           >
                             {user.pivot.checked_in === 1
                               ? "Hủy check-in"
@@ -830,7 +830,6 @@ const DetailEvents = () => {
         </div>
       )} */}
 
-
       <Modal
         title={
           <div className="flex justify-between items-center">
@@ -838,9 +837,7 @@ const DetailEvents = () => {
             <button
               onClick={() => setIsModalOpen(false)}
               className="text-xl font-semibold text-gray-500 hover:text-gray-700"
-            >
-
-            </button>
+            ></button>
           </div>
         }
         width={1000}
@@ -900,7 +897,7 @@ const DetailEvents = () => {
           </Button>
         </div>
 
-        { }
+        {}
         {isTicketForm && !showStatistics && !showUsersStatistics && (
           <AddTicket eventId={eventId} />
         )}
@@ -995,7 +992,7 @@ const DetailEvents = () => {
             <hr />
             <br />
             <button
-              onClick={() => setShowCheckInPopup(true)}  // Mở popup mà không cần mã vé
+              onClick={() => setShowCheckInPopup(true)} // Mở popup mà không cần mã vé
               className="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] bg-green-500 text-white hover:bg-green-600"
             >
               Check-in
@@ -1038,10 +1035,11 @@ const DetailEvents = () => {
                           {user.name}
                         </td>
                         <td
-                          className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1
-                            ? "text-green-500"
-                            : "text-red-500"
-                            }`}
+                          className={`border border-gray-300 px-4 py-2 ${
+                            user.pivot.checked_in === 1
+                              ? "text-green-500"
+                              : "text-red-500"
+                          }`}
                         >
                           {user.pivot.checked_in === 1
                             ? "Đã check-in"
@@ -1049,7 +1047,6 @@ const DetailEvents = () => {
                         </td>
                         <td className="border border-gray-300 px-4 py-2 text-center">
                           {/* Hiển thị nút "Check-in" chỉ khi chưa check-in */}
-
 
                           {/* Hiển thị nút "Hủy check-in" khi đã check-in */}
                           {user.pivot.checked_in === 1 && (
@@ -1081,7 +1078,6 @@ const DetailEvents = () => {
                     </tr>
                   )}
                 </tbody>
-
               </table>
             </div>
           </div>
@@ -1125,19 +1121,21 @@ const DetailEvents = () => {
               <h2 className="text-2xl font-bold mb-4">Check-in</h2>
               <div className="flex space-x-4 mb-4 justify-center">
                 <button
-                  className={`px-4 py-2 rounded ${checkInMode === "code"
+                  className={`px-4 py-2 rounded ${
+                    checkInMode === "code"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-700"
-                    }`}
+                  }`}
                   onClick={() => handleSwitchCheckInMode("code")}
                 >
                   Nhập mã vé
                 </button>
                 <button
-                  className={`px-4 py-2 rounded ${checkInMode === "qr"
+                  className={`px-4 py-2 rounded ${
+                    checkInMode === "qr"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-700"
-                    }`}
+                  }`}
                   onClick={() => handleSwitchCheckInMode("qr")}
                 >
                   Quét mã QR
@@ -1185,7 +1183,6 @@ const DetailEvents = () => {
           </div>
         )}
       </Modal>
-
     </div>
   );
 };

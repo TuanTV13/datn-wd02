@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Modal, Input, message } from "antd";
 import axios from "axios";
 import axiosInstance from "../../../axios";
+import moment from "moment";
 
 const CategoryList = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isTrashedView, setIsTrashedView] = useState(false); // Trạng thái xem danh mục đã xoá
 
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -18,8 +20,8 @@ const CategoryList = () => {
   const [reload, setReload] = useState(false);
 
   useEffect(() => {
-    fetchCategories();
-  }, [reload]);
+    isTrashedView ? fetchTrashedCategories() : fetchCategories();
+  }, [reload, isTrashedView]);
 
   // Fetch danh sách danh mục
   const fetchCategories = async () => {
@@ -37,14 +39,32 @@ const CategoryList = () => {
       }));
       setData(formattedData);
     } catch (error) {
-      console.error("Failed to fetch categories:", error);
       message.error("Không thể tải danh sách danh mục.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Modal thêm danh mục
+  // Fetch danh mục đã xoá
+  const fetchTrashedCategories = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get("categories/list/Trashed");
+      const formattedData = response.data.data.map((item, index) => ({
+        key: index + 1,
+        id: item.id,
+        name: item.name,
+        deleted_at: item.deleted_at || "N/A",
+      }));
+      setData(formattedData);
+    } catch (error) {
+      message.error("Không thể tải danh mục đã xoá.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Thêm danh mục
   const handleAddCategory = async () => {
     if (!newCategory.trim())
       return message.warning("Vui lòng nhập tên danh mục.");
@@ -60,12 +80,11 @@ const CategoryList = () => {
       setIsAddModalVisible(false);
       setNewCategory("");
     } catch (error) {
-      console.error("Failed to add category:", error);
       message.error("Không thể thêm danh mục.");
     }
   };
 
-  // Modal sửa danh mục
+  // Sửa danh mục
   const handleEditCategory = async () => {
     if (!editCategory.name.trim())
       return message.warning("Vui lòng nhập tên danh mục.");
@@ -77,14 +96,12 @@ const CategoryList = () => {
       message.success("Cập nhật danh mục thành công!");
       setReload(!reload);
       setIsEditModalVisible(false);
-      setEditCategory({ id: null, name: "" });
     } catch (error) {
-      console.error("Failed to update category:", error);
       message.error("Không thể cập nhật danh mục.");
     }
   };
 
-  // Modal xoá danh mục
+  // Xoá danh mục
   const handleDeleteCategory = async () => {
     try {
       await axiosInstance.delete(
@@ -93,64 +110,91 @@ const CategoryList = () => {
       message.success("Xoá danh mục thành công!");
       setReload(!reload);
       setIsDeleteModalVisible(false);
-      setDeleteCategory({ id: null, name: "" });
     } catch (error) {
-      console.error("Failed to delete category:", error);
       message.error("Không thể xoá danh mục.");
+    }
+  };
+
+  // Khôi phục danh mục
+  const handleRestoreCategory = async (id) => {
+    try {
+      await axiosInstance.get(
+        `http://localhost:8000/api/v1/categories/${id}/restore`
+      );
+      message.success("Khôi phục danh mục thành công!");
+      setReload(!reload);
+    } catch (error) {
+      message.error("Không thể khôi phục danh mục.");
     }
   };
 
   const columns = [
     { title: "STT", dataIndex: "key", key: "key", align: "center" },
-    { title: "ID", dataIndex: "id", key: "id", align: "center" },
+    // { title: "ID", dataIndex: "id", key: "id", align: "center" },
     { title: "Tên danh mục", dataIndex: "name", key: "name" },
     {
-      title: "Ngày tạo",
-      dataIndex: "created_at",
-      key: "created_at",
-      align: "center",
-    },
-    {
-      title: "Ngày cập nhật",
-      dataIndex: "updated_at",
-      key: "updated_at",
+      title: isTrashedView ? "Ngày xoá" : "Ngày tạo",
+      dataIndex: isTrashedView ? "deleted_at" : "created_at",
+      render: (_, record) =>
+        isTrashedView
+          ? moment(record.deleted_at).format("DD/MM/YYYY HH:mm:ss")
+          : moment(record.created_at).format("DD/MM/YYYY HH:mm:ss"),
+      key: isTrashedView ? "deleted_at" : "created_at",
       align: "center",
     },
     {
       title: "Thao tác",
       key: "actions",
       align: "center",
-      render: (_, record) => (
-        <div className="flex space-x-2 justify-center">
-          <Button
-            type="link"
-            onClick={() =>
-              setIsEditModalVisible(true) || setEditCategory(record)
-            }
-          >
-            Sửa
+      render: (_, record) =>
+        isTrashedView ? (
+          <Button type="link" onClick={() => handleRestoreCategory(record.id)}>
+            Khôi phục
           </Button>
-          <Button
-            type="link"
-            danger
-            onClick={() =>
-              setIsDeleteModalVisible(true) || setDeleteCategory(record)
-            }
-          >
-            Xóa
-          </Button>
-        </div>
-      ),
+        ) : (
+          <>
+            <Button
+              type="link"
+              onClick={() =>
+                setIsEditModalVisible(true) || setEditCategory(record)
+              }
+            >
+              Sửa
+            </Button>
+            <Button
+              type="link"
+              danger
+              onClick={() =>
+                setIsDeleteModalVisible(true) || setDeleteCategory(record)
+              }
+            >
+              Xóa
+            </Button>
+          </>
+        ),
     },
   ];
 
   return (
     <div className="p-6">
       <div className="flex justify-between mb-4">
-        <h2 className="text-2xl font-bold">Danh sách danh mục</h2>
-        <Button type="primary" onClick={() => setIsAddModalVisible(true)}>
-          Thêm mới
-        </Button>
+        <h2 className="text-2xl font-bold">
+          {isTrashedView ? "Danh mục đã xoá" : "Danh sách danh mục"}
+        </h2>
+        <div>
+          {!isTrashedView && (
+            <Button
+              type="primary"
+              onClick={() => setIsAddModalVisible(true)}
+              className="mr-2"
+            >
+              Thêm mới
+            </Button>
+          )}
+          <Button onClick={() => setIsTrashedView(!isTrashedView)}>
+            {isTrashedView ? "Danh mục chính" : "Danh mục đã xoá"}
+          </Button>
+        </div>
       </div>
 
       <Table
