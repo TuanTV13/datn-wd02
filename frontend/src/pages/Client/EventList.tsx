@@ -108,6 +108,7 @@ const EventListing = () => {
       setFilteredEvents(data); // Cập nhật danh sách sự kiện
     } catch (err) {
       toast.error("Không tìm thấy sự kiện");
+      setFilteredEvents([])
     }
   };
   const [Inputlocation, setLocation] = useState("");
@@ -361,7 +362,7 @@ const EventListing = () => {
                           className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
                           src={item.thumbnail}
                         />
-                        <span  className={`absolute top-2 left-2 text-white text-sm font-semibold px-3 py-1 rounded ${getStatusColor(item.status).color}`}>
+                        <span  className={`absolute top-2 left-2 text-white text-sm font-semibold px-2 py-1 rounded ${getStatusColor(item.status).color}`}>
                         {getStatusColor(item.status).text}
                         </span>
                       </div>

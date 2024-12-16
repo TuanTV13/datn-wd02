@@ -122,7 +122,6 @@ const Header = () => {
     }
   };
   // Check đăng nhập
-
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {

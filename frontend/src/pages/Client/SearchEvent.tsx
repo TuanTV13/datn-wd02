@@ -198,7 +198,7 @@ const SearchEvent = () => {
           <div className="mb-6">
             <div
               className="flex justify-between items-center cursor-pointer text-xl font-semibold text-gray-700 hover:text-blue-600 transition-colors"
-              onClick={toggleCategory}
+              // onClick={toggleCategory}
             >
               Danh mục
               <svg
@@ -219,7 +219,6 @@ const SearchEvent = () => {
               </svg>
             </div>
 
-            {isCategoryOpen && (
               <div className="mt-4">
                 <input
                   type="text"
@@ -249,7 +248,6 @@ const SearchEvent = () => {
                   ))}
                 </ul>
               </div>
-            )}
           </div>
 
           {/* Location Filter */}
