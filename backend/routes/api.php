@@ -160,6 +160,10 @@ Route::prefix('v1')->group(function () {
             Route::post('search', [ClientEventController::class, 'search']);
         });
 
+        Route::prefix('vouchers')->group(function () {
+            Route::get('{eventId}', [ClientEventController::class, 'getVouchersEvent']);
+        });
+
         Route::prefix('home')->group(function () {
             Route::get('header-events', [HomeController::class, 'headerEvents']);
             Route::get('upcoming-events/{provinceSlug?}', [HomeController::class, 'upcomingEvents']);

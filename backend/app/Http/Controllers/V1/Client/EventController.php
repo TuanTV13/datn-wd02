@@ -4,6 +4,8 @@ namespace App\Http\Controllers\V1\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\EventUser;
+use App\Models\TicketPrice;
+use App\Models\Voucher;
 use App\Repositories\EventRepository;
 use App\Repositories\TicketRepository;
 use App\Repositories\TransactionRepository;
@@ -296,4 +298,28 @@ class EventController extends Controller
             'data' => $events
         ]);
     }
+
+    function getVouchersEvent($eventId) {
+        $tickets = TicketPrice::where('event_id', $eventId)->get();
+        
+        if ($tickets->isEmpty()) {
+            return response()->json([
+                'data' => [],
+            ]);
+        }
+    
+        $ticketStartDate = $tickets->min('sale_start'); 
+        $ticketEndDate = $tickets->max('sale_end'); 
+    
+        $vouchers = Voucher::where('status', 'published')
+            ->where('event_id', $eventId)
+            ->whereBetween('start_time', [$ticketStartDate, $ticketEndDate]) 
+            ->whereBetween('end_time', [$ticketStartDate, $ticketEndDate])
+            ->get();
+    
+        return response()->json([
+            'data' => $vouchers,
+        ]);
+    }
+    
 }
