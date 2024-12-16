@@ -15,7 +15,9 @@ class UserRepository
 
     public function all()
     {
-        return $this->user->all();
+        return User::whereDoesntHave('roles', function ($query) {
+            $query->where('name', 'admin');
+        })->get();
     }
 
     public function create(array $data)

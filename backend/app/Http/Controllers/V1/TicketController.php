@@ -293,6 +293,10 @@ class TicketController extends Controller
     {
         $ticket = $this->ticketRepository->restore($id);
 
+        if ($ticket && $ticket->zone()->withTrashed()->exists()) {
+            $ticket->zone()->restore();
+        }
+        
         return response()->json([
             'message' => 'Khôi phục vé thành công',
             'data' => $ticket

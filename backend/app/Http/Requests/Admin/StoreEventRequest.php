@@ -91,4 +91,23 @@ class StoreEventRequest extends FormRequest
             'end_time.custom' => 'Thời gian kết thúc phải sau ít nhất 2 giờ so với thời gian bắt đầu.',
         ];
     }
+
+    public function attributes(): array
+    {
+        return [
+            'category_id' => 'thể loại sự kiện',
+            'province' => 'tỉnh',
+            'district' => 'huyện',
+            'ward' => 'xã',
+            'name' => 'tên sự kiện',
+            'description' => 'mô tả sự kiện',
+            'location' => 'địa điểm',
+            'event_type' => 'loại sự kiện',
+            'link_online' => 'link sự kiện trực tuyến',
+            'max_attendess' => 'số lượng người tham gia tối đa',
+            'thumbnail' => 'hình ảnh đại diện',
+            'start_time' => 'thời gian bắt đầu',
+            'end_time' => 'thời gian kết thúc',
+        ];
+    }
 }

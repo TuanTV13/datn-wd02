@@ -203,7 +203,7 @@ console.log(filteredTickets)
                           {getEventName(priceItem.event_id)}
                         </td>
                         <td className="p-4 border border-gray-300">
-                          {/* {priceItem.zone.name} */}
+                          {priceItem.zone.name}
                         </td>
                         <td className="p-4 border border-gray-300">
                           {item.ticket_type}
