@@ -145,7 +145,7 @@ class PaymentController extends Controller
                 return response()->json(['message' => 'Số lượng vé không đủ'], 400);
             }
 
-            if ($quantity > $ticketZone->purchase_limit) {
+            if ($quantity > $ticketZone->purchase_limit && $ticketZone->purchase_limit != 0) {
                 return response()->json(['message' => 'Số lượng vé vượt quá giới hạn cho phép'], 400);
             }
 
@@ -369,7 +369,7 @@ class PaymentController extends Controller
                 DB::commit();
                 // session()->flush();
                 Log::info('Thanh toán thành công', ['transaction_id' => $transaction->id, 'ticket_id' => $ticket->id]);
-                return response()->json(['message' => 'Thanh toán thành công', 'transaction_id' => $transaction->id]);
+                return redirect('http://localhost:5173/order-detail/' . $transaction->id);
             }
         } catch (Exception $e) {
             DB::rollBack();

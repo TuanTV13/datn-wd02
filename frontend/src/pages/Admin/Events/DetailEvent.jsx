@@ -11,18 +11,20 @@ import AddDiscountCode from "../Voucher/AddDiscountCode";
 import UpdateEvent from "./UpdateEvent";
 import AddSpeakerModal from "../../../components/Admin/AddSpeakerModal";
 ChartJS.register(ArcElement, Tooltip, Legend);
-
+import QrReader from "react-qr-scanner"; // Import thư viện
 const DetailEvents = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [subnet, setSubnet] = useState("");
   const [eventDetails, setEventDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showTickets, setShowTickets] = useState(false); 
-  const [showUsers, setShowUsers] = useState(false); 
-  const [showUpdateEvent, setShowUpdateEvent] = useState(false); 
-  const [showStatusPopup, setShowStatusPopup] = useState(false); 
-  const [selectedStatus, setSelectedStatus] = useState(""); 
+  const [showUsers, setShowUsers] = useState(false);
+  const [showUpdateEvent, setShowUpdateEvent] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
-
+  const [qrCodeData, setQrCodeData] = useState(null);
+  const [checkInMode, setCheckInMode] = useState("code"); // 'code' hoặc 'qr'
+  const [checkInPopup, setShowCheckInPopup] = useState(false); // Khởi tạo trạng thái của popup
   const [modalData, setModalData] = useState({
     show: false,
     id: null,
@@ -32,16 +34,18 @@ const DetailEvents = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const { id } = useParams();
 
+  const [event, setEvent] = useState(null);
 
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTicketForm, setIsTicketForm] = useState(true);
   const [eventId, setEventId] = useState(id);
   const [reload, setReload] = useState(false);
   const [showStatistics, setShowStatistics] = useState(false);
   const [showAddSpeaker, setShowAddSpeaker] = useState(false);
+  const token = localStorage.getItem("access_token");
+  const [showUsersStatistics, setShowUsersStatistics] = useState(false);
 
-  const [showUsersStatistics, setShowUsersStatistics] = useState(false); 
+  // Hàm cuộn lên đầu trang
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -72,14 +76,39 @@ const DetailEvents = () => {
     fetchEventDetails();
   }, [id, reload]);
   useEffect(() => {
-    
     const interval = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); 
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
+  const handleAddIp = async () => {
+    if (!subnet) {
+      toast.error("Vui lòng nhập địa chỉ IP subnet.");
+      return;
+    }
 
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `http://127.0.0.1:8000/api/v1/events/${id}/add-ip`,
+        { subnet },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast.success("Địa chỉ IP đã được thêm thành công!");
+      setShowModal(false); // Đóng modal sau khi thành công
+    } catch (error) {
+      toast.error("Lỗi khi thêm địa chỉ IP. Vui lòng thử lại!");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleStatusChange = async (currentStatus) => {
     const token = localStorage.getItem("access_token");
     const headers = {
@@ -87,7 +116,6 @@ const DetailEvents = () => {
       "Content-Type": "application/json",
     };
 
-    
     const nextStatusMap = {
       pending: "confirmed",
       confirmed: "checkin",
@@ -97,14 +125,13 @@ const DetailEvents = () => {
     const nextStatus = nextStatusMap[currentStatus];
 
     try {
-      
       const response = await axios.put(
         `http://127.0.0.1:8000/api/v1/events/changeStatus/${id}`,
         { status: nextStatus },
         { headers }
       );
       setReload(!reload);
-      
+
       toast.success("Cập nhật trạng thái thành công!", {
         position: "top-right",
         autoClose: 3000,
@@ -114,7 +141,6 @@ const DetailEvents = () => {
         draggable: true,
       });
     } catch (err) {
-      
       toast.error("Cập nhật trạng thái thất bại!", {
         position: "top-right",
         autoClose: 3000,
@@ -131,10 +157,10 @@ const DetailEvents = () => {
     setSelectedStatus(status);
     setShowConfirmPopup(true);
   };
-  
+
   const getTimeDifference = (startTime) => {
     const eventStartTime = new Date(startTime);
-    return (eventStartTime - currentTime) / 1000 / 60 / 60; 
+    return (eventStartTime - currentTime) / 1000 / 60 / 60;
   };
 
   const getNextStatusLabel = (status) => {
@@ -149,52 +175,83 @@ const DetailEvents = () => {
     }
     return "";
   };
+  const handleCheckInSubmit = () => {
+    const ticketCode = document.getElementById("ticket_code").value; // Lấy mã vé người dùng nhập
 
-  const handleCheckIn = async (id, ticketCode) => {
-    try {
-      
-      const token = localStorage.getItem("access_token");
+    if (!ticketCode) {
+      // Hiển thị thông báo lỗi nếu mã vé không được nhập
+      toast.error({ message: "Vui lòng nhập mã vé" });
+      return; // Dừng lại và không gửi yêu cầu API
+    }
 
-      
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json", 
-      };
+    // Tạo đối tượng dữ liệu để gửi lên API
+    const requestData = {
+      ticket_code: ticketCode,
+    };
 
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/v1/events/${id}/checkin`,
-        {
-          method: "PUT",
-          headers: headers,
-          body: JSON.stringify({ ticket_code: ticketCode }),
-        }
-      );
+    axios
+      .put(
+        `http://127.0.0.1:8000/api/v1/clients/events/${id}/checkin`,
+        requestData
+      )
+      .then((response) => {
+        setShowCheckInPopup(false); // Đóng popup sau khi check-in thành công
+        setReload(!reload);
+        toast.success(" Check-in thành công!");
+      })
+      .catch((error) => {
+        console.error("Lỗi khi check-in:", error);
+        toast.error(error.response.data.message);
+      });
+  };
 
-      if (!response.ok) {
-        const error = await response.json();
-        
-      }
+  const handleCheckIn = () => {
+    setShowCheckInPopup(true);
+    setCheckInMode("code"); // Mặc định vào chế độ nhập mã vé
+  };
+  const handleCloseCheckInPopup = () => {
+    setShowCheckInPopup(false);
+  };
+  const handleSwitchCheckInMode = (mode) => {
+    setCheckInMode(mode);
+  };
+  const handleQrCodeScan = (data) => {
+    if (data && data.text) {
+      // Kiểm tra nếu dữ liệu có trường text
+      console.log("Dữ liệu quét được:", data); // In ra dữ liệu quét để kiểm tra
 
-      const data = await response.json();
+      const ticket_code = data.text; // Lấy mã vé từ trường text
 
-      toast.success("Thay đổi trạng thái check-in thành công!");
-      setReload(!reload);
-    } catch (error) {
-      toast.error("Thay đổi trạng thái check-in thất bại!");
-      if (error.status === 401) {
-      }
-      localStorage.clear();
-      window.location = "/auth";
-      console.error("Error:", error);
+      setQrCodeData(ticket_code); // Cập nhật ticketCode vào state
+
+      // Gửi dữ liệu mã QR (ticketCode) để xử lý check-in
+      axios
+        .put(
+          `http://127.0.0.1:8000/api/v1/clients/events/${id}/checkin`,
+          { ticket_code: ticket_code } // Gửi ticketCode lên API
+        )
+        .then((response) => {
+          setShowCheckInPopup(false); // Đóng popup sau khi check-in thành công
+          setReload(!reload);
+          toast.success("Check-in thành công!"); // Thông báo check-in thành công
+          console.log("Check-in thành công:", response);
+        })
+        .catch((error) => {
+          toast.error(error);
+          console.error("Lỗi khi check-in:", error); // Xử lý lỗi nếu có
+        });
+    } else {
+      console.log("Không nhận được dữ liệu từ mã QR."); // Trường hợp không nhận được dữ liệu
     }
   };
 
+  const handleQrCodeError = (err) => {
+    console.error("Lỗi quét mã QR:", err);
+  };
   const handleCancelCheckIn = async (id, ticketCode) => {
     try {
-      
       const token = localStorage.getItem("access_token");
 
-      
       const headers = {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -216,7 +273,6 @@ const DetailEvents = () => {
       const data = await response.json();
       toast.success("Thay đổi trạng thái check-in thành công!");
       setReload(!reload);
-      
     } catch (error) {
       toast.error("Thay đổi trạng thái check-in thất bại!");
       if (error.status === 401) {
@@ -240,11 +296,10 @@ const DetailEvents = () => {
 
   const { data } = eventDetails;
 
-  
   const speakers = data.speakers || [];
   const tickets = data.event.tickets || [];
   const users = data.event.users || [];
-  
+
   const { vipPercentage, normalPercentage } = data;
 
   const chartData = {
@@ -260,6 +315,16 @@ const DetailEvents = () => {
   const timeDifference = getTimeDifference(data.event.start_time);
   return (
     <div className="bg-white rounded-lg shadow p-6">
+      {/*       
+      {isVisible && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-4 right-4 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
+          aria-label="Scroll to top"
+        >
+          ↑
+        </button>
+      )} */}
       <AddSpeakerModal
         show={showAddSpeaker}
         onClose={() => {
@@ -279,7 +344,6 @@ const DetailEvents = () => {
       </h1>
 
       <p className="text-lg font-medium text-gray-700 mb-6 flex justify-between items-center bg-white p-4 rounded-lg shadow-md border-l-4">
-        
         <span className="flex items-center text-gray-800">
           <span className="mr-2 text-xl">📌</span>
           Trạng thái:{" "}
@@ -316,7 +380,7 @@ const DetailEvents = () => {
             )}
 
             {/* Hiển thị nút chuyển sang check-in trong vòng 2 giờ trước khi sự kiện bắt đầu */}
-            {timeDifference <= 2 && timeDifference > 0 && data.event.status === "checkin" && (
+            {data.event.status === "checkin" && (
               <Button
                 type="primary"
                 className="h-12 px-6 py-2 to-teal-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
@@ -360,7 +424,8 @@ const DetailEvents = () => {
               sang{" "}
               <span className="font-bold text-blue-500">
                 {getNextStatusLabel(selectedStatus)}
-              </span>?
+              </span>
+              ?
             </p>
             <div className="flex justify-center space-x-4">
               <button
@@ -386,18 +451,61 @@ const DetailEvents = () => {
       <div className="flex space-x-4 justify-center mb-8">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300">
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
+        >
           Quản lý vé và voucher
         </button>
 
         <button
-          onClick={() => { }}
+          onClick={() => setShowModal(true)}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
         >
           Thêm địa chỉ IP check-in
         </button>
 
-
+        {showModal && (
+          <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full ">
+              <h2 className="text-xl font-semibold mb-4">
+                Thêm địa chỉ IP check-in
+              </h2>
+              <div className="mb-4">
+                <label
+                  htmlFor="subnet"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Subnet
+                </label>
+                <input
+                  type="text"
+                  id="subnet"
+                  name="subnet"
+                  value={subnet}
+                  onChange={(e) => setSubnet(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Nhập địa chỉ IP subnet"
+                />
+              </div>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 bg-gray-400 text-white rounded-lg"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleAddIp}
+                  className={`px-4 py-2 bg-blue-500 text-white rounded-lg ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loading}
+                >
+                  {loading ? "Đang thêm..." : "Xác nhận"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <button
           onClick={() => setShowUpdateEvent(!showUpdateEvent)}
           className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
@@ -406,10 +514,6 @@ const DetailEvents = () => {
         </button>
       </div>
       {showUpdateEvent && <UpdateEvent />}
-
-     
-
-
 
       <hr />
       <br />
@@ -692,7 +796,7 @@ const DetailEvents = () => {
       )}
 
       {/* Modal xác nhận */}
-      {modalData.show && (
+      {/* {modalData.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
             <h2 className="text-xl font-semibold mb-4">Xác nhận</h2>
@@ -724,77 +828,74 @@ const DetailEvents = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
-
-<Modal
-  title={
-    <div className="flex justify-between items-center">
-      <span>Quản lý vé và voucher</span>
-      <button
-        onClick={() => setIsModalOpen(false)}
-        className="text-xl font-semibold text-gray-500 hover:text-gray-700"
+      <Modal
+        title={
+          <div className="flex justify-between items-center">
+            <span>Quản lý vé và voucher</span>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="text-xl font-semibold text-gray-500 hover:text-gray-700"
+            ></button>
+          </div>
+        }
+        width={1000}
+        open={isModalOpen}
+        footer={[
+          <Button
+            key="close"
+            type="primary"
+            onClick={() => {
+              setIsModalOpen(false);
+              navigate("/admin/detail-event/" + eventId);
+            }}
+          >
+            Đóng
+          </Button>,
+        ]}
+        onCancel={() => setIsModalOpen(false)}
       >
-      
-      </button>
-    </div>
-  }
-  width={1000}
-  open={isModalOpen}
-  footer={[
-    <Button
-      key="close"
-      type="primary"
-      onClick={() => {
-        setIsModalOpen(false);
-        navigate("/admin/detail-event/" + eventId);
-      }}
-    >
-      Đóng
-    </Button>,
-  ]}
-  onCancel={() => setIsModalOpen(false)} 
->
-  <div className="flex justify-center gap-3">
-    <Button
-      key="ticket"
-      onClick={() => {
-        setIsTicketForm(true); 
-        setShowStatistics(false); 
-        setShowUsersStatistics(false); 
-      }}
-    >
-      Thêm vé
-    </Button>
-    <Button
-      key="voucher"
-      onClick={() => {
-        setIsTicketForm(false); 
-        setShowStatistics(false); 
-        setShowUsersStatistics(false); 
-      }}
-    >
-      Thêm voucher
-    </Button>
-    <Button
-      onClick={() => {
-        setShowStatistics(true); 
-        setIsTicketForm(false); 
-        setShowUsersStatistics(false); 
-      }}
-    >
-      Thống kê vé
-    </Button>
-    <Button
-      onClick={() => {
-        setShowUsersStatistics(true); 
-        setIsTicketForm(false); 
-        setShowStatistics(false); 
-      }}
-    >
-      Thống kê người dùng
-    </Button>
-  </div>
+        <div className="flex justify-center gap-3">
+          <Button
+            key="ticket"
+            onClick={() => {
+              setIsTicketForm(true);
+              setShowStatistics(false);
+              setShowUsersStatistics(false);
+            }}
+          >
+            Thêm vé
+          </Button>
+          <Button
+            key="voucher"
+            onClick={() => {
+              setIsTicketForm(false);
+              setShowStatistics(false);
+              setShowUsersStatistics(false);
+            }}
+          >
+            Thêm voucher
+          </Button>
+          <Button
+            onClick={() => {
+              setShowStatistics(true);
+              setIsTicketForm(false);
+              setShowUsersStatistics(false);
+            }}
+          >
+            Thống kê vé
+          </Button>
+          <Button
+            onClick={() => {
+              setShowUsersStatistics(true);
+              setIsTicketForm(false);
+              setShowStatistics(false);
+            }}
+          >
+            Thống kê người dùng
+          </Button>
+        </div>
 
         {}
         {isTicketForm && !showStatistics && !showUsersStatistics && (
@@ -887,25 +988,35 @@ const DetailEvents = () => {
               Người dùng đã mua vé
             </h3>
             <br />
+
             <hr />
             <br />
+            <button
+              onClick={() => setShowCheckInPopup(true)} // Mở popup mà không cần mã vé
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] bg-green-500 text-white hover:bg-green-600"
+            >
+              Check-in
+            </button>
+            <br />
+            <br />
+
             <div className="overflow-x-auto">
               <table className="table-auto w-full border-collapse border border-gray-300">
                 <thead>
                   <tr className="bg-gray-200">
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       STT
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       Mã vé
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       Khách hàng
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       Trạng thái check-in
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+                    <th className="border border-gray-300 px-4 py-2 text-center">
                       Thao tác
                     </th>
                   </tr>
@@ -935,28 +1046,24 @@ const DetailEvents = () => {
                             : "Chưa check-in"}
                         </td>
                         <td className="border border-gray-300 px-4 py-2 text-center">
-                          <button
-                            onClick={() =>
-                              setModalData({
-                                show: true,
-                                id: user.id,
-                                ticketCode: user.ticket_code,
-                                action:
-                                  user.pivot.checked_in === 1
-                                    ? "cancel"
-                                    : "checkin",
-                              })
-                            }
-                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-                              user.pivot.checked_in === 1
-                                ? "bg-red-500 text-white hover:bg-red-600"
-                                : "bg-green-500 text-white hover:bg-green-600"
-                            }`}
-                          >
-                            {user.pivot.checked_in === 1
-                              ? "Hủy check-in"
-                              : "Check-in"}
-                          </button>
+                          {/* Hiển thị nút "Check-in" chỉ khi chưa check-in */}
+
+                          {/* Hiển thị nút "Hủy check-in" khi đã check-in */}
+                          {user.pivot.checked_in === 1 && (
+                            <button
+                              onClick={() =>
+                                setModalData({
+                                  show: true,
+                                  id: user.id,
+                                  ticketCode: user.ticket_code,
+                                  action: "cancel",
+                                })
+                              }
+                              className="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] bg-red-500 text-white hover:bg-red-600"
+                            >
+                              Hủy check-in
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -1003,6 +1110,73 @@ const DetailEvents = () => {
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                 >
                   Xác nhận
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {checkInPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-lg w-[600px]">
+              <h2 className="text-2xl font-bold mb-4">Check-in</h2>
+              <div className="flex space-x-4 mb-4 justify-center">
+                <button
+                  className={`px-4 py-2 rounded ${
+                    checkInMode === "code"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                  onClick={() => handleSwitchCheckInMode("code")}
+                >
+                  Nhập mã vé
+                </button>
+                <button
+                  className={`px-4 py-2 rounded ${
+                    checkInMode === "qr"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                  onClick={() => handleSwitchCheckInMode("qr")}
+                >
+                  Quét mã QR
+                </button>
+              </div>
+
+              {checkInMode === "code" && (
+                <div>
+                  <input
+                    id="ticket_code"
+                    type="text"
+                    placeholder="Nhập mã vé"
+                    className="w-full p-2 border rounded mb-4 text-black"
+                  />
+                </div>
+              )}
+
+              {checkInMode === "qr" && (
+                <div>
+                  <QrReader
+                    delay={300}
+                    style={{ width: "100%" }}
+                    onError={handleQrCodeError}
+                    onScan={handleQrCodeScan}
+                  />
+                </div>
+              )}
+
+              {/* Nút xác nhận và đóng trên cùng một hàng */}
+              <div className="flex space-x-4 mt-4">
+                <button
+                  onClick={handleCheckInSubmit}
+                  className="w-[48%] bg-blue-500 text-white py-2 rounded"
+                >
+                  Xác nhận
+                </button>
+                <button
+                  onClick={handleCloseCheckInPopup}
+                  className="w-[48%] bg-gray-500 text-white py-2 rounded"
+                >
+                  Đóng
                 </button>
               </div>
             </div>
