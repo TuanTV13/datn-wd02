@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { notification } from "antd";
+import { Button, List, notification } from "antd";
+import moment from "moment";
 
 const CheckOut = () => {
   const location = useLocation();
@@ -10,6 +11,8 @@ const CheckOut = () => {
   // console.log(ticketData)
   const eventId = ticketData.eventId;
   const searchParams = new URLSearchParams(location.search);
+  const [vouchers, setVouchers] = useState([]);
+  const [isVoucherListVisible, setIsVoucherListVisible] = useState(false); // Hiển thị danh sách voucher
   const ticketType = searchParams.get("ticketType");
   const ticketId = searchParams.get("ticketId");
   // const eventId = searchParams.get("eventId");
@@ -38,9 +41,7 @@ const CheckOut = () => {
 
   const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [voucherCode, setVoucherCode] = useState("");
-  const [totalPrice, setTotalPrice] = useState(
-    ticketData.totalPrice
-  );
+  const [totalPrice, setTotalPrice] = useState(ticketData.totalPrice);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
   const validateForm = () => {
     const newErrors = {
@@ -91,6 +92,20 @@ const CheckOut = () => {
         });
     }
   }, []);
+  const fetchVouchers = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/v1/clients/vouchers/${eventId}`
+      );
+      setVouchers(response.data.data || []);
+    } catch (error) {
+      console.error("Error fetching vouchers:", error);
+      notification.error({ message: "Không thể tải danh sách voucher." });
+    }
+  };
+  useEffect(() => {
+    fetchVouchers(); // Lấy danh sách voucher khi component mount
+  }, []);
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setUserInfo((prevState) => ({
@@ -101,12 +116,12 @@ const CheckOut = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const listVouchers = async () => {
+    const response = await axios.get(
+      `http://127.0.0.1:8000/api/v1/vouchers/${eventId}/findByEvent`
+    );
 
-    const response = await axios.get(`http://127.0.0.1:8000/api/v1/vouchers/${eventId}/findByEvent`)
-
-    console.log(response.data)
-
-  }
+    console.log(response.data);
+  };
 
   const handleVoucherApply = async () => {
     const token = localStorage.getItem("access_token");
@@ -183,7 +198,7 @@ const CheckOut = () => {
       discount_code: voucherCode || null,
       amount: parseFloat(ticketData.totalPrice).toFixed(2),
     };
-    console.log("ádfd", paymentData)
+    console.log("ádfd", paymentData);
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/clients/payment/process",
@@ -195,7 +210,7 @@ const CheckOut = () => {
           },
         }
       );
-      console.log(response.data)
+      console.log(response.data);
       if (response.data.status === "success") {
         window.location.href = response.data.payment_url;
       } else {
@@ -204,7 +219,7 @@ const CheckOut = () => {
         });
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       notification.error({
         message:
           error.response?.data?.message || "Có lỗi xảy ra trong thanh toán.",
@@ -214,7 +229,7 @@ const CheckOut = () => {
     }
 
     setIsProcessing(false);
-  }
+  };
 
   return (
     <div className="mt-36 mx-4">
@@ -437,6 +452,53 @@ const CheckOut = () => {
                   {/* Nội dung SVG */}
                 </svg>
               )}
+            </div>
+            <div>
+              <div>
+                {/* Hiển thị danh sách voucher */}
+                <Button
+                  type="link"
+                  onClick={() => setIsVoucherListVisible(!isVoucherListVisible)}
+                >
+                  {isVoucherListVisible
+                    ? "Ẩn danh sách voucher"
+                    : "Hiển thị voucher có thể sử dụng"}
+                </Button>
+                {isVoucherListVisible && (
+                  <List
+                    dataSource={vouchers}
+                    bordered
+                    renderItem={(voucher) => (
+                      <List.Item>
+                        <div>
+                          <strong>{voucher.code}</strong> -{" "}
+                          {voucher.discount_type === "fixed"
+                            ? `${voucher.discount_value} VND`
+                            : `${voucher.discount_value}%`}
+                          <div>
+                            <small>
+                              Hiệu lực:{" "}
+                              {moment(voucher.start_time).format(
+                                "DD/MM/YYYY HH:mm"
+                              )}{" "}
+                              -{" "}
+                              {moment(voucher.end_time).format(
+                                "DD/MM/YYYY HH:mm"
+                              )}
+                            </small>
+                          </div>
+                        </div>
+                        <Button
+                          type="primary"
+                          onClick={() => setVoucherCode(voucher.code)}
+                        >
+                          Sử dụng
+                        </Button>
+                      </List.Item>
+                    )}
+                  />
+                )}
+              </div>
             </div>
             <div className="border-b flex flex-col gap-y-3">
               <label className="text-sm text-[#9D9EA2]">Áp dụng voucher</label>
