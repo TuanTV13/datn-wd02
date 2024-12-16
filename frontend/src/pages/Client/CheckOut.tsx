@@ -7,9 +7,12 @@ const CheckOut = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const ticketData = location.state;
+  // console.log(ticketData)
+  const eventId = ticketData.eventId;
   const searchParams = new URLSearchParams(location.search);
   const ticketType = searchParams.get("ticketType");
   const ticketId = searchParams.get("ticketId");
+  // const eventId = searchParams.get("eventId");
   const seatZoneId = Number(searchParams.get("seatZoneId") || 1);
   const quantity = searchParams.get("quantity");
   const initialTotalPrice = parseFloat(searchParams.get("price") || "0");
@@ -26,10 +29,17 @@ const CheckOut = () => {
     phone: "",
   });
 
+  const [isSvgVisible, setIsSvgVisible] = useState(false);
+
+  // Hàm để xử lý sự kiện nhấn
+  const handleToggleSvg = () => {
+    setIsSvgVisible(!isSvgVisible); // Đảo ngược trạng thái (ẩn/hiện)
+  };
+
   const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [voucherCode, setVoucherCode] = useState("");
   const [totalPrice, setTotalPrice] = useState(
-    initialTotalPrice * Number(quantity)
+    ticketData.totalPrice
   );
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
   const validateForm = () => {
@@ -90,6 +100,14 @@ const CheckOut = () => {
   };
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const listVouchers = async () => {
+
+    const response = await axios.get(`http://127.0.0.1:8000/api/v1/vouchers/${eventId}/findByEvent`)
+
+    console.log(response.data)
+
+  }
+
   const handleVoucherApply = async () => {
     const token = localStorage.getItem("access_token");
     const userID = localStorage.getItem("user_id");
@@ -102,7 +120,7 @@ const CheckOut = () => {
       const response = await axios.post(
         `http://127.0.0.1:8000/api/v1/vouchers/apply/${totalPrice}`,
         {
-          event_id: ticketId,
+          event_id: eventId,
           user_id: userID,
           code: voucherCode,
           totalAmount: totalPrice,
@@ -165,7 +183,7 @@ const CheckOut = () => {
       discount_code: voucherCode || null,
       amount: parseFloat(ticketData.totalPrice).toFixed(2),
     };
-console.log("ádfd",paymentData)
+    console.log("ádfd", paymentData)
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/clients/payment/process",
@@ -195,8 +213,8 @@ console.log("ádfd",paymentData)
       setIsProcessing(false); // End processing
     }
 
-      setIsProcessing(false);
-    }
+    setIsProcessing(false);
+  }
 
   return (
     <div className="mt-36 mx-4">
@@ -398,11 +416,28 @@ console.log("ádfd",paymentData)
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
                     currency: "VND",
-                  }).format(ticketData.totalPrice)}{" "}
+                  }).format(totalPrice)}{" "}
                 </p>
               </section>
             </div>
+            <div>
+              {/* Khi nhấn vào, SVG sẽ hiện ra */}
+              <span className="text-[#9D9EA2]" onClick={handleToggleSvg}>
+                Mã giảm giá có thể sử dụng
+              </span>
 
+              {/* SVG chỉ hiển thị khi state isSvgVisible là true */}
+              {isSvgVisible && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 10"
+                  stroke="currentColor"
+                >
+                  {/* Nội dung SVG */}
+                </svg>
+              )}
+            </div>
             <div className="border-b flex flex-col gap-y-3">
               <label className="text-sm text-[#9D9EA2]">Áp dụng voucher</label>
               <div className="lg:flex items-center gap-x-3">
@@ -433,7 +468,7 @@ console.log("ádfd",paymentData)
                 {new Intl.NumberFormat("vi-VN", {
                   style: "currency",
                   currency: "VND",
-                }).format(ticketData.totalPrice)}{" "}
+                }).format(totalPrice)}{" "}
               </span>
             </button>
           </div>

@@ -23,6 +23,11 @@ class VoucherRepository
         return $this->voucher->find($id);
     }
 
+    public function findByEvent($id)
+    {
+        return $this->voucher->where('event_id', $id)->get();
+    }
+
     public function findByCode($code)
     {
         return $this->voucher->where('code', $code)->first();

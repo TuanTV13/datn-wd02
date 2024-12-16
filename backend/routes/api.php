@@ -129,6 +129,7 @@ Route::prefix('v1')->group(function () {
     });
     Route::post('/apply-discount', [PaymentController::class, 'applyDiscount']);
     Route::post('vouchers/apply/{totalPrice}', [VoucherController::class, 'apply']);
+    Route::get('vouchers/{id}/findByEvent', [VoucherController::class, 'voucherByEvent']);
     Route::get('vouchers', [VoucherController::class, 'index']);
     Route::prefix('vouchers')->middleware(['check.jwt', 'check.permission:manage-vouchers'])->group(function () {
         Route::post('create', [VoucherController::class, 'create']);

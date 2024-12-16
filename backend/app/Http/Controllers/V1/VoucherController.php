@@ -49,6 +49,13 @@ class VoucherController extends Controller
         }
     }
 
+    public function voucherByEvent($id)
+    {
+        $vouchers = $this->voucherRepository->findByEvent($id);
+
+        return response()->json($vouchers);
+    }
+
     public function create(StoreVoucherRequest $request)
     {
         DB::beginTransaction();

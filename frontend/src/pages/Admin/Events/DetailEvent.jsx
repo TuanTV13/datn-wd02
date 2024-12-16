@@ -201,7 +201,7 @@ const DetailEvents = () => {
       })
       .catch((error) => {
         console.error("Lỗi khi check-in:", error);
-        toast.error(error.response.data.message);
+        toast.error(error.response.data.error);
       });
   };
 
@@ -237,7 +237,7 @@ const DetailEvents = () => {
           console.log("Check-in thành công:", response);
         })
         .catch((error) => {
-          toast.error(error);
+          toast.error("Lỗi");
           console.error("Lỗi khi check-in:", error); // Xử lý lỗi nếu có
         });
     } else {
