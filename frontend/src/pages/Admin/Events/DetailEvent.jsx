@@ -82,33 +82,33 @@ const DetailEvents = () => {
 
     return () => clearInterval(interval);
   }, []);
-  const handleAddIp = async () => {
-    if (!subnet) {
-      toast.error("Vui lòng nhập địa chỉ IP subnet.");
-      return;
-    }
+  // const handleAddIp = async () => {
+  //   if (!subnet) {
+  //     toast.error("Vui lòng nhập địa chỉ IP subnet.");
+  //     return;
+  //   }
 
-    setLoading(true);
-    try {
-      const response = await axios.post(
-        `http://127.0.0.1:8000/api/v1/events/${id}/add-ip`,
-        { subnet },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      toast.success("Địa chỉ IP đã được thêm thành công!");
-      setShowModal(false); // Đóng modal sau khi thành công
-    } catch (error) {
-      toast.error("Lỗi khi thêm địa chỉ IP. Vui lòng thử lại!");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   setLoading(true);
+  //   try {
+  //     const response = await axios.post(
+  //       `http://127.0.0.1:8000/api/v1/events/${id}/add-ip`,
+  //       { subnet },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+  //     toast.success("Địa chỉ IP đã được thêm thành công!");
+  //     setShowModal(false); // Đóng modal sau khi thành công
+  //   } catch (error) {
+  //     toast.error("Lỗi khi thêm địa chỉ IP. Vui lòng thử lại!");
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleStatusChange = async (currentStatus) => {
     const token = localStorage.getItem("access_token");
     const headers = {
@@ -196,8 +196,10 @@ const DetailEvents = () => {
       )
       .then((response) => {
         setShowCheckInPopup(false); // Đóng popup sau khi check-in thành công
-        setReload(!reload);
         toast.success(" Check-in thành công!");
+
+        setReload(!reload);
+
       })
       .catch((error) => {
         console.error("Lỗi khi check-in:", error);
@@ -232,8 +234,9 @@ const DetailEvents = () => {
         )
         .then((response) => {
           setShowCheckInPopup(false); // Đóng popup sau khi check-in thành công
-          setReload(!reload);
+
           toast.success("Check-in thành công!"); // Thông báo check-in thành công
+          setReload(!reload);
           console.log("Check-in thành công:", response);
         })
         .catch((error) => {
@@ -338,7 +341,7 @@ const DetailEvents = () => {
       </h2>
       <hr className="border-t-2 border-gray-300 mb-6" />
 
-      {}
+      { }
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6 p-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-transparent bg-clip-text shadow-xl rounded-lg">
         {data.event.name}
       </h1>
@@ -356,7 +359,7 @@ const DetailEvents = () => {
           </span>
         </span>
 
-        {}
+        { }
         {data.event.status !== "completed" && (
           <>
             {/* Không hiển thị gì nếu trạng thái là confirmed mà thời gian thực cách thời gian diễn ra sự kiện quá 2 tiếng */}
@@ -456,14 +459,14 @@ const DetailEvents = () => {
           Quản lý vé và voucher
         </button>
 
-        <button
+        {/* <button
           onClick={() => setShowModal(true)}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
         >
           Thêm địa chỉ IP check-in
-        </button>
+        </button> */}
 
-        {showModal && (
+        {/* {showModal && (
           <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full ">
               <h2 className="text-xl font-semibold mb-4">
@@ -505,7 +508,7 @@ const DetailEvents = () => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
         <button
           onClick={() => setShowUpdateEvent(!showUpdateEvent)}
           className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300"
@@ -565,8 +568,8 @@ const DetailEvents = () => {
             {data.event.event_type === "offline"
               ? "Trực tiếp"
               : data.event.event_type === "online"
-              ? "Trực tuyến"
-              : "Không xác định"}
+                ? "Trực tuyến"
+                : "Không xác định"}
           </p>
         </div>
 
@@ -734,11 +737,10 @@ const DetailEvents = () => {
                           {user.name}
                         </td>
                         <td
-                          className={`border border-gray-300 px-4 py-2 ${
-                            user.pivot.checked_in === 1
+                          className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1
                               ? "text-green-500"
                               : "text-red-500"
-                          }`}
+                            }`}
                         >
                           {user.pivot.checked_in === 1
                             ? "Đã check-in"
@@ -757,11 +759,10 @@ const DetailEvents = () => {
                                     : "checkin",
                               })
                             }
-                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${
-                              user.pivot.checked_in === 1
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] ${user.pivot.checked_in === 1
                                 ? "bg-red-500 text-white hover:bg-red-600"
                                 : "bg-green-500 text-white hover:bg-green-600"
-                            }`}
+                              }`}
                           >
                             {user.pivot.checked_in === 1
                               ? "Hủy check-in"
@@ -897,7 +898,7 @@ const DetailEvents = () => {
           </Button>
         </div>
 
-        {}
+        { }
         {isTicketForm && !showStatistics && !showUsersStatistics && (
           <AddTicket eventId={eventId} />
         )}
@@ -991,12 +992,15 @@ const DetailEvents = () => {
 
             <hr />
             <br />
-            <button
-              onClick={() => setShowCheckInPopup(true)} // Mở popup mà không cần mã vé
-              className="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] bg-green-500 text-white hover:bg-green-600"
-            >
-              Check-in
-            </button>
+            {data.event.status === "checkin" && (
+              <button
+                onClick={() => setShowCheckInPopup(true)} // Mở popup mà không cần mã vé
+                className="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-[150px] bg-green-500 text-white hover:bg-green-600"
+              >
+                Check-in
+              </button>
+            )}
+
             <br />
             <br />
 
@@ -1035,11 +1039,10 @@ const DetailEvents = () => {
                           {user.name}
                         </td>
                         <td
-                          className={`border border-gray-300 px-4 py-2 ${
-                            user.pivot.checked_in === 1
+                          className={`border border-gray-300 px-4 py-2 ${user.pivot.checked_in === 1
                               ? "text-green-500"
                               : "text-red-500"
-                          }`}
+                            }`}
                         >
                           {user.pivot.checked_in === 1
                             ? "Đã check-in"
@@ -1121,21 +1124,19 @@ const DetailEvents = () => {
               <h2 className="text-2xl font-bold mb-4">Check-in</h2>
               <div className="flex space-x-4 mb-4 justify-center">
                 <button
-                  className={`px-4 py-2 rounded ${
-                    checkInMode === "code"
+                  className={`px-4 py-2 rounded ${checkInMode === "code"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-700"
-                  }`}
+                    }`}
                   onClick={() => handleSwitchCheckInMode("code")}
                 >
                   Nhập mã vé
                 </button>
                 <button
-                  className={`px-4 py-2 rounded ${
-                    checkInMode === "qr"
+                  className={`px-4 py-2 rounded ${checkInMode === "qr"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-700"
-                  }`}
+                    }`}
                   onClick={() => handleSwitchCheckInMode("qr")}
                 >
                   Quét mã QR

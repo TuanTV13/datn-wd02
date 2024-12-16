@@ -172,7 +172,8 @@ class EventController extends Controller
     public function filter(Request $request)
     {
 
-        $query = $this->eventRepository->query();
+        $query = $this->eventRepository->query()->where('status', 'confirmed')
+        ->orWhere('status', 'checkin');
 
         if ($request->has('name')) {
             $query->where('name', 'like', '%' . $request->input('name') . '%');
@@ -241,7 +242,7 @@ class EventController extends Controller
         $query = $this->eventRepository->query();
 
         if ($request->has('name') && $request->input('name') !== '') {
-            $query->where('name', 'like', '%' . $request->input('name') . '%')->where('status', 'confirmed');
+            $query->where('name', 'like', '%' . $request->input('name') . '%')->where('status', 'confirmed')->orWhere('status', 'checkin');
         }
 
         $perPage = $request->input('per_page', 10);
