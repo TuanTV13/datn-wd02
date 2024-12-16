@@ -157,9 +157,9 @@ class EventController extends Controller
             }
 
             // Kiểm tra và xử lý display_header
-            if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'] ?? 0)) {
-                return $validateEventHeader;
-            }
+            // if ($validateEventHeader = $this->validateEventDisplayHeader($data['display_header'] ?? 0)) {
+            //     return $validateEventHeader;
+            // }
 
             if ($request->hasFile('thumbnail')) {
                 $thumbnailUrl = $this->uploadThumbnail($request->file('thumbnail'));

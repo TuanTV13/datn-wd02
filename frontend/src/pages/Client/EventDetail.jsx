@@ -17,7 +17,7 @@ const EventDetail = () => {
   const [ticketQuantity, setTicketQuantity] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [similarEvents, setSimilarEvents] = useState([]);
-
+const [reload, setReload] = useState(false);
   const [selectedZones, setSelectedZones] = useState({});
   const [quantity, setQuantity] = useState(1);
  
