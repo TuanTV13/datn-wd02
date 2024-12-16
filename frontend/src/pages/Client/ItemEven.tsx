@@ -72,7 +72,6 @@ const ItemEven = () => {
       api
         .get(`/clients/events/${selectedEventId}`)
         .then((response) => {
-          console.log(response.data.data);
           setEvent(response.data.data); // Lưu chi tiết sự kiện vào state
         })
         .catch((error) => {
@@ -117,7 +116,7 @@ const ItemEven = () => {
       }
 
       if (tickets.length > 0) {
-        const ticketData = { tickets: tickets, totalPrice: totalAmount };
+        const ticketData = { eventId: event?.id,tickets: tickets, totalPrice: totalAmount };
         console.log(ticketData);
         navigate("/checkout", { state: ticketData });
       } else {

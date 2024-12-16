@@ -7,7 +7,7 @@ const ListTicket = () => {
   const { tickets, onDel, onVerify, events } = useContext(TicketsCT);
   const [StatusList] = useState(Object.values(StatusType));
   const [filteredTickets, setFilteredTickets] = useState(tickets);
-  console.log(filteredTickets)
+  console.log(filteredTickets);
   // Filters
   const [searchName, setSearchName] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -65,8 +65,6 @@ const ListTicket = () => {
     tickets,
   ]);
 
-
-
   const getEventName = (eventId: number | string) => {
     const event = events.find((event) => event.id === eventId);
     return event ? event.name : "Tên sự kiện không tìm thấy";
@@ -82,7 +80,10 @@ const ListTicket = () => {
     setCurrentPage(page);
   };
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState({ ticketId: null, priceId: null });
+  const [deleteTarget, setDeleteTarget] = useState({
+    ticketId: null,
+    priceId: null,
+  });
 
   const [showVerifyConfirm, setShowVerifyConfirm] = useState(false);
   const [verifyTarget, setVerifyTarget] = useState(null);
@@ -111,7 +112,6 @@ const ListTicket = () => {
     setShowDeleteConfirm(false);
     setDeleteTarget({ ticketId: null, priceId: null });
   };
-
 
   return (
     <div className="w-full">
@@ -177,7 +177,7 @@ const ListTicket = () => {
             onChange={(e) => setSelectedTicketType(e.target.value)}
           >
             <option value="">Chọn loại vé</option>
-            
+
             {Object.values(TicketType).map((type) => (
               <option key={type} value={type}>
                 {type}
@@ -273,7 +273,9 @@ const ListTicket = () => {
                               </svg>
                             </Link>
                             <button
-                              onClick={() => confirmDelete(item.id, priceItem.id)}
+                              onClick={() =>
+                                confirmDelete(item.id, priceItem.id)
+                              }
                               className="text-red-500"
                             >
                               <svg
@@ -284,9 +286,7 @@ const ListTicket = () => {
                                 <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"></path>
                               </svg>
                             </button>
-                            <button
-                              onClick={() => confirmVerify(item.id)}
-                            >
+                            <button onClick={() => confirmVerify(item.id)}>
                               <svg
                                 className="w-[20px] h-[20px] fill-gray-500"
                                 viewBox="0 0 512 512"
@@ -315,7 +315,6 @@ const ListTicket = () => {
           </tbody>
         </table>
 
-        
         <div className="flex justify-center space-x-2 mt-4 pb-10">
           <LeftOutlined
             className="cursor-pointer"
@@ -354,50 +353,50 @@ const ListTicket = () => {
         </div>
       </div>
       {showDeleteConfirm && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-              <h3 className="text-xl font-bold mb-4">Xác nhận xóa vé</h3>
-              <p className="mb-6">Bạn có chắc chắn muốn xóa vé này không?</p>
-              <div className="flex justify-end space-x-4">
-                <button
-                  className="bg-gray-300 px-4 py-2 rounded-md"
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
-                  Hủy
-                </button>
-                <button
-                  className="bg-red-500 text-white px-4 py-2 rounded-md"
-                  onClick={handleDelete}
-                >
-                  Xóa
-                </button>
-              </div>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 className="text-xl font-bold mb-4">Xác nhận xóa vé</h3>
+            <p className="mb-6">Bạn có chắc chắn muốn xóa vé này không?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="bg-gray-300 px-4 py-2 rounded-md"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded-md"
+                onClick={handleDelete}
+              >
+                Xóa
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-{showVerifyConfirm && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-              <h3 className="text-xl font-bold mb-4">Xác nhận xác minh vé</h3>
-              <p className="mb-6">Bạn có chắc chắn muốn xác minh vé này không?</p>
-              <div className="flex justify-end space-x-4">
-                <button
-                  className="bg-gray-300 px-4 py-2 rounded-md"
-                  onClick={() => setShowVerifyConfirm(false)}
-                >
-                  Hủy
-                </button>
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                  onClick={handleVerify}
-                >
-                  Xác minh
-                </button>
-              </div>
+      {showVerifyConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 className="text-xl font-bold mb-4">Xác nhận xác minh vé</h3>
+            <p className="mb-6">Bạn có chắc chắn muốn xác minh vé này không?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="bg-gray-300 px-4 py-2 rounded-md"
+                onClick={() => setShowVerifyConfirm(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                onClick={handleVerify}
+              >
+                Xác minh
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
     </div>
   );
 };

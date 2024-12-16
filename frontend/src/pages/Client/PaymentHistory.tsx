@@ -96,7 +96,10 @@ const PaymentHistory = ({ userId }: { userId: number }) => {
                       {event.event_name}
                     </td>
                     <td className="border border-gray-400 p-2 text-center">
-                      {event.total_amount}
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(event.total_amount)}{" "}
                     </td>
                     <td className="border border-gray-400 p-2 text-center">
                       {event.payment_method}
