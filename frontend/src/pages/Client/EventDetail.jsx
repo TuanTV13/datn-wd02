@@ -148,6 +148,7 @@ const [reload, setReload] = useState(false);
     if (tickets.length > 0) {
       // Tạo dữ liệu để gửi sang trang checkout
       const ticketData = {
+        eventId: id,
         tickets: tickets,
         totalPrice: totalAmount,
       };
