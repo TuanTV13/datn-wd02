@@ -107,7 +107,7 @@ const Banner = () => {
     }
 
     if (tickets.length > 0) {
-      const ticketData = { tickets: tickets, totalPrice: totalAmount };
+      const ticketData = { eventId: event?.id,tickets: tickets, totalPrice: totalAmount };
       console.log(ticketData);
       navigate("/checkout", { state: ticketData });
     } else {
