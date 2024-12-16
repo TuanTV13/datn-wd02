@@ -11,7 +11,7 @@ const UserChangePassword = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Gọi API GET để lấy thông tin người dùng và lưu id
+
   useEffect(() => {
     axiosInstance
       .get("/user", {})
@@ -25,7 +25,7 @@ const UserChangePassword = () => {
       });
   }, []);
 
-  // Hàm xử lý đổi mật khẩu
+  
   const handleSubmit = (values) => {
     if (values.confirm_password !== values.new_password) {
       notification.error({
@@ -41,7 +41,7 @@ const UserChangePassword = () => {
       return;
     }
 
-    // Gọi API để thay đổi mật khẩu
+    
     axiosInstance
       .put(`/user/change-password/${userId}`, {
         password: values.password,
