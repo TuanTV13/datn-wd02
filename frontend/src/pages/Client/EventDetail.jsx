@@ -8,7 +8,8 @@ import { toast } from "react-toastify";
 const EventDetail = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
- 
+  const [errorPopup, setErrorPopup] = useState(""); // State để lưu thông báo lỗi
+
   const [selectedVIPTicket, setSelectedVIPTicket] = useState(null);
   const [vipTicketQuantity, setVIPTicketQuantity] = useState(1);
   const [selectedRegularTicket, setSelectedRegularTicket] = useState(null);
@@ -373,124 +374,148 @@ const [reload, setReload] = useState(false);
 
       {/* Hiển thị Popup nếu showPopup là true */}
       {showPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-[700px]">
-            <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg w-[700px]">
+      <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
 
-            {/* Nhóm vé VIP */}
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-indigo-700 mb-4">Vé VIP</h3>
-              <select
-                value={selectedVIPTicket?.id || ""} // Giữ vé VIP đã chọn
-                onChange={(e) => {
-                  const selected = event.tickets.find(
-                    (ticket) => ticket.id === parseInt(e.target.value)
-                  );
-                  setSelectedVIPTicket(selected);
-                  setVIPTicketQuantity(1); // Đặt lại số lượng vé VIP khi chọn vé mới
-                }}
-                className="border p-2 rounded w-full"
-              >
-                <option value="">Chọn khu vực</option>
-                {event.tickets
-                  .filter((ticket) => ticket?.ticket?.ticket_type === "VIP")
-                  .map((ticket) => (
-                    <option key={ticket.id} value={ticket.id}>
-                      Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND -
-                      Số lượng còn lại: {ticket.sold_quantity}
-                    </option>
-                  ))}
-              </select>
+      {/* Nhóm vé VIP */}
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-indigo-700 mb-4">Vé VIP</h3>
+        <select
+          value={selectedVIPTicket?.id || ""}
+          onChange={(e) => {
+            const selected = event.tickets.find(
+              (ticket) => ticket.id === parseInt(e.target.value)
+            );
+            setSelectedVIPTicket(selected);
+            setVIPTicketQuantity(1);
+          }}
+          className="border p-2 rounded w-full"
+        >
+          <option value="">Chọn khu vực</option>
+          {event.tickets
+            .filter((ticket) => ticket?.ticket?.ticket_type === "VIP")
+            .map((ticket) => (
+              <option key={ticket.id} value={ticket.id}>
+                Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND - Số
+                lượng còn lại: {ticket.sold_quantity}
+              </option>
+            ))}
+        </select>
 
-              {/* Hiển thị input số lượng khi vé VIP được chọn */}
-              {selectedVIPTicket && (
-                <div className="mt-4">
-                  <label className="block text-sm font-bold mb-2">
-                    Số lượng
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max={selectedVIPTicket.purchase_limit}
-                    // max={Math.min(10, selectedVIPTicket.quantity - selectedVIPTicket.sold_quantity)}
-                    value={vipTicketQuantity || 1}
-                    onChange={(e) => setVIPTicketQuantity(e.target.value)}
-                    className="border p-2 rounded w-full"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Nhóm vé Thường */}
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-indigo-700 mb-4">
-                Vé Thường
-              </h3>
-              <select
-                value={selectedRegularTicket?.id || ""} // Giữ vé Thường đã chọn
-                onChange={(e) => {
-                  const selected = event.tickets.find(
-                    (ticket) => ticket.id === parseInt(e.target.value)
-                  );
-                  setSelectedRegularTicket(selected);
-                  setRegularTicketQuantity(1); // Đặt lại số lượng vé Thường khi chọn vé mới
-                }}
-                className="border p-2 rounded w-full"
-              >
-                <option value="">Chọn khu vực</option>
-                {event.tickets
-                  .filter((ticket) => ticket?.ticket?.ticket_type === "Thường")
-                  .map((ticket) => (
-                    <option key={ticket.id} value={ticket.id}>
-                      Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND -
-                      Số lượng còn lại: {ticket.sold_quantity}
-                    </option>
-                  ))}
-              </select>
-
-              {/* Hiển thị input số lượng khi vé Thường được chọn */}
-              {selectedRegularTicket && (
-                <div className="mt-4">
-                  <label className="block text-sm font-bold mb-2">
-                    Số lượng
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max={selectedRegularTicket.purchase_limit}
-                    // max={Math.min(10, selectedRegularTicket.quantity - selectedRegularTicket.sold_quantity)}
-                    value={regularTicketQuantity}
-                    onChange={(e) => setRegularTicketQuantity(e.target.value)}
-                    className="border p-2 rounded w-full"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Nút Mua vé và Đóng */}
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={handleClosePopup}
-                className="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600"
-              >
-                Đóng
-              </button>
-
-              <button
-                onClick={handleBuyTicketClick}
-                className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
-                disabled={
-                  (!selectedVIPTicket && !selectedRegularTicket) ||
-                  (selectedVIPTicket && vipTicketQuantity < 1) ||
-                  (selectedRegularTicket && regularTicketQuantity < 1)
+        {/* Hiển thị input số lượng khi vé VIP được chọn */}
+        {selectedVIPTicket && (
+          <div className="mt-4">
+            <label className="block text-sm font-bold mb-2">Số lượng</label>
+            <input
+              type="number"
+              min="1"
+              max="6"
+              value={vipTicketQuantity || 1}
+              onChange={(e) => {
+                const quantity = parseInt(e.target.value, 10);
+                if (quantity > 5) {
+                  setErrorPopup("Số lượng vé VIP trong 1 giao dịch tối đa là 5.");
+                } else {
+                  setVIPTicketQuantity(quantity);
+                  setErrorPopup(null);
                 }
-              >
-                Mua vé
-              </button>
-            </div>
+              }}
+              className="border p-2 rounded w-full"
+            />
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Nhóm vé Thường */}
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-indigo-700 mb-4">Vé Thường</h3>
+        <select
+          value={selectedRegularTicket?.id || ""}
+          onChange={(e) => {
+            const selected = event.tickets.find(
+              (ticket) => ticket.id === parseInt(e.target.value)
+            );
+            setSelectedRegularTicket(selected);
+            setRegularTicketQuantity(1);
+          }}
+          className="border p-2 rounded w-full"
+        >
+          <option value="">Chọn khu vực</option>
+          {event.tickets
+            .filter((ticket) => ticket?.ticket?.ticket_type === "Thường")
+            .map((ticket) => (
+              <option key={ticket.id} value={ticket.id}>
+                Khu vực: {ticket?.zone?.name} - Giá: {ticket.price} VND - Số
+                lượng còn lại: {ticket.sold_quantity}
+              </option>
+            ))}
+        </select>
+
+        {/* Hiển thị input số lượng khi vé Thường được chọn */}
+        {selectedRegularTicket && (
+          <div className="mt-4">
+            <label className="block text-sm font-bold mb-2">Số lượng</label>
+            <input
+              type="number"
+              min="1"
+              max="11"
+              value={regularTicketQuantity || 1}
+              onChange={(e) => {
+                const quantity = parseInt(e.target.value, 10);
+                if (quantity > 10) {
+                  setErrorPopup("Số lượng vé Thường trong 1 giao dịch tối đa là 10.");
+                } else {
+                  setRegularTicketQuantity(quantity);
+                  setErrorPopup(null);
+                }
+              }}
+              className="border p-2 rounded w-full"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Nút Mua vé và Đóng */}
+      <div className="mt-6 flex justify-end space-x-4">
+        <button
+          onClick={handleClosePopup}
+          className="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600"
+        >
+          Đóng
+        </button>
+
+        <button
+          onClick={handleBuyTicketClick}
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+          disabled={
+            (!selectedVIPTicket && !selectedRegularTicket) ||
+            (selectedVIPTicket && vipTicketQuantity < 1) ||
+            (selectedRegularTicket && regularTicketQuantity < 1)
+          }
+        >
+          Mua vé
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Popup hiển thị lỗi */}
+{errorPopup && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-4 rounded-lg shadow-lg w-[400px] text-center">
+      <p className="text-red-500 font-bold mb-4">{errorPopup}</p>
+      <button
+        onClick={() => setErrorPopup(null)}
+        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      >
+        Đóng
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

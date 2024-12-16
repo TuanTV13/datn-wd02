@@ -282,10 +282,10 @@ class EventController extends Controller
     //         ];
     //     }
 
-    //     if ($newEndTime->lt($newStartTime->addHours(2))) {
+    //     if ($newEndTime->lt($newStartTime->addHours())) {
     //         return [
     //             'status' => false,
-    //             'message' => 'Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 2 giờ.'
+    //             'message' => 'Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 1 giờ.'
     //         ];
     //     }
 

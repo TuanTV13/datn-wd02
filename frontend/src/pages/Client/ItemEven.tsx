@@ -391,7 +391,7 @@ const ItemEven = () => {
       </div>
 
       {/* 3 */}
-      <div className="lg:w-[1400px] mx-auto sm:w-full mb:w-full flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px] mt-4 mb-4">
+      {/* <div className="lg:w-[1400px] mx-auto sm:w-full mb:w-full flex flex-col lg:mt-[10px] lg:pt-12 mb:pt-[39px] mt-4 mb-4">
         <strong className="lg:text-[36px] mb:text-[40px] lg:leading-[36px] mb:leading-[48px] xm:mt-5 ml-2">
           SỰ KIỆN ĐƯỢC ĐÁNH GIÁ CAO
         </strong>
@@ -500,7 +500,7 @@ const ItemEven = () => {
             {showRatedEvents ? "Ẩn bớt sự kiện" : "Xem tất cả sự kiện"}
           </button>
         </div>
-      </div>
+      </div> */}
       {/* Hiển thị Popup nếu showPopup là true */}
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
