@@ -108,7 +108,7 @@ const EventListing = () => {
       setFilteredEvents(data); // Cập nhật danh sách sự kiện
     } catch (err) {
       toast.error("Không tìm thấy sự kiện");
-      setFilteredEvents([])
+      setFilteredEvents([]);
     }
   };
   const [Inputlocation, setLocation] = useState("");
@@ -130,11 +130,11 @@ const EventListing = () => {
     return div.textContent || div.innerText || "";
   };
 
-  const [totalPages, setTotalPages] = useState(Math.ceil(events.length / 5));
+  const [totalPages, setTotalPages] = useState(Math.ceil(events.length / 6));
   useEffect(() => {
-    setTotalPages(Math.ceil(filteredEvents.length / 5)); // Cập nhật lại tổng số trang khi có sự kiện lọc
+    setTotalPages(Math.ceil(filteredEvents.length / 6)); // Cập nhật lại tổng số trang khi có sự kiện lọc
   }, [filteredEvents]);
-  const eventsPerPage = 5; // Số sự kiện trên mỗi trang
+  const eventsPerPage = 6; // Số sự kiện trên mỗi trang
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
   const [categoryId, setCategoryId] = useState<any[]>([]);
 
@@ -186,6 +186,8 @@ const EventListing = () => {
         return { text: "Trạng thái không xác định", color: "bg-gray-300" };
     }
   };
+
+  const [isGridView, setIsGridView] = useState(false);
   return (
     <div className="lg:mx-10 mt-36">
       <div className="flex flex-col lg:flex-row">
@@ -343,49 +345,76 @@ const EventListing = () => {
         </div>
         {/* <!-- Main Content --> */}
         <div className="w-full lg:w-3/4 p-4">
-          <div className=" mb-4 ">
-            <div className="flex justify-between space-x-2  items-center">
-              <h2 className="text-3xl font-semibold">Danh sách sự kiện</h2>
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setIsGridView(false)}
+                className={`p-2 rounded shadow flex items-center justify-center w-[40px] h-[40px] ${
+                  !isGridView
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700"
+                }`}
+              >
+                <i className="fas fa-bars"></i>
+              </button>
+              <button
+                onClick={() => setIsGridView(true)}
+                className={`p-2 rounded shadow flex items-center justify-center w-[40px] h-[40px] ${
+                  isGridView
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700"
+                }`}
+              >
+                <i className="fas fa-th"></i>
+              </button>
             </div>
           </div>
+
           <div className="border-b-[1px] border-gray-300 mb-4"></div>
           {/* <!-- Items --> */}
           <div className="space-y-4 ">
             {currentEvents.length > 0 ? (
-              currentEvents.map((item) => (
-                <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
-                  <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
-                    <Link to={`/event-detail/${item.id}`}>
-                      <div className="relative">
-                        <img
-                          alt={item.name}
-                          className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
-                          src={item.thumbnail}
-                        />
-                        <span  className={`absolute top-2 left-2 text-white text-sm font-semibold px-2 py-1 rounded ${getStatusColor(item.status).color}`}>
-                        {getStatusColor(item.status).text}
-                        </span>
+              isGridView ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {currentEvents.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-white p-4 rounded-[20px] shadow border hover:border-[#007BFF]"
+                    >
+                      <div className="relative overflow-hidden">
+                        <Link to={`/event-detail/${item.id}`}>
+                          <div className="relative">
+                            <img
+                              alt={item.name}
+                              className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
+                              src={item.thumbnail}
+                            />
+                            <span
+                              className={`absolute top-2 left-2 text-white text-sm font-semibold px-2 py-1 rounded ${
+                                getStatusColor(item.status).color
+                              }`}
+                            >
+                              {getStatusColor(item.status).text}
+                            </span>
+                          </div>
+                        </Link>
                       </div>
-                    </Link>
-                  </div>
-
-                  <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
-                    <div className="lg:flex">
-                      <div className="flex flex-col justify-between lg:w-2/3">
+                      <div className="mt-2">
                         <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer line-clamp-1">
                           <Link to={`/event-detail/${item.id}`}>
                             {item.name}
                           </Link>
                         </h3>
-                        <div className="flex items-center text-gray-600 mb-1 mt-1">
+                        <div className="flex items-center text-gray-600 mb-2 mt-2">
                           <i className="fas fa-clock mr-2"></i>
                           Thời gian bắt đầu: {item.start_time}
                         </div>
-                        <div className="flex items-center text-gray-600 mb-1 mt-1">
+                        <div className="flex items-center text-gray-600 mb-2 mt-2">
                           <i className="fas fa-clock mr-2"></i>
                           Thời gian kết thúc: {item.end_time}
                         </div>
-                        <div className="flex items-center text-gray-600 mb-1 mt-1 line-clamp-1">
+
+                        <div className="flex items-center text-gray-600 mb-2 mt-2 line-clamp-1">
                           <i className="fa-solid fa-user mr-2"></i>
                           Diễn giả:
                           {item.speakers?.length > 0 ? (
@@ -399,13 +428,15 @@ const EventListing = () => {
                             <span className="ml-1">Không có diễn giả</span>
                           )}
                         </div>
-                        <div className="flex items-center text-gray-600 mb-1 mt-1">
+
+                        <div className="flex items-center text-gray-600 mb-2 mt-2 line-clamp-1">
                           <i className="fas fa-map-marker-alt mr-2"></i>
                           Địa điểm: {item.location}
                         </div>
                         <div
-                          className={`flex items-center text-gray-600 mb-1 line-clamp-1`}
+                          className={`flex items-center text-gray-600 mb-2 line-clamp-1`}
                         >
+                          <i className="fas fa-align-left mr-2"></i>
                           Mô tả: {stripHtmlTags(item.description)}
                         </div>
 
@@ -416,8 +447,7 @@ const EventListing = () => {
                           Xem thêm
                         </Link>
                       </div>
-
-                      <div className="lg:ml-5 lg:mt-28">
+                      <div className="mt-2">
                         <button className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
                           <Link to={`/event-detail/${item.id}`}>
                             Xem chi tiết
@@ -425,13 +455,98 @@ const EventListing = () => {
                         </button>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))
+              ) : (
+                currentEvents.map((item) => (
+                  <div className="bg-white p-4 rounded-[20px] shadow flex flex-col lg:flex-row border hover:border-[#007BFF]">
+                    <div className="w-full lg:w-1/3 relative mb-4 lg:mb-0 overflow-hidden">
+                      <Link to={`/event-detail/${item.id}`}>
+                        <div className="relative">
+                          <img
+                            alt={item.name}
+                            className="rounded-[20px] h-[180px] w-full object-cover transition-all duration-300 hover:rounded-none hover:scale-110"
+                            src={item.thumbnail}
+                          />
+                          <span
+                            className={`absolute top-2 left-2 text-white text-sm font-semibold px-2 py-1 rounded ${
+                              getStatusColor(item.status).color
+                            }`}
+                          >
+                            {getStatusColor(item.status).text}
+                          </span>
+                        </div>
+                      </Link>
+                    </div>
+
+                    <div className="w-full lg:w-2/3 pl-5 flex flex-col justify-between">
+                      <div className="lg:flex">
+                        <div className="flex flex-col justify-between lg:w-2/3">
+                          <h3 className="text-lg font-semibold hover:text-[#007BFF] cursor-pointer line-clamp-1">
+                            <Link to={`/event-detail/${item.id}`}>
+                              {item.name}
+                            </Link>
+                          </h3>
+                          <div className="flex items-center text-gray-600 mb-1 mt-1">
+                            <i className="fas fa-clock mr-2"></i>
+                            Thời gian bắt đầu: {item.start_time}
+                          </div>
+                          <div className="flex items-center text-gray-600 mb-1 mt-1">
+                            <i className="fas fa-clock mr-2"></i>
+                            Thời gian kết thúc: {item.end_time}
+                          </div>
+                          <div className="flex items-center text-gray-600 mb-1 mt-1 line-clamp-1">
+                            <i className="fa-solid fa-user mr-2"></i>
+                            Diễn giả:
+                            {item.speakers?.length > 0 ? (
+                              item.speakers?.map((speaker, index) => (
+                                <span className="ml-1 ">
+                                  {speaker.name}
+                                  {index < item.speakers.length - 1 && " , "}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="ml-1">Không có diễn giả</span>
+                            )}
+                          </div>
+                          <div className="flex items-center text-gray-600 mb-1 mt-1">
+                            <i className="fas fa-map-marker-alt mr-2"></i>
+                            Địa điểm: {item.location}
+                          </div>
+                          <div
+                            className={`flex items-center text-gray-600 mb-1 line-clamp-1`}
+                          >
+                            <i className="fas fa-align-left mr-2"></i>
+                            Mô tả: {stripHtmlTags(item.description)}
+                          </div>
+
+                          <Link
+                            to={`/event-detail/${item.id}`}
+                            className="text-blue-500 "
+                          >
+                            Xem thêm
+                          </Link>
+                        </div>
+
+                        <div className="lg:ml-5 lg:mt-28">
+                          <button className="w-[100%] mr-2 px-8 py-3 border rounded-[20px] text-blue-500 border-blue-500 hover:bg-[#007BFF] hover:text-white">
+                            <Link to={`/event-detail/${item.id}`}>
+                              Xem chi tiết
+                            </Link>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )
             ) : (
-              <p className="text-center text-gray-500 mt-4">
-                Không tìm thấy sự kiện nào phù hợp.
-              </p>
+              <div className="text-center text-gray-500 mt-8">
+                <i className="fas fa-calendar-times text-4xl mb-2"></i>
+                <p className="text-lg font-semibold">
+                  Không tìm thấy sự kiện nào phù hợp.
+                </p>
+              </div>
             )}
             <div className="flex items-center justify-center mt-4 space-x-2">
               <button
