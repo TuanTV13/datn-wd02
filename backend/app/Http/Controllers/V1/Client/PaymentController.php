@@ -460,11 +460,11 @@ class PaymentController extends Controller
             }
 
             Log::info('VNPay giao dịch thất bại hoặc hủy', ['response_code' => $responseCode]);
-            return response()->json(['message' => 'Thanh toán thất bại'], 400);
+            return redirect('http://localhost:5173/order-detail/' . $transaction_id);
         }
 
         Log::info('VNPay giao dịch không thành công, response_code không khớp', ['response_code' => $responseCode]);
-        return response()->json(['message' => 'Không rõ trạng thái giao dịch'], 400);
+        return redirect('http://localhost:5173/order-detail/' . $transaction_id);
     }
 
     // Xác thực thành công khi thanh toán bằng Paypal.
