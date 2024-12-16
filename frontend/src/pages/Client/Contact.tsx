@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const Contact = () => {
   return (
     <div className="mt-36">
-      <div className="bg-gradient-to-r from-[#007BFF] to-[#F5F5F5] h-[100px]">
+      <div className="bg-gradient-to-r from-[#b9faa9] to-[#007BFF] h-[100px]">
         <div className="flex items-center p-4">
           <span className="text-black"><Link to={`/`}>Trang chủ</Link> </span>
           <span className="mx-2 text-gray-500">/</span>

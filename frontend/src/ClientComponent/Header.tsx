@@ -277,7 +277,7 @@ const Header = () => {
                 <ul className="absolute bg-gray-100 shadow-lg mt-2 rounded-lg p-2 w-[230px]">
                   <li className="flex hover:bg-gray-300">
                     <Link
-                      to={``}
+                      to={`/ticketing`}
                       className="block px-4 py-2"
                       onClick={closeMenu} // Đóng menu khi chọn mục
                     >
