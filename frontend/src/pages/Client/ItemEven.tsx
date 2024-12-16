@@ -49,7 +49,6 @@ const ItemEven = () => {
     if (normalizedFilter === "mới nhất") return true;
     return normalizedProvince === normalizedFilter;
   });
-
   const [event, setEvent] = useState<Event | null>(null);
   const [selectedVIPTicket, setSelectedVIPTicket] = useState<Tickets | null>(
     null
@@ -203,6 +202,9 @@ const ItemEven = () => {
                         <span className="text-gray-500">Không có diễn giả</span>
                       )}
                     </p>
+                    <p className="mt-3 text-gray-500 text-sm">
+                      Sự kiện diễn ra : {event.event_type}
+                    </p>
                   </div>
 
                   <div className="text-xs mb-2">
@@ -321,8 +323,11 @@ const ItemEven = () => {
                         <span className="text-gray-500">Không có diễn giả</span>
                       )}
                     </p>
+                    <p className="mt-2 line-clamp-1">
+                      Sự kiện diễn ra: {event.event_type}
+                    </p>
                   </div>
-                  <div className="text-xs mb-2 mt-2">
+                  <div className="text-xs mb-2 mt-5">
                     <button
                       onClick={() => handleShowPopup(event.id)}
                       className="mt-2 w-[100px] h-[30px] bg-blue-400 hover:bg-blue-700 text-white font-semibold rounded-md mx-auto block"
@@ -419,7 +424,7 @@ const ItemEven = () => {
                       {event.name}
                     </Link>
                   </p>
-                  <p className="mt-2">Thành phố tổ chức: {event.province}</p>
+                  <p className="mt-2 line-clamp-1">Thành phố tổ chức: {event.province}</p>
                   <p className="mt-2 line-clamp-1">
                     Diễn giả:{" "}
                     {event.speakers && JSON.parse(event.speakers).length > 0 ? (
@@ -433,6 +438,7 @@ const ItemEven = () => {
                       <span className="text-gray-500">Không có diễn giả</span>
                     )}
                   </p>
+                  <p className="mt-2">Sự kiện diễn ra: {event.event_type}</p>
                 </div>
                 <div className="text-xs mb-2 mt-2">
                   <button
