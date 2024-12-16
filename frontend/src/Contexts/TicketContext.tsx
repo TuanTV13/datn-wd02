@@ -50,7 +50,6 @@ const TicketsContext = ({ children }: Props) => {
   }, []);
 
   const onDel = async (id: number, seatId: number) => {
-    if (confirm("Bạn có muốn xóa không?")) {
       try {
         await deleteTicket(id, seatId);
         setTickets((prevTickets) =>
@@ -62,7 +61,6 @@ const TicketsContext = ({ children }: Props) => {
         console.error("Error deleting ticket:", error);
         toast.error("Lỗi khi xóa vé");
       }
-    }
   };
 
   const onAdd = async (ticket: Tickets) => {
@@ -126,7 +124,7 @@ const TicketsContext = ({ children }: Props) => {
       toast.success("Xác nhận thành công");
     } catch (error) {
       console.error("Error verifying ticket:", error);
-      toast.error("Lỗi khi xác nhận vé");
+      toast.error("Lỗi khi xác nhận vé:");
     }
   };
 

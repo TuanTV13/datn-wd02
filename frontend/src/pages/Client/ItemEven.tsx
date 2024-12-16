@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { HomeCT } from "../../Contexts/HomeContext";
 import api from "../../api_service/api";
+import { toast } from "react-toastify";
 
 interface Tickets {
   id: number;
@@ -32,6 +33,7 @@ const ItemEven = () => {
   const [filter, setFilter] = useState("Mới nhất");
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [showFeatured, setShowFeatured] = useState(false);
+  const [showRatedEvents, setShowRatedEvents] = useState(false);
   const { upcomingEvents, featuredEvents, topRatedEvents } = useContext(HomeCT);
 
   // Lấy danh sách các thành phố duy nhất từ trường location của sự kiện
@@ -81,42 +83,46 @@ const ItemEven = () => {
   const navigate = useNavigate();
 
   const handleBuyTicketClick = () => {
-    const tickets = [];
-    let totalAmount = 0;
-
-    if (selectedVIPTicket && vipTicketQuantity > 0) {
-      const vipTicketTotalPrice = selectedVIPTicket.price * vipTicketQuantity;
-      tickets.push({
-        ticket_id: selectedVIPTicket.ticket.id,
-        ticket_type: "VIP",
-        quantity: vipTicketQuantity,
-        seat_zone_id: selectedVIPTicket?.zone?.id,
-        seat_zone: selectedVIPTicket?.zone?.name,
-        original_price: selectedVIPTicket?.price,
-      });
-      totalAmount += vipTicketTotalPrice;
-    }
-
-    if (selectedRegularTicket && regularTicketQuantity > 0) {
-      const regularTicketTotalPrice =
-        selectedRegularTicket.price * regularTicketQuantity;
-      tickets.push({
-        ticket_id: selectedRegularTicket.ticket.id,
-        ticket_type: "Thường",
-        quantity: regularTicketQuantity,
-        seat_zone_id: selectedRegularTicket?.zone?.id,
-        seat_zone: selectedRegularTicket?.zone?.name,
-        original_price: selectedRegularTicket?.price,
-      });
-      totalAmount += regularTicketTotalPrice;
-    }
-
-    if (tickets.length > 0) {
-      const ticketData = { tickets: tickets, totalPrice: totalAmount };
-      console.log(ticketData);
-      navigate("/checkout", { state: ticketData });
+    if (event?.status === "checkin") {
+      toast.error("Sự kiện đang check-in nên không mua được vé");
     } else {
-      alert("Vui lòng chọn ít nhất một loại vé.");
+      const tickets = [];
+      let totalAmount = 0;
+
+      if (selectedVIPTicket && vipTicketQuantity > 0) {
+        const vipTicketTotalPrice = selectedVIPTicket.price * vipTicketQuantity;
+        tickets.push({
+          ticket_id: selectedVIPTicket.ticket.id,
+          ticket_type: "VIP",
+          quantity: vipTicketQuantity,
+          seat_zone_id: selectedVIPTicket?.zone?.id,
+          seat_zone: selectedVIPTicket?.zone?.name,
+          original_price: selectedVIPTicket?.price,
+        });
+        totalAmount += vipTicketTotalPrice;
+      }
+
+      if (selectedRegularTicket && regularTicketQuantity > 0) {
+        const regularTicketTotalPrice =
+          selectedRegularTicket.price * regularTicketQuantity;
+        tickets.push({
+          ticket_id: selectedRegularTicket.ticket.id,
+          ticket_type: "Thường",
+          quantity: regularTicketQuantity,
+          seat_zone_id: selectedRegularTicket?.zone?.id,
+          seat_zone: selectedRegularTicket?.zone?.name,
+          original_price: selectedRegularTicket?.price,
+        });
+        totalAmount += regularTicketTotalPrice;
+      }
+
+      if (tickets.length > 0) {
+        const ticketData = { tickets: tickets, totalPrice: totalAmount };
+        console.log(ticketData);
+        navigate("/checkout", { state: ticketData });
+      } else {
+        alert("Vui lòng chọn ít nhất một loại vé.");
+      }
     }
   };
 
@@ -257,7 +263,7 @@ const ItemEven = () => {
         <div className="flex justify-center mt-4">
           <button
             onClick={() => setShowUpcoming(!showUpcoming)}
-            className="p-3 text-white bg-[#007BFF] rounded-lg w-48 hover:bg-[#0056b3] border"
+            className="p-2 text-white bg-[#007BFF] rounded-lg w-40 hover:bg-[#0f00b3] border"
           >
             {showUpcoming ? "Ẩn bớt sự kiện" : "Xem tất cả sự kiện"}
           </button>
@@ -373,7 +379,7 @@ const ItemEven = () => {
         <div className="flex justify-center mt-2">
           <button
             onClick={() => setShowFeatured(!showFeatured)}
-            className="p-2 text-[#007BFF] rounded-lg w-40 hover:bg-[#007BFF] border hover:text-white"
+            className="p-2 text-white bg-[#007BFF] rounded-lg w-40 hover:bg-[#0f00b3] border"
           >
             {showFeatured ? "Ẩn bớt sự kiện" : "Xem tất cả sự kiện"}
           </button>
@@ -388,7 +394,9 @@ const ItemEven = () => {
 
         <div className="grid lg:pt-16 lg:pb-[50px] mb:pb-[61px] lg:grid-cols-4 gap-y-8 mb:gap-y-4 mx-12 mt-4">
           {topRatedEvents?.length > 0 ? (
-            topRatedEvents?.map((event) => (
+            topRatedEvents
+            .slice(0, showRatedEvents ? topRatedEvents.length : 4)
+            .map((event) => (
               <div
                 key={event.id}
                 className="w-full h-auto mb-4 lg:w-[300px] lg:h-[350px] border border-gray-300 rounded-[16px] p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-[#c6e1fe] hover:to-[#F5F5F5]"
@@ -479,13 +487,23 @@ const ItemEven = () => {
             </p>
           )}
         </div>
+        <div className="flex justify-center mt-2">
+          <button
+            onClick={() => setShowRatedEvents(!showRatedEvents)}
+            className="p-2 text-white bg-[#007BFF] rounded-lg w-40 hover:bg-[#0f00b3] border"
+          >
+            {showRatedEvents ? "Ẩn bớt sự kiện" : "Xem tất cả sự kiện"}
+          </button>
+        </div>
       </div>
       {/* Hiển thị Popup nếu showPopup là true */}
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-[700px]">
             <h2 className="text-2xl font-bold mb-4">Chọn vé</h2>
-            <h2 className="text-2xl font-bold mb-4 text-blue-500">Sự kiện: {event?.name}</h2>
+            <h2 className="text-2xl font-bold mb-4 text-blue-500">
+              Sự kiện: {event?.name}
+            </h2>
 
             {/* Nhóm vé VIP */}
             <div className="mb-6">
@@ -507,7 +525,7 @@ const ItemEven = () => {
                   .filter((ticket) => ticket.ticket.ticket_type === "VIP")
                   .map((ticket) => (
                     <option key={ticket.id} value={ticket.id}>
-                      Khu vực: {ticket?.zone.name || "N/A"} - Giá:{" "}
+                      Khu vực: {ticket?.zone?.name || "N/A"} - Giá:{" "}
                       {new Intl.NumberFormat("vi-VN", {
                         style: "currency",
                         currency: "VND",

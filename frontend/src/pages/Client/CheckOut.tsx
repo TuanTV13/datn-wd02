@@ -1,23 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { notification } from "antd";
+import api from "../../api_service/api";
+import { Vouchers } from "../../interfaces/Vouchers";
+import { FaClipboard } from "react-icons/fa";
 
 const CheckOut = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const ticketData = location.state;
-  // console.log(ticketData)
   const eventId = ticketData.eventId;
-  const searchParams = new URLSearchParams(location.search);
-  const ticketType = searchParams.get("ticketType");
-  const ticketId = searchParams.get("ticketId");
-  // const eventId = searchParams.get("eventId");
-  const seatZoneId = Number(searchParams.get("seatZoneId") || 1);
-  const quantity = searchParams.get("quantity");
-  const initialTotalPrice = parseFloat(searchParams.get("price") || "0");
-
-  const zoneName = searchParams.get("zoneName");
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -38,9 +31,7 @@ const CheckOut = () => {
 
   const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [voucherCode, setVoucherCode] = useState("");
-  const [totalPrice, setTotalPrice] = useState(
-    ticketData.totalPrice
-  );
+  const [totalPrice, setTotalPrice] = useState(ticketData.totalPrice);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Kiểm tra đăng nhập
   const validateForm = () => {
     const newErrors = {
@@ -99,14 +90,22 @@ const CheckOut = () => {
     }));
   };
   const [isProcessing, setIsProcessing] = useState(false);
-
+  const [vouchers, setVouchers] = useState<Vouchers[]>([]);
   const listVouchers = async () => {
+    try {
+      const { data } = await api.get(`/vouchers/${eventId}/findByEvent`);
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-    const response = await axios.get(`http://127.0.0.1:8000/api/v1/vouchers/${eventId}/findByEvent`)
-
-    console.log(response.data)
-
-  }
+  useEffect(() => {
+    (async () => {
+      const data = await listVouchers();
+      setVouchers(data);
+    })();
+  }, []);
 
   const handleVoucherApply = async () => {
     const token = localStorage.getItem("access_token");
@@ -183,7 +182,6 @@ const CheckOut = () => {
       discount_code: voucherCode || null,
       amount: parseFloat(ticketData.totalPrice).toFixed(2),
     };
-    console.log("ádfd", paymentData)
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/clients/payment/process",
@@ -195,7 +193,7 @@ const CheckOut = () => {
           },
         }
       );
-      console.log(response.data)
+      console.log(response.data);
       if (response.data.status === "success") {
         window.location.href = response.data.payment_url;
       } else {
@@ -204,7 +202,7 @@ const CheckOut = () => {
         });
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       notification.error({
         message:
           error.response?.data?.message || "Có lỗi xảy ra trong thanh toán.",
@@ -214,8 +212,31 @@ const CheckOut = () => {
     }
 
     setIsProcessing(false);
-  }
+  };
 
+  const [isCopied, setIsCopied] = useState(false);
+
+  const copyToClipboard = (code: any) => {
+    navigator.clipboard
+      .writeText(code)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000); // Ẩn popup sau 2 giây
+      })
+      .catch((err) => {
+        console.error("Có lỗi khi sao chép mã:", err);
+      });
+  };
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Check đăng nhập
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      setIsAuthenticated(true); // User is logged in
+    } else {
+      setIsAuthenticated(false); // User is not logged in
+    }
+  }, []);
   return (
     <div className="mt-36 mx-4">
       {isProcessing && (
@@ -420,44 +441,67 @@ const CheckOut = () => {
                 </p>
               </section>
             </div>
-            <div>
-              {/* Khi nhấn vào, SVG sẽ hiện ra */}
-              <span className="text-[#9D9EA2]" onClick={handleToggleSvg}>
-                Mã giảm giá có thể sử dụng
-              </span>
-
-              {/* SVG chỉ hiển thị khi state isSvgVisible là true */}
-              {isSvgVisible && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 10"
-                  stroke="currentColor"
-                >
-                  {/* Nội dung SVG */}
-                </svg>
-              )}
-            </div>
-            <div className="border-b flex flex-col gap-y-3">
-              <label className="text-sm text-[#9D9EA2]">Áp dụng voucher</label>
-              <div className="lg:flex items-center gap-x-3">
-                <input
-                  type="text"
-                  placeholder="Coupon code"
-                  className="pl-[22px] py-2 rounded-lg border"
-                  value={voucherCode}
-                  onChange={(e) => setVoucherCode(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={handleVoucherApply}
-                  className="text-[#007BFF] font-medium bg-[#F3FBF4] border text-sm rounded-[100px] px-3 py-2"
-                >
-                  Áp dụng
-                </button>
+            {!isAuthenticated ? (
+              <div className="text-center text-sm text-[#9D9EA2]">
+               
               </div>
-            </div>
+            ) : (
+              <>
+                <div>
+                  {/* Khi nhấn vào, SVG sẽ hiện ra */}
+                  <span
+                    className="text-[#9D9EA2] mb-4 text-sm"
+                    onClick={handleToggleSvg}
+                  >
+                    Mã giảm giá có thể sử dụng
+                  </span>
 
+                  {/* Hiển thị mã giảm giá dưới dạng danh sách khi isSvgVisible là true */}
+                  {isSvgVisible && (
+                    <div>
+                      <ul>
+                        {vouchers.map((item) => (
+                          <li key={item.id} className="flex items-center">
+                            <div>Mã giảm giá: {item.code}</div>
+                            <div className="ml-2">
+                              Giảm giá: {item.discount_value}{" "}
+                              {item.discount_type === "fixed" ? "VND" : "%"}
+                            </div>
+                            {/* Icon sao chép */}
+                            <FaClipboard
+                              className="ml-2 cursor-pointer"
+                              onClick={() => copyToClipboard(item.code)}
+                              title="Sao chép mã giảm giá"
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <div className="border-b flex flex-col gap-y-3">
+                  <label className="text-sm text-[#9D9EA2]">
+                    Áp dụng voucher
+                  </label>
+                  <div className="lg:flex items-center gap-x-3">
+                    <input
+                      type="text"
+                      placeholder="Coupon code"
+                      className="pl-[22px] py-2 rounded-lg border"
+                      value={voucherCode}
+                      onChange={(e) => setVoucherCode(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleVoucherApply}
+                      className="text-[#007BFF] font-medium bg-[#F3FBF4] border text-sm rounded-[100px] px-3 py-2"
+                    >
+                      Áp dụng
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
             <button
               type="submit"
               className="bg-[#007BFF] px-10 h-14 rounded-[100px] text-white flex gap-x-4 place-items-center justify-center"
@@ -474,6 +518,11 @@ const CheckOut = () => {
           </div>
         </div>
       </form>
+      {isCopied && (
+        <div className="fixed top-36 right-4 bg-green-500 text-white p-3 rounded-md shadow-lg">
+          Mã giảm giá đã được sao chép!
+        </div>
+      )}
     </div>
   );
 };

@@ -219,7 +219,7 @@ const Dashboard = () => {
   const tableData = data?.top_events?.map((event: any) => ({
     key: event.id,
     name: event.name,
-    total_revenue: event.total_revenue,
+    total_revenue: event.total_revenue ,
     percentage: event.percentage,
   }));
 
@@ -261,7 +261,10 @@ const Dashboard = () => {
       {}
       <div className="mb-6">
         <h3 className="text-xl font-semibold">
-          Tổng doanh thu: {data.total_revenue} VNĐ
+          Tổng doanh thu: {new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(data.total_revenue)}{" "}
         </h3>
       </div>
       <div className="grid grid-cols-2 gap-6 mb-6">
